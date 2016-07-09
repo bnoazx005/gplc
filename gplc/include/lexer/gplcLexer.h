@@ -13,15 +13,13 @@
 
 
 #include "..\common\gplcTypes.h"
+#include "gplcTokens.h"
 #include <string>
+#include <vector>
 
 
 namespace gplc
 {
-	///<Forward declarations
-	class CToken;
-
-
 	class CLexer
 	{
 		public:
@@ -39,7 +37,7 @@ namespace gplc
 		private:
 			CLexer(const CLexer& lexer);
 		private:
-			std::vector<CToken>
+			std::vector<CToken> mTokens;
 	};
 }
 

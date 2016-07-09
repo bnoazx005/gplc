@@ -21,6 +21,9 @@
     <ClCompile Include="source\lexer\gplcLexer.cpp">
       <Filter>source\lexer</Filter>
     </ClCompile>
+    <ClCompile Include="source\lexer\gplcTokens.cpp">
+      <Filter>source\lexer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gplc.h">
@@ -31,6 +34,9 @@
     </ClInclude>
     <ClInclude Include="include\common\gplcTypes.h">
       <Filter>include\common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lexer\gplcTokens.h">
+      <Filter>include\lexer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
