@@ -1,2 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" />
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="lexer">
+      <UniqueIdentifier>{21ecf981-85f1-4a92-93fc-f57b07007148}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{6c1b6c5d-72c9-458f-a506-63abf4222529}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="tests.cpp" />
+    <ClCompile Include="lexer\lexer.cpp">
+      <Filter>lexer</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

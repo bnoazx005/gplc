@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\lexer\gplcLexer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\common\gplcTypes.h" />
     <ClInclude Include="include\gplc.h" />
+    <ClInclude Include="include\lexer\gplcLexer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{81CA3DBC-6909-4ABB-B0B4-13E425252565}</ProjectGuid>
@@ -32,7 +34,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>

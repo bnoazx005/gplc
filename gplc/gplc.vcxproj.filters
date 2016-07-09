@@ -7,15 +7,30 @@
     <Filter Include="source">
       <UniqueIdentifier>{7599fdea-5eff-44bf-9728-bac5510d77c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\lexer">
+      <UniqueIdentifier>{05647728-a3a8-4297-8710-5c33577d3138}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\common">
+      <UniqueIdentifier>{7ee3dc54-4546-4cc1-a457-4d8c434edd9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\lexer">
+      <UniqueIdentifier>{552690af-0e0a-4afb-a3df-8e840f2027ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\main.cpp">
-      <Filter>source</Filter>
+    <ClCompile Include="source\lexer\gplcLexer.cpp">
+      <Filter>source\lexer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gplc.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lexer\gplcLexer.h">
+      <Filter>include\lexer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\common\gplcTypes.h">
+      <Filter>include\common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
