@@ -12,6 +12,10 @@
 #define GPLC_TOKENS_H
 
 
+#include "..\common\gplcTypes.h"
+#include <string>
+
+
 namespace gplc
 {
 
@@ -22,6 +26,7 @@ namespace gplc
 		TT_DOUBLE,
 		TT_STRING,
 		TT_CHAR,
+		TT_IDENTIFIER,
 		TT_DEFAULT
 	};
 
@@ -32,13 +37,15 @@ namespace gplc
 	class CToken
 	{
 		public:
+			CToken();
 			CToken(E_TOKEN_TYPE type);
 			virtual ~CToken();
 
 			E_TOKEN_TYPE GetType() const;
-		protected:
-			CToken();
-			CToken(const CToken& token);
+
+			virtual std::wstring ToString() const;
+		/*protected:
+			CToken(const CToken& token);*/
 		protected:
 			E_TOKEN_TYPE mType;
 	};
@@ -53,15 +60,36 @@ namespace gplc
 	class CIntToken: public CToken
 	{
 		public:
-			CIntToken(int value);
+			CIntToken(I32 value);
 			virtual ~CIntToken();
 
-			int GetValue() const;
+			I32 GetValue() const;
 		protected:
 			CIntToken();
 			CIntToken(const CIntToken& token);
 		protected:
-			int mValue;
+			I32 mValue;
+	};
+
+	
+	/*!
+		\brief CIdentifierToken class
+
+		It was derived from CToken and describes identifier's name.
+	*/
+
+	class CIdentifierToken : public CToken
+	{
+	public:
+		CIdentifierToken(const std::wstring& name);
+		virtual ~CIdentifierToken();
+
+		const std::wstring GetName() const;
+	protected:
+		CIdentifierToken();
+		CIdentifierToken(const CIdentifierToken& token);
+	protected:
+		const std::wstring mName;
 	};
 }
 

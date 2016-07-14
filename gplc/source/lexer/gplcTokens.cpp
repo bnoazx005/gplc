@@ -23,10 +23,10 @@ namespace gplc
 	{
 	}
 
-	CToken::CToken(const CToken& token):
+	/*CToken::CToken(const CToken& token):
 		mType(TT_DEFAULT)
 	{
-	}
+	}*/
 
 	CToken::CToken(E_TOKEN_TYPE type):
 		mType(type)
@@ -42,11 +42,16 @@ namespace gplc
 		return mType;
 	}
 
+	std::wstring CToken::ToString() const
+	{
+		return L"(Token: TT_DEFAULT)";
+	}
+
 	/*!
 		CIntToken's defenition
 	*/
 
-	CIntToken::CIntToken(int value):
+	CIntToken::CIntToken(I32 value):
 		CToken(TT_INTEGER), mValue(value)
 	{
 	}
@@ -65,8 +70,36 @@ namespace gplc
 	{
 	}
 
-	int CIntToken::GetValue() const
+	I32 CIntToken::GetValue() const
 	{
 		return mValue;
+	}
+
+	/*!
+		CIdentifierToken defenition
+	*/
+
+	CIdentifierToken::CIdentifierToken(const std::wstring& name) :
+		CToken(TT_IDENTIFIER), mName(name)
+	{
+	}
+
+	CIdentifierToken::CIdentifierToken() :
+		CToken(TT_IDENTIFIER)
+	{
+	}
+
+	CIdentifierToken::CIdentifierToken(const CIdentifierToken& token) :
+		CToken(token)
+	{
+	}
+
+	CIdentifierToken::~CIdentifierToken()
+	{
+	}
+
+	const std::wstring CIdentifierToken::GetName() const
+	{
+		return mName;
 	}
 }

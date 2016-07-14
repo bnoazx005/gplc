@@ -11,6 +11,7 @@
 
 ///< lexer's files group
 #include "lexer\gplcLexer.h"
+#include "lexer\gplcTokens.h"
 
 ///< common data structures and utilities
 #include "common\gplcTypes.h"

@@ -13,13 +13,16 @@
 
 
 #include "..\common\gplcTypes.h"
-#include "gplcTokens.h"
 #include <string>
 #include <vector>
 
 
 namespace gplc
 {
+	//forward declarations
+	class CToken;
+
+
 	class CLexer
 	{
 		public:
@@ -27,17 +30,23 @@ namespace gplc
 			~CLexer();
 
 			Result Init(const std::wstring& inputStream);
-			Result Free();
 
 			Result Reset();
 
+			const CToken* GetCurrToken();
+
 			const CToken* GetNextToken();
 
-			const CToken* PeekNextToken(int numOfSteps = 1) const;
+			const CToken* PeekNextToken(I32 numOfSteps = 1) const;
 		private:
 			CLexer(const CLexer& lexer);
+
+			CToken* _scanToken(const std::wstring& stream, U32& pos, TLexerErrorInfo* errorInfo);
 		private:
-			std::vector<CToken> mTokens;
+			U32                 mCurrPos;
+			U32                 mCurrTokenIndex;
+
+			std::vector<CToken*> mTokens;
 	};
 }
 
