@@ -15,13 +15,13 @@
 namespace gplc
 {
 	CLexer::CLexer():
-		mCurrPos(0), mCurrTokenIndex(0)
+		mCurrPos(0), mCurrLine(0), mCurrTokenIndex(0)
 	{
 
 	}
 
 	CLexer::CLexer(const CLexer& lexer) :
-		mCurrPos(0), mCurrTokenIndex(0)
+		mCurrPos(0), mCurrLine(0), mCurrTokenIndex(0)
 	{
 	}
 
@@ -30,7 +30,7 @@ namespace gplc
 
 	}
 
-	Result CLexer::Init(const std::wstring& inputStream)
+	Result CLexer::Init(const std::wstring& inputStream, TLexerErrorInfo* errorInfo)
 	{
 		Result result = Reset();
 
@@ -42,24 +42,37 @@ namespace gplc
 		U32 streamLength = inputStream.length();
 		U32 pos          = mCurrPos;
 		
-		TLexerErrorInfo errorInfo;
+		errorInfo = nullptr;
 
 		CToken* pCurrToken = nullptr;
 
 		while ((pos < streamLength) && (inputStream[pos] != WEOF))
 		{
-			if (inputStream[pos] == ' ') //skip whitespace
+			if (iswblank(inputStream[pos])) //skip whitespace
 			{
 				pos++;
 
 				continue;
 			}
 
+			if (iswspace(inputStream[pos])) //try detect \r and \n, 'cause all spaces and tabulations were passed at the previous case
+			{
+				pos++;
+				mCurrLine++;
+
+				continue;
+			}
+
 			// increment is done implicitly in _scanToken
-			pCurrToken = _scanToken(inputStream, pos, &errorInfo);
+			pCurrToken = _scanToken(inputStream, pos);
 
 			if (pCurrToken == nullptr)
 			{
+				errorInfo = new TLexerErrorInfo();
+				
+				errorInfo->mPos  = mCurrPos;
+				errorInfo->mLine = mCurrLine;
+
 				return RV_FAIL;
 			}
 
@@ -104,22 +117,27 @@ namespace gplc
 		return mTokens[++mCurrTokenIndex];
 	}
 
-	const CToken* CLexer::PeekNextToken(int numOfSteps) const
+	const CToken* CLexer::PeekNextToken(U32 numOfSteps) const
 	{
-		return nullptr;
+		U32 neededTokenId = numOfSteps + mCurrTokenIndex;
+
+		if (mTokens.size() <= neededTokenId)
+		{
+			return nullptr;
+		}
+
+		return mTokens[neededTokenId];
 	}
 	
-	CToken* CLexer::_scanToken(const std::wstring& stream, U32& pos, TLexerErrorInfo* errorInfo)
+	CToken* CLexer::_scanToken(const std::wstring& stream, U32& pos)
 	{
 		W16 currChar = stream[pos];
-
-		errorInfo    = nullptr;
-
+		
 		if (iswalpha(currChar) || currChar == L'_') //try to read identifier's token
 		{
 			std::wstring identifierName;
 
-			while (iswalpha(currChar) || iswdigit(currChar) || currChar == L'_')
+			while (iswalnum(currChar) || currChar == L'_')
 			{
 				identifierName.push_back(currChar);
 
@@ -127,6 +145,9 @@ namespace gplc
 			}
 
 			mCurrPos = pos;
+
+			//try to detect reserved keywords here
+			///<TODO: think about the way to do it 1)hardcode here; 2)loop over keywords from prepared file
 
 			return new CIdentifierToken(identifierName);
 		}
