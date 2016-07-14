@@ -4,3 +4,4 @@ gplc/tests/bin/
 gplc/tests/tmp/
 *.opensdf
 *.sdf
+.vs/
