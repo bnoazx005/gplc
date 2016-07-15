@@ -156,9 +156,16 @@ namespace gplc
 			mCurrPos = pos;
 
 			//try to detect reserved keywords here
+			
 			///<TODO: think about the way to do it 1)hardcode here; 2)loop over keywords from prepared file
+			std::map<std::wstring, E_TOKEN_TYPE>::const_iterator token;
 
-			return new CIdentifierToken(identifierName);
+			if ((token = mReservedTokensMap.find(identifierName)) != mReservedTokensMap.end())
+			{
+				return new CToken((*token).second); //return reserved keyword's token
+			}
+
+			return new CIdentifierToken(identifierName);	//if it's not reserved just return it as identifier
 		}
 
 		return nullptr;
