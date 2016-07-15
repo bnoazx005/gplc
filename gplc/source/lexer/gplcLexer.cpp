@@ -50,30 +50,30 @@ namespace gplc
 			return result;
 		}
 
-		U32 streamLength = inputStream.length();
-		U32 pos          = mCurrPos;
+		W16 currChar = _getCurrChar(inputStream);
 		
 		CToken* pCurrToken = nullptr;
 
-		while ((pos < streamLength) && (inputStream[pos] != WEOF))
+		while (currChar != WEOF)
 		{
-			if (iswblank(inputStream[pos])) //skip whitespace
+			if (iswblank(currChar)) //skip whitespace
 			{
-				pos++;
+				currChar = _getNextChar(inputStream);
 
 				continue;
 			}
 
-			if (iswspace(inputStream[pos])) //try detect \r and \n, 'cause all spaces and tabulations were passed at the previous case
+			if (iswspace(currChar)) //try detect \r and \n, 'cause all spaces and tabulations were passed at the previous case
 			{
-				pos++;
 				mCurrLine++;
+
+				currChar = _getNextChar(inputStream);
 
 				continue;
 			}
 
 			// increment is done implicitly in _scanToken
-			pCurrToken = _scanToken(inputStream, pos);
+			pCurrToken = _scanToken(inputStream);
 
 			if (pCurrToken == nullptr)
 			{
@@ -86,6 +86,8 @@ namespace gplc
 			}
 
 			mTokens.push_back(pCurrToken);
+
+			currChar = _getNextChar(inputStream);
 		}
 
 		return RV_SUCCESS;
@@ -155,10 +157,15 @@ namespace gplc
 			return WEOF;
 		}
 
+		//if (mCurrPos == 0)
+		//{
+		//	return stream[mCurrPos++];
+		//}
+
 		return stream[++mCurrPos];
 	}
 
-	W16 CLexer::_peekNextChar(const std::wstring& stream, U32 offset = 1) const
+	W16 CLexer::_peekNextChar(const std::wstring& stream, U32 offset) const
 	{
 		U32 newPositionAtStream = mCurrPos + offset;
 
@@ -170,9 +177,9 @@ namespace gplc
 		return stream[newPositionAtStream];
 	}
 	
-	CToken* CLexer::_scanToken(const std::wstring& stream, U32& pos)
+	CToken* CLexer::_scanToken(const std::wstring& stream)
 	{
-		W16 currChar = stream[pos];
+		W16 currChar = _getCurrChar(stream);
 		
 		if (iswalpha(currChar) || currChar == L'_') //try to read identifier's token
 		{
@@ -182,11 +189,9 @@ namespace gplc
 			{
 				identifierName.push_back(currChar);
 
-				currChar = stream[++pos];
+				currChar = _getNextChar(stream);
 			}
-
-			mCurrPos = pos;
-
+			
 			//try to detect reserved keywords here
 			
 			///<TODO: think about the way to do it 1)hardcode here; 2)loop over keywords from prepared file
@@ -210,22 +215,22 @@ namespace gplc
 			//try parse decimal integer or floating point value
 			if (currChar != L'0')
 			{
-				while (isdigit(currChar)) // pass integers
+				while (iswdigit(currChar)) // pass integers
 				{                                           
 					numberStr.push_back(currChar);
 
-					currChar = stream[++pos];
+					currChar = _getNextChar(stream);
 				}
 
 				if (currChar == L'.') //it's floating point value
 				{
 					numberType = 0x1;
 
-					while (isdigit(currChar)) // pass the rest part of the number
+					while (iswdigit(currChar)) // pass the rest part of the number
 					{
 						numberStr.push_back(currChar);
 
-						currChar = stream[++pos];
+						currChar = _getNextChar(stream);
 					}
 				}
 			}
@@ -261,8 +266,6 @@ namespace gplc
 			//	}
 			//}			
 			
-			mCurrPos = pos;
-
 			//check up a form of number
 		}
 

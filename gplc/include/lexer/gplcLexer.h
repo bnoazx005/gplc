@@ -46,7 +46,7 @@ namespace gplc
 			
 			W16 _peekNextChar(const std::wstring& stream, U32 offset = 1) const;
 
-			CToken* _scanToken(const std::wstring& stream, U32& pos);
+			CToken* _scanToken(const std::wstring& stream);
 
 			std::map<std::wstring, E_TOKEN_TYPE> _readTokensMapFromFile(const std::wstring& filename, Result& result);
 		private:
