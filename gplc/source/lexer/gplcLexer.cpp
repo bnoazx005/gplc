@@ -54,7 +54,7 @@ namespace gplc
 		
 		CToken* pCurrToken = nullptr;
 
-		while (currChar != WEOF)
+		while ((currChar = _getCurrChar(inputStream)) != WEOF)
 		{
 			if (iswblank(currChar)) //skip whitespace
 			{
@@ -86,8 +86,6 @@ namespace gplc
 			}
 
 			mTokens.push_back(pCurrToken);
-
-			currChar = _getNextChar(inputStream);
 		}
 
 		return RV_SUCCESS;
@@ -154,6 +152,8 @@ namespace gplc
 	{
 		if (mCurrPos + 1 >= stream.length())
 		{
+			mCurrPos++;
+
 			return WEOF;
 		}
 
@@ -205,7 +205,7 @@ namespace gplc
 			return new CIdentifierToken(identifierName);	//if it's not reserved just return it as identifier
 		}
 
-		if (iswdigit(currChar)) //try to get number
+		if (iswdigit(currChar) || currChar == L'.') //try to get number
 		{
 			std::wstring numberStr;
 
@@ -213,7 +213,7 @@ namespace gplc
 			//floating point value always has sign bit and cannot has hex, oct, bin representations' bits.
 
 			//try parse decimal integer or floating point value
-			if (currChar != L'0')
+			if (currChar != L'0' || (currChar == L'0' && _peekNextChar(stream, 1) == L'.'))
 			{
 				while (iswdigit(currChar)) // pass integers
 				{                                           
@@ -226,7 +226,7 @@ namespace gplc
 				{
 					numberType = 0x1;
 
-					while (iswdigit(currChar)) // pass the rest part of the number
+					while (iswdigit(currChar) || currChar == L'.') // pass the rest part of the number
 					{
 						numberStr.push_back(currChar);
 
@@ -267,6 +267,13 @@ namespace gplc
 			//}			
 			
 			//check up a form of number
+
+			if (numberType == 0x0) //some kind of integer
+			{
+				return new CNumberToken<I32>(TT_INT, _wtoi(numberStr.c_str()));
+			}
+
+			return new CNumberToken<F32>(TT_FLOAT, _wtof(numberStr.c_str()));
 		}
 
 		return nullptr;

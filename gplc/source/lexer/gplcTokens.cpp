@@ -48,34 +48,6 @@ namespace gplc
 	}
 
 	/*!
-		CIntToken's defenition
-	*/
-
-	CIntToken::CIntToken(I32 value):
-		CToken(TT_INT), mValue(value)
-	{
-	}
-
-	CIntToken::CIntToken():
-		CToken(TT_INT)
-	{
-	}
-
-	CIntToken::CIntToken(const CIntToken& token):
-		CToken(token)
-	{
-	}
-
-	CIntToken::~CIntToken()
-	{
-	}
-
-	I32 CIntToken::GetValue() const
-	{
-		return mValue;
-	}
-
-	/*!
 		CIdentifierToken defenition
 	*/
 

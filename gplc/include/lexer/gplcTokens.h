@@ -52,26 +52,42 @@ namespace gplc
 
 
 	/*!
-		\brief CIntToken class 
+		\brief CNumberToken class 
 
 		It was derived from CToken.
 	*/
 	
-	class CIntToken: public CToken
+	template <class T>
+	class CNumberToken: public CToken
 	{
 		public:
-			CIntToken(I32 value);
-			virtual ~CIntToken();
+			CNumberToken(E_TOKEN_TYPE type, T value):
+				CToken(type), mValue(value)
+			{
+			}
 
-			I32 GetValue() const;
+			virtual ~CNumberToken()
+			{
+			}
+
+			T GetValue() const
+			{
+				return mValue;
+			}
 		protected:
-			CIntToken();
-			CIntToken(const CIntToken& token);
+			CNumberToken():
+				CToken(TT_INT)
+			{
+			}
+
+			CNumberToken(const CNumberToken& token) :
+				CToken(token)
+			{
+			}
 		protected:
-			I32 mValue;
+			T mValue;
 	};
-
-	
+		
 	/*!
 		\brief CIdentifierToken class
 

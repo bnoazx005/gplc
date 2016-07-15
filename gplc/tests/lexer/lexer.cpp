@@ -12,7 +12,6 @@ TEST_CASE("Lexer's tests")
 	const std::wstring pathToIncorrectConfig = L".\\lexer\\configs\\incorrect.tokens";
 
 	REQUIRE(pLexer != nullptr);
-	REQUIRE(pLexer->Init(L"42", pathToConfig, &error) == gplc::RV_FAIL);
 	
 	SECTION("Correct identifier test")
 	{
@@ -59,10 +58,13 @@ TEST_CASE("Lexer's tests")
 		REQUIRE(pIdentifierToken->GetName() == L"id_");
 	}
 
-	SECTION("Invalid \'digit at the begining of the identifier\' identifier test")
-	{
-		REQUIRE(pLexer->Init(L"42identifier", pathToConfig, &error) == gplc::RV_FAIL);
-	}
+	//Now it works in other way. A lexer recognizes number and identifier, but not the incorrect identifier. 
+	//Therefore this test should be removed.
+
+	//SECTION("Invalid \'digit at the begining of the identifier\' identifier test")
+	//{
+	//	REQUIRE(pLexer->Init(L"42identifier", pathToConfig, &error) == gplc::RV_FAIL);
+	//}
 
 	SECTION("GetNextToken test")
 	{
@@ -159,6 +161,35 @@ TEST_CASE("Lexer's tests")
 		pCurrToken = pLexer->GetNextToken();
 
 		REQUIRE(pCurrToken == nullptr);
+	}
+
+	SECTION("Numbers' tokens test")
+	{
+		REQUIRE(pLexer->Init(L"42 4.2 0.42 .5", pathToConfig, &error) == gplc::RV_SUCCESS);
+
+		const gplc::CNumberToken<gplc::I32>* pCurrIntToken = dynamic_cast<const gplc::CNumberToken<gplc::I32>*>(pLexer->GetCurrToken());
+
+		REQUIRE(pCurrIntToken != nullptr);
+		REQUIRE(pCurrIntToken->GetType() == gplc::TT_INT);
+		REQUIRE(pCurrIntToken->GetValue() == 42);
+
+		const gplc::CNumberToken<gplc::F32>* pCurrFloatToken = dynamic_cast<const gplc::CNumberToken<gplc::F32>*>(pLexer->GetNextToken());
+
+		REQUIRE(pCurrFloatToken != nullptr);
+		REQUIRE(pCurrFloatToken->GetType() == gplc::TT_FLOAT);
+		REQUIRE(pCurrFloatToken->GetValue() == Approx(4.2));
+
+		pCurrFloatToken = dynamic_cast<const gplc::CNumberToken<gplc::F32>*>(pLexer->GetNextToken());
+
+		REQUIRE(pCurrFloatToken != nullptr);
+		REQUIRE(pCurrFloatToken->GetType() == gplc::TT_FLOAT);
+		REQUIRE(pCurrFloatToken->GetValue() == Approx(0.42));
+
+		pCurrFloatToken = dynamic_cast<const gplc::CNumberToken<gplc::F32>*>(pLexer->GetNextToken());
+
+		REQUIRE(pCurrFloatToken != nullptr);
+		REQUIRE(pCurrFloatToken->GetType() == gplc::TT_FLOAT);
+		REQUIRE(pCurrFloatToken->GetValue() == Approx(0.5));
 	}
 
 	delete pLexer;

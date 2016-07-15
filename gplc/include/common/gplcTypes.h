@@ -25,6 +25,11 @@ namespace gplc
 	typedef unsigned int       U32;
 	typedef unsigned long long U64;
 
+	///< Floating points aliases
+	typedef float       F32;
+	typedef double      F64;
+	typedef long double F128;
+
 	///< Characters' aliases
 	typedef char     C8;
 	typedef char16_t C16;
