@@ -137,6 +137,38 @@ namespace gplc
 
 		return mTokens[neededTokenId];
 	}
+
+	W16 CLexer::_getCurrChar(const std::wstring& stream) const
+	{
+		if (mCurrPos >= stream.length())
+		{
+			return WEOF;
+		}
+
+		return stream[mCurrPos];
+	}
+
+	W16 CLexer::_getNextChar(const std::wstring& stream)
+	{
+		if (mCurrPos + 1 >= stream.length())
+		{
+			return WEOF;
+		}
+
+		return stream[++mCurrPos];
+	}
+
+	W16 CLexer::_peekNextChar(const std::wstring& stream, U32 offset = 1) const
+	{
+		U32 newPositionAtStream = mCurrPos + offset;
+
+		if (newPositionAtStream >= stream.length())
+		{
+			return WEOF;
+		}
+
+		return stream[newPositionAtStream];
+	}
 	
 	CToken* CLexer::_scanToken(const std::wstring& stream, U32& pos)
 	{
@@ -166,6 +198,72 @@ namespace gplc
 			}
 
 			return new CIdentifierToken(identifierName);	//if it's not reserved just return it as identifier
+		}
+
+		if (iswdigit(currChar)) //try to get number
+		{
+			std::wstring numberStr;
+
+			U8 numberType = 0; // flags: 0x0 - int; 0x1 - floating point; 0x80 - signed; 0x40 - long; 0x20 - long; 0x10 - hex; 0x8 - oct; 0x4 - bin;
+			//floating point value always has sign bit and cannot has hex, oct, bin representations' bits.
+
+			//try parse decimal integer or floating point value
+			if (currChar != L'0')
+			{
+				while (isdigit(currChar)) // pass integers
+				{                                           
+					numberStr.push_back(currChar);
+
+					currChar = stream[++pos];
+				}
+
+				if (currChar == L'.') //it's floating point value
+				{
+					numberType = 0x1;
+
+					while (isdigit(currChar)) // pass the rest part of the number
+					{
+						numberStr.push_back(currChar);
+
+						currChar = stream[++pos];
+					}
+				}
+			}
+
+			//while (isdigit(currChar) || currChar == L'.' || currChar == L'b' ||
+			//	    currChar == L'x' || currChar == L'X') // pass integers, floating point values 
+			//{                                            // and its hexademical, octal and binary representations
+			//	numberStr.push_back(currChar);
+
+			//	currChar = stream[++pos];
+			//}
+			//
+			//check a literal after the number
+			//const std::wstring allowableLiterals              = L"lLuUsS";
+			//const std::wstring allowableFloatingPointLiterals = L"lLfF";
+			//std::wstring       currLiterals;
+
+			//while (allowableLiterals.find_first_of(currChar) != -1)
+			//{
+			//	switch (currChar)
+			//	{
+			//		case L'l': case L'L': // long integer
+			//			break;
+
+			//		case L'u': case L'U': // unsigned integer
+			//			break;
+
+			//		case L's': case L'S': // signed integer
+			//			break;
+
+			//		case L'f': case L'F': // single precision floating point value
+			//			break;
+			//	}
+			//}			
+			
+			mCurrPos = pos;
+
+			//check up a form of number
 		}
 
 		return nullptr;

@@ -40,6 +40,12 @@ namespace gplc
 		private:
 			CLexer(const CLexer& lexer);
 
+			W16 _getCurrChar(const std::wstring& stream) const;
+
+			W16 _getNextChar(const std::wstring& stream);
+			
+			W16 _peekNextChar(const std::wstring& stream, U32 offset = 1) const;
+
 			CToken* _scanToken(const std::wstring& stream, U32& pos);
 
 			std::map<std::wstring, E_TOKEN_TYPE> _readTokensMapFromFile(const std::wstring& filename, Result& result);
