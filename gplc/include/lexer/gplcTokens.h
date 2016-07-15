@@ -21,11 +21,11 @@ namespace gplc
 
 	enum E_TOKEN_TYPE
 	{
-		TT_INTEGER,
-		TT_FLOAT,
-		TT_DOUBLE,
-		TT_STRING,
-		TT_CHAR,
+		TT_INT        = 0,
+		TT_FLOAT      = 1,
+		TT_DOUBLE     = 2,
+		TT_STRING     = 3,
+		TT_CHAR       = 4,
 		TT_IDENTIFIER,
 		TT_DEFAULT
 	};

@@ -13,15 +13,14 @@
 
 
 #include "..\common\gplcTypes.h"
+#include "gplcTokens.h"
 #include <string>
 #include <vector>
+#include <map>
 
 
 namespace gplc
 {
-	//forward declarations
-	class CToken;
-
 
 	class CLexer
 	{
@@ -29,7 +28,7 @@ namespace gplc
 			CLexer();
 			~CLexer();
 
-			Result Init(const std::wstring& inputStream, TLexerErrorInfo* errorInfo);
+			Result Init(const std::wstring& inputStream, const std::wstring& configFilename, TLexerErrorInfo* errorInfo);
 
 			Result Reset();
 
@@ -42,12 +41,15 @@ namespace gplc
 			CLexer(const CLexer& lexer);
 
 			CToken* _scanToken(const std::wstring& stream, U32& pos);
-		private:
-			U32                  mCurrPos;
-			U32                  mCurrLine;
-			U32                  mCurrTokenIndex;
 
-			std::vector<CToken*> mTokens;
+			std::map<std::wstring, E_TOKEN_TYPE> _readTokensMapFromFile(const std::wstring& filename, Result& result);
+		private:
+			U32                                  mCurrPos;
+			U32                                  mCurrLine;
+			U32                                  mCurrTokenIndex;
+
+			std::map<std::wstring, E_TOKEN_TYPE> mReservedTokensMap;
+			std::vector<CToken*>                 mTokens;
 	};
 }
 

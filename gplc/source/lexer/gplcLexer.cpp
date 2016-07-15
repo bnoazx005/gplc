@@ -10,6 +10,7 @@
 
 #include "lexer\gplcLexer.h"
 #include "lexer\gplcTokens.h"
+#include <fstream>
 
 
 namespace gplc
@@ -30,9 +31,19 @@ namespace gplc
 
 	}
 
-	Result CLexer::Init(const std::wstring& inputStream, TLexerErrorInfo* errorInfo)
+	Result CLexer::Init(const std::wstring& inputStream, const std::wstring& configFilename, TLexerErrorInfo* errorInfo)
 	{
 		Result result = Reset();
+		
+		errorInfo = nullptr;
+
+		if (!SUCCESS(result))
+		{
+			return result;
+		}
+
+		//try parse config file with reserved tokens
+		mReservedTokensMap = _readTokensMapFromFile(configFilename, result);
 
 		if (!SUCCESS(result))
 		{
@@ -42,8 +53,6 @@ namespace gplc
 		U32 streamLength = inputStream.length();
 		U32 pos          = mCurrPos;
 		
-		errorInfo = nullptr;
-
 		CToken* pCurrToken = nullptr;
 
 		while ((pos < streamLength) && (inputStream[pos] != WEOF))
@@ -153,5 +162,90 @@ namespace gplc
 		}
 
 		return nullptr;
+	}
+	
+	std::map<std::wstring, E_TOKEN_TYPE> CLexer::_readTokensMapFromFile(const std::wstring& filename, Result& result)
+	{
+		std::map<std::wstring, E_TOKEN_TYPE> tokensMap;
+
+		result = RV_SUCCESS;
+
+		std::wifstream configFileWithTokens;
+		
+		configFileWithTokens.open(filename.c_str());
+
+		if (!configFileWithTokens.is_open())
+		{
+			result = RV_FILE_NOT_FOUND;
+
+			return tokensMap;
+		}
+
+		//parse config file
+		std::wstring currConfigLine;
+		std::wstring tokenName;
+		std::wstring value;
+
+		U32 pos     = 0;
+		U32 prevPos = 0;
+
+		while (std::getline(configFileWithTokens, currConfigLine))
+		{
+			//the parsing of a current config line
+			//its representation (token_name  token_value_in_enum_E_TOKEN_TYPE)
+
+			pos = currConfigLine.find_first_of(L'(');
+
+			if (pos == -1) // there is no open bracket
+			{
+				result = RV_INCORRECT_CONFIG;
+
+				break;
+			}
+
+			//skip white spaces
+			pos     = currConfigLine.find_first_not_of(L' ', pos + 1);
+			prevPos = pos;
+
+			//try to get a name of token
+			pos = currConfigLine.find_first_of(L' ', pos);
+
+			if (pos == -1) // delimiter between name and value is absent
+			{
+				result = RV_INCORRECT_CONFIG;
+
+				break;
+			}
+
+			tokenName = currConfigLine.substr(prevPos, pos - prevPos);
+			
+			//skip white spaces
+			pos     = currConfigLine.find_first_not_of(L' ', pos);
+			prevPos = pos;
+			
+			//check close bracket
+			pos = currConfigLine.find_first_of(L')', pos);
+
+			if (pos == -1) // there is no close bracket
+			{
+				result = RV_INCORRECT_CONFIG;
+
+				break;
+			}
+
+			value = currConfigLine.substr(prevPos, pos - prevPos);
+			
+			//erase all white spaces if they exist
+			while ((pos = value.find(L' ')) != -1)
+			{
+				value.erase(pos, 1);
+			}
+
+			tokensMap.insert(std::make_pair(tokenName, (E_TOKEN_TYPE)_wtoi(value.c_str())));
+		}
+
+		configFileWithTokens.close();
+
+		return tokensMap;
 	}
 }

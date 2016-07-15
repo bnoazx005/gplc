@@ -45,6 +45,8 @@ namespace gplc
 		RV_SUCCESS           = 0x0,	///< Successfully done
 		RV_FAIL              = 0x1,	///< Critical error during execution
 		RV_INVALID_ARGUMENTS = 0x2, ///< Some function's argument has invalid value
+		RV_FILE_NOT_FOUND    = 0x4, ///< file was not found or some another its problem has happened
+		RV_INCORRECT_CONFIG  = 0x8, ///< it means that some error has happened during the parsing of a config file
 	};
 
 	/*!

@@ -52,12 +52,12 @@ namespace gplc
 	*/
 
 	CIntToken::CIntToken(I32 value):
-		CToken(TT_INTEGER), mValue(value)
+		CToken(TT_INT), mValue(value)
 	{
 	}
 
 	CIntToken::CIntToken():
-		CToken(TT_INTEGER)
+		CToken(TT_INT)
 	{
 	}
 

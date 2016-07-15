@@ -7,12 +7,16 @@ TEST_CASE("Lexer's tests")
 	gplc::TLexerErrorInfo error;
 	gplc::CLexer* pLexer = new gplc::CLexer();
 
+	const std::wstring pathToConfig          = L".\\lexer\\configs\\.tokens";
+	const std::wstring pathToCorrectConfig   = L".\\lexer\\configs\\correct.tokens";
+	const std::wstring pathToIncorrectConfig = L".\\lexer\\configs\\incorrect.tokens";
+
 	REQUIRE(pLexer != nullptr);
-	REQUIRE(pLexer->Init(L"42", &error) == gplc::RV_FAIL);
+	REQUIRE(pLexer->Init(L"42", pathToConfig, &error) == gplc::RV_FAIL);
 	
 	SECTION("Correct identifier test")
 	{
-		REQUIRE(pLexer->Init(L"identifier", &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"identifier", pathToConfig, &error) == gplc::RV_SUCCESS);
 
 		const gplc::CIdentifierToken* pIdentifierToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetCurrToken());
 
@@ -22,7 +26,7 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("Correct identifier with digits test")
 	{
-		REQUIRE(pLexer->Init(L"identifier42 identi42fier", &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"identifier42 identi42fier", pathToConfig, &error) == gplc::RV_SUCCESS);
 
 		const gplc::CIdentifierToken* pIdentifierToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetCurrToken());
 
@@ -37,7 +41,7 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("Correct identifier with underscope test")
 	{
-		REQUIRE(pLexer->Init(L"_identifier compound_identifier_test id_", &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"_identifier compound_identifier_test id_", pathToConfig, &error) == gplc::RV_SUCCESS);
 
 		const gplc::CIdentifierToken* pIdentifierToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetCurrToken());
 
@@ -57,12 +61,12 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("Invalid \'digit at the begining of the identifier\' identifier test")
 	{
-		REQUIRE(pLexer->Init(L"42identifier", &error) == gplc::RV_FAIL);
+		REQUIRE(pLexer->Init(L"42identifier", pathToConfig, &error) == gplc::RV_FAIL);
 	}
 
 	SECTION("GetNextToken test")
 	{
-		REQUIRE(pLexer->Init(L"id0 id1 id2 id3 id4 id5", &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"id0 id1 id2 id3 id4 id5", pathToConfig, &error) == gplc::RV_SUCCESS);
 
 		gplc::U32 numOfTokens = 0;
 
@@ -76,7 +80,7 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("PeekNextToken test")
 	{
-		REQUIRE(pLexer->Init(L"id0 id1 id2 id3 id4 id5", &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"id0 id1 id2 id3 id4 id5", pathToConfig, &error) == gplc::RV_SUCCESS);
 
 		const gplc::CIdentifierToken* pCurrToken = nullptr;
 
@@ -87,7 +91,7 @@ TEST_CASE("Lexer's tests")
 
 		while (pCurrToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->PeekNextToken(i)))
 		{
-			swprintf(charsBuf, L"id%d\0", i);
+			swprintf_s(charsBuf, 4, L"id%d\0", i);
 
 			currName.clear();
 			currName.append(charsBuf);
@@ -100,6 +104,12 @@ TEST_CASE("Lexer's tests")
 
 		REQUIRE(pLexer->PeekNextToken(6) == nullptr);
 		REQUIRE(pLexer->PeekNextToken(42) == nullptr);
+	}
+
+	SECTION("_readTokensMapFromFile test")
+	{
+		REQUIRE(pLexer->Init(L"", pathToIncorrectConfig, &error) == gplc::RV_INCORRECT_CONFIG);
+		REQUIRE(pLexer->Init(L"", pathToCorrectConfig, &error) == gplc::RV_SUCCESS);
 	}
 
 	delete pLexer;
