@@ -118,7 +118,7 @@ namespace gplc
 
 	const CToken* CLexer::GetNextToken()
 	{
-		if (mTokens.size() <= mCurrTokenIndex + 1)
+		if (mCurrTokenIndex + 1 >= mTokens.size())
 		{
 			return nullptr;
 		}
@@ -234,6 +234,62 @@ namespace gplc
 					}
 				}
 			}
+			else if (currChar == L'0') //hex, oct or bin representation of an integer value
+			{
+				numberStr.push_back(currChar);
+
+				currChar = _getNextChar(stream);
+
+				if (currChar == L'x' || currChar == L'X') //hex value
+				{
+					numberType |= 0x10; //set the flag of hexademical numeral system
+
+					numberStr.push_back(currChar);
+
+					currChar = _getNextChar(stream);
+
+					const std::wstring hexAlphabet = L"abcdefABCDEF"; //not including 0-9 digits
+
+					while (iswdigit(currChar) || (hexAlphabet.find_first_of(currChar) != -1))
+					{
+						numberStr.push_back(currChar);
+
+						currChar = _getNextChar(stream);
+					}
+				}
+				else if (currChar == L'b' || currChar == L'B') //bin value
+				{
+					numberType |= 0x4; //set the flag of binary numeral system
+					
+					currChar = _getNextChar(stream);
+
+					while (currChar == L'0' || currChar == L'1')
+					{
+						numberStr.push_back(currChar);
+
+						currChar = _getNextChar(stream);
+					}
+				}
+				else if (iswdigit(currChar)) //oct value
+				{
+					numberType |= 0x8; //set the flag of octal numeral system
+					
+					numberStr.push_back(currChar);
+
+					currChar = _getNextChar(stream);
+
+					while (iswdigit(currChar))
+					{
+						numberStr.push_back(currChar);
+
+						currChar = _getNextChar(stream);
+					}
+				}
+				else //error
+				{
+					return nullptr;
+				}
+			}
 
 			//while (isdigit(currChar) || currChar == L'.' || currChar == L'b' ||
 			//	    currChar == L'x' || currChar == L'X') // pass integers, floating point values 
@@ -267,13 +323,14 @@ namespace gplc
 			//}			
 			
 			//check up a form of number
+			I32 numSysBasis = (numberType & 0x10) ? 16 : (numberType & 0x8) ? 8 : (numberType & 0x4) ? 2 : 10;
 
-			if (numberType == 0x0) //some kind of integer
+			if ((numberType & 0x1) == 0x0) //some kind of integer
 			{
-				return new CNumberToken<I32>(TT_INT, _wtoi(numberStr.c_str()));
+				return new CNumberToken<I32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
 			}
 
-			return new CNumberToken<F32>(TT_FLOAT, _wtof(numberStr.c_str()));
+			return new CNumberToken<F64>(TT_DOUBLE, _wtof(numberStr.c_str()));
 		}
 
 		return nullptr;

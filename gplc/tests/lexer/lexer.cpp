@@ -172,24 +172,44 @@ TEST_CASE("Lexer's tests")
 		REQUIRE(pCurrIntToken != nullptr);
 		REQUIRE(pCurrIntToken->GetType() == gplc::TT_INT);
 		REQUIRE(pCurrIntToken->GetValue() == 42);
-
-		const gplc::CNumberToken<gplc::F32>* pCurrFloatToken = dynamic_cast<const gplc::CNumberToken<gplc::F32>*>(pLexer->GetNextToken());
+		CAPTURE(0);
+		const gplc::CNumberToken<gplc::F64>* pCurrFloatToken = dynamic_cast<const gplc::CNumberToken<gplc::F64>*>(pLexer->GetNextToken());
 
 		REQUIRE(pCurrFloatToken != nullptr);
-		REQUIRE(pCurrFloatToken->GetType() == gplc::TT_FLOAT);
+		REQUIRE(pCurrFloatToken->GetType() == gplc::TT_DOUBLE);
 		REQUIRE(pCurrFloatToken->GetValue() == Approx(4.2));
 
-		pCurrFloatToken = dynamic_cast<const gplc::CNumberToken<gplc::F32>*>(pLexer->GetNextToken());
+		CAPTURE(1);
+		pCurrFloatToken = dynamic_cast<const gplc::CNumberToken<gplc::F64>*>(pLexer->GetNextToken());
 
 		REQUIRE(pCurrFloatToken != nullptr);
-		REQUIRE(pCurrFloatToken->GetType() == gplc::TT_FLOAT);
+		REQUIRE(pCurrFloatToken->GetType() == gplc::TT_DOUBLE);
 		REQUIRE(pCurrFloatToken->GetValue() == Approx(0.42));
 
-		pCurrFloatToken = dynamic_cast<const gplc::CNumberToken<gplc::F32>*>(pLexer->GetNextToken());
+		CAPTURE(2);
+		pCurrFloatToken = dynamic_cast<const gplc::CNumberToken<gplc::F64>*>(pLexer->GetNextToken());
 
 		REQUIRE(pCurrFloatToken != nullptr);
-		REQUIRE(pCurrFloatToken->GetType() == gplc::TT_FLOAT);
+		REQUIRE(pCurrFloatToken->GetType() == gplc::TT_DOUBLE);
 		REQUIRE(pCurrFloatToken->GetValue() == Approx(0.5));
+		CAPTURE(3);
+	}
+
+	SECTION("numerical systems test")
+	{
+		REQUIRE(pLexer->Init(L"0x42 0b10", pathToConfig, &error) == gplc::RV_SUCCESS);
+
+		const gplc::CNumberToken<gplc::I32>* pCurrIntToken = dynamic_cast<const gplc::CNumberToken<gplc::I32>*>(pLexer->GetCurrToken());
+
+		REQUIRE(pCurrIntToken != nullptr);
+		REQUIRE(pCurrIntToken->GetType() == gplc::TT_INT);
+		REQUIRE(pCurrIntToken->GetValue() == 0x42);
+
+		pCurrIntToken = dynamic_cast<const gplc::CNumberToken<gplc::I32>*>(pLexer->GetNextToken());
+
+		REQUIRE(pCurrIntToken != nullptr);
+		REQUIRE(pCurrIntToken->GetType() == gplc::TT_INT);
+		REQUIRE(pCurrIntToken->GetValue() == 2);
 	}
 
 	delete pLexer;
