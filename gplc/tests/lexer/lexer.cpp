@@ -74,5 +74,33 @@ TEST_CASE("Lexer's tests")
 		REQUIRE(numOfTokens == 5); //5 is because of an access to the first token is provided with GetCurrToken; GetNextToken returns the other five
 	}
 
+	SECTION("PeekNextToken test")
+	{
+		REQUIRE(pLexer->Init(L"id0 id1 id2 id3 id4 id5", &error) == gplc::RV_SUCCESS);
+
+		const gplc::CIdentifierToken* pCurrToken = nullptr;
+
+		gplc::U32 i = 0;
+
+		std::wstring currName;
+		gplc::W16 charsBuf[4];
+
+		while (pCurrToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->PeekNextToken(i)))
+		{
+			swprintf(charsBuf, L"id%d\0", i);
+
+			currName.clear();
+			currName.append(charsBuf);
+
+			i++;
+
+			REQUIRE(pCurrToken->GetName() == currName);
+			REQUIRE(pCurrToken->GetType() == gplc::TT_IDENTIFIER);
+		}
+
+		REQUIRE(pLexer->PeekNextToken(6) == nullptr);
+		REQUIRE(pLexer->PeekNextToken(42) == nullptr);
+	}
+
 	delete pLexer;
 }
