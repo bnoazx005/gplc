@@ -6,6 +6,9 @@
 	\brief The file contains lexer's class defenition
 
 	\todo
+	1) A supporting of number's literals
+	2) Add other reserved tokens recognition. For instance, ==, !=, :, etc.
+	3) Refactor a generation of numbers' tokens
 */
 
 #include "lexer\gplcLexer.h"
@@ -156,12 +159,7 @@ namespace gplc
 
 			return WEOF;
 		}
-
-		//if (mCurrPos == 0)
-		//{
-		//	return stream[mCurrPos++];
-		//}
-
+		
 		return stream[++mCurrPos];
 	}
 
@@ -322,16 +320,38 @@ namespace gplc
 			//	}
 			//}			
 			
-			//check up a form of number
 			I32 numSysBasis = (numberType & 0x10) ? 16 : (numberType & 0x8) ? 8 : (numberType & 0x4) ? 2 : 10;
 
-			if ((numberType & 0x1) == 0x0) //some kind of integer
+			switch (numberType & 0x1)
 			{
-				return new CNumberToken<I32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
-			}
+				case 0: // integer
 
-			return new CNumberToken<F64>(TT_DOUBLE, _wtof(numberStr.c_str()));
+					switch (numberType & 0x80) //Is it signed? If bit is turn on then it's signed value
+					{
+						case 0: //unsigned
+							return new CNumberToken<U32>(TT_UINT, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
+							break;
+
+						case 1: //signed
+							return new CNumberToken<I32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
+							break;
+					}
+
+					return new CNumberToken<I32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
+
+					break;
+
+				case 1: // floating point
+					return new CNumberToken<F64>(TT_DOUBLE, _wtof(numberStr.c_str()));
+					break;
+
+				default: // this case won't be never reached, but let it be here for safe code execution
+					return nullptr;
+			}
 		}
+
+		//try to recognize other reserved tokens
+		///<TODO a recognition of other reserved tokens
 
 		return nullptr;
 	}
