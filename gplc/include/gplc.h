@@ -15,5 +15,6 @@
 
 ///< common data structures and utilities
 #include "common\gplcTypes.h"
+#include "common\gplcConstants.h"
 
 #endif

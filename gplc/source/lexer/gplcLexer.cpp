@@ -318,7 +318,7 @@ namespace gplc
 			//		case L'f': case L'F': // single precision floating point value
 			//			break;
 			//	}
-			//}			
+			//}
 			
 			I32 numSysBasis = (numberType & 0x10) ? 16 : (numberType & 0x8) ? 8 : (numberType & 0x4) ? 2 : 10;
 
@@ -342,7 +342,17 @@ namespace gplc
 					break;
 
 				case 1: // floating point
-					return new CNumberToken<F64>(TT_DOUBLE, _wtof(numberStr.c_str()));
+
+					switch (numberType & 0x40) //1 - double; 0; - float
+					{
+						case 0:
+							return new CNumberToken<F32>(TT_FLOAT, wcstof(numberStr.c_str(), nullptr));
+							break;
+						case 1:
+							return new CNumberToken<F64>(TT_DOUBLE, _wtof(numberStr.c_str()));
+							break;
+					}
+
 					break;
 
 				default: // this case won't be never reached, but let it be here for safe code execution

@@ -5,3 +5,4 @@ gplc/tests/tmp/
 *.opensdf
 *.sdf
 .vs/
+gplc/docs/

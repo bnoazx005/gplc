@@ -23,6 +23,7 @@
     <ClCompile Include="source\lexer\gplcTokens.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\common\gplcConstants.h" />
     <ClInclude Include="include\common\gplcTypes.h" />
     <ClInclude Include="include\gplc.h" />
     <ClInclude Include="include\lexer\gplcLexer.h" />
