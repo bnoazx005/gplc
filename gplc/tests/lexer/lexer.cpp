@@ -116,47 +116,48 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("Keywords test")
 	{
-		REQUIRE(pLexer->Init(L"identifier integer int character char floatValue float2int float", pathToConfig, &error) == gplc::RV_SUCCESS);
-
+		REQUIRE(pLexer->Init(L"identifier integer int character char floatValue float2int float!====<>+-*[]{};,.:\\/", pathToConfig, &error) == gplc::RV_SUCCESS);
 		const gplc::CToken* pCurrToken = pLexer->GetCurrToken();
 
-		REQUIRE(pCurrToken != nullptr);
-		REQUIRE(pCurrToken->GetType() == gplc::TT_IDENTIFIER);
+		std::vector<gplc::E_TOKEN_TYPE> tokens;
+		tokens.push_back(gplc::TT_IDENTIFIER);
+		tokens.push_back(gplc::TT_IDENTIFIER);
+		tokens.push_back(gplc::TT_INT);
+		tokens.push_back(gplc::TT_IDENTIFIER);
+		tokens.push_back(gplc::TT_CHAR);
+		tokens.push_back(gplc::TT_IDENTIFIER);
+		tokens.push_back(gplc::TT_IDENTIFIER);
+		tokens.push_back(gplc::TT_FLOAT);
+		tokens.push_back(gplc::TT_NE);
+		tokens.push_back(gplc::TT_EQ);
+		tokens.push_back(gplc::TT_ASSIGN_OP);
+		tokens.push_back(gplc::TT_LT);
+		tokens.push_back(gplc::TT_GT);
+		tokens.push_back(gplc::TT_PLUS);
+		tokens.push_back(gplc::TT_MINUS);
+		tokens.push_back(gplc::TT_STAR);
+		tokens.push_back(gplc::TT_OPEN_SQR_BRACE);
+		tokens.push_back(gplc::TT_CLOSE_SQR_BRACE);
+		tokens.push_back(gplc::TT_OPEN_BRACE);
+		tokens.push_back(gplc::TT_CLOSE_BRACE);
+		tokens.push_back(gplc::TT_SEMICOLON);
+		tokens.push_back(gplc::TT_COMMA);
+		tokens.push_back(gplc::TT_POINT);
+		tokens.push_back(gplc::TT_COLON);
+		tokens.push_back(gplc::TT_BACKSLASH);
+		tokens.push_back(gplc::TT_SLASH);
 
-		pCurrToken = pLexer->GetNextToken();
+		gplc::U32 tokensCount = tokens.size();
 
-		REQUIRE(pCurrToken != nullptr);
-		REQUIRE(pCurrToken->GetType() == gplc::TT_IDENTIFIER);
+		for (gplc::U32 i = 0; i < tokensCount; i++)
+		{
+			pCurrToken = pLexer->GetCurrToken();
 
-		pCurrToken = pLexer->GetNextToken();
+			REQUIRE(pCurrToken != nullptr);
+			REQUIRE(pCurrToken->GetType() == tokens[i]);
 
-		REQUIRE(pCurrToken != nullptr);
-		REQUIRE(pCurrToken->GetType() == gplc::TT_INT);
-
-		pCurrToken = pLexer->GetNextToken();
-
-		REQUIRE(pCurrToken != nullptr);
-		REQUIRE(pCurrToken->GetType() == gplc::TT_IDENTIFIER);
-
-		pCurrToken = pLexer->GetNextToken();
-
-		REQUIRE(pCurrToken != nullptr);
-		REQUIRE(pCurrToken->GetType() == gplc::TT_CHAR);
-
-		pCurrToken = pLexer->GetNextToken();
-
-		REQUIRE(pCurrToken != nullptr);
-		REQUIRE(pCurrToken->GetType() == gplc::TT_IDENTIFIER);
-
-		pCurrToken = pLexer->GetNextToken();
-
-		REQUIRE(pCurrToken != nullptr);
-		REQUIRE(pCurrToken->GetType() == gplc::TT_IDENTIFIER);
-
-		pCurrToken = pLexer->GetNextToken();
-
-		REQUIRE(pCurrToken != nullptr);
-		REQUIRE(pCurrToken->GetType() == gplc::TT_FLOAT);
+			pCurrToken = pLexer->GetNextToken();
+		}
 
 		pCurrToken = pLexer->GetNextToken();
 
@@ -289,6 +290,6 @@ TEST_CASE("Lexer's tests")
 		REQUIRE(pCurrDoubleToken->GetType() == gplc::TT_DOUBLE);
 		REQUIRE(pCurrDoubleToken->GetValue() == Approx(0.4));
 	}
-
+	
 	delete pLexer;
 }

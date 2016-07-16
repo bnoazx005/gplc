@@ -6,8 +6,7 @@
 	\brief The file contains lexer's class defenition
 
 	\todo
-	1) Add other reserved tokens recognition. For instance, ==, !=, :, etc.
-	2) Add strings and chars tokens
+	1) Add strings and chars tokens
 */
 
 #include "lexer\gplcLexer.h"
@@ -83,60 +82,56 @@ namespace gplc
 			{
 				currChar = _peekNextChar(inputStream, 1);
 
-				switch (currChar)
+				if (currChar == L'/') //single-line comment
 				{
-					case L'/': //single-line comment
+					//skip symbols until neither \n nor \r
+					do
+					{
+						currChar = _getNextChar(inputStream);
+					} while (currChar != L'\n' && currChar != L'\r' && currChar != WEOF);
 
-						//skip symbols until neither \n nor \r
-						do
-						{
-							currChar = _getNextChar(inputStream);
-						} while (currChar != L'\n' && currChar != L'\r' && currChar != WEOF);
-
-						break;
-
-					case L'*':
-
-						currChar = _getNextChar(inputStream); //get '*'
-						numOfNestedCommentsBlocks = 1;
-
-						do
-						{
-							currChar = _getNextChar(inputStream);
-
-							if (currChar == L'/' && _peekNextChar(inputStream, 1) == L'*')
-							{
-								numOfNestedCommentsBlocks++;
-
-								_getNextChar(inputStream); //get '*'
-
-								continue;
-							}
-
-							if (currChar == L'*' && _peekNextChar(inputStream, 1) == L'/')
-							{
-								if (numOfNestedCommentsBlocks == 0)
-								{
-									errorInfo = new TLexerErrorInfo();
-
-									errorInfo->mPos = mCurrPos;
-									errorInfo->mLine = mCurrLine;
-
-									return RV_INCORRECT_TOKEN;
-								}
-
-								numOfNestedCommentsBlocks--;
-
-								_getNextChar(inputStream); //get '/'
-							}
-						} while (currChar != L'*' && _peekNextChar(inputStream, 1) != L'/' && numOfNestedCommentsBlocks > 0);
-
-						_getNextChar(inputStream);
-
-						break;
+					continue;
 				}
+				else if (currChar == L'*')
+				{
+					currChar = _getNextChar(inputStream); //get '*'
+					numOfNestedCommentsBlocks = 1;
 
-				continue;
+					do
+					{
+						currChar = _getNextChar(inputStream);
+
+						if (currChar == L'/' && _peekNextChar(inputStream, 1) == L'*')
+						{
+							numOfNestedCommentsBlocks++;
+
+							_getNextChar(inputStream); //get '*'
+
+							continue;
+						}
+
+						if (currChar == L'*' && _peekNextChar(inputStream, 1) == L'/')
+						{
+							if (numOfNestedCommentsBlocks == 0)
+							{
+								errorInfo = new TLexerErrorInfo();
+
+								errorInfo->mPos = mCurrPos;
+								errorInfo->mLine = mCurrLine;
+
+								return RV_INCORRECT_TOKEN;
+							}
+
+							numOfNestedCommentsBlocks--;
+
+							_getNextChar(inputStream); //get '/'
+						}
+					} while (currChar != L'*' && _peekNextChar(inputStream, 1) != L'/' && numOfNestedCommentsBlocks > 0);
+
+					_getNextChar(inputStream);
+
+					continue;
+				}
 			}
 
 			// increment is done implicitly in _scanToken
@@ -242,8 +237,54 @@ namespace gplc
 	CToken* CLexer::_scanToken(const std::wstring& stream)
 	{
 		W16 currChar = _getCurrChar(stream);
+
+		//try to recognize reserved symbols' sequences
+		std::wstring expectedToken;
+
+		expectedToken.push_back(currChar);
 		
-		if (iswalpha(currChar) || currChar == L'_') //try to read identifier's token
+		std::map<std::wstring, E_TOKEN_TYPE>::const_iterator tokenIter, additionalTokenIter;
+
+		if ((tokenIter = mReservedTokensMap.find(expectedToken)) != mReservedTokensMap.end())
+		{
+			currChar = _peekNextChar(stream, 1);
+			
+			expectedToken.push_back(currChar); // try to find another longer token
+
+			if ((additionalTokenIter = mReservedTokensMap.find(expectedToken)) != mReservedTokensMap.end())
+			{
+				_getNextChar(stream);
+				_getNextChar(stream);
+
+				return new CToken((*additionalTokenIter).second);
+			}
+
+			if ((*tokenIter).second != TT_POINT || !iswdigit(currChar)) //check is it just a point or delimiter in a floating point number
+			{
+				_getNextChar(stream);
+
+				return new CToken((*tokenIter).second);
+			}
+		}
+		else
+		{
+			currChar = _peekNextChar(stream, 1);
+
+			expectedToken.push_back(currChar); // try to find another longer token
+
+			if ((additionalTokenIter = mReservedTokensMap.find(expectedToken)) != mReservedTokensMap.end())
+			{
+				_getNextChar(stream);
+				_getNextChar(stream); //set pos to new char
+
+				return new CToken((*additionalTokenIter).second);
+			}
+		}
+
+		currChar = _getCurrChar(stream);
+		
+		//try to read identifier's token
+		if (iswalpha(currChar) || currChar == L'_') 
 		{
 			std::wstring identifierName;
 
@@ -284,7 +325,7 @@ namespace gplc
 					currChar = _getNextChar(stream);
 				}
 
-				if (currChar == L'.') //it's floating point value
+				if (currChar == L'.' && iswdigit(_peekNextChar(stream, 1))) //it's floating point value
 				{
 					numberType = NB_FLOAT;
 
@@ -493,10 +534,7 @@ namespace gplc
 					return nullptr;
 			}
 		}		
-
-		//try to recognize other reserved tokens
-		///<TODO a recognition of other reserved tokens
-
+		
 		return nullptr;
 	}
 	

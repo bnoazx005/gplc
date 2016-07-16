@@ -19,15 +19,45 @@
 namespace gplc
 {
 
+	/*!
+		\brief enum E_TOKEN_TYPE
+
+		All possible tokens' types
+	*/
+	
 	enum E_TOKEN_TYPE
 	{
-		TT_INT        = 0,
-		TT_UINT       = 1,
-		TT_FLOAT      = 2,
-		TT_DOUBLE     = 3,
-		TT_STRING     = 4,
-		TT_CHAR       = 5,
-		TT_IDENTIFIER,
+		TT_INT             = 0,
+		TT_UINT            = 1,
+		TT_FLOAT           = 2,
+		TT_DOUBLE          = 3,
+		TT_STRING          = 4,
+		TT_CHAR            = 5,
+		TT_IDENTIFIER      = 6,
+		TT_ASSIGN_OP       = 7,  ///< =
+		TT_COLON           = 8,  ///< :
+		TT_SEMICOLON       = 9,  ///< ;
+		TT_COMMA           = 10, ///< ,
+		TT_STAR            = 11, ///< *
+		TT_AMPERSAND       = 12, ///< &
+		TT_GT              = 13, ///< >
+		TT_LT              = 14, ///< <
+		TT_GE              = 15, ///< >=
+		TT_LE              = 16, ///< <=
+		TT_NE              = 17, ///< !=
+		TT_EQ              = 18, ///< ==
+		TT_PLUS            = 19, ///< +
+		TT_MINUS           = 20, ///< -
+		TT_SLASH           = 21, ///< '/'
+		TT_BACKSLASH       = 22, ///< '\'
+		TT_OPEN_BRACKET    = 23, ///< (
+		TT_CLOSE_BRACKET   = 24, ///< )
+		TT_OPEN_SQR_BRACE  = 25, ///< [
+		TT_CLOSE_SQR_BRACE = 26, ///< ]
+		TT_OPEN_BRACE      = 27, ///< {
+		TT_CLOSE_BRACE     = 28, ///< }
+		TT_VLINE           = 29, ///< |
+		TT_POINT           = 30, ///< .
 		TT_DEFAULT
 	};
 
