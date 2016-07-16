@@ -8,7 +8,6 @@
 	\todo
 	1) Add other reserved tokens recognition. For instance, ==, !=, :, etc.
 	2) Add strings and chars tokens
-	3) Add single- and multi- line comments
 */
 
 #include "lexer\gplcLexer.h"
