@@ -226,7 +226,7 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("number's literals test")
 	{
-		REQUIRE(pLexer->Init(L"42l 42ul 42s 42uu 42f", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"42l 42ul 42s 42uu 42f 42usf", pathToConfig, &error) == gplc::RV_SUCCESS);
 
 		const gplc::CNumberToken<gplc::IL32>* pCurrIntToken1 = dynamic_cast<const gplc::CNumberToken<gplc::IL32>*>(pLexer->GetCurrToken());
 		
@@ -257,6 +257,12 @@ TEST_CASE("Lexer's tests")
 		REQUIRE(pCurrFloatToken5 != nullptr);
 		REQUIRE(pCurrFloatToken5->GetType() == gplc::TT_FLOAT);
 		REQUIRE(pCurrFloatToken5->GetValue() == Approx(42.0));
+
+		const gplc::CNumberToken<gplc::F32>* pCurrFloatToken6 = dynamic_cast<const gplc::CNumberToken<gplc::F32>*>(pLexer->GetNextToken());
+
+		REQUIRE(pCurrFloatToken6 != nullptr);
+		REQUIRE(pCurrFloatToken6->GetType() == gplc::TT_FLOAT);
+		REQUIRE(pCurrFloatToken6->GetValue() == Approx(42.0));
 	}
 
 	delete pLexer;
