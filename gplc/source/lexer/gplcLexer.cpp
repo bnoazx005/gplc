@@ -58,6 +58,8 @@ namespace gplc
 		
 		CToken* pCurrToken = nullptr;
 
+		U8 numOfNestedCommentsBlocks = 0;
+
 		while ((currChar = _getCurrChar(inputStream)) != WEOF)
 		{
 			if (iswblank(currChar)) //skip whitespace
@@ -72,6 +74,68 @@ namespace gplc
 				mCurrLine++;
 
 				currChar = _getNextChar(inputStream);
+
+				continue;
+			}
+
+			// skip comments
+			//try to recognize single- and milti- line comments
+			if (currChar == L'/')
+			{
+				currChar = _peekNextChar(inputStream, 1);
+
+				switch (currChar)
+				{
+					case L'/': //single-line comment
+
+						//skip symbols until neither \n nor \r
+						do
+						{
+							currChar = _getNextChar(inputStream);
+						} while (currChar != L'\n' && currChar != L'\r' && currChar != WEOF);
+
+						break;
+
+					case L'*':
+
+						currChar = _getNextChar(inputStream); //get '*'
+						numOfNestedCommentsBlocks = 1;
+
+						do
+						{
+							currChar = _getNextChar(inputStream);
+
+							if (currChar == L'/' && _peekNextChar(inputStream, 1) == L'*')
+							{
+								numOfNestedCommentsBlocks++;
+
+								_getNextChar(inputStream); //get '*'
+
+								continue;
+							}
+
+							if (currChar == L'*' && _peekNextChar(inputStream, 1) == L'/')
+							{
+								if (numOfNestedCommentsBlocks == 0)
+								{
+									errorInfo = new TLexerErrorInfo();
+
+									errorInfo->mPos = mCurrPos;
+									errorInfo->mLine = mCurrLine;
+
+									return RV_INCORRECT_TOKEN;
+								}
+
+								numOfNestedCommentsBlocks--;
+
+								_getNextChar(inputStream); //get '/'
+							}
+						} while (currChar != L'*' && _peekNextChar(inputStream, 1) != L'/' && numOfNestedCommentsBlocks > 0);
+
+						_getNextChar(inputStream);
+
+						break;
+				}
 
 				continue;
 			}
@@ -347,11 +411,15 @@ namespace gplc
 					{
 						currChar = _getNextChar(stream); //read this value from the stream
 
-						numberType ^= NB_LONG; //clear 'long' bit
+						numberType &= ~NB_LONG; //clear 'long' bit
 					}
 					else if (allowableIntLiterals.find_first_of(currChar) != -1)
 					{
 						return nullptr; //incorrect literal for floating point was found
+					}
+					else //double
+					{
+						numberType |= NB_LONG;
 					}
 
 					break;
@@ -425,7 +493,7 @@ namespace gplc
 				default: // this case won't be never reached, but let it be here for safe code execution
 					return nullptr;
 			}
-		}
+		}		
 
 		//try to recognize other reserved tokens
 		///<TODO a recognition of other reserved tokens
