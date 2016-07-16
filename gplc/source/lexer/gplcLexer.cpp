@@ -6,13 +6,14 @@
 	\brief The file contains lexer's class defenition
 
 	\todo
-	1) A supporting of number's literals
-	2) Add other reserved tokens recognition. For instance, ==, !=, :, etc.
-	3) Refactor a generation of numbers' tokens
+	1) Add other reserved tokens recognition. For instance, ==, !=, :, etc.
+	2) Add strings and chars tokens
+	3) Add single- and multi- line comments
 */
 
 #include "lexer\gplcLexer.h"
 #include "lexer\gplcTokens.h"
+#include "common\gplcConstants.h"
 #include <fstream>
 
 
@@ -85,7 +86,7 @@ namespace gplc
 				errorInfo->mPos  = mCurrPos;
 				errorInfo->mLine = mCurrLine;
 
-				return RV_FAIL;
+				return RV_INCORRECT_TOKEN;
 			}
 
 			mTokens.push_back(pCurrToken);
@@ -207,8 +208,8 @@ namespace gplc
 		{
 			std::wstring numberStr;
 
-			U8 numberType = 0; // flags: 0x0 - int; 0x1 - floating point; 0x80 - signed; 0x40 - long; 0x20 - long; 0x10 - hex; 0x8 - oct; 0x4 - bin;
-			//floating point value always has sign bit and cannot has hex, oct, bin representations' bits.
+			U8 numberType = NB_INT | NB_SIGNED; // flags: 0x0 - int; 0x1 - floating point; 0x80 - signed; 0x40 - long; 0x20 - long; 
+			//0x10 - hex; 0x8 - oct; 0x4 - bin; floating point value always has sign bit and cannot has hex, oct, bin representations' bits.
 
 			//try parse decimal integer or floating point value
 			if (currChar != L'0' || (currChar == L'0' && _peekNextChar(stream, 1) == L'.'))
@@ -222,7 +223,7 @@ namespace gplc
 
 				if (currChar == L'.') //it's floating point value
 				{
-					numberType = 0x1;
+					numberType = NB_FLOAT;
 
 					while (iswdigit(currChar) || currChar == L'.') // pass the rest part of the number
 					{
@@ -240,7 +241,7 @@ namespace gplc
 
 				if (currChar == L'x' || currChar == L'X') //hex value
 				{
-					numberType |= 0x10; //set the flag of hexademical numeral system
+					numberType |= NB_HEX; //set the flag of hexademical numeral system
 
 					numberStr.push_back(currChar);
 
@@ -257,7 +258,7 @@ namespace gplc
 				}
 				else if (currChar == L'b' || currChar == L'B') //bin value
 				{
-					numberType |= 0x4; //set the flag of binary numeral system
+					numberType |= NB_BIN; //set the flag of binary numeral system
 					
 					currChar = _getNextChar(stream);
 
@@ -270,7 +271,7 @@ namespace gplc
 				}
 				else if (iswdigit(currChar)) //oct value
 				{
-					numberType |= 0x8; //set the flag of octal numeral system
+					numberType |= NB_OCT; //set the flag of octal numeral system
 					
 					numberStr.push_back(currChar);
 
@@ -289,66 +290,132 @@ namespace gplc
 				}
 			}
 
-			//while (isdigit(currChar) || currChar == L'.' || currChar == L'b' ||
-			//	    currChar == L'x' || currChar == L'X') // pass integers, floating point values 
-			//{                                            // and its hexademical, octal and binary representations
-			//	numberStr.push_back(currChar);
+			//check up literals
+			const std::wstring allowableIntLiterals = L"lLuUsS";
 
-			//	currChar = stream[++pos];
-			//}
-			//
-			//check a literal after the number
-			//const std::wstring allowableLiterals              = L"lLuUsS";
-			//const std::wstring allowableFloatingPointLiterals = L"lLfF";
-			//std::wstring       currLiterals;
+			U8 literalsCount = 0x0; 
 
-			//while (allowableLiterals.find_first_of(currChar) != -1)
-			//{
-			//	switch (currChar)
-			//	{
-			//		case L'l': case L'L': // long integer
-			//			break;
+			switch (numberType & NB_FLOAT)
+			{
+				case NB_INT:
 
-			//		case L'u': case L'U': // unsigned integer
-			//			break;
+					//all possible literals are placed in allowableLiterals
+					while (allowableIntLiterals.find_first_of(currChar = _getCurrChar(stream)) != -1)
+					{
+						switch (currChar) //only first literal of 'u' or 's' influences on number's mask
+						{
+							case L'l':case L'L':
 
-			//		case L's': case L'S': // signed integer
-			//			break;
+								if (!(numberType & NB_LONG))
+								{
+									numberType |= NB_LONG;
+								}
+								else
+								{
+									numberType |= NB_ADD_LONG;
+								}
 
-			//		case L'f': case L'F': // single precision floating point value
-			//			break;
-			//	}
-			//}
+								break;
+							case L'u':case L'U':
+								numberType <<= 1; //clear 8th bit
+								numberType >>= 1; 
+								break;
+							case L's':case L'S':
+								numberType |= NB_SIGNED;
+								break;
+						}
+
+						currChar = _getNextChar(stream);
+					}
+
+					if (currChar == 'f' || currChar == 'F')
+					{
+						numberType |= NB_FLOAT;
+
+						currChar = _getNextChar(stream);
+					}
+
+					break;
+
+				case NB_FLOAT:
+
+					//try to get literals 
+					//there is possible only one kind of literal for floating point values. It's 'f' or 'F'.
+					currChar = _getCurrChar(stream);
+
+					if (currChar == 'f' || currChar == 'F')
+					{
+						currChar = _getNextChar(stream); //read this value from the stream
+
+						numberType ^= NB_LONG; //clear 'long' bit
+					}
+					else if (allowableIntLiterals.find_first_of(currChar) != -1)
+					{
+						return nullptr; //incorrect literal for floating point was found
+					}
+
+					break;
+			}
 			
-			I32 numSysBasis = (numberType & 0x10) ? 16 : (numberType & 0x8) ? 8 : (numberType & 0x4) ? 2 : 10;
+			//the contruction of a token
 
-			switch (numberType & 0x1)
+			U32 numSysBasis = (numberType & NB_HEX) | (numberType & NB_OCT) | ((numberType & NB_BIN) >> 1);
+			
+			switch (numberType & NB_FLOAT)
 			{
 				case 0: // integer
 
-					switch (numberType & 0x80) //Is it signed? If bit is turn on then it's signed value
+					switch (numberType & NB_SIGNED) //Is it signed? If bit is turn on then it's signed value
 					{
 						case 0: //unsigned
-							return new CNumberToken<U32>(TT_UINT, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
+
+							if (numberType & NB_LONG && !(numberType & NB_ADD_LONG)) // long
+							{
+								return new CNumberToken<UL32>(TT_UINT, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
+							}
+							else if (numberType & NB_LONG && numberType & NB_ADD_LONG) // long long
+							{
+								return new CNumberToken<U64>(TT_UINT, wcstoull(numberStr.c_str(), nullptr, numSysBasis));
+							}
+							else
+							{
+								return new CNumberToken<U32>(TT_UINT, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
+							}
+
 							break;
 
-						case 1: //signed
+						case NB_SIGNED: //signed
+
+							if (numberType & NB_LONG && !(numberType & NB_ADD_LONG)) // long
+							{
+								return new CNumberToken<IL32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
+							}
+							else if (numberType & NB_LONG && numberType & NB_ADD_LONG) // long long
+							{
+								return new CNumberToken<I64>(TT_INT, wcstoll(numberStr.c_str(), nullptr, numSysBasis));
+							}
+							else
+							{
+								return new CNumberToken<I32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
+							}
+
+							break;
+
+						default:
 							return new CNumberToken<I32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
 							break;
 					}
-
-					return new CNumberToken<I32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
 
 					break;
 
 				case 1: // floating point
 
-					switch (numberType & 0x40) //1 - double; 0; - float
+					switch (numberType & NB_LONG) //1 - double; 0; - float
 					{
 						case 0:
 							return new CNumberToken<F32>(TT_FLOAT, wcstof(numberStr.c_str(), nullptr));
 							break;
-						case 1:
+						case NB_LONG:
 							return new CNumberToken<F64>(TT_DOUBLE, _wtof(numberStr.c_str()));
 							break;
 					}

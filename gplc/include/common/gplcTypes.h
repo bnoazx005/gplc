@@ -18,11 +18,13 @@ namespace gplc
 	typedef char      I8;
 	typedef short     I16;
 	typedef int       I32;
+	typedef long      IL32;
 	typedef long long I64;
 
 	typedef unsigned char      U8;
 	typedef unsigned short     U16;
 	typedef unsigned int       U32;
+	typedef unsigned long      UL32;
 	typedef unsigned long long U64;
 
 	///< Floating points aliases
@@ -47,11 +49,12 @@ namespace gplc
 
 	enum E_RESULT_VALUE
 	{
-		RV_SUCCESS           = 0x0,	///< Successfully done
-		RV_FAIL              = 0x1,	///< Critical error during execution
-		RV_INVALID_ARGUMENTS = 0x2, ///< Some function's argument has invalid value
-		RV_FILE_NOT_FOUND    = 0x4, ///< file was not found or some another its problem has happened
-		RV_INCORRECT_CONFIG  = 0x8, ///< it means that some error has happened during the parsing of a config file
+		RV_SUCCESS           = 0x0,	 ///< Successfully done
+		RV_FAIL              = 0x1,	 ///< Critical error during execution
+		RV_INVALID_ARGUMENTS = 0x2,  ///< Some function's argument has invalid value
+		RV_FILE_NOT_FOUND    = 0x4,  ///< File was not found or some another its problem has happened
+		RV_INCORRECT_CONFIG  = 0x8,  ///< It means that some error has happened during the parsing of a config file
+		RV_INCORRECT_TOKEN   = 0x10, ///< This is lexer's error, which happens, when token's structure is incorrect or cannot be recognized.
 	};
 
 	/*!

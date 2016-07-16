@@ -27,7 +27,7 @@ namespace gplc
 	{
 		NB_INT      = 0x0,  ///< An integer number 
 		NB_FLOAT    = 0x1,  ///< A floating point number
-		NB_SIGN     = 0x80, ///< A sign of a number (1 is signed and 0 is unsigned)
+		NB_SIGNED   = 0x80, ///< A sign of a number (1 is signed and 0 is unsigned)
 		NB_HEX      = 0x10, ///< A number is represented in hexademical numerical system
 		NB_OCT      = 0x8,  ///< A number is represented in octal numerical system
 		NB_BIN      = 0x4,  ///< A number is represented in binary numerical system
