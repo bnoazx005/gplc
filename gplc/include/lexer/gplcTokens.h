@@ -27,13 +27,13 @@ namespace gplc
 	
 	enum E_TOKEN_TYPE
 	{
-		TT_INT             = 0,
-		TT_UINT            = 1,
-		TT_FLOAT           = 2,
-		TT_DOUBLE          = 3,
-		TT_STRING          = 4,
-		TT_CHAR            = 5,
-		TT_IDENTIFIER      = 6,
+		TT_INT             = 0,  ///< Signed integer type
+		TT_UINT            = 1,  ///< Unsigned integer type
+		TT_FLOAT           = 2,  ///< Single precision floating point type
+		TT_DOUBLE          = 3,  ///< Double precision floating point type
+		TT_STRING          = 4,  ///< String type
+		TT_CHAR            = 5,  ///< Char type
+		TT_IDENTIFIER      = 6,  ///< Identifier
 		TT_ASSIGN_OP       = 7,  ///< =
 		TT_COLON           = 8,  ///< :
 		TT_SEMICOLON       = 9,  ///< ;
@@ -83,21 +83,21 @@ namespace gplc
 
 
 	/*!
-		\brief CNumberToken class 
+		\brief CTypedValueToken class 
 
 		It was derived from CToken.
 	*/
 	
 	template <class T>
-	class CNumberToken: public CToken
+	class CTypedValueToken: public CToken
 	{
 		public:
-			CNumberToken(E_TOKEN_TYPE type, T value):
+			CTypedValueToken(E_TOKEN_TYPE type, T value):
 				CToken(type), mValue(value)
 			{
 			}
 
-			virtual ~CNumberToken()
+			virtual ~CTypedValueToken()
 			{
 			}
 
@@ -106,12 +106,12 @@ namespace gplc
 				return mValue;
 			}
 		protected:
-			CNumberToken():
+			CTypedValueToken():
 				CToken(TT_INT)
 			{
 			}
 
-			CNumberToken(const CNumberToken& token) :
+			CTypedValueToken(const CTypedValueToken& token) :
 				CToken(token)
 			{
 			}

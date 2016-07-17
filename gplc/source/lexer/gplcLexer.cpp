@@ -479,15 +479,15 @@ namespace gplc
 
 							if (numberType & NB_LONG && !(numberType & NB_ADD_LONG)) // long
 							{
-								return new CNumberToken<UL32>(TT_UINT, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<UL32>(TT_UINT, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
 							}
 							else if (numberType & NB_LONG && numberType & NB_ADD_LONG) // long long
 							{
-								return new CNumberToken<U64>(TT_UINT, wcstoull(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<U64>(TT_UINT, wcstoull(numberStr.c_str(), nullptr, numSysBasis));
 							}
 							else
 							{
-								return new CNumberToken<U32>(TT_UINT, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<U32>(TT_UINT, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
 							}
 
 							break;
@@ -496,21 +496,21 @@ namespace gplc
 
 							if (numberType & NB_LONG && !(numberType & NB_ADD_LONG)) // long
 							{
-								return new CNumberToken<IL32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<IL32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
 							}
 							else if (numberType & NB_LONG && numberType & NB_ADD_LONG) // long long
 							{
-								return new CNumberToken<I64>(TT_INT, wcstoll(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<I64>(TT_INT, wcstoll(numberStr.c_str(), nullptr, numSysBasis));
 							}
 							else
 							{
-								return new CNumberToken<I32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<I32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
 							}
 
 							break;
 
 						default:
-							return new CNumberToken<I32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
+							return new CTypedValueToken<I32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
 							break;
 					}
 
@@ -521,10 +521,10 @@ namespace gplc
 					switch (numberType & NB_LONG) //1 - double; 0; - float
 					{
 						case 0:
-							return new CNumberToken<F32>(TT_FLOAT, wcstof(numberStr.c_str(), nullptr));
+							return new CTypedValueToken<F32>(TT_FLOAT, wcstof(numberStr.c_str(), nullptr));
 							break;
 						case NB_LONG:
-							return new CNumberToken<F64>(TT_DOUBLE, _wtof(numberStr.c_str()));
+							return new CTypedValueToken<F64>(TT_DOUBLE, _wtof(numberStr.c_str()));
 							break;
 					}
 
@@ -533,7 +533,28 @@ namespace gplc
 				default: // this case won't be never reached, but let it be here for safe code execution
 					return nullptr;
 			}
-		}		
+		}
+
+		//try to get a string
+		std::wstring strConstantValue;
+
+		if (currChar == L'\"')
+		{
+			while ((currChar = _getNextChar(stream)) != L'\"' && currChar != WEOF)
+			{
+				strConstantValue.push_back(currChar);
+			}
+
+			if (currChar == WEOF)
+			{
+				return nullptr;
+			}
+
+			_getNextChar(stream); //get \"
+
+			return new CTypedValueToken<std::wstring>(TT_STRING, strConstantValue);
+		}
+		
 		
 		return nullptr;
 	}
