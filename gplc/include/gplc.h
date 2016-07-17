@@ -9,12 +9,15 @@
 #ifndef GPLC_H
 #define GPLC_H
 
-///< lexer's files group
+/// Lexer's files group
 #include "lexer\gplcLexer.h"
 #include "lexer\gplcTokens.h"
 
-///< common data structures and utilities
+/// Common data structures and utilities
 #include "common\gplcTypes.h"
 #include "common\gplcConstants.h"
+
+/// Parser's files group
+#include "parser\gplcParser.h"
 
 #endif
