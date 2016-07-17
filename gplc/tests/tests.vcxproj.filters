@@ -7,11 +7,17 @@
     <Filter Include="common">
       <UniqueIdentifier>{6c1b6c5d-72c9-458f-a506-63abf4222529}</UniqueIdentifier>
     </Filter>
+    <Filter Include="parser">
+      <UniqueIdentifier>{6f884e7c-18bb-4682-864f-6713aa6dab0c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tests.cpp" />
     <ClCompile Include="lexer\lexer.cpp">
       <Filter>lexer</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\parser.cpp">
+      <Filter>parser</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
