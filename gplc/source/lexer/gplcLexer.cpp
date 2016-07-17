@@ -170,7 +170,7 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 
-	const CToken* CLexer::GetCurrToken()
+	const CToken* CLexer::GetCurrToken() const
 	{
 		if (mTokens.size() <= mCurrTokenIndex)
 		{
