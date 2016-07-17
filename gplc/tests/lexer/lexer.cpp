@@ -294,6 +294,29 @@ TEST_CASE("Lexer's tests")
 	SECTION("strings test")
 	{
 		REQUIRE(pLexer->Init(LR"("Hello, world!")", pathToConfig, &error) == gplc::RV_SUCCESS);
+
+		const gplc::CTypedValueToken<std::wstring>* pCurrToken = dynamic_cast<const gplc::CTypedValueToken<std::wstring>*>(pLexer->GetCurrToken());
+
+		REQUIRE(pCurrToken != nullptr);
+		REQUIRE(pCurrToken->GetType() == gplc::TT_STRING);
+		REQUIRE(pCurrToken->GetValue() == L"Hello, world!");
+	}
+
+	SECTION("chars test")
+	{
+		REQUIRE(pLexer->Init(L"'f'  'g'", pathToConfig, &error) == gplc::RV_SUCCESS);
+
+		const gplc::CTypedValueToken<gplc::W16>* pCurrToken = dynamic_cast<const gplc::CTypedValueToken<gplc::W16>*>(pLexer->GetCurrToken());
+
+		REQUIRE(pCurrToken != nullptr);
+		REQUIRE(pCurrToken->GetType() == gplc::TT_CHAR);
+		REQUIRE(pCurrToken->GetValue() == L'f');
+
+		pCurrToken = dynamic_cast<const gplc::CTypedValueToken<gplc::W16>*>(pLexer->GetNextToken());
+
+		REQUIRE(pCurrToken != nullptr);
+		REQUIRE(pCurrToken->GetType() == gplc::TT_CHAR);
+		REQUIRE(pCurrToken->GetValue() == L'g');
 	}
 	
 	delete pLexer;

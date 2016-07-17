@@ -7,6 +7,8 @@
 
 	\todo
 	1) Add strings and chars tokens
+	2) By now all strings are recognized as wide characters strings (unicode strings). Should thing about the way to change it.
+	3) Add literals for strings
 */
 
 #include "lexer\gplcLexer.h"
@@ -536,6 +538,7 @@ namespace gplc
 		}
 
 		//try to get a string
+		
 		std::wstring strConstantValue;
 
 		if (currChar == L'\"')
@@ -555,6 +558,22 @@ namespace gplc
 			return new CTypedValueToken<std::wstring>(TT_STRING, strConstantValue);
 		}
 		
+		//try to get a char value
+		
+		if (currChar == L'\'')
+		{
+			currChar = _getNextChar(stream);
+
+			if (_peekNextChar(stream, 1) != L'\'')
+			{
+				return nullptr;
+			}
+
+			_getNextChar(stream); //get '\''
+			_getNextChar(stream); //get next symbol
+
+			return new CTypedValueToken<W16>(TT_CHAR, currChar);
+		}
 		
 		return nullptr;
 	}
