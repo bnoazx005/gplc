@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="source\lexer\gplcLexer.cpp" />
     <ClCompile Include="source\lexer\gplcTokens.cpp" />
+    <ClCompile Include="source\parser\gplcParser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\common\gplcConstants.h" />
@@ -28,6 +29,7 @@
     <ClInclude Include="include\gplc.h" />
     <ClInclude Include="include\lexer\gplcLexer.h" />
     <ClInclude Include="include\lexer\gplcTokens.h" />
+    <ClInclude Include="include\parser\gplcParser.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{81CA3DBC-6909-4ABB-B0B4-13E425252565}</ProjectGuid>

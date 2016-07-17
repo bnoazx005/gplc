@@ -16,6 +16,12 @@
     <Filter Include="source\lexer">
       <UniqueIdentifier>{552690af-0e0a-4afb-a3df-8e840f2027ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\parser">
+      <UniqueIdentifier>{f25e98af-3894-454f-87e9-954b6f1edd1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\parser">
+      <UniqueIdentifier>{078ad60b-d820-499b-aabe-c51c476a5902}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\lexer\gplcLexer.cpp">
@@ -23,6 +29,9 @@
     </ClCompile>
     <ClCompile Include="source\lexer\gplcTokens.cpp">
       <Filter>source\lexer</Filter>
+    </ClCompile>
+    <ClCompile Include="source\parser\gplcParser.cpp">
+      <Filter>source\parser</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -40,6 +49,9 @@
     </ClInclude>
     <ClInclude Include="include\common\gplcConstants.h">
       <Filter>include\common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\parser\gplcParser.h">
+      <Filter>include\parser</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
