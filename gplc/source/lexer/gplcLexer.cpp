@@ -20,13 +20,13 @@
 namespace gplc
 {
 	CLexer::CLexer():
-		mCurrPos(0), mCurrLine(0), mCurrTokenIndex(0)
+		ILexer(), mCurrPos(0), mCurrLine(0), mCurrTokenIndex(0)
 	{
 
 	}
 
 	CLexer::CLexer(const CLexer& lexer) :
-		mCurrPos(0), mCurrLine(0), mCurrTokenIndex(0)
+		ILexer(lexer), mCurrPos(0), mCurrLine(0), mCurrTokenIndex(0)
 	{
 	}
 
