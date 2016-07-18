@@ -88,7 +88,6 @@ namespace gplc
 	};
 
 
-
 	/*!
 		\brief CLexer class
 

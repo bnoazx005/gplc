@@ -18,13 +18,37 @@ namespace gplc
 	class ILexer;
 
 
-	class CParser
+	/*!
+		\brief IParser interface
+
+		All parsers should implement its methods, all of 'stub' and 'mock' objects too.
+	*/
+	
+	class IParser
+	{
+		public:
+			IParser() {}
+			virtual ~IParser() {}
+
+			virtual CASTNode* Parse(const ILexer* lexer) = 0;
+		protected:
+			IParser(const IParser& parser) {}
+	};
+
+
+	/*!
+		\brief CParser class
+
+		Implements methods, which is tools for a syntactic analysis.
+	*/
+	
+	class CParser : public IParser
 	{
 		public:
 			CParser();
-			~CParser();
+			virtual ~CParser();
 
-			CASTNode* Parse(const ILexer* lexer);
+			virtual CASTNode* Parse(const ILexer* lexer);
 		private:
 			CParser(const CParser& parser);
 		private:
