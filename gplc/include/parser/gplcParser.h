@@ -14,12 +14,17 @@
 
 namespace gplc
 {
+	class CASTNode;
+	class ILexer;
+
 
 	class CParser
 	{
 		public:
 			CParser();
 			~CParser();
+
+			CASTNode* Parse(const ILexer* lexer);
 		private:
 			CParser(const CParser& parser);
 		private:
