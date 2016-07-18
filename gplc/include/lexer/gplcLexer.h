@@ -23,13 +23,80 @@ namespace gplc
 {
 
 	/*!
+		\brief ILexer interface
+
+		All lexers should implement its methods. The first goal of using it is unit testing.
+	*/
+	
+	class ILexer
+	{
+		public:
+			ILexer() {}
+			virtual ~ILexer() {}
+
+			/*!
+				\brief The function reads input stream of characters and prepares a tokens' sequence.
+
+				\param[in] inputStream An input characters sequence.
+				\param[in] configFilename A name of file, which stores reserved keywords' declarations.
+				\param[out] errorInfo A pointer to TLexerErrorInfo, which describes information about an error. It equals to null in normal case.
+
+				\return A function's result code.
+			*/
+
+			virtual Result Init(const std::wstring& inputStream, const std::wstring& configFilename, TLexerErrorInfo* errorInfo) = 0;
+
+			/*!
+				\brief The function clears the current state of an object.
+
+				The method implicitly is called from Init function of the class.
+
+				\return A function's result code.
+			*/
+
+			virtual Result Reset() = 0;
+
+			/*!
+				\brief The function returns a current token from tokens' sequence
+
+				A call of this method doesn't change a state of an object.
+
+				\return A current token from tokens' sequence
+			*/
+
+			virtual const CToken* GetCurrToken() const = 0;
+
+			/*!
+				\brief The function returns next token from tokens' sequence
+
+				A call of this method increments value of an inner pointer to tokens' sequence.
+
+				\return A next token from tokens' sequence
+			*/
+
+			virtual const CToken* GetNextToken() = 0;
+
+			/*!
+				\brief The function allows to peek some token after the current one with specified offset.
+
+				\return A token from tokens' sequence with specified offset from the current one.
+			*/
+
+			virtual const CToken* PeekNextToken(U32 numOfSteps = 1) const = 0;
+		protected:
+			ILexer(const ILexer& lexer) {}
+	};
+
+
+
+	/*!
 		\brief CLexer class
 
 		The class provides methods for tokens' recognition. All allowable tokens' types are placed in gplcTokens.h.
 		All reserved keywords are placed in a special file .tokens. They duplicate E_TOKEN_TYPE's values.
 	*/
 
-	class CLexer
+	class CLexer : public ILexer
 	{
 		public:
 			/*!
@@ -42,7 +109,7 @@ namespace gplc
 				\brief Default contructor of the class
 			*/
 
-			~CLexer();
+			virtual ~CLexer();
 
 			/*!
 				\brief The function reads input stream of characters and prepares a tokens' sequence.
@@ -54,7 +121,7 @@ namespace gplc
 				\return A function's result code.
 			*/
 
-			Result Init(const std::wstring& inputStream, const std::wstring& configFilename, TLexerErrorInfo* errorInfo);
+			virtual Result Init(const std::wstring& inputStream, const std::wstring& configFilename, TLexerErrorInfo* errorInfo);
 
 			/*!
 				\brief The function clears the current state of an object.
@@ -64,7 +131,7 @@ namespace gplc
 				\return A function's result code.
 			*/
 
-			Result Reset();
+			virtual Result Reset();
 
 			/*!
 				\brief The function returns a current token from tokens' sequence
@@ -74,7 +141,7 @@ namespace gplc
 				\return A current token from tokens' sequence
 			*/
 
-			const CToken* GetCurrToken() const;
+			virtual const CToken* GetCurrToken() const;
 
 			/*!
 				\brief The function returns next token from tokens' sequence
@@ -84,7 +151,7 @@ namespace gplc
 				\return A next token from tokens' sequence
 			*/
 
-			const CToken* GetNextToken();
+			virtual const CToken* GetNextToken();
 
 			/*!
 				\brief The function allows to peek some token after the current one with specified offset.
@@ -92,7 +159,7 @@ namespace gplc
 				\return A token from tokens' sequence with specified offset from the current one.
 			*/
 
-			const CToken* PeekNextToken(U32 numOfSteps = 1) const;
+			virtual const CToken* PeekNextToken(U32 numOfSteps = 1) const;
 		private:
 			/*!
 				\brief Copy contructor
