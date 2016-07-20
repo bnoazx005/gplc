@@ -19,5 +19,6 @@
 
 /// Parser's files group
 #include "parser\gplcParser.h"
+#include "parser\gplcASTNodes.h"
 
 #endif

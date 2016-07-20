@@ -30,6 +30,7 @@
     <ClInclude Include="include\lexer\gplcLexer.h" />
     <ClInclude Include="include\lexer\gplcTokens.h" />
     <ClInclude Include="include\parser\gplcParser.h" />
+    <ClInclude Include="include\parser\gplcASTNodes.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{81CA3DBC-6909-4ABB-B0B4-13E425252565}</ProjectGuid>
@@ -87,7 +88,7 @@
     <OutDir>$(ProjectDir)bin\$(Configuration)\</OutDir>
     <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
     <SourcePath>$(ProjectDir)\source;$(SourcePath)</SourcePath>
-    <IntDir>\tmp\$(Configuration)\</IntDir>
+    <IntDir>$(ProjectDir)tmp\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>

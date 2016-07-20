@@ -53,5 +53,8 @@
     <ClInclude Include="include\parser\gplcParser.h">
       <Filter>include\parser</Filter>
     </ClInclude>
+    <ClInclude Include="include\parser\gplcASTNodes.h">
+      <Filter>include\parser</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
