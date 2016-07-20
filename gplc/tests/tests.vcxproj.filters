@@ -19,5 +19,13 @@
     <ClCompile Include="parser\parser.cpp">
       <Filter>parser</Filter>
     </ClCompile>
+    <ClCompile Include="parser\stubLexer.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="parser\stubLexer.h">
+      <Filter>parser</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

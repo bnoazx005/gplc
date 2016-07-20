@@ -1,15 +1,18 @@
 /*!
-\author Ildar Kasimov
-\date   09.07.2016
-\copyright
+	\author Ildar Kasimov
+	\date   09.07.2016
+	\copyright
 
-\brief The file contains types' aliases
+	\brief The file contains types' aliases
 
-\todo
+	\todo
 */
 
 #ifndef GPLC_TYPES_H
 #define GPLC_TYPES_H
+
+
+#include <string>
 
 
 namespace gplc
@@ -68,6 +71,12 @@ namespace gplc
 	#define SUCCESS(resultType) (resultType == RV_SUCCESS)	/*(~(resultType & RV_FAIL))*/
 
 
+	/*!
+		\brief The TLexerErrorInfo structure
+
+		Provides information about an appeared error.
+	*/
+	
 	#pragma pack(push, 1)
 
 	typedef struct TLexerErrorInfo
@@ -75,6 +84,23 @@ namespace gplc
 		I32 mLine;
 		I32 mPos;
 	} TLexerErrorInfo;
+
+	#pragma pack(pop)
+
+	
+	/*!
+		\brief The TParserErrorInfo structure
+
+		Provides information about an appeared error.
+	*/
+
+	#pragma pack(push, 1)
+
+	typedef struct TParserErrorInfo
+	{
+		Result      mErrorCode;
+		std::string mMessage;
+	} TParserErrorInfo;
 
 	#pragma pack(pop)
 }

@@ -151,7 +151,11 @@
   <ItemGroup>
     <ClCompile Include="lexer\lexer.cpp" />
     <ClCompile Include="parser\parser.cpp" />
+    <ClCompile Include="parser\stubLexer.cpp" />
     <ClCompile Include="tests.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="parser\stubLexer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
