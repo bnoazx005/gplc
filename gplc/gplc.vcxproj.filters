@@ -33,6 +33,9 @@
     <ClCompile Include="source\parser\gplcParser.cpp">
       <Filter>source\parser</Filter>
     </ClCompile>
+    <ClCompile Include="source\parser\gplcASTNodes.cpp">
+      <Filter>source\parser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gplc.h">

@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="source\lexer\gplcLexer.cpp" />
     <ClCompile Include="source\lexer\gplcTokens.cpp" />
+    <ClCompile Include="source\parser\gplcASTNodes.cpp" />
     <ClCompile Include="source\parser\gplcParser.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -12,6 +12,7 @@
 #define GPLC_AST_NODES_H
 
 
+#include "common\gplcTypes.h"
 #include <vector>
 
 
@@ -23,11 +24,13 @@ namespace gplc
 			CASTNode();
 			virtual ~CASTNode();
 
-			void AttachChild(const CASTNode* node);
-			void DettachChild(CASTNode** node);
+			Result AttachChild(const CASTNode* node);
+			Result DettachChild(CASTNode** node);
 
 			const std::vector<CASTNode*> GetChildren() const;
 			U32 GetChildrenCount() const;
+		protected:
+			CASTNode(const CASTNode& node);
 		protected:
 			std::vector<CASTNode*> mChildren;
 	};
