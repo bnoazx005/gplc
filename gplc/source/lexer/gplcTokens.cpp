@@ -28,8 +28,8 @@ namespace gplc
 	{
 	}*/
 
-	CToken::CToken(E_TOKEN_TYPE type):
-		mType(type)
+	CToken::CToken(E_TOKEN_TYPE type, U32 posAtStream):
+		mType(type), mPos(posAtStream)
 	{
 	}
 
@@ -42,6 +42,11 @@ namespace gplc
 		return mType;
 	}
 
+	U32 CToken::GetPos() const
+	{
+		return mPos;
+	}
+
 	std::wstring CToken::ToString() const
 	{
 		return L"(Token: TT_DEFAULT)";
@@ -51,13 +56,13 @@ namespace gplc
 		CIdentifierToken defenition
 	*/
 
-	CIdentifierToken::CIdentifierToken(const std::wstring& name) :
-		CToken(TT_IDENTIFIER), mName(name)
+	CIdentifierToken::CIdentifierToken(const std::wstring& name, U32 posAtStream):
+		CToken(TT_IDENTIFIER, posAtStream), mName(name)
 	{
 	}
 
 	CIdentifierToken::CIdentifierToken() :
-		CToken(TT_IDENTIFIER)
+		CToken(TT_IDENTIFIER, 0)
 	{
 	}
 

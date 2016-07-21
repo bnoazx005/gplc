@@ -258,14 +258,14 @@ namespace gplc
 				_getNextChar(stream);
 				_getNextChar(stream);
 
-				return new CToken((*additionalTokenIter).second);
+				return new CToken((*additionalTokenIter).second, mCurrPos - 2);
 			}
 
 			if ((*tokenIter).second != TT_POINT || !iswdigit(currChar)) //check is it just a point or delimiter in a floating point number
 			{
 				_getNextChar(stream);
 
-				return new CToken((*tokenIter).second);
+				return new CToken((*tokenIter).second, mCurrPos - 1);
 			}
 		}
 		else
@@ -279,7 +279,7 @@ namespace gplc
 				_getNextChar(stream);
 				_getNextChar(stream); //set pos to new char
 
-				return new CToken((*additionalTokenIter).second);
+				return new CToken((*additionalTokenIter).second, mCurrPos - 2);
 			}
 		}
 
@@ -304,10 +304,10 @@ namespace gplc
 
 			if ((token = mReservedTokensMap.find(identifierName)) != mReservedTokensMap.end())
 			{
-				return new CToken((*token).second); //return reserved keyword's token
+				return new CToken((*token).second, mCurrPos); //return reserved keyword's token
 			}
 
-			return new CIdentifierToken(identifierName);	//if it's not reserved just return it as identifier
+			return new CIdentifierToken(identifierName, mCurrPos);	//if it's not reserved just return it as identifier
 		}
 
 		if (iswdigit(currChar) || currChar == L'.') //try to get number
@@ -481,15 +481,15 @@ namespace gplc
 
 							if (numberType & NB_LONG && !(numberType & NB_ADD_LONG)) // long
 							{
-								return new CTypedValueToken<UL32>(TT_UINT, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<UL32>(TT_UINT, mCurrPos, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
 							}
 							else if (numberType & NB_LONG && numberType & NB_ADD_LONG) // long long
 							{
-								return new CTypedValueToken<U64>(TT_UINT, wcstoull(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<U64>(TT_UINT, mCurrPos, wcstoull(numberStr.c_str(), nullptr, numSysBasis));
 							}
 							else
 							{
-								return new CTypedValueToken<U32>(TT_UINT, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<U32>(TT_UINT, mCurrPos, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
 							}
 
 							break;
@@ -498,21 +498,21 @@ namespace gplc
 
 							if (numberType & NB_LONG && !(numberType & NB_ADD_LONG)) // long
 							{
-								return new CTypedValueToken<IL32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<IL32>(TT_INT, mCurrPos, wcstol(numberStr.c_str(), nullptr, numSysBasis));
 							}
 							else if (numberType & NB_LONG && numberType & NB_ADD_LONG) // long long
 							{
-								return new CTypedValueToken<I64>(TT_INT, wcstoll(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<I64>(TT_INT, mCurrPos, wcstoll(numberStr.c_str(), nullptr, numSysBasis));
 							}
 							else
 							{
-								return new CTypedValueToken<I32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<I32>(TT_INT, mCurrPos, wcstol(numberStr.c_str(), nullptr, numSysBasis));
 							}
 
 							break;
 
 						default:
-							return new CTypedValueToken<I32>(TT_INT, wcstol(numberStr.c_str(), nullptr, numSysBasis));
+							return new CTypedValueToken<I32>(TT_INT, mCurrPos, wcstol(numberStr.c_str(), nullptr, numSysBasis));
 							break;
 					}
 
@@ -523,10 +523,10 @@ namespace gplc
 					switch (numberType & NB_LONG) //1 - double; 0; - float
 					{
 						case 0:
-							return new CTypedValueToken<F32>(TT_FLOAT, wcstof(numberStr.c_str(), nullptr));
+							return new CTypedValueToken<F32>(TT_FLOAT, mCurrPos, wcstof(numberStr.c_str(), nullptr));
 							break;
 						case NB_LONG:
-							return new CTypedValueToken<F64>(TT_DOUBLE, _wtof(numberStr.c_str()));
+							return new CTypedValueToken<F64>(TT_DOUBLE, mCurrPos, _wtof(numberStr.c_str()));
 							break;
 					}
 
@@ -555,7 +555,7 @@ namespace gplc
 
 			_getNextChar(stream); //get \"
 
-			return new CTypedValueToken<std::wstring>(TT_STRING, strConstantValue);
+			return new CTypedValueToken<std::wstring>(TT_STRING, mCurrPos - 1, strConstantValue);
 		}
 		
 		//try to get a char value
@@ -572,7 +572,7 @@ namespace gplc
 			_getNextChar(stream); //get '\''
 			_getNextChar(stream); //get next symbol
 
-			return new CTypedValueToken<W16>(TT_CHAR, currChar);
+			return new CTypedValueToken<W16>(TT_CHAR, mCurrPos - 2, currChar);
 		}
 		
 		return nullptr;
