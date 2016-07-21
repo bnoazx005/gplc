@@ -97,7 +97,7 @@ namespace gplc
 	{
 		public:
 			CTypedValueToken(E_TOKEN_TYPE type, U32 posAtStream, T value):
-				CToken(type, pos), mValue(value)
+				CToken(type, posAtStream), mValue(value)
 			{
 			}
 

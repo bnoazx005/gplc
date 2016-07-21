@@ -62,7 +62,7 @@ namespace gplc
 	}
 
 	CIdentifierToken::CIdentifierToken() :
-		CToken(TT_IDENTIFIER)
+		CToken(TT_IDENTIFIER, 0)
 	{
 	}
 
