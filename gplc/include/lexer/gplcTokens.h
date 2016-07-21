@@ -69,16 +69,20 @@ namespace gplc
 	{
 		public:
 			CToken();
-			CToken(E_TOKEN_TYPE type);
+			CToken(E_TOKEN_TYPE type, U32 posAtStream);
 			virtual ~CToken();
 
 			E_TOKEN_TYPE GetType() const;
+
+			U32 GetPos() const;
 
 			virtual std::wstring ToString() const;
 		/*protected:
 			CToken(const CToken& token);*/
 		protected:
 			E_TOKEN_TYPE mType;
+
+			U32          mPos;
 	};
 
 
@@ -92,8 +96,8 @@ namespace gplc
 	class CTypedValueToken: public CToken
 	{
 		public:
-			CTypedValueToken(E_TOKEN_TYPE type, T value):
-				CToken(type), mValue(value)
+			CTypedValueToken(E_TOKEN_TYPE type, U32 posAtStream, T value):
+				CToken(type, pos), mValue(value)
 			{
 			}
 
@@ -128,7 +132,7 @@ namespace gplc
 	class CIdentifierToken : public CToken
 	{
 	public:
-		CIdentifierToken(const std::wstring& name);
+		CIdentifierToken(const std::wstring& name, U32 posAtStream);
 		virtual ~CIdentifierToken();
 
 		const std::wstring GetName() const;
