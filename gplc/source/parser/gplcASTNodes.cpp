@@ -41,6 +41,18 @@ namespace gplc
 
 		return RV_SUCCESS;
 	}
+	
+	Result CASTNode::AttachChildren(const std::vector<const CASTNode*>& nodes)
+	{
+		if (nodes.empty())
+		{
+			return RV_FAIL;
+		}
+
+		mChildren.insert(mChildren.end(), nodes.begin(), nodes.end());
+
+		return RV_SUCCESS;
+	}
 
 	Result CASTNode::DettachChild(CASTNode** node)
 	{

@@ -24,8 +24,9 @@ namespace gplc
 	
 	enum E_NODE_TYPE
 	{
-		NT_OPERATOR,  ///< An operator
-		NT_DECL,      ///< A declration operator
+		NT_PROGRAM_UNIT, ///< A program unit
+		NT_OPERATOR,     ///< An operator
+		NT_DECL,         ///< A declration operator
 	};
 
 	/*!
@@ -39,9 +40,11 @@ namespace gplc
 			virtual ~CASTNode();
 
 			Result AttachChild(const CASTNode* node);
+			
+			Result AttachChildren(const std::vector<const CASTNode*>& nodes);
 
 			Result DettachChild(CASTNode** node);
-
+			
 			const std::vector<const CASTNode*> GetChildren() const;
 
 			U32 GetChildrenCount() const;

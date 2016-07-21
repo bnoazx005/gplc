@@ -60,10 +60,10 @@ namespace gplc
 
 				<program-unit> ::= <statements>;
 
-				\param[in]
-				\param[out]
+				\param[in] lexer A pointer to lexer's object
+				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
-				\return
+				\return A pointer to node of a program unit
 			*/
 			
 			CASTNode* _parseProgramUnit(const ILexer* lexer, TParserErrorInfo* errorInfo);
