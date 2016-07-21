@@ -25,6 +25,7 @@ namespace gplc
 	enum E_NODE_TYPE
 	{
 		NT_PROGRAM_UNIT, ///< A program unit
+		NT_STATEMENTS,   ///< Statements
 		NT_OPERATOR,     ///< An operator
 		NT_DECL,         ///< A declration operator
 	};

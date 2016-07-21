@@ -55,6 +55,8 @@ namespace gplc
 		private:
 			CParser(const CParser& parser);
 
+			Result _expect(E_TOKEN_TYPE expectedValue, const CToken* currValue, TParserErrorInfo* errorInfo);
+
 			/*!
 				\brief Try to parse the following grammar rule.
 
@@ -74,10 +76,10 @@ namespace gplc
 				<statements> ::=   <statement> 
                                  | <statement> <statements>;
 
-				\param[in]
-				\param[out]
+				\param[in] lexer A pointer to lexer's object
+				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
-				\return
+				\return A pointer to node with a statements list
 			*/
 
 			CASTNode* _parseStatementsList(const ILexer* lexer, TParserErrorInfo* errorInfo);
@@ -87,10 +89,12 @@ namespace gplc
 
 				<statement> ::= <operator> ; ; 
 				
-				\param[in]
-				\param[out]
+				\todo There is no <directive> non-terminal. It will be added later.
 
-				\return
+				\param[in] lexer A pointer to lexer's object
+				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
+
+				\return A pointer to node with a particular statement
 			*/
 
 			CASTNode* _parseStatement(const ILexer* lexer, TParserErrorInfo* errorInfo);

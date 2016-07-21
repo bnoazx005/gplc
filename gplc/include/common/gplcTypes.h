@@ -58,6 +58,7 @@ namespace gplc
 		RV_FILE_NOT_FOUND    = 0x4,  ///< File was not found or some another its problem has happened
 		RV_INCORRECT_CONFIG  = 0x8,  ///< It means that some error has happened during the parsing of a config file
 		RV_INCORRECT_TOKEN   = 0x10, ///< This is lexer's error, which happens, when token's structure is incorrect or cannot be recognized.
+		RV_UNEXPECTED_TOKEN  = 0x20, ///< This is parser's error, which happens, when it recognizes unexpected token.
 	};
 
 	/*!
@@ -100,6 +101,7 @@ namespace gplc
 	{
 		Result      mErrorCode;
 		std::string mMessage;
+		U32         mPos;
 	} TParserErrorInfo;
 
 	#pragma pack(pop)
