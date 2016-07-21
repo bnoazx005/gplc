@@ -21,6 +21,8 @@ gplc::Result CStubLexer::Init(const std::wstring& inputStream, const std::wstrin
 
 	//fill in the tokens' vector
 	mTokens.push_back(new gplc::CToken(gplc::TT_IDENTIFIER));
+	mTokens.push_back(new gplc::CToken(gplc::TT_COLON));
+	mTokens.push_back(new gplc::CToken(gplc::TT_INT));
 	
 	return gplc::RV_SUCCESS;
 }

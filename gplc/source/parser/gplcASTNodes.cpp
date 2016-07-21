@@ -17,7 +17,8 @@ namespace gplc
 		CASTNode class definition
 	*/
 
-	CASTNode::CASTNode()
+	CASTNode::CASTNode(E_NODE_TYPE type):
+		mType(type)
 	{
 	}
 
@@ -31,15 +32,40 @@ namespace gplc
 
 	Result CASTNode::AttachChild(const CASTNode* node)
 	{
-		return RV_FAIL;
+		if (node == nullptr)
+		{
+			return RV_INVALID_ARGUMENTS;
+		}
+
+		mChildren.push_back(node);
+
+		return RV_SUCCESS;
 	}
 
 	Result CASTNode::DettachChild(CASTNode** node)
 	{
-		return RV_FAIL;
+		if (node == nullptr)
+		{
+			return RV_INVALID_ARGUMENTS;
+		}
+
+		std::vector<const CASTNode*>::iterator currElement = std::find(mChildren.begin(), mChildren.end(), *node);
+
+		if (currElement == mChildren.end())
+		{
+			return RV_FAIL;
+		}
+
+		mChildren.erase(currElement);
+
+		delete *currElement;
+
+		*currElement = nullptr;
+		
+		return RV_SUCCESS;
 	}
 
-	const std::vector<CASTNode*> CASTNode::GetChildren() const
+	const std::vector<const CASTNode*> CASTNode::GetChildren() const
 	{
 		return mChildren;
 	}
@@ -47,5 +73,10 @@ namespace gplc
 	U32 CASTNode::GetChildrenCount() const
 	{
 		return mChildren.size();
+	}
+	
+	E_NODE_TYPE CASTNode::GetType() const
+	{
+		return mType;
 	}
 }

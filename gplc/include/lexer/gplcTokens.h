@@ -58,6 +58,18 @@ namespace gplc
 		TT_CLOSE_BRACE     = 28, ///< }
 		TT_VLINE           = 29, ///< |
 		TT_POINT           = 30, ///< .
+		TT_INT8_TYPE       = 31,
+		TT_INT16_TYPE      = 32,
+		TT_INT32_TYPE      = 33,
+		TT_INT64_TYPE      = 34,
+		TT_UINT8_TYPE      = 35,
+		TT_UINT16_TYPE     = 36,
+		TT_UINT32_TYPE     = 37,
+		TT_UINT64_TYPE     = 38,
+		TT_FLOAT_TYPE      = 39,
+		TT_DOUBLE_TYPE     = 40,
+		TT_STRING_TYPE     = 41,
+		TT_CHAR_TYPE       = 42,
 		TT_DEFAULT
 	};
 

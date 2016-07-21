@@ -52,6 +52,26 @@ namespace gplc
 
 	CASTNode* CParser::_parseProgramUnit(const ILexer* lexer, TParserErrorInfo* errorInfo)
 	{
-		return new CASTNode();
+		return _parseStatementsList(lexer, errorInfo);
+	}
+
+	CASTNode* CParser::_parseStatementsList(const ILexer* lexer, TParserErrorInfo* errorInfo)
+	{
+		return _parseStatement(lexer, errorInfo);
+	}
+
+	CASTNode* CParser::_parseStatement(const ILexer* lexer, TParserErrorInfo* errorInfo)
+	{
+		return _parseOperator(lexer, errorInfo);
+	}
+
+	CASTNode* CParser::_parseOperator(const ILexer* lexer, TParserErrorInfo* errorInfo)
+	{
+		return _parseDeclaration(lexer, errorInfo);
+	}
+
+	CASTNode* CParser::_parseDeclaration(const ILexer* lexer, TParserErrorInfo* errorInfo)
+	{
+		return new CASTNode(NT_DECL);
 	}
 }

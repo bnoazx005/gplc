@@ -18,21 +18,41 @@
 
 namespace gplc
 {
+	/*!
+		\brief E_NODE_TYPE enumeration
+	*/
+	
+	enum E_NODE_TYPE
+	{
+		NT_OPERATOR,  ///< An operator
+		NT_DECL,      ///< A declration operator
+	};
+
+	/*!
+		\brief CASTNode class
+	*/
+
 	class CASTNode
 	{
 		public:
-			CASTNode();
+			CASTNode(E_NODE_TYPE type);
 			virtual ~CASTNode();
 
 			Result AttachChild(const CASTNode* node);
+
 			Result DettachChild(CASTNode** node);
 
-			const std::vector<CASTNode*> GetChildren() const;
+			const std::vector<const CASTNode*> GetChildren() const;
+
 			U32 GetChildrenCount() const;
+
+			E_NODE_TYPE GetType() const;
 		protected:
 			CASTNode(const CASTNode& node);
 		protected:
-			std::vector<CASTNode*> mChildren;
+			E_NODE_TYPE                  mType;
+
+			std::vector<const CASTNode*> mChildren;
 	};
 }
 
