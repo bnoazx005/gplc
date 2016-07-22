@@ -28,6 +28,8 @@ namespace gplc
 		NT_STATEMENTS,   ///< Statements
 		NT_OPERATOR,     ///< An operator
 		NT_DECL,         ///< A declration operator
+		NT_IDENTIFIER,   ///< An identifier
+		NT_BUILTIN_TYPE, ///< A builtin type (intX, uintX, float, double, string, char)
 	};
 
 	/*!
@@ -52,12 +54,33 @@ namespace gplc
 
 			E_NODE_TYPE GetType() const;
 		protected:
+			CASTNode();
 			CASTNode(const CASTNode& node);
 		protected:
 			E_NODE_TYPE                  mType;
 
 			std::vector<const CASTNode*> mChildren;
 	};
+
+
+	/*!
+		\brief CASTIdentifierNode
+	*/
+
+	class CASTIdentifierNode : public CASTNode
+	{
+		public:
+			CASTIdentifierNode(const std::wstring& name);
+			virtual ~CASTIdentifierNode();
+
+			const std::wstring& GetName() const;
+		protected:
+			CASTIdentifierNode();
+			CASTIdentifierNode(const CASTIdentifierNode& node);
+		protected:
+			std::wstring mName;
+	};
+
 }
 
 #endif

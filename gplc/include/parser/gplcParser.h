@@ -13,6 +13,7 @@
 
 
 #include "common\gplcTypes.h"
+#include "lexer\gplcTokens.h"
 
 
 namespace gplc
@@ -33,7 +34,7 @@ namespace gplc
 			IParser() {}
 			virtual ~IParser() {}
 
-			virtual CASTNode* Parse(const ILexer* lexer, TParserErrorInfo* errorInfo) = 0;
+			virtual CASTNode* Parse(ILexer* lexer, TParserErrorInfo* &errorInfo) = 0;
 		protected:
 			IParser(const IParser& parser) {}
 	};
@@ -51,11 +52,11 @@ namespace gplc
 			CParser();
 			virtual ~CParser();
 
-			virtual CASTNode* Parse(const ILexer* lexer, TParserErrorInfo* errorInfo);
+			virtual CASTNode* Parse(ILexer* lexer, TParserErrorInfo* &errorInfo);
 		private:
 			CParser(const CParser& parser);
 
-			Result _expect(E_TOKEN_TYPE expectedValue, const CToken* currValue, TParserErrorInfo* errorInfo);
+			Result _expect(E_TOKEN_TYPE expectedValue, const CToken* currValue, TParserErrorInfo* &errorInfo);
 
 			/*!
 				\brief Try to parse the following grammar rule.
@@ -68,7 +69,7 @@ namespace gplc
 				\return A pointer to node of a program unit
 			*/
 			
-			CASTNode* _parseProgramUnit(const ILexer* lexer, TParserErrorInfo* errorInfo);
+			CASTNode* _parseProgramUnit(ILexer* lexer, TParserErrorInfo* &errorInfo);
 
 			/*!
 				\brief Try to parse the list of statements.
@@ -82,7 +83,7 @@ namespace gplc
 				\return A pointer to node with a statements list
 			*/
 
-			CASTNode* _parseStatementsList(const ILexer* lexer, TParserErrorInfo* errorInfo);
+			CASTNode* _parseStatementsList(ILexer* lexer, TParserErrorInfo* &errorInfo);
 
 			/*!
 				\brief Try to parse a single statement
@@ -97,34 +98,51 @@ namespace gplc
 				\return A pointer to node with a particular statement
 			*/
 
-			CASTNode* _parseStatement(const ILexer* lexer, TParserErrorInfo* errorInfo);
+			CASTNode* _parseStatement(ILexer* lexer, TParserErrorInfo* &errorInfo);
 
 			/*!
 				\brief Try to parse a single operator
 
 				<operator> ::= <declaration>;
 
-				\param[in]
-				\param[out]
+				\param[in] lexer A pointer to lexer's object
+				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
-				\return
+				\return A pointer to node with an operator
 			*/
 
-			CASTNode* _parseOperator(const ILexer* lexer, TParserErrorInfo* errorInfo);
+			CASTNode* _parseOperator(ILexer* lexer, TParserErrorInfo* &errorInfo);
 
 			/*!
 				\brief Try to parse a declaration
 
-				<declaration> ::=   <attributes> <identifiers> : <type>
+				<declaration> ::=   <identifiers> : <attributes> <type>
                                   | <identifiers> : <type>;
 
-				\param[in]
-				\param[out]
+				\param[in] lexer A pointer to lexer's object
+				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
-				\return
+				\return A pointer to node with a declaration
 			*/
 
-			CASTNode* _parseDeclaration(const ILexer* lexer, TParserErrorInfo* errorInfo);
+			CASTNode* _parseDeclaration(ILexer* lexer, TParserErrorInfo* &errorInfo);
+
+			/*!
+				\brief Try to parse a type
+
+				<type> ::=   <builtin_type>
+				           | <identifier>
+				           | <struct_declaration>
+				           | <enum_declaration>
+				           | <func_declaration>;
+
+				\param[in] lexer A pointer to lexer's object
+				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
+
+				\return A pointer to node describes type
+			*/
+
+			CASTNode* _parseType(ILexer* lexer, TParserErrorInfo* &errorInfo);
 		private:
 	};
 }

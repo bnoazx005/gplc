@@ -52,13 +52,14 @@ namespace gplc
 
 	enum E_RESULT_VALUE
 	{
-		RV_SUCCESS           = 0x0,	 ///< Successfully done
-		RV_FAIL              = 0x1,	 ///< Critical error during execution
-		RV_INVALID_ARGUMENTS = 0x2,  ///< Some function's argument has invalid value
-		RV_FILE_NOT_FOUND    = 0x4,  ///< File was not found or some another its problem has happened
-		RV_INCORRECT_CONFIG  = 0x8,  ///< It means that some error has happened during the parsing of a config file
-		RV_INCORRECT_TOKEN   = 0x10, ///< This is lexer's error, which happens, when token's structure is incorrect or cannot be recognized.
-		RV_UNEXPECTED_TOKEN  = 0x20, ///< This is parser's error, which happens, when it recognizes unexpected token.
+		RV_SUCCESS                 = 0x0,  ///< Successfully done
+		RV_FAIL                    = 0x1,  ///< Critical error during execution
+		RV_INVALID_ARGUMENTS       = 0x2,  ///< Some function's argument has invalid value
+		RV_FILE_NOT_FOUND          = 0x4,  ///< File was not found or some another its problem has happened
+		RV_INCORRECT_CONFIG        = 0x8,  ///< It means that some error has happened during the parsing of a config file
+		RV_INCORRECT_TOKEN         = 0x10, ///< This is lexer's error, which happens, when token's structure is incorrect or cannot be recognized.
+		RV_UNEXPECTED_TOKEN        = 0x20, ///< This is parser's error, which happens, when it recognizes unexpected token.
+		RV_UNRECOGNIZED_TOKENS_SEQ = 0x40, ///< SAn input tokens sequence doesn't match with any grammar rule
 	};
 
 	/*!
@@ -105,6 +106,26 @@ namespace gplc
 	} TParserErrorInfo;
 
 	#pragma pack(pop)
+
+	/*!
+		\brief The E_BUILTIN_TYPES enumration
+	*/
+
+	enum E_BUILTIN_TYPES
+	{
+		BT_INT8,
+		BT_INT16,
+		BT_INT32,
+		BT_INT64,
+		BT_UINT8,
+		BT_UINT16,
+		BT_UINT32,
+		BT_UINT64,
+		BT_FLOAT,
+		BT_DOUBLE,
+		BT_STRING,
+		BT_CHAR,
+	};
 }
 
 #endif

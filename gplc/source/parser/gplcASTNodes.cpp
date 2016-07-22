@@ -17,6 +17,10 @@ namespace gplc
 		CASTNode class definition
 	*/
 
+	CASTNode::CASTNode()
+	{
+	}
+
 	CASTNode::CASTNode(E_NODE_TYPE type):
 		mType(type)
 	{
@@ -90,5 +94,33 @@ namespace gplc
 	E_NODE_TYPE CASTNode::GetType() const
 	{
 		return mType;
+	}
+
+	/*!
+		CASTIdentifierNode defenition
+	*/
+
+	CASTIdentifierNode::CASTIdentifierNode() :
+		CASTNode(NT_IDENTIFIER)
+	{
+	}
+
+	CASTIdentifierNode::CASTIdentifierNode(const CASTIdentifierNode& node) :
+		CASTNode(node)
+	{
+	}
+
+	CASTIdentifierNode::CASTIdentifierNode(const std::wstring& name) :
+		CASTNode(NT_IDENTIFIER), mName(name)
+	{
+	}
+
+	CASTIdentifierNode::~CASTIdentifierNode()
+	{
+	}
+
+	const std::wstring& CASTIdentifierNode::GetName() const
+	{
+		return mName;
 	}
 }
