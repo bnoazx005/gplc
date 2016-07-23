@@ -16,6 +16,8 @@
 /// Common data structures and utilities
 #include "common\gplcTypes.h"
 #include "common\gplcConstants.h"
+#include "common\gplcSymTable.h"
+#include "common\gplcTypeSystem.h"
 
 /// Parser's files group
 #include "parser\gplcParser.h"

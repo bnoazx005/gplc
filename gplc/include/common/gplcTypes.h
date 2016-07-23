@@ -108,10 +108,10 @@ namespace gplc
 	#pragma pack(pop)
 
 	/*!
-		\brief The E_BUILTIN_TYPES enumration
+		\brief The E_COMPILER_TYPES enumration
 	*/
 
-	enum E_BUILTIN_TYPES
+	enum E_COMPILER_TYPES
 	{
 		BT_INT8,
 		BT_INT16,
@@ -125,6 +125,12 @@ namespace gplc
 		BT_DOUBLE,
 		BT_STRING,
 		BT_CHAR,
+		BT_VOID,
+		BT_BOOL,
+		BT_POINTER,
+		BT_STRUCT,
+		BT_FUNCTION,
+		BT_ENUM,
 	};
 }
 
