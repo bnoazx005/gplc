@@ -54,7 +54,7 @@ namespace gplc
 
 			virtual Result LeaveScope() = 0;
 
-			virtual Result AddVariable() = 0;
+			virtual Result AddVariable(const std::wstring& variableName, const CType* typeDesc) = 0;
 
 			virtual const CType* LookUp(const std::wstring& variableName) const = 0;
 		protected:
