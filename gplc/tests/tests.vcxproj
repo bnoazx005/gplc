@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="common\symTable.cpp" />
     <ClCompile Include="lexer\lexer.cpp" />
     <ClCompile Include="parser\parser.cpp" />
     <ClCompile Include="parser\stubLexer.cpp" />

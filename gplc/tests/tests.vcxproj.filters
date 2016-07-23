@@ -22,6 +22,9 @@
     <ClCompile Include="parser\stubLexer.cpp">
       <Filter>parser</Filter>
     </ClCompile>
+    <ClCompile Include="common\symTable.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="parser\stubLexer.h">

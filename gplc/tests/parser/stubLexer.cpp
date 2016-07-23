@@ -3,12 +3,12 @@
 
 
 CStubLexer::CStubLexer():
-	gplc::ILexer(), mCurrTokenIndex(0)
+	gplc::ILexer(), mCurrTokenIndex(0), mSavedTokenIndex(UINT32_MAX)
 {
 }
 
 CStubLexer::CStubLexer(const CStubLexer& lexer):
-	gplc::ILexer(lexer), mCurrTokenIndex(0)
+	gplc::ILexer(lexer), mCurrTokenIndex(0), mSavedTokenIndex(UINT32_MAX)
 {
 }
 
@@ -64,4 +64,19 @@ const gplc::CToken* CStubLexer::PeekNextToken(gplc::U32 numOfSteps) const
 	}
 
 	return mTokens[neededTokenId];
+}
+
+void CStubLexer::SavePosition()
+{
+	mSavedTokenIndex = mCurrTokenIndex;
+}
+
+void CStubLexer::RestorePosition()
+{
+	if (mSavedTokenIndex >= UINT32_MAX)
+	{
+		return;
+	}
+
+	mCurrTokenIndex = mSavedTokenIndex;
 }

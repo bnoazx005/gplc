@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\common\gplcSymTable.cpp" />
     <ClCompile Include="source\common\gplcTypeSystem.cpp" />
     <ClCompile Include="source\lexer\gplcLexer.cpp" />
     <ClCompile Include="source\lexer\gplcTokens.cpp" />

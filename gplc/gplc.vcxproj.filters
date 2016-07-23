@@ -42,6 +42,9 @@
     <ClCompile Include="source\common\gplcTypeSystem.cpp">
       <Filter>source\common</Filter>
     </ClCompile>
+    <ClCompile Include="source\common\gplcSymTable.cpp">
+      <Filter>source\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gplc.h">

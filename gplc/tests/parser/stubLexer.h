@@ -69,10 +69,23 @@ class CStubLexer : public gplc::ILexer
 		*/
 
 		virtual const gplc::CToken* PeekNextToken(gplc::U32 numOfSteps = 1) const;
+
+		/*!
+			\brief The method saves current state of an object. It's used for backtracking.
+		*/
+
+		virtual void SavePosition();
+
+		/*!
+			\brief The method restores previous state of an object. It's used for backtracking.
+		*/
+
+		virtual void RestorePosition();
 	protected:
 		CStubLexer(const CStubLexer& lexer);
 	private:
 		gplc::U32                  mCurrTokenIndex;
+		gplc::U32                  mSavedTokenIndex;
 
 		std::vector<gplc::CToken*> mTokens;
 };
