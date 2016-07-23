@@ -22,6 +22,9 @@
     <Filter Include="source\parser">
       <UniqueIdentifier>{078ad60b-d820-499b-aabe-c51c476a5902}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\common">
+      <UniqueIdentifier>{bcbceb79-f5de-49e1-9947-9f23ccd1c74a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\lexer\gplcLexer.cpp">
@@ -35,6 +38,9 @@
     </ClCompile>
     <ClCompile Include="source\parser\gplcASTNodes.cpp">
       <Filter>source\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="source\common\gplcTypeSystem.cpp">
+      <Filter>source\common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

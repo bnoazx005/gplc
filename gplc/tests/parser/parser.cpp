@@ -15,9 +15,9 @@ TEST_CASE("Parser's tests")
 
 	SECTION("Parsing")
 	{
-		//gplc::CASTNode* pMain = pParser->Parse(pStubLexerObject, errorInfo);
+		gplc::CASTNode* pMain = pParser->Parse(pStubLexerObject, errorInfo);
 
-		//REQUIRE(pMain != nullptr);
+		REQUIRE(pMain != nullptr);
 	}
 	
 	delete pParser;

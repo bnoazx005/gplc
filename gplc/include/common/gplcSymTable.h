@@ -13,8 +13,8 @@
 
 namespace gplc
 {
+	class CType;
 
-	struct TTypeDescription; ///< Forward declarations
 
 	/*!
 		\brief ISymTable interface
@@ -32,11 +32,11 @@ namespace gplc
 
 			struct TSymTableEntry
 			{
-				TSymTableEntry*                           mParentScope;
+				TSymTableEntry*                mParentScope;
 
-				std::vector<TSymTableEntry*>              mNestedScopes;
+				std::vector<TSymTableEntry*>   mNestedScopes;
 
-				std::map<std::wstring, TTypeDescription*> mVariables;
+				std::map<std::wstring, CType*> mVariables;
 			};
 
 		#pragma pack(pop)
@@ -51,7 +51,7 @@ namespace gplc
 
 			virtual Result AddVariable() = 0;
 
-			//virtual 
+			virtual CType* LookUp(const std::wstring& variableName) const = 0;
 		protected:
 	};
 }

@@ -29,7 +29,20 @@ namespace gplc
 		NT_OPERATOR,     ///< An operator
 		NT_DECL,         ///< A declration operator
 		NT_IDENTIFIER,   ///< An identifier
-		NT_BUILTIN_TYPE, ///< A builtin type (intX, uintX, float, double, string, char)
+		NT_INT8,
+		NT_INT16,
+		NT_INT32,
+		NT_INT64,
+		NT_UINT8,
+		NT_UINT16,
+		NT_UINT32,
+		NT_UINT64,
+		NT_CHAR,
+		NT_STRING,
+		NT_BOOL,
+		NT_VOID,
+		NT_POINTER,
+
 	};
 
 	/*!

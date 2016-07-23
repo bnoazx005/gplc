@@ -20,6 +20,7 @@ namespace gplc
 {
 	class CASTNode;
 	class ILexer;
+	class CType;
 
 
 	/*!
@@ -139,10 +140,32 @@ namespace gplc
 				\param[in] lexer A pointer to lexer's object
 				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
-				\return A pointer to node describes type
+				\return  A pointer to node with a type
 			*/
 
 			CASTNode* _parseType(ILexer* lexer, TParserErrorInfo* &errorInfo);
+
+			/*!
+				\brief Try to parse a type
+
+				<builtin_type> ::=   <intX>
+				                   | <uintX>
+								   | <float>
+								   | <double>
+								   | <char>
+								   | <string>
+								   | <bool>
+								   | <void>
+								   | <pointer>
+								   | <array>
+
+				\param[in] lexer A pointer to lexer's object
+				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
+
+				\return  A pointer to node with a builtin type
+			*/
+
+			CASTNode* _parseBuiltInType(ILexer* lexer, TParserErrorInfo* &errorInfo);
 		private:
 	};
 }

@@ -11,6 +11,7 @@
 #include "parser\gplcParser.h"
 #include "parser\gplcASTNodes.h"
 #include "lexer\gplcLexer.h"
+#include "common\gplcTypeSystem.h"
 
 
 namespace gplc
@@ -231,7 +232,9 @@ namespace gplc
 		}
 		while (pTmpToken->GetType() == TT_IDENTIFIER);
 
-		if ((pDeclaration->GetChildrenCount() < 1) || (lexer->PeekNextToken(i)->GetType() == TT_COLON && lexer->PeekNextToken(i + 1)->GetType() != TT_ASSIGN_OP)) // it's not a declaration
+		i = pDeclaration->GetChildrenCount();
+
+		if ((i < 1) || (lexer->PeekNextToken(i)->GetType() == TT_COLON && lexer->PeekNextToken(i + 1)->GetType() )) // it's not a declaration
 		{
 			return nullptr;
 		}
@@ -241,23 +244,8 @@ namespace gplc
 			lexer->GetNextToken(); //get all passed tokens
 		}
 
-		//parse type
+		CASTNode* pTypeNode = _parseType(lexer, errorInfo);
 
-		//store into sym table
-
-		//const CIdentifierToken* pIdentifierToken = dynamic_cast<const CIdentifierToken*>(lexer->GetCurrToken());
-
-		//pDeclaration->AttachChild(new CASTIdentifierNode(pIdentifierToken->GetName())); //attach the identifier
-		//
-		//if (_expect(TT_COLON, lexer->GetNextToken(), errorInfo) != RV_SUCCESS)
-		//{
-		//	return pDeclaration;
-		//}
-
-		//pDeclaration->AttachChild(_parseType(lexer, errorInfo));
-
-		////Add information we've got into a symbols' table
-		////pSymbolTable->Add(pIdTok->GetName, pType)
 		
 		return pDeclaration;
 	}
@@ -274,11 +262,179 @@ namespace gplc
 		\param[in] lexer A pointer to lexer's object
 		\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
-		\return A pointer to node describes type
+		\return A pointer to node with a type
 	*/
 
-	CASTNode* _parseType(ILexer* lexer, TParserErrorInfo* &errorInfo)
+	CASTNode* CParser::_parseType(ILexer* lexer, TParserErrorInfo* &errorInfo)
 	{
+		CASTNode* pOperator = nullptr;
+
+		if ((pOperator = _parseBuiltInType(lexer, errorInfo)))
+		{
+			return pOperator;
+		}
+		else
+		{
+			errorInfo = new TParserErrorInfo();
+
+			errorInfo->mMessage = "Unrecognized tokens sequence";
+			errorInfo->mMessage = RV_UNRECOGNIZED_TOKENS_SEQ;
+			errorInfo->mPos = lexer->GetCurrToken()->GetPos();
+
+			return nullptr;
+		}
+
 		return nullptr;
+	}
+
+	/*!
+		\brief Try to parse a type
+
+		<builtin_type> ::=   <intX>
+						   | <uintX>
+						   | <float>
+						   | <double>
+						   | <char>
+						   | <string>
+						   | <bool>
+						   | <void>
+						   | <pointer>
+						   | <array>
+
+		\param[in] lexer A pointer to lexer's object
+		\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
+
+		\return  A pointer to node with a builtin type
+	*/
+
+	CASTNode* CParser::_parseBuiltInType(ILexer* lexer, TParserErrorInfo* &errorInfo)
+	{
+		const CToken* pTypeName  = lexer->GetCurrToken();
+		const CToken* pNextToken = lexer->PeekNextToken(1);
+
+		CASTNode* pBuiltinType = nullptr;
+
+		switch (pNextToken->GetType())
+		{
+			case TT_STAR: // a pointer
+
+				pBuiltinType = new CASTNode(NT_POINTER);
+
+				switch (pTypeName->GetType())
+				{
+					case TT_INT8_TYPE:
+						pBuiltinType->AttachChild(new CASTNode(NT_INT8));
+						break;
+
+					case TT_INT16_TYPE:
+						pBuiltinType->AttachChild(new CASTNode(NT_INT16));
+						break;
+
+					case TT_INT32_TYPE:
+						pBuiltinType->AttachChild(new CASTNode(NT_INT32));
+						break;
+
+					case TT_INT64_TYPE:
+						pBuiltinType->AttachChild(new CASTNode(NT_INT64));
+						break;
+
+					case TT_UINT8_TYPE:
+						pBuiltinType->AttachChild(new CASTNode(NT_UINT8));
+						break;
+
+					case TT_UINT16_TYPE:
+						pBuiltinType->AttachChild(new CASTNode(NT_UINT16));
+						break;
+
+					case TT_UINT32_TYPE:
+						pBuiltinType->AttachChild(new CASTNode(NT_UINT32));
+						break;
+
+					case TT_UINT64_TYPE:
+						pBuiltinType->AttachChild(new CASTNode(NT_UINT64));
+						break;
+
+					case TT_CHAR_TYPE:
+						pBuiltinType->AttachChild(new CASTNode(NT_CHAR));
+						break;
+
+					case TT_STRING_TYPE:
+						pBuiltinType->AttachChild(new CASTNode(NT_STRING));
+						break;
+
+					case TT_BOOL_TYPE:
+						pBuiltinType->AttachChild(new CASTNode(NT_BOOL));
+						break;
+
+					case TT_VOID_TYPE:
+						pBuiltinType->AttachChild(new CASTNode(NT_VOID));
+						break;
+				}
+
+				break;
+
+			case TT_OPEN_SQR_BRACE: // an array
+
+
+
+				break;
+
+			default: //just a builtin type
+
+				switch (pTypeName->GetType())
+				{
+					case TT_INT8_TYPE:
+						pBuiltinType = new CASTNode(NT_INT8);
+						break;
+
+					case TT_INT16_TYPE:
+						pBuiltinType = new CASTNode(NT_INT16);
+						break;
+
+					case TT_INT32_TYPE:
+						pBuiltinType = new CASTNode(NT_INT32);
+						break;
+
+					case TT_INT64_TYPE:
+						pBuiltinType = new CASTNode(NT_INT64);
+						break;
+
+					case TT_UINT8_TYPE:
+						pBuiltinType = new CASTNode(NT_UINT8);
+						break;
+
+					case TT_UINT16_TYPE:
+						pBuiltinType = new CASTNode(NT_UINT16);
+						break;
+
+					case TT_UINT32_TYPE:
+						pBuiltinType = new CASTNode(NT_UINT32);
+						break;
+
+					case TT_UINT64_TYPE:
+						pBuiltinType = new CASTNode(NT_UINT64);
+						break;
+
+					case TT_CHAR_TYPE:
+						pBuiltinType = new CASTNode(NT_CHAR);
+						break;
+
+					case TT_STRING_TYPE:
+						pBuiltinType = new CASTNode(NT_STRING);
+						break;
+
+					case TT_BOOL_TYPE:
+						pBuiltinType = new CASTNode(NT_BOOL);
+						break;
+
+					case TT_VOID_TYPE:
+						pBuiltinType = new CASTNode(NT_VOID);
+						break;
+				}
+
+				break;
+		}
+
+		return pBuiltinType;
 	}
 }
