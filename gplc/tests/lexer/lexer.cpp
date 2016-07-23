@@ -319,5 +319,25 @@ TEST_CASE("Lexer's tests")
 		REQUIRE(pCurrToken->GetValue() == L'g');
 	}
 	
+	SECTION("Save- Restore- methods test")
+	{
+		REQUIRE(pLexer->Init(L"42l 42ul 42s 42uu 42f 42usf\n/**/", pathToConfig, &error) == gplc::RV_SUCCESS);
+
+		REQUIRE(pLexer->GetNextToken() != nullptr);
+
+		pLexer->SavePosition();
+
+		const gplc::CToken* pSavedToken = pLexer->GetCurrToken();
+
+		for (gplc::I32 i = 0; i < 3; i++)
+		{
+			REQUIRE(pLexer->GetNextToken() != nullptr);
+		}
+
+		pLexer->RestorePosition();
+
+		REQUIRE(pLexer->GetCurrToken() == pSavedToken);
+	}
+
 	delete pLexer;
 }

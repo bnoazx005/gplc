@@ -83,6 +83,18 @@ namespace gplc
 			*/
 
 			virtual const CToken* PeekNextToken(U32 numOfSteps = 1) const = 0;
+
+			/*!
+				\brief The method saves current state of an object. It's used for backtracking.
+			*/
+			
+			virtual void SavePosition() = 0;
+
+			/*!
+				\brief The method restores previous state of an object. It's used for backtracking.
+			*/
+			
+			virtual void RestorePosition() = 0;
 		protected:
 			ILexer(const ILexer& lexer) {}
 	};
@@ -159,6 +171,18 @@ namespace gplc
 			*/
 
 			virtual const CToken* PeekNextToken(U32 numOfSteps = 1) const;
+
+			/*!
+				\brief The method saves current state of an object. It's used for backtracking.
+			*/
+
+			virtual void SavePosition();
+
+			/*!
+				\brief The method restores previous state of an object. It's used for backtracking.
+			*/
+
+			virtual void RestorePosition();
 		private:
 			/*!
 				\brief Copy contructor
@@ -225,6 +249,8 @@ namespace gplc
 			U32                                  mCurrPos;
 			U32                                  mCurrLine;
 			U32                                  mCurrTokenIndex;
+
+			U32                                  mSavedTokenIndex;
 
 			std::map<std::wstring, E_TOKEN_TYPE> mReservedTokensMap;
 			std::vector<CToken*>                 mTokens;
