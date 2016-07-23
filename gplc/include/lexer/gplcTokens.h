@@ -70,6 +70,10 @@ namespace gplc
 		TT_DOUBLE_TYPE     = 40,
 		TT_STRING_TYPE     = 41,
 		TT_CHAR_TYPE       = 42,
+		TT_BOOL_TYPE       = 43,
+		TT_VOID_TYPE       = 44, ///< void
+		TT_ENUM_TYPE       = 45, ///< enum
+		TT_STRUCT_TYPE     = 46, ///< struct
 		TT_DEFAULT
 	};
 
