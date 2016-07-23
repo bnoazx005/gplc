@@ -20,13 +20,13 @@
 namespace gplc
 {
 	CLexer::CLexer():
-		ILexer(), mCurrPos(0), mCurrLine(0), mCurrTokenIndex(0)
+		ILexer(), mCurrPos(0), mCurrLine(0), mCurrTokenIndex(0), mSavedTokenIndex(UINT32_MAX)
 	{
 
 	}
 
 	CLexer::CLexer(const CLexer& lexer) :
-		ILexer(lexer), mCurrPos(0), mCurrLine(0), mCurrTokenIndex(0)
+		ILexer(lexer), mCurrPos(0), mCurrLine(0), mCurrTokenIndex(0), mSavedTokenIndex(UINT32_MAX)
 	{
 	}
 
@@ -159,8 +159,9 @@ namespace gplc
 	{
 		mTokens.clear();
 
-		mCurrTokenIndex = 0;
-		mCurrPos        = 0;
+		mCurrPos         = 0;
+		mCurrTokenIndex  = 0;
+		mSavedTokenIndex = UINT32_MAX;
 
 		if (!mTokens.empty() || mCurrPos != 0)
 		{
@@ -200,6 +201,21 @@ namespace gplc
 		}
 
 		return mTokens[neededTokenId];
+	}
+
+	void CLexer::SavePosition()
+	{
+		mSavedTokenIndex = mCurrTokenIndex;
+	}
+
+	void CLexer::RestorePosition()
+	{
+		if (mSavedTokenIndex >= UINT32_MAX)
+		{
+			return;
+		}
+
+		mCurrTokenIndex = mSavedTokenIndex;
 	}
 
 	W16 CLexer::_getCurrChar(const std::wstring& stream) const
