@@ -106,7 +106,9 @@ namespace gplc
 
 		CASTNode* pStatements = _parseStatementsList(lexer, errorInfo);
 
-		if (errorInfo != nullptr || pStatements == nullptr)
+		pProgramUnit->AttachChild(pStatements);
+
+		if (errorInfo != nullptr)
 		{
 			return pProgramUnit;
 		}
@@ -137,7 +139,7 @@ namespace gplc
 		{
 			pStatementsList->AttachChild(pCurrStatement);
 		}
-
+		
 		return pStatementsList;
 	}
 

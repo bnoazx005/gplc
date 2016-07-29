@@ -69,6 +69,8 @@ namespace gplc
 		protected:
 			CASTNode();
 			CASTNode(const CASTNode& node);
+
+			virtual void _removeNode(CASTNode** node);
 		protected:
 			E_NODE_TYPE                  mType;
 

@@ -9,6 +9,7 @@
 */
 
 #include "parser\gplcASTNodes.h"
+#include <stack>
 
 
 namespace gplc
@@ -32,6 +33,34 @@ namespace gplc
 
 	CASTNode::~CASTNode()
 	{
+		U32 childrenCount = mChildren.size();
+
+		if (childrenCount >= 1)
+		{
+			std::stack<const CASTNode*> nodesInStack;
+
+			nodesInStack.push(mChildren[0]);
+
+			const CASTNode* pCurrNode = nullptr;
+
+			while (!nodesInStack.empty())
+			{
+				pCurrNode = nodesInStack.top();
+
+				nodesInStack.pop();
+
+				childrenCount = pCurrNode->mChildren.size();
+
+				for (U32 i = 0; i < childrenCount; i++)
+				{
+					nodesInStack.push(pCurrNode->mChildren[i]);
+				}
+
+				delete pCurrNode;
+
+				pCurrNode = nullptr;
+			}
+		}
 	}
 
 	Result CASTNode::AttachChild(const CASTNode* node)
@@ -94,6 +123,45 @@ namespace gplc
 	E_NODE_TYPE CASTNode::GetType() const
 	{
 		return mType;
+	}
+
+	void CASTNode::_removeNode(CASTNode** node)
+	{
+		CASTNode* pNode = *node;
+
+		if (pNode == nullptr)
+		{
+			return;
+		}
+
+		U32 childrenCount = pNode->mChildren.size();
+
+		if (childrenCount < 1)
+		{
+			return;
+		}
+
+		std::stack<const CASTNode*> nodesInStack;
+
+		nodesInStack.push(pNode->mChildren[0]);
+
+		const CASTNode* pCurrNode = nullptr;
+
+		while (!nodesInStack.empty())
+		{
+			pCurrNode = nodesInStack.top();
+
+			nodesInStack.pop();
+
+			for (U32 i = 0; i < childrenCount; i++)
+			{
+				nodesInStack.push(pCurrNode->mChildren[i]);
+			}
+
+			delete pCurrNode;
+
+			pCurrNode = nullptr;
+		}
 	}
 
 	/*!

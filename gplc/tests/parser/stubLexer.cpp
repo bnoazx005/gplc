@@ -14,6 +14,21 @@ CStubLexer::CStubLexer(const CStubLexer& lexer):
 
 CStubLexer::~CStubLexer()
 {
+	gplc::U32 tokensCount = mTokens.size();
+
+	gplc::CToken* pCurrToken = nullptr;
+
+	for (gplc::U32 i = 0; i < tokensCount; i++) //release the memory
+	{
+		pCurrToken = mTokens[i];
+
+		if (pCurrToken == nullptr)
+		{
+			continue;
+		}
+
+		delete pCurrToken;
+	}
 }
 
 gplc::Result CStubLexer::Init(const std::wstring& inputStream, const std::wstring& configFilename, gplc::TLexerErrorInfo* errorInfo)
@@ -31,6 +46,22 @@ gplc::Result CStubLexer::Init(const std::wstring& inputStream, const std::wstrin
 
 gplc::Result CStubLexer::Reset()
 {
+	gplc::U32 tokensCount = mTokens.size();
+
+	gplc::CToken* pCurrToken = nullptr;
+
+	for (gplc::U32 i = 0; i < tokensCount; i++) //release the memory
+	{
+		pCurrToken = mTokens[i];
+
+		if (pCurrToken == nullptr)
+		{
+			continue;
+		}
+
+		delete pCurrToken;
+	}
+
 	return gplc::RV_SUCCESS;
 }
 
