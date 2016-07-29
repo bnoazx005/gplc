@@ -32,7 +32,7 @@ namespace gplc
 
 	CLexer::~CLexer()
 	{
-
+		Reset();
 	}
 
 	Result CLexer::Init(const std::wstring& inputStream, const std::wstring& configFilename, TLexerErrorInfo* errorInfo)
@@ -157,6 +157,22 @@ namespace gplc
 	
 	Result CLexer::Reset()
 	{
+		U32 tokensCount = mTokens.size();
+
+		CToken* pCurrToken = nullptr;
+
+		for (U32 i = 0; i < tokensCount; i++) //release the memory
+		{
+			pCurrToken = mTokens[i];
+
+			if (pCurrToken == nullptr)
+			{
+				continue;
+			}
+
+			delete pCurrToken;
+		}
+
 		mTokens.clear();
 
 		mCurrPos         = 0;
