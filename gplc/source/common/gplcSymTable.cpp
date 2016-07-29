@@ -52,6 +52,7 @@ namespace gplc
 
 	CSymTable::~CSymTable()
 	{
+		_removeScope(&mpGlobalScopeEntry);
 	}
 
 	Result CSymTable::EnterScope()
@@ -123,5 +124,42 @@ namespace gplc
 		}
 
 		return nullptr;
+	}
+
+	void CSymTable::_removeScope(TSymTableEntry** scope)
+	{
+		if (*scope == nullptr)
+		{
+			return;
+		}
+
+		TSymTableEntry* pScope = *scope;
+
+		std::map<std::wstring, const CType*> currTable = pScope->mVariables;
+
+		if (!currTable.empty())
+		{
+			std::map<std::wstring, const CType*>::iterator var = currTable.begin();
+
+			for (var = currTable.begin(); var != currTable.end(); var++)
+			{
+				delete (*var).second;
+			}
+
+			currTable.clear();
+		}
+
+		std::vector<TSymTableEntry*> scopes = pScope->mNestedScopes;
+		
+		for (std::vector<TSymTableEntry*>::iterator nestedScope = scopes.begin(); nestedScope != scopes.end(); nestedScope++)
+		{
+			_removeScope(&(*nestedScope));
+		}
+
+		scopes.clear();
+
+		delete *scope;
+
+		*scope = nullptr;
 	}
 }

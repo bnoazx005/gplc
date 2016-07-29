@@ -83,6 +83,8 @@ namespace gplc
 			CSymTable(const CSymTable& table);
 
 			const CType* _lookUp(const TSymTableEntry* entry, const std::wstring& variableName) const;
+
+			void _removeScope(TSymTableEntry** scope);
 		protected:
 			TSymTableEntry* mpGlobalScopeEntry;
 
