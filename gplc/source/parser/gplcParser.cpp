@@ -256,13 +256,7 @@ namespace gplc
 		{
 			return nullptr;
 		}
-
-
-		for (U32 k = 0; k < i + 2; k++)
-		{
-			lexer->GetNextToken(); //get all passed tokens
-		}
-
+		
 		CASTNode* pTypeNode = _parseType(lexer, errorInfo);
 
 		

@@ -128,6 +128,10 @@ namespace gplc
 
 			CASTNode* _parseDeclaration(ILexer* lexer, TParserErrorInfo* &errorInfo);
 
+			CASTNode* _parseIdentifiersDecl(ILexer* lexer, TParserErrorInfo* &errorInfo);
+
+			CASTNode* _parseStructDecl(ILexer* lexer, TParserErrorInfo* &errorInfo);
+
 			/*!
 				\brief Try to parse a type
 
