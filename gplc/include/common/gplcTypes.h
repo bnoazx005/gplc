@@ -100,9 +100,12 @@ namespace gplc
 
 	typedef struct TParserErrorInfo
 	{
-		Result      mErrorCode;
-		std::string mMessage;
-		U32         mPos;
+		Result            mErrorCode;
+		std::string       mMessage;
+		U32               mPos;
+
+		TParserErrorInfo* mpPrevError;
+		TParserErrorInfo* mpNextError;
 	} TParserErrorInfo;
 
 	#pragma pack(pop)

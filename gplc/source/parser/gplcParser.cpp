@@ -161,7 +161,15 @@ namespace gplc
 	{
 		CASTNode* pOperator = _parseOperator(lexer, errorInfo);
 
-		_expect(TT_SEMICOLON, lexer->GetCurrToken(), errorInfo);
+		if (!SUCCESS(_expect(TT_SEMICOLON, lexer->GetCurrToken(), errorInfo)))
+		{
+			C8 tmpStrBuf[255];
+
+			sprintf_s(tmpStrBuf, sizeof(C8) * 255, "Missing ; at %d\0", errorInfo->mPos);
+			errorInfo->mMessage = tmpStrBuf;
+
+			return pOperator;
+		}
 
 		lexer->GetNextToken(); //get ;
 		
@@ -217,13 +225,13 @@ namespace gplc
 	{
 		CASTNode* pDeclaration = new CASTNode(NT_DECL);
 
+		lexer->SavePosition(); // save the current position at the input stream
+
 		//check the rule accordance
 		const CToken* pTmpToken = nullptr;
 
 		const CIdentifierToken* pIdToken = nullptr;
-
-		U32 i = 0;
-
+		
 		do 
 		{
 			if (pTmpToken != nullptr)
@@ -233,16 +241,22 @@ namespace gplc
 				pDeclaration->AttachChild(new CASTIdentifierNode(pIdToken->GetName()));
 			}
 
-			pTmpToken = lexer->PeekNextToken(i++);
+			pTmpToken = lexer->GetNextToken();
 		}
 		while (pTmpToken->GetType() == TT_IDENTIFIER);
 
-		i = pDeclaration->GetChildrenCount();
+		U32 numOfReadIdentifiers = pDeclaration->GetChildrenCount();
 
-		if ((i < 1) || (lexer->PeekNextToken(i)->GetType() == TT_COLON && lexer->PeekNextToken(i + 1)->GetType() )) // it's not a declaration
+		if ((numOfReadIdentifiers < 1)) // it's not a declaration
 		{
 			return nullptr;
 		}
+
+		if (!SUCCESS(_expect(TT_COLON, lexer->GetCurrToken(), errorInfo)))
+		{
+			return nullptr;
+		}
+
 
 		for (U32 k = 0; k < i + 2; k++)
 		{
