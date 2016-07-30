@@ -21,7 +21,12 @@ TEST_CASE("Parser's tests")
 
 		delete pMain;
 	}
-	
+
+	if (errorInfo != nullptr)
+	{
+		delete errorInfo;
+	}
+		
 	delete pParser;
 	delete pStubLexerObject;
 }

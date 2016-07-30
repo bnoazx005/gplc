@@ -105,11 +105,14 @@ namespace gplc
 		CASTNode* pProgramUnit = new CASTNode(NT_PROGRAM_UNIT);
 
 		CASTNode* pStatements = _parseStatementsList(lexer, errorInfo);
-
-		pProgramUnit->AttachChild(pStatements);
-
+		
 		if (errorInfo != nullptr)
 		{
+			if (pStatements != nullptr)
+			{
+				delete pStatements;
+			}
+			
 			return pProgramUnit;
 		}
 
