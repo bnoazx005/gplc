@@ -14,17 +14,16 @@ Gplc is a compiler for the gpl (non final project name) programming language.
 
 (not finished yet)
 
-    <program-unit> ::= <statements>;
+    <program-unit> ::= <statements>
 
-    <statements> ::=   <statement> 
+    <statements> ::=   <statement>
                      | <statement> <statements>;
 
     <statement> ::= <operator> ; ;                                  // add here <directive> here later
 
     <operator> ::= <declaration>;
 
-    <declaration> ::=   <attributes> <identifiers> : <type>
-                      | <identifiers> : <type>;
+    <declaration> ::=   <identifiers> : <attributes> <type>;
 
     <identifiers> ::=   <identifier>
                       | <identifier> , <identifiers>;

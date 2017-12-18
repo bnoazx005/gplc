@@ -223,7 +223,23 @@ namespace gplc
 
 	CASTNode* CParser::_parseDeclaration(ILexer* lexer, TParserErrorInfo* &errorInfo)
 	{
-		CASTNode* pDeclaration = new CASTNode(NT_DECL);
+		CASTNode* pDeclaration = nullptr;
+
+		if ((pDeclaration = _parseIdentifiersDecl(lexer, errorInfo)))
+		{
+			return pDeclaration;
+		}
+		else
+		{
+			return nullptr;
+		}
+
+		return pDeclaration;
+	}
+
+	CASTNode* CParser::_parseIdentifiersDecl(ILexer* lexer, TParserErrorInfo* &errorInfo)
+	{
+		CASTNode* pDeclaration = nullptr;
 
 		lexer->SavePosition(); // save the current position at the input stream
 
@@ -247,19 +263,24 @@ namespace gplc
 
 		U32 numOfReadIdentifiers = pDeclaration->GetChildrenCount();
 
-		if ((numOfReadIdentifiers < 1)) // it's not a declaration
+		if (numOfReadIdentifiers < 1 || 
+			!SUCCESS(_expect(TT_COLON, lexer->GetCurrToken(), errorInfo)) ||
+			lexer->GetNextToken()->GetType() == TT_ASSIGN_OP) // it's not a declaration
 		{
-			return nullptr;
-		}
+			lexer->RestorePosition();
 
-		if (!SUCCESS(_expect(TT_COLON, lexer->GetCurrToken(), errorInfo)))
-		{
 			return nullptr;
 		}
 		
-		CASTNode* pTypeNode = _parseType(lexer, errorInfo);
-
+		CASTNode* pTypeNode = nullptr;
 		
+		if (!(pTypeNode = _parseType(lexer, errorInfo)))
+		{
+			lexer->RestorePosition();
+
+			return nullptr;
+		}
+
 		return pDeclaration;
 	}
 

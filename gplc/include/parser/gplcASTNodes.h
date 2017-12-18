@@ -24,11 +24,12 @@ namespace gplc
 	
 	enum E_NODE_TYPE
 	{
-		NT_PROGRAM_UNIT, ///< A program unit
-		NT_STATEMENTS,   ///< Statements
-		NT_OPERATOR,     ///< An operator
-		NT_DECL,         ///< A declration operator
-		NT_IDENTIFIER,   ///< An identifier
+		NT_PROGRAM_UNIT,     ///< A program unit
+		NT_STATEMENTS,       ///< Statements
+		NT_OPERATOR,         ///< An operator
+		NT_DECL,             ///< A declration operator
+		NT_IDENTIFIER,       ///< An identifier
+		NT_IDENTIFIERS_LIST,
 		NT_INT8,
 		NT_INT16,
 		NT_INT32,
