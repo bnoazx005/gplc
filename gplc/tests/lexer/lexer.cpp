@@ -4,7 +4,6 @@
 
 TEST_CASE("Lexer's tests")
 {
-	gplc::TLexerErrorInfo error;
 	gplc::CLexer* pLexer = new gplc::CLexer();
 
 	const std::wstring pathToConfig          = L".\\lexer\\configs\\.tokens";
@@ -15,7 +14,7 @@ TEST_CASE("Lexer's tests")
 	
 	SECTION("Correct identifier test")
 	{
-		REQUIRE(pLexer->Init(L"identifier", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"identifier", pathToConfig) == gplc::RV_SUCCESS);
 
 		const gplc::CIdentifierToken* pIdentifierToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetCurrToken());
 
@@ -25,7 +24,7 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("Correct identifier with digits test")
 	{
-		REQUIRE(pLexer->Init(L"identifier42 identi42fier", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"identifier42 identi42fier", pathToConfig) == gplc::RV_SUCCESS);
 
 		const gplc::CIdentifierToken* pIdentifierToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetCurrToken());
 
@@ -40,7 +39,7 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("Correct identifier with underscope test")
 	{
-		REQUIRE(pLexer->Init(L"_identifier compound_identifier_test id_", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"_identifier compound_identifier_test id_", pathToConfig) == gplc::RV_SUCCESS);
 
 		const gplc::CIdentifierToken* pIdentifierToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetCurrToken());
 
@@ -68,7 +67,7 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("GetNextToken test")
 	{
-		REQUIRE(pLexer->Init(L"id0 id1 id2 id3 id4 id5", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"id0 id1 id2 id3 id4 id5", pathToConfig) == gplc::RV_SUCCESS);
 
 		gplc::U32 numOfTokens = 0;
 
@@ -82,7 +81,7 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("PeekNextToken test")
 	{
-		REQUIRE(pLexer->Init(L"id0 id1 id2 id3 id4 id5", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"id0 id1 id2 id3 id4 id5", pathToConfig) == gplc::RV_SUCCESS);
 
 		const gplc::CIdentifierToken* pCurrToken = nullptr;
 
@@ -110,13 +109,13 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("_readTokensMapFromFile test")
 	{
-		REQUIRE(pLexer->Init(L"", pathToIncorrectConfig, &error) == gplc::RV_INCORRECT_CONFIG);
-		REQUIRE(pLexer->Init(L"", pathToCorrectConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"", pathToIncorrectConfig) == gplc::RV_INCORRECT_CONFIG);
+		REQUIRE(pLexer->Init(L"", pathToCorrectConfig) == gplc::RV_SUCCESS);
 	}
 
 	SECTION("Keywords test")
 	{
-		REQUIRE(pLexer->Init(L"identifier integer int character char floatValue float2int float!====<>+-*[]{};,.:\\/", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"identifier integer int character char floatValue float2int float!====<>+-*[]{};,.:\\/", pathToConfig) == gplc::RV_SUCCESS);
 		const gplc::CToken* pCurrToken = pLexer->GetCurrToken();
 
 		std::vector<gplc::E_TOKEN_TYPE> tokens;
@@ -166,7 +165,7 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("Numbers' tokens test")
 	{
-		REQUIRE(pLexer->Init(L"42 4.2 0.42 .5", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"42 4.2 0.42 .5", pathToConfig) == gplc::RV_SUCCESS);
 
 		const gplc::CTypedValueToken<gplc::I32>* pCurrIntToken = dynamic_cast<const gplc::CTypedValueToken<gplc::I32>*>(pLexer->GetCurrToken());
 
@@ -195,7 +194,7 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("numerical systems test")
 	{
-		REQUIRE(pLexer->Init(L"0x42 0b10 042 42", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"0x42 0b10 042 42", pathToConfig) == gplc::RV_SUCCESS);
 
 		const gplc::CTypedValueToken<gplc::I32>* pCurrIntToken = dynamic_cast<const gplc::CTypedValueToken<gplc::I32>*>(pLexer->GetCurrToken());
 
@@ -224,7 +223,7 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("number's literals test")
 	{
-		REQUIRE(pLexer->Init(L"42l 42ul 42s 42uu 42f 42usf", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"42l 42ul 42s 42uu 42f 42usf", pathToConfig) == gplc::RV_SUCCESS);
 
 		const gplc::CTypedValueToken<gplc::IL32>* pCurrIntToken1 = dynamic_cast<const gplc::CTypedValueToken<gplc::IL32>*>(pLexer->GetCurrToken());
 		
@@ -265,18 +264,18 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("single line comments test")
 	{
-		REQUIRE(pLexer->Init(L"//42l 42ul 42s 42uu 42f 42usf", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"//42l 42ul 42s 42uu 42f 42usf", pathToConfig) == gplc::RV_SUCCESS);
 		
 		REQUIRE(pLexer->GetCurrToken() == nullptr);
 	}
 
 	SECTION("multi line comments test")
 	{
-		REQUIRE(pLexer->Init(L"/*42l 42ul 42s 42uu 42f 42usf*/\n/**/", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"/*42l 42ul 42s 42uu 42f 42usf*/\n/**/", pathToConfig) == gplc::RV_SUCCESS);
 
 		REQUIRE(pLexer->GetCurrToken() == nullptr);
 
-		REQUIRE(pLexer->Init(L"/*42l 42ul*/\n    .4f .4", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"/*42l 42ul*/\n    .4f .4", pathToConfig) == gplc::RV_SUCCESS);
 
 		const gplc::CTypedValueToken<gplc::F32>* pCurrFloatToken = dynamic_cast<const gplc::CTypedValueToken<gplc::F32>*>(pLexer->GetCurrToken());
 
@@ -293,7 +292,7 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("strings test")
 	{
-		REQUIRE(pLexer->Init(LR"("Hello, world!")", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(LR"("Hello, world!")", pathToConfig) == gplc::RV_SUCCESS);
 
 		const gplc::CTypedValueToken<std::wstring>* pCurrToken = dynamic_cast<const gplc::CTypedValueToken<std::wstring>*>(pLexer->GetCurrToken());
 
@@ -304,7 +303,7 @@ TEST_CASE("Lexer's tests")
 
 	SECTION("chars test")
 	{
-		REQUIRE(pLexer->Init(L"'f'  'g'", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"'f'  'g'", pathToConfig) == gplc::RV_SUCCESS);
 
 		const gplc::CTypedValueToken<gplc::W16>* pCurrToken = dynamic_cast<const gplc::CTypedValueToken<gplc::W16>*>(pLexer->GetCurrToken());
 
@@ -321,7 +320,7 @@ TEST_CASE("Lexer's tests")
 	
 	SECTION("Save- Restore- methods test")
 	{
-		REQUIRE(pLexer->Init(L"42l 42ul 42s 42uu 42f 42usf\n/**/", pathToConfig, &error) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(L"42l 42ul 42s 42uu 42f 42usf\n/**/", pathToConfig) == gplc::RV_SUCCESS);
 
 		REQUIRE(pLexer->GetNextToken() != nullptr);
 

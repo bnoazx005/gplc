@@ -14,6 +14,7 @@
 
 #include "common\gplcTypes.h"
 #include "lexer\gplcTokens.h"
+#include "..\utils\Delegate.h"
 
 
 namespace gplc
@@ -35,7 +36,9 @@ namespace gplc
 			IParser() {}
 			virtual ~IParser() {}
 
-			virtual CASTNode* Parse(ILexer* lexer, TParserErrorInfo* &errorInfo) = 0;
+			virtual CASTNode* Parse(ILexer* lexer) = 0;
+		public:
+			CDelegate<void, const TParserErrorInfo&> OnErrorOutput;
 		protected:
 			IParser(const IParser& parser) {}
 	};
@@ -53,11 +56,11 @@ namespace gplc
 			CParser();
 			virtual ~CParser();
 
-			virtual CASTNode* Parse(ILexer* lexer, TParserErrorInfo* &errorInfo);
+			virtual CASTNode* Parse(ILexer* lexer);
 		private:
 			CParser(const CParser& parser);
 
-			Result _expect(E_TOKEN_TYPE expectedValue, const CToken* currValue, TParserErrorInfo* &errorInfo);
+			Result _expect(E_TOKEN_TYPE expectedValue, const CToken* currValue);
 
 			/*!
 				\brief Try to parse the following grammar rule.
@@ -65,12 +68,11 @@ namespace gplc
 				<program-unit> ::= <statements>;
 
 				\param[in] lexer A pointer to lexer's object
-				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 				\return A pointer to node of a program unit
 			*/
 			
-			CASTNode* _parseProgramUnit(ILexer* lexer, TParserErrorInfo* &errorInfo);
+			CASTNode* _parseProgramUnit(ILexer* lexer);
 
 			/*!
 				\brief Try to parse the list of statements.
@@ -79,12 +81,11 @@ namespace gplc
                                  | <statement> <statements>;
 
 				\param[in] lexer A pointer to lexer's object
-				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 				\return A pointer to node with a statements list
 			*/
 
-			CASTNode* _parseStatementsList(ILexer* lexer, TParserErrorInfo* &errorInfo);
+			CASTNode* _parseStatementsList(ILexer* lexer);
 
 			/*!
 				\brief Try to parse a single statement
@@ -94,12 +95,11 @@ namespace gplc
 				\todo There is no <directive> non-terminal. It will be added later.
 
 				\param[in] lexer A pointer to lexer's object
-				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 				\return A pointer to node with a particular statement
 			*/
 
-			CASTNode* _parseStatement(ILexer* lexer, TParserErrorInfo* &errorInfo);
+			CASTNode* _parseStatement(ILexer* lexer);
 
 			/*!
 				\brief Try to parse a single operator
@@ -107,12 +107,11 @@ namespace gplc
 				<operator> ::= <declaration>;
 
 				\param[in] lexer A pointer to lexer's object
-				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 				\return A pointer to node with an operator
 			*/
 
-			CASTNode* _parseOperator(ILexer* lexer, TParserErrorInfo* &errorInfo);
+			CASTNode* _parseOperator(ILexer* lexer);
 
 			/*!
 				\brief Try to parse a declaration
@@ -121,16 +120,15 @@ namespace gplc
                                   | <identifiers> : <type>;
 
 				\param[in] lexer A pointer to lexer's object
-				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 				\return A pointer to node with a declaration
 			*/
 
-			CASTNode* _parseDeclaration(ILexer* lexer, TParserErrorInfo* &errorInfo);
+			CASTNode* _parseDeclaration(ILexer* lexer);
 
-			CASTNode* _parseIdentifiersDecl(ILexer* lexer, TParserErrorInfo* &errorInfo);
+			CASTNode* _parseIdentifiersDecl(ILexer* lexer);
 
-			CASTNode* _parseStructDecl(ILexer* lexer, TParserErrorInfo* &errorInfo);
+			CASTNode* _parseStructDecl(ILexer* lexer);
 
 			/*!
 				\brief Try to parse a type
@@ -142,12 +140,11 @@ namespace gplc
 				           | <func_declaration>;
 
 				\param[in] lexer A pointer to lexer's object
-				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 				\return  A pointer to node with a type
 			*/
 
-			CASTNode* _parseType(ILexer* lexer, TParserErrorInfo* &errorInfo);
+			CASTNode* _parseType(ILexer* lexer);
 
 			/*!
 				\brief Try to parse a type
@@ -164,12 +161,11 @@ namespace gplc
 								   | <array>
 
 				\param[in] lexer A pointer to lexer's object
-				\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 				\return  A pointer to node with a builtin type
 			*/
 
-			CASTNode* _parseBuiltInType(ILexer* lexer, TParserErrorInfo* &errorInfo);
+			CASTNode* _parseBuiltInType(ILexer* lexer);
 		private:
 	};
 }

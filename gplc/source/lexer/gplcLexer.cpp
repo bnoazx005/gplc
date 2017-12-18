@@ -35,12 +35,10 @@ namespace gplc
 		Reset();
 	}
 
-	Result CLexer::Init(const std::wstring& inputStream, const std::wstring& configFilename, TLexerErrorInfo* errorInfo)
+	Result CLexer::Init(const std::wstring& inputStream, const std::wstring& configFilename)
 	{
 		Result result = Reset();
 		
-		errorInfo = nullptr;
-
 		if (!SUCCESS(result))
 		{
 			return result;
@@ -116,10 +114,14 @@ namespace gplc
 						{
 							if (numOfNestedCommentsBlocks == 0)
 							{
-								errorInfo = new TLexerErrorInfo();
+								TLexerErrorInfo errorInfo;
 
-								errorInfo->mPos = mCurrPos;
-								errorInfo->mLine = mCurrLine;
+								memset(&errorInfo, 0, sizeof(errorInfo));
+
+								errorInfo.mPos = mCurrPos;
+								errorInfo.mLine = mCurrLine;
+
+								OnErrorOutput.Invoke(errorInfo);
 
 								return RV_INCORRECT_TOKEN;
 							}
@@ -141,10 +143,14 @@ namespace gplc
 
 			if (pCurrToken == nullptr)
 			{
-				errorInfo = new TLexerErrorInfo();
-				
-				errorInfo->mPos  = mCurrPos;
-				errorInfo->mLine = mCurrLine;
+				TLexerErrorInfo errorInfo;
+
+				memset(&errorInfo, 0, sizeof(errorInfo));
+
+				errorInfo.mPos = mCurrPos;
+				errorInfo.mLine = mCurrLine;
+
+				OnErrorOutput.Invoke(errorInfo);
 
 				return RV_INCORRECT_TOKEN;
 			}

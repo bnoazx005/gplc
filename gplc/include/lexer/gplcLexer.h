@@ -14,6 +14,7 @@
 
 #include "..\common\gplcTypes.h"
 #include "gplcTokens.h"
+#include "..\utils\Delegate.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -39,12 +40,11 @@ namespace gplc
 
 				\param[in] inputStream An input characters sequence.
 				\param[in] configFilename A name of file, which stores reserved keywords' declarations.
-				\param[out] errorInfo A pointer to TLexerErrorInfo, which describes information about an error. It equals to null in normal case.
 
 				\return A function's result code.
 			*/
 
-			virtual Result Init(const std::wstring& inputStream, const std::wstring& configFilename, TLexerErrorInfo* errorInfo) = 0;
+			virtual Result Init(const std::wstring& inputStream, const std::wstring& configFilename) = 0;
 
 			/*!
 				\brief The function clears the current state of an object.
@@ -95,6 +95,8 @@ namespace gplc
 			*/
 			
 			virtual void RestorePosition() = 0;
+		public:
+			CDelegate<void, const TLexerErrorInfo&> OnErrorOutput;
 		protected:
 			ILexer(const ILexer& lexer) {}
 	};
@@ -127,12 +129,11 @@ namespace gplc
 
 				\param[in] inputStream An input characters sequence.
 				\param[in] configFilename A name of file, which stores reserved keywords' declarations.
-				\param[out] errorInfo A pointer to TLexerErrorInfo, which describes information about an error. It equals to null in normal case.
 
 				\return A function's result code.
 			*/
 
-			virtual Result Init(const std::wstring& inputStream, const std::wstring& configFilename, TLexerErrorInfo* errorInfo);
+			virtual Result Init(const std::wstring& inputStream, const std::wstring& configFilename);
 
 			/*!
 				\brief The function clears the current state of an object.

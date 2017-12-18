@@ -31,10 +31,8 @@ CStubLexer::~CStubLexer()
 	}
 }
 
-gplc::Result CStubLexer::Init(const std::wstring& inputStream, const std::wstring& configFilename, gplc::TLexerErrorInfo* errorInfo)
+gplc::Result CStubLexer::Init(const std::wstring& inputStream, const std::wstring& configFilename)
 {
-	errorInfo = nullptr;
-
 	//fill in the tokens' vector
 	mTokens.push_back(new gplc::CIdentifierToken(L"x", 0));
 	mTokens.push_back(new gplc::CToken(gplc::TT_COLON, 1));

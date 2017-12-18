@@ -25,12 +25,11 @@ class CStubLexer : public gplc::ILexer
 
 			\param[in] inputStream An input characters sequence.
 			\param[in] configFilename A name of file, which stores reserved keywords' declarations.
-			\param[out] errorInfo A pointer to TLexerErrorInfo, which describes information about an error. It equals to null in normal case.
 
 			\return A function's result code.
 		*/
 
-		virtual gplc::Result Init(const std::wstring& inputStream, const std::wstring& configFilename, gplc::TLexerErrorInfo* errorInfo);
+		virtual gplc::Result Init(const std::wstring& inputStream, const std::wstring& configFilename);
 
 		/*!
 			\brief The function clears the current state of an object.

@@ -25,6 +25,9 @@
     <Filter Include="source\common">
       <UniqueIdentifier>{bcbceb79-f5de-49e1-9947-9f23ccd1c74a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\utils">
+      <UniqueIdentifier>{0edd6eaf-0904-4647-ac0a-071c21a52df0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\lexer\gplcLexer.cpp">
@@ -73,6 +76,12 @@
     </ClInclude>
     <ClInclude Include="include\common\gplcTypeSystem.h">
       <Filter>include\common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utils\Callback.h">
+      <Filter>include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utils\Delegate.h">
+      <Filter>include\utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

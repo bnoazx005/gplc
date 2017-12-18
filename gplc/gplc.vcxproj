@@ -36,6 +36,8 @@
     <ClInclude Include="include\lexer\gplcTokens.h" />
     <ClInclude Include="include\parser\gplcParser.h" />
     <ClInclude Include="include\parser\gplcASTNodes.h" />
+    <ClInclude Include="include\utils\Callback.h" />
+    <ClInclude Include="include\utils\Delegate.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{81CA3DBC-6909-4ABB-B0B4-13E425252565}</ProjectGuid>

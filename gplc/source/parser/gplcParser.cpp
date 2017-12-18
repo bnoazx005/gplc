@@ -34,35 +34,41 @@ namespace gplc
 	{
 	}
 
-	CASTNode* CParser::Parse(ILexer* lexer, TParserErrorInfo* &errorInfo)
+	CASTNode* CParser::Parse(ILexer* lexer)
 	{
 		if (lexer == nullptr)
 		{
-			errorInfo = new TParserErrorInfo();
-			
-			errorInfo->mErrorCode = RV_INVALID_ARGUMENTS;
-			errorInfo->mMessage   = "A pointer to lexer equals to null";
+			TParserErrorInfo errorInfo;
 
+			memset(&errorInfo, 0, sizeof(errorInfo));
+						
+			errorInfo.mErrorCode = RV_INVALID_ARGUMENTS;
+			errorInfo.mMessage   = "A pointer to lexer equals to null";
+			
+			OnErrorOutput.Invoke(errorInfo);
+			
 			return nullptr;
 		}
-
-		errorInfo = nullptr;
-
+		
 		if (lexer->GetCurrToken() == nullptr) //returns just an empty program unit
 		{
 			return new CASTNode(NT_PROGRAM_UNIT);
 		}
 
-		return _parseProgramUnit(lexer, errorInfo);
+		return _parseProgramUnit(lexer);
 	}
 
-	Result CParser::_expect(E_TOKEN_TYPE expectedValue, const CToken* currValue, TParserErrorInfo* &errorInfo)
+	Result CParser::_expect(E_TOKEN_TYPE expectedValue, const CToken* currValue)
 	{
 		if (currValue == nullptr)
 		{
-			errorInfo = new TParserErrorInfo();
+			TParserErrorInfo errorInfo;
 
-			errorInfo->mErrorCode = RV_INVALID_ARGUMENTS;
+			memset(&errorInfo, 0, sizeof(errorInfo));
+
+			errorInfo.mErrorCode = RV_INVALID_ARGUMENTS;
+
+			OnErrorOutput.Invoke(errorInfo);
 
 			return RV_FAIL;
 		}
@@ -71,20 +77,22 @@ namespace gplc
 
 		if (expectedValue == currValueType)
 		{
-			errorInfo = nullptr;
-
 			return RV_SUCCESS;
 		}
 
-		errorInfo = new TParserErrorInfo();
-		
+		TParserErrorInfo errorInfo;
+
+		memset(&errorInfo, 0, sizeof(errorInfo));
+				
 		C8 tmpStrBuf[255];
 
 		sprintf_s(tmpStrBuf, sizeof(C8) * 255, "An unexpected token was found at %d. %d instead of %d\0", currValue->GetPos(), currValueType, expectedValue);
 
-		errorInfo->mMessage   = tmpStrBuf;
-		errorInfo->mErrorCode = RV_UNEXPECTED_TOKEN;
-		errorInfo->mPos       = currValue->GetPos();
+		errorInfo.mMessage   = tmpStrBuf;
+		errorInfo.mErrorCode = RV_UNEXPECTED_TOKEN;
+		errorInfo.mPos       = currValue->GetPos();
+
+		OnErrorOutput.Invoke(errorInfo);
 
 		return RV_UNEXPECTED_TOKEN;
 	}
@@ -95,28 +103,20 @@ namespace gplc
 		<program-unit> ::= <statements>;
 
 		\param[in] lexer A pointer to lexer's object
-		\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 		\return A pointer to node of a program unit
 	*/
 
-	CASTNode* CParser::_parseProgramUnit(ILexer* lexer, TParserErrorInfo* &errorInfo)
+	CASTNode* CParser::_parseProgramUnit(ILexer* lexer)
 	{
 		CASTNode* pProgramUnit = new CASTNode(NT_PROGRAM_UNIT);
 
-		CASTNode* pStatements = _parseStatementsList(lexer, errorInfo);
+		CASTNode* pStatements = _parseStatementsList(lexer);
 		
-		if (errorInfo != nullptr)
+		if (pStatements)
 		{
-			if (pStatements != nullptr)
-			{
-				delete pStatements;
-			}
-			
-			return pProgramUnit;
+			pProgramUnit->AttachChildren(pStatements->GetChildren());
 		}
-
-		pProgramUnit->AttachChildren(pStatements->GetChildren());
 
 		return pProgramUnit;
 	}
@@ -128,17 +128,16 @@ namespace gplc
 		                 | <statement> <statements>;
 
 		\param[in] lexer A pointer to lexer's object
-		\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 		\return A pointer to node with a statements list
 	*/
 
-	CASTNode* CParser::_parseStatementsList(ILexer* lexer, TParserErrorInfo* &errorInfo)
+	CASTNode* CParser::_parseStatementsList(ILexer* lexer)
 	{
 		CASTNode* pStatementsList = new CASTNode(NT_STATEMENTS);
 		CASTNode* pCurrStatement  = nullptr;
 
-		while (pCurrStatement = _parseStatement(lexer, errorInfo))
+		while (pCurrStatement = _parseStatement(lexer))
 		{
 			pStatementsList->AttachChild(pCurrStatement);
 		}
@@ -152,16 +151,15 @@ namespace gplc
 		<statement> ::= <operator> ; ;
 
 		\param[in] lexer A pointer to lexer's object
-		\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 		\return A pointer to node with a particular statement
 	*/
 
-	CASTNode* CParser::_parseStatement(ILexer* lexer, TParserErrorInfo* &errorInfo)
+	CASTNode* CParser::_parseStatement(ILexer* lexer)
 	{
-		CASTNode* pOperator = _parseOperator(lexer, errorInfo);
+		CASTNode* pOperator = _parseOperator(lexer);
 
-		if (!SUCCESS(_expect(TT_SEMICOLON, lexer->GetCurrToken(), errorInfo)))
+		/*if (!SUCCESS(_expect(TT_SEMICOLON, lexer->GetCurrToken())))
 		{
 			C8 tmpStrBuf[255];
 
@@ -169,7 +167,7 @@ namespace gplc
 			errorInfo->mMessage = tmpStrBuf;
 
 			return pOperator;
-		}
+		}*/
 
 		lexer->GetNextToken(); //get ;
 		
@@ -182,16 +180,20 @@ namespace gplc
 		<operator> ::= <declaration>;
 
 		\param[in] lexer A pointer to lexer's object
-		\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 		\return A pointer to node with an operator
 	*/
 
-	CASTNode* CParser::_parseOperator(ILexer* lexer, TParserErrorInfo* &errorInfo)
+	CASTNode* CParser::_parseOperator(ILexer* lexer)
 	{
 		CASTNode* pOperator = nullptr;
 
-		if ((pOperator = _parseDeclaration(lexer, errorInfo)))
+		if ((pOperator = _parseDeclaration(lexer)))
+		{
+			return pOperator;
+		}
+
+		/*if ((pOperator = _parseDeclaration(lexer)))
 		{
 			return pOperator;
 		}
@@ -205,7 +207,7 @@ namespace gplc
 
 			return nullptr;
 		}
-
+*/
 		return nullptr;
 	}
 
@@ -216,16 +218,15 @@ namespace gplc
 		                  | <identifiers> : <type>;
 
 		\param[in] lexer A pointer to lexer's object
-		\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 		\return A pointer to node with a declaration
 	*/
 
-	CASTNode* CParser::_parseDeclaration(ILexer* lexer, TParserErrorInfo* &errorInfo)
+	CASTNode* CParser::_parseDeclaration(ILexer* lexer)
 	{
 		CASTNode* pDeclaration = nullptr;
 
-		if ((pDeclaration = _parseIdentifiersDecl(lexer, errorInfo)))
+		if ((pDeclaration = _parseIdentifiersDecl(lexer)))
 		{
 			return pDeclaration;
 		}
@@ -237,7 +238,7 @@ namespace gplc
 		return pDeclaration;
 	}
 
-	CASTNode* CParser::_parseIdentifiersDecl(ILexer* lexer, TParserErrorInfo* &errorInfo)
+	CASTNode* CParser::_parseIdentifiersDecl(ILexer* lexer)
 	{
 		CASTNode* pDeclaration = nullptr;
 
@@ -263,23 +264,23 @@ namespace gplc
 
 		U32 numOfReadIdentifiers = pDeclaration->GetChildrenCount();
 
-		if (numOfReadIdentifiers < 1 || 
-			!SUCCESS(_expect(TT_COLON, lexer->GetCurrToken(), errorInfo)) ||
-			lexer->GetNextToken()->GetType() == TT_ASSIGN_OP) // it's not a declaration
-		{
-			lexer->RestorePosition();
+		//if (numOfReadIdentifiers < 1 || 
+		//	!SUCCESS(_expect(TT_COLON, lexer->GetCurrToken(), errorInfo)) ||
+		//	lexer->GetNextToken()->GetType() == TT_ASSIGN_OP) // it's not a declaration
+		//{
+		//	lexer->RestorePosition();
 
-			return nullptr;
-		}
-		
-		CASTNode* pTypeNode = nullptr;
-		
-		if (!(pTypeNode = _parseType(lexer, errorInfo)))
-		{
-			lexer->RestorePosition();
+		//	return nullptr;
+		//}
+		//
+		//CASTNode* pTypeNode = nullptr;
+		//
+		//if (!(pTypeNode = _parseType(lexer, errorInfo)))
+		//{
+		//	lexer->RestorePosition();
 
-			return nullptr;
-		}
+		//	return nullptr;
+		//}
 
 		return pDeclaration;
 	}
@@ -294,16 +295,15 @@ namespace gplc
 		           | <func_declaration>;
 
 		\param[in] lexer A pointer to lexer's object
-		\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 		\return A pointer to node with a type
 	*/
 
-	CASTNode* CParser::_parseType(ILexer* lexer, TParserErrorInfo* &errorInfo)
+	CASTNode* CParser::_parseType(ILexer* lexer)
 	{
 		CASTNode* pOperator = nullptr;
-
-		if ((pOperator = _parseBuiltInType(lexer, errorInfo)))
+/*
+		if ((pOperator = _parseBuiltInType(lexer)))
 		{
 			return pOperator;
 		}
@@ -316,7 +316,7 @@ namespace gplc
 			errorInfo->mPos = lexer->GetCurrToken()->GetPos();
 
 			return nullptr;
-		}
+		}*/
 
 		return nullptr;
 	}
@@ -336,12 +336,11 @@ namespace gplc
 						   | <array>
 
 		\param[in] lexer A pointer to lexer's object
-		\param[out] errorInfo A pointer to structure that contains information about appeared errors. It equals to nullptr if function returns RV_SUCCESS.
 
 		\return  A pointer to node with a builtin type
 	*/
 
-	CASTNode* CParser::_parseBuiltInType(ILexer* lexer, TParserErrorInfo* &errorInfo)
+	CASTNode* CParser::_parseBuiltInType(ILexer* lexer)
 	{
 		const CToken* pTypeName  = lexer->GetCurrToken();
 		const CToken* pNextToken = lexer->PeekNextToken(1);
