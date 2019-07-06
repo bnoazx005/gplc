@@ -92,7 +92,7 @@ namespace gplc
 
 			U32 GetPos() const;
 
-			virtual std::wstring ToString() const;
+			virtual std::string ToString() const;
 		/*protected:
 			CToken(const CToken& token);*/
 		protected:
@@ -148,15 +148,15 @@ namespace gplc
 	class CIdentifierToken : public CToken
 	{
 	public:
-		CIdentifierToken(const std::wstring& name, U32 posAtStream);
+		CIdentifierToken(const std::string& name, U32 posAtStream);
 		virtual ~CIdentifierToken();
 
-		const std::wstring GetName() const;
+		const std::string GetName() const;
 	protected:
 		CIdentifierToken();
 		CIdentifierToken(const CIdentifierToken& token);
 	protected:
-		const std::wstring mName;
+		const std::string mName;
 	};
 }
 

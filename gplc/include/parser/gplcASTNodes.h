@@ -86,15 +86,15 @@ namespace gplc
 	class CASTIdentifierNode : public CASTNode
 	{
 		public:
-			CASTIdentifierNode(const std::wstring& name);
+			CASTIdentifierNode(const std::string& name);
 			virtual ~CASTIdentifierNode();
 
-			const std::wstring& GetName() const;
+			const std::string& GetName() const;
 		protected:
 			CASTIdentifierNode();
 			CASTIdentifierNode(const CASTIdentifierNode& node);
 		protected:
-			std::wstring mName;
+			std::string mName;
 	};
 
 }

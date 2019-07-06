@@ -31,10 +31,10 @@ CStubLexer::~CStubLexer()
 	}
 }
 
-gplc::Result CStubLexer::Init(const std::wstring& inputStream, const std::wstring& configFilename)
+gplc::Result CStubLexer::Init(const std::string& inputStream, const std::string& configFilename)
 {
 	//fill in the tokens' vector
-	mTokens.push_back(new gplc::CIdentifierToken(L"x", 0));
+	mTokens.push_back(new gplc::CIdentifierToken("x", 0));
 	mTokens.push_back(new gplc::CToken(gplc::TT_COLON, 1));
 	mTokens.push_back(new gplc::CToken(gplc::TT_INT32_TYPE, 2));
 	mTokens.push_back(new gplc::CToken(gplc::TT_SEMICOLON, 3));

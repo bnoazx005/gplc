@@ -35,7 +35,7 @@ namespace gplc
 		Reset();
 	}
 
-	Result CLexer::Init(const std::wstring& inputStream, const std::wstring& configFilename)
+	Result CLexer::Init(const std::string& inputStream, const std::string& configFilename)
 	{
 		Result result = Reset();
 		
@@ -52,13 +52,13 @@ namespace gplc
 			return result;
 		}
 
-		W16 currChar = _getCurrChar(inputStream);
+		C8 currChar = _getCurrChar(inputStream);
 		
 		CToken* pCurrToken = nullptr;
 
 		U8 numOfNestedCommentsBlocks = 0;
 
-		while ((currChar = _getCurrChar(inputStream)) != WEOF)
+		while ((currChar = _getCurrChar(inputStream)) != EOF)
 		{
 			if (iswblank(currChar)) //skip whitespace
 			{
@@ -78,21 +78,21 @@ namespace gplc
 
 			// skip comments
 			//try to recognize single- and milti- line comments
-			if (currChar == L'/')
+			if (currChar == '/')
 			{
 				currChar = _peekNextChar(inputStream, 1);
 
-				if (currChar == L'/') //single-line comment
+				if (currChar == '/') //single-line comment
 				{
 					//skip symbols until neither \n nor \r
 					do
 					{
 						currChar = _getNextChar(inputStream);
-					} while (currChar != L'\n' && currChar != L'\r' && currChar != WEOF);
+					} while (currChar != '\n' && currChar != '\r' && currChar != EOF);
 
 					continue;
 				}
-				else if (currChar == L'*')
+				else if (currChar == '*')
 				{
 					currChar = _getNextChar(inputStream); //get '*'
 					numOfNestedCommentsBlocks = 1;
@@ -101,7 +101,7 @@ namespace gplc
 					{
 						currChar = _getNextChar(inputStream);
 
-						if (currChar == L'/' && _peekNextChar(inputStream, 1) == L'*')
+						if (currChar == '/' && _peekNextChar(inputStream, 1) == '*')
 						{
 							numOfNestedCommentsBlocks++;
 
@@ -110,7 +110,7 @@ namespace gplc
 							continue;
 						}
 
-						if (currChar == L'*' && _peekNextChar(inputStream, 1) == L'/')
+						if (currChar == '*' && _peekNextChar(inputStream, 1) == '/')
 						{
 							if (numOfNestedCommentsBlocks == 0)
 							{
@@ -130,7 +130,7 @@ namespace gplc
 
 							_getNextChar(inputStream); //get '/'
 						}
-					} while (currChar != L'*' && _peekNextChar(inputStream, 1) != L'/' && numOfNestedCommentsBlocks > 0);
+					} while (currChar != '*' && _peekNextChar(inputStream, 1) != '/' && numOfNestedCommentsBlocks > 0);
 
 					_getNextChar(inputStream);
 
@@ -240,50 +240,50 @@ namespace gplc
 		mCurrTokenIndex = mSavedTokenIndex;
 	}
 
-	W16 CLexer::_getCurrChar(const std::wstring& stream) const
+	C8 CLexer::_getCurrChar(const std::string& stream) const
 	{
 		if (mCurrPos >= stream.length())
 		{
-			return WEOF;
+			return EOF;
 		}
 
 		return stream[mCurrPos];
 	}
 
-	W16 CLexer::_getNextChar(const std::wstring& stream)
+	C8 CLexer::_getNextChar(const std::string& stream)
 	{
 		if (mCurrPos + 1 >= stream.length())
 		{
 			mCurrPos++;
 
-			return WEOF;
+			return EOF;
 		}
 		
 		return stream[++mCurrPos];
 	}
 
-	W16 CLexer::_peekNextChar(const std::wstring& stream, U32 offset) const
+	C8 CLexer::_peekNextChar(const std::string& stream, U32 offset) const
 	{
 		U32 newPositionAtStream = mCurrPos + offset;
 
 		if (newPositionAtStream >= stream.length())
 		{
-			return WEOF;
+			return EOF;
 		}
 
 		return stream[newPositionAtStream];
 	}
 	
-	CToken* CLexer::_scanToken(const std::wstring& stream)
+	CToken* CLexer::_scanToken(const std::string& stream)
 	{
-		W16 currChar = _getCurrChar(stream);
+		C8 currChar = _getCurrChar(stream);
 
 		//try to recognize reserved symbols' sequences
-		std::wstring expectedToken;
+		std::string expectedToken;
 
 		expectedToken.push_back(currChar);
 		
-		std::map<std::wstring, E_TOKEN_TYPE>::const_iterator tokenIter, additionalTokenIter;
+		std::map<std::string, E_TOKEN_TYPE>::const_iterator tokenIter, additionalTokenIter;
 
 		if ((tokenIter = mReservedTokensMap.find(expectedToken)) != mReservedTokensMap.end())
 		{
@@ -324,11 +324,11 @@ namespace gplc
 		currChar = _getCurrChar(stream);
 		
 		//try to read identifier's token
-		if (iswalpha(currChar) || currChar == L'_') 
+		if (iswalpha(currChar) || currChar == '_') 
 		{
-			std::wstring identifierName;
+			std::string identifierName;
 
-			while (iswalnum(currChar) || currChar == L'_')
+			while (iswalnum(currChar) || currChar == '_')
 			{
 				identifierName.push_back(currChar);
 
@@ -338,7 +338,7 @@ namespace gplc
 			//try to detect reserved keywords here
 			
 			///<TODO: think about the way to do it 1)hardcode here; 2)loop over keywords from prepared file
-			std::map<std::wstring, E_TOKEN_TYPE>::const_iterator token;
+			std::map<std::string, E_TOKEN_TYPE>::const_iterator token;
 
 			if ((token = mReservedTokensMap.find(identifierName)) != mReservedTokensMap.end())
 			{
@@ -348,15 +348,15 @@ namespace gplc
 			return new CIdentifierToken(identifierName, mCurrPos);	//if it's not reserved just return it as identifier
 		}
 
-		if (iswdigit(currChar) || currChar == L'.') //try to get number
+		if (iswdigit(currChar) || currChar == '.') //try to get number
 		{
-			std::wstring numberStr;
+			std::string numberStr;
 
 			U8 numberType = NB_INT | NB_SIGNED; // flags: 0x0 - int; 0x1 - floating point; 0x80 - signed; 0x40 - long; 0x20 - long; 
 			//0x10 - hex; 0x8 - oct; 0x4 - bin; floating point value always has sign bit and cannot has hex, oct, bin representations' bits.
 
 			//try parse decimal integer or floating point value
-			if (currChar != L'0' || (currChar == L'0' && _peekNextChar(stream, 1) == L'.'))
+			if (currChar != '0' || (currChar == '0' && _peekNextChar(stream, 1) == '.'))
 			{
 				while (iswdigit(currChar)) // pass integers
 				{                                           
@@ -365,11 +365,11 @@ namespace gplc
 					currChar = _getNextChar(stream);
 				}
 
-				if (currChar == L'.' && iswdigit(_peekNextChar(stream, 1))) //it's floating point value
+				if (currChar == '.' && iswdigit(_peekNextChar(stream, 1))) //it's floating point value
 				{
 					numberType = NB_FLOAT;
 
-					while (iswdigit(currChar) || currChar == L'.') // pass the rest part of the number
+					while (iswdigit(currChar) || currChar == '.') // pass the rest part of the number
 					{
 						numberStr.push_back(currChar);
 
@@ -377,13 +377,13 @@ namespace gplc
 					}
 				}
 			}
-			else if (currChar == L'0') //hex, oct or bin representation of an integer value
+			else if (currChar == '0') //hex, oct or bin representation of an integer value
 			{
 				numberStr.push_back(currChar);
 
 				currChar = _getNextChar(stream);
 
-				if (currChar == L'x' || currChar == L'X') //hex value
+				if (currChar == 'x' || currChar == 'X') //hex value
 				{
 					numberType |= NB_HEX; //set the flag of hexademical numeral system
 
@@ -391,7 +391,7 @@ namespace gplc
 
 					currChar = _getNextChar(stream);
 
-					const std::wstring hexAlphabet = L"abcdefABCDEF"; //not including 0-9 digits
+					const std::string hexAlphabet = "abcdefABCDEF"; //not including 0-9 digits
 
 					while (iswdigit(currChar) || (hexAlphabet.find_first_of(currChar) != -1))
 					{
@@ -400,13 +400,13 @@ namespace gplc
 						currChar = _getNextChar(stream);
 					}
 				}
-				else if (currChar == L'b' || currChar == L'B') //bin value
+				else if (currChar == 'b' || currChar == 'B') //bin value
 				{
 					numberType |= NB_BIN; //set the flag of binary numeral system
 					
 					currChar = _getNextChar(stream);
 
-					while (currChar == L'0' || currChar == L'1')
+					while (currChar == '0' || currChar == '1')
 					{
 						numberStr.push_back(currChar);
 
@@ -435,7 +435,7 @@ namespace gplc
 			}
 
 			//check up literals
-			const std::wstring allowableIntLiterals = L"lLuUsS";
+			const std::string allowableIntLiterals = "lLuUsS";
 
 			U8 literalsCount = 0x0; 
 
@@ -448,7 +448,7 @@ namespace gplc
 					{
 						switch (currChar) //only first literal of 'u' or 's' influences on number's mask
 						{
-							case L'l':case L'L':
+							case 'l':case 'L':
 
 								if (!(numberType & NB_LONG))
 								{
@@ -460,11 +460,11 @@ namespace gplc
 								}
 
 								break;
-							case L'u':case L'U':
+							case 'u':case 'U':
 								numberType <<= 1; //clear 8th bit
 								numberType >>= 1; 
 								break;
-							case L's':case L'S':
+							case 's':case 'S':
 								numberType |= NB_SIGNED;
 								break;
 						}
@@ -519,15 +519,15 @@ namespace gplc
 
 							if (numberType & NB_LONG && !(numberType & NB_ADD_LONG)) // long
 							{
-								return new CTypedValueToken<UL32>(TT_UINT, mCurrPos, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<UL32>(TT_UINT, mCurrPos, strtoul(numberStr.c_str(), nullptr, numSysBasis));
 							}
 							else if (numberType & NB_LONG && numberType & NB_ADD_LONG) // long long
 							{
-								return new CTypedValueToken<U64>(TT_UINT, mCurrPos, wcstoull(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<U64>(TT_UINT, mCurrPos, strtoull(numberStr.c_str(), nullptr, numSysBasis));
 							}
 							else
 							{
-								return new CTypedValueToken<U32>(TT_UINT, mCurrPos, wcstoul(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<U32>(TT_UINT, mCurrPos, strtoul(numberStr.c_str(), nullptr, numSysBasis));
 							}
 
 							break;
@@ -536,21 +536,21 @@ namespace gplc
 
 							if (numberType & NB_LONG && !(numberType & NB_ADD_LONG)) // long
 							{
-								return new CTypedValueToken<IL32>(TT_INT, mCurrPos, wcstol(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<IL32>(TT_INT, mCurrPos, (numberStr.c_str(), nullptr, numSysBasis));
 							}
 							else if (numberType & NB_LONG && numberType & NB_ADD_LONG) // long long
 							{
-								return new CTypedValueToken<I64>(TT_INT, mCurrPos, wcstoll(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<I64>(TT_INT, mCurrPos, strtoll(numberStr.c_str(), nullptr, numSysBasis));
 							}
 							else
 							{
-								return new CTypedValueToken<I32>(TT_INT, mCurrPos, wcstol(numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<I32>(TT_INT, mCurrPos, strtol(numberStr.c_str(), nullptr, numSysBasis));
 							}
 
 							break;
 
 						default:
-							return new CTypedValueToken<I32>(TT_INT, mCurrPos, wcstol(numberStr.c_str(), nullptr, numSysBasis));
+							return new CTypedValueToken<I32>(TT_INT, mCurrPos, strtol(numberStr.c_str(), nullptr, numSysBasis));
 							break;
 					}
 
@@ -561,10 +561,10 @@ namespace gplc
 					switch (numberType & NB_LONG) //1 - double; 0; - float
 					{
 						case 0:
-							return new CTypedValueToken<F32>(TT_FLOAT, mCurrPos, wcstof(numberStr.c_str(), nullptr));
+							return new CTypedValueToken<F32>(TT_FLOAT, mCurrPos, atof(numberStr.c_str()));
 							break;
 						case NB_LONG:
-							return new CTypedValueToken<F64>(TT_DOUBLE, mCurrPos, _wtof(numberStr.c_str()));
+							return new CTypedValueToken<F64>(TT_DOUBLE, mCurrPos, atof(numberStr.c_str()));
 							break;
 					}
 
@@ -577,32 +577,32 @@ namespace gplc
 
 		//try to get a string
 		
-		std::wstring strConstantValue;
+		std::string strConstantValue;
 
-		if (currChar == L'\"')
+		if (currChar == '\"')
 		{
-			while ((currChar = _getNextChar(stream)) != L'\"' && currChar != WEOF)
+			while ((currChar = _getNextChar(stream)) != '\"' && currChar != EOF)
 			{
 				strConstantValue.push_back(currChar);
 			}
 
-			if (currChar == WEOF)
+			if (currChar == EOF)
 			{
 				return nullptr;
 			}
 
 			_getNextChar(stream); //get \"
 
-			return new CTypedValueToken<std::wstring>(TT_STRING, mCurrPos - 1, strConstantValue);
+			return new CTypedValueToken<std::string>(TT_STRING, mCurrPos - 1, strConstantValue);
 		}
 		
 		//try to get a char value
 		
-		if (currChar == L'\'')
+		if (currChar == '\'')
 		{
 			currChar = _getNextChar(stream);
 
-			if (_peekNextChar(stream, 1) != L'\'')
+			if (_peekNextChar(stream, 1) != '\'')
 			{
 				return nullptr;
 			}
@@ -610,19 +610,19 @@ namespace gplc
 			_getNextChar(stream); //get '\''
 			_getNextChar(stream); //get next symbol
 
-			return new CTypedValueToken<W16>(TT_CHAR, mCurrPos - 2, currChar);
+			return new CTypedValueToken<C8>(TT_CHAR, mCurrPos - 2, currChar);
 		}
 		
 		return nullptr;
 	}
 	
-	std::map<std::wstring, E_TOKEN_TYPE> CLexer::_readTokensMapFromFile(const std::wstring& filename, Result& result)
+	std::map<std::string, E_TOKEN_TYPE> CLexer::_readTokensMapFromFile(const std::string& filename, Result& result)
 	{
-		std::map<std::wstring, E_TOKEN_TYPE> tokensMap;
+		std::map<std::string, E_TOKEN_TYPE> tokensMap;
 
 		result = RV_SUCCESS;
 
-		std::wifstream configFileWithTokens;
+		std::ifstream configFileWithTokens;
 		
 		configFileWithTokens.open(filename.c_str());
 
@@ -634,9 +634,9 @@ namespace gplc
 		}
 
 		//parse config file
-		std::wstring currConfigLine;
-		std::wstring tokenName;
-		std::wstring value;
+		std::string currConfigLine;
+		std::string tokenName;
+		std::string value;
 
 		U32 pos     = 0;
 		U32 prevPos = 0;
@@ -646,7 +646,7 @@ namespace gplc
 			//the parsing of a current config line
 			//its representation (token_name  token_value_in_enum_E_TOKEN_TYPE)
 
-			pos = currConfigLine.find_first_of(L'(');
+			pos = currConfigLine.find_first_of('(');
 
 			if (pos == -1) // there is no open bracket
 			{
@@ -656,11 +656,11 @@ namespace gplc
 			}
 
 			//skip white spaces
-			pos     = currConfigLine.find_first_not_of(L' ', pos + 1);
+			pos     = currConfigLine.find_first_not_of(' ', pos + 1);
 			prevPos = pos;
 
 			//try to get a name of token
-			pos = currConfigLine.find_first_of(L' ', pos);
+			pos = currConfigLine.find_first_of(' ', pos);
 
 			if (pos == -1) // delimiter between name and value is absent
 			{
@@ -672,11 +672,11 @@ namespace gplc
 			tokenName = currConfigLine.substr(prevPos, pos - prevPos);
 			
 			//skip white spaces
-			pos     = currConfigLine.find_first_not_of(L' ', pos);
+			pos     = currConfigLine.find_first_not_of(' ', pos);
 			prevPos = pos;
 			
 			//check close bracket
-			pos = currConfigLine.find_first_of(L')', pos);
+			pos = currConfigLine.find_first_of(')', pos);
 
 			if (pos == -1) // there is no close bracket
 			{
@@ -688,12 +688,12 @@ namespace gplc
 			value = currConfigLine.substr(prevPos, pos - prevPos);
 			
 			//erase all white spaces if they exist
-			while ((pos = value.find(L' ')) != -1)
+			while ((pos = value.find(' ')) != -1)
 			{
 				value.erase(pos, 1);
 			}
 
-			tokensMap.insert(std::make_pair(tokenName, (E_TOKEN_TYPE)_wtoi(value.c_str())));
+			tokensMap.insert(std::make_pair(tokenName, (E_TOKEN_TYPE)atoi(value.c_str())));
 		}
 
 		configFileWithTokens.close();

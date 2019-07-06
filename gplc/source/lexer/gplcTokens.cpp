@@ -47,16 +47,16 @@ namespace gplc
 		return mPos;
 	}
 
-	std::wstring CToken::ToString() const
+	std::string CToken::ToString() const
 	{
-		return L"(Token: TT_DEFAULT)";
+		return "(Token: TT_DEFAULT)";
 	}
 
 	/*!
 		CIdentifierToken defenition
 	*/
 
-	CIdentifierToken::CIdentifierToken(const std::wstring& name, U32 posAtStream):
+	CIdentifierToken::CIdentifierToken(const std::string& name, U32 posAtStream):
 		CToken(TT_IDENTIFIER, posAtStream), mName(name)
 	{
 	}
@@ -75,7 +75,7 @@ namespace gplc
 	{
 	}
 
-	const std::wstring CIdentifierToken::GetName() const
+	const std::string CIdentifierToken::GetName() const
 	{
 		return mName;
 	}

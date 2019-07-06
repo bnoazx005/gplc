@@ -178,7 +178,7 @@ namespace gplc
 	{
 	}
 
-	CASTIdentifierNode::CASTIdentifierNode(const std::wstring& name) :
+	CASTIdentifierNode::CASTIdentifierNode(const std::string& name) :
 		CASTNode(NT_IDENTIFIER), mName(name)
 	{
 	}
@@ -187,7 +187,7 @@ namespace gplc
 	{
 	}
 
-	const std::wstring& CASTIdentifierNode::GetName() const
+	const std::string& CASTIdentifierNode::GetName() const
 	{
 		return mName;
 	}

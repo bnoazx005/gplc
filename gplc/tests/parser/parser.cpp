@@ -8,7 +8,7 @@ TEST_CASE("Parser's tests")
 	gplc::TParserErrorInfo* errorInfo;
 
 	CStubLexer* pStubLexerObject = new CStubLexer();
-	pStubLexerObject->Init(L"identifier", L".tokens");
+	pStubLexerObject->Init("identifier", ".tokens");
 
 	gplc::CParser* pParser = new gplc::CParser();
 

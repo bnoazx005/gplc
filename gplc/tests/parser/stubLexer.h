@@ -29,7 +29,7 @@ class CStubLexer : public gplc::ILexer
 			\return A function's result code.
 		*/
 
-		virtual gplc::Result Init(const std::wstring& inputStream, const std::wstring& configFilename);
+		virtual gplc::Result Init(const std::string& inputStream, const std::string& configFilename);
 
 		/*!
 			\brief The function clears the current state of an object.

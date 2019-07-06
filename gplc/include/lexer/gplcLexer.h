@@ -44,7 +44,7 @@ namespace gplc
 				\return A function's result code.
 			*/
 
-			virtual Result Init(const std::wstring& inputStream, const std::wstring& configFilename) = 0;
+			virtual Result Init(const std::string& inputStream, const std::string& configFilename) = 0;
 
 			/*!
 				\brief The function clears the current state of an object.
@@ -124,7 +124,7 @@ namespace gplc
 				\return A function's result code.
 			*/
 
-			virtual Result Init(const std::wstring& inputStream, const std::wstring& configFilename);
+			virtual Result Init(const std::string& inputStream, const std::string& configFilename);
 
 			/*!
 				\brief The function clears the current state of an object.
@@ -194,7 +194,7 @@ namespace gplc
 				\return A wide character at current position of the inner pointer.
 			*/
 
-			W16 _getCurrChar(const std::wstring& stream) const;
+			C8 _getCurrChar(const std::string& stream) const;
 
 			/*!
 				\brief The private method returns the next character.
@@ -204,7 +204,7 @@ namespace gplc
 				\return A wide character after current position of the inner pointer.
 			*/
 
-			W16 _getNextChar(const std::wstring& stream);
+			C8 _getNextChar(const std::string& stream);
 			
 			/*!
 				\brief The private method returns a character, which is placed after current one with specified offset.
@@ -215,7 +215,7 @@ namespace gplc
 				\return A wide character at specified position.
 			*/
 
-			W16 _peekNextChar(const std::wstring& stream, U32 offset = 1) const;
+			C8 _peekNextChar(const std::string& stream, U32 offset = 1) const;
 
 			/*!
 				\brief The private method reads input stream and returns recognized tokens.
@@ -225,7 +225,7 @@ namespace gplc
 				\return A recognized token.
 			*/
 
-			CToken* _scanToken(const std::wstring& stream);
+			CToken* _scanToken(const std::string& stream);
 
 			/*!
 				\brief The private method reads a specified file with tokens and contructs a map with following structure map<std::wstring, E_TOKEN_TYPE>.
@@ -236,16 +236,16 @@ namespace gplc
 				\return A map of std::wstring to E_TOKEN_TYPE.
 			*/
 
-			std::map<std::wstring, E_TOKEN_TYPE> _readTokensMapFromFile(const std::wstring& filename, Result& result);
+			std::map<std::string, E_TOKEN_TYPE> _readTokensMapFromFile(const std::string& filename, Result& result);
 		private:
-			U32                                  mCurrPos;
-			U32                                  mCurrLine;
-			U32                                  mCurrTokenIndex;
+			U32                                 mCurrPos;
+			U32                                 mCurrLine;
+			U32                                 mCurrTokenIndex;
 
-			U32                                  mSavedTokenIndex;
+			U32                                 mSavedTokenIndex;
 
-			std::map<std::wstring, E_TOKEN_TYPE> mReservedTokensMap;
-			std::vector<CToken*>                 mTokens;
+			std::map<std::string, E_TOKEN_TYPE> mReservedTokensMap;
+			std::vector<CToken*>                mTokens;
 	};
 }
 
