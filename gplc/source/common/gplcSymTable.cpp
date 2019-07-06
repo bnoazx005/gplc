@@ -85,23 +85,23 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 
-	Result CSymTable::AddVariable(const std::wstring& variableName, const CType* typeDesc)
+	Result CSymTable::AddVariable(const std::string& variableName, const CType* typeDesc)
 	{
 		mpCurrScopeEntry->mVariables.insert(std::make_pair(variableName, typeDesc));
 
 		return RV_FAIL;
 	}
 	
-	const CType* CSymTable::LookUp(const std::wstring& variableName) const
+	const CType* CSymTable::LookUp(const std::string& variableName) const
 	{
 		return _lookUp(mpGlobalScopeEntry, variableName);
 	}
 
-	const CType* CSymTable::_lookUp(const TSymTableEntry* entry, const std::wstring& variableName) const
+	const CType* CSymTable::_lookUp(const TSymTableEntry* entry, const std::string& variableName) const
 	{
-		std::map<std::wstring, const CType*> table = entry->mVariables;
+		std::map<std::string, const CType*> table = entry->mVariables;
 
-		std::map<std::wstring, const CType*>::const_iterator varDesc = table.cend();
+		std::map<std::string, const CType*>::const_iterator varDesc = table.cend();
 
 		if ((varDesc = table.find(variableName)) != table.cend())
 		{
@@ -135,11 +135,11 @@ namespace gplc
 
 		TSymTableEntry* pScope = *scope;
 
-		std::map<std::wstring, const CType*> currTable = pScope->mVariables;
+		std::map<std::string, const CType*> currTable = pScope->mVariables;
 
 		if (!currTable.empty())
 		{
-			std::map<std::wstring, const CType*>::iterator var = currTable.begin();
+			std::map<std::string, const CType*>::iterator var = currTable.begin();
 
 			for (var = currTable.begin(); var != currTable.end(); var++)
 			{

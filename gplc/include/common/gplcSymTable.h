@@ -37,11 +37,11 @@ namespace gplc
 
 			struct TSymTableEntry
 			{
-				TSymTableEntry*                      mParentScope;
+				TSymTableEntry*                     mParentScope;
 
-				std::vector<TSymTableEntry*>         mNestedScopes;
+				std::vector<TSymTableEntry*>        mNestedScopes;
 
-				std::map<std::wstring, const CType*> mVariables;
+				std::map<std::string, const CType*> mVariables;
 			};
 
 		#pragma pack(pop)
@@ -54,9 +54,9 @@ namespace gplc
 
 			virtual Result LeaveScope() = 0;
 
-			virtual Result AddVariable(const std::wstring& variableName, const CType* typeDesc) = 0;
+			virtual Result AddVariable(const std::string& variableName, const CType* typeDesc) = 0;
 
-			virtual const CType* LookUp(const std::wstring& variableName) const = 0;
+			virtual const CType* LookUp(const std::string& variableName) const = 0;
 		protected:
 			ISymTable(const ISymTable& table);
 	};
@@ -72,17 +72,17 @@ namespace gplc
 			CSymTable();
 			virtual ~CSymTable();
 
-			virtual Result EnterScope();
+			Result EnterScope() override;
 
-			virtual Result LeaveScope();
+			Result LeaveScope() override;
 
-			virtual Result AddVariable(const std::wstring& variableName, const CType* typeDesc);
+			Result AddVariable(const std::string& variableName, const CType* typeDesc) override;
 
-			virtual const CType* LookUp(const std::wstring& variableName) const;
+			const CType* LookUp(const std::string& variableName) const override;
 		protected:
 			CSymTable(const CSymTable& table);
 
-			const CType* _lookUp(const TSymTableEntry* entry, const std::wstring& variableName) const;
+			const CType* _lookUp(const TSymTableEntry* entry, const std::string& variableName) const;
 
 			void _removeScope(TSymTableEntry** scope);
 		protected:

@@ -32,8 +32,8 @@ namespace gplc
 	class ILexer
 	{
 		public:
-			ILexer() {}
-			virtual ~ILexer() {}
+			ILexer() = default;
+			virtual ~ILexer() = default;
 
 			/*!
 				\brief The function reads input stream of characters and prepares a tokens' sequence.
@@ -112,16 +112,7 @@ namespace gplc
 	class CLexer : public ILexer
 	{
 		public:
-			/*!
-				\brief Default contructor of the class
-			*/
-
 			CLexer();
-
-			/*!
-				\brief Default contructor of the class
-			*/
-
 			virtual ~CLexer();
 
 			/*!
