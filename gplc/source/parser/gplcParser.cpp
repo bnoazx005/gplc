@@ -148,7 +148,7 @@ namespace gplc
 	/*!
 		\brief Try to parse a single statement
 
-		<statement> ::= <operator> ; ;
+		<statement> ::= <operator> ;
 
 		\param[in] lexer A pointer to lexer's object
 
@@ -168,8 +168,6 @@ namespace gplc
 
 			return pOperator;
 		}*/
-
-		lexer->GetNextToken(); //get ;
 		
 		return pOperator;
 	}
@@ -226,6 +224,9 @@ namespace gplc
 	{
 		CASTNode* pDeclaration = nullptr;
 
+		CASTNode* pIdentifiers = _parseIdentifiers(lexer);
+		/*CASTNode* pTypeDecl = _parseTypeDecl(lexer);
+
 		if ((pDeclaration = _parseIdentifiersDecl(lexer)))
 		{
 			return pDeclaration;
@@ -233,57 +234,106 @@ namespace gplc
 		else
 		{
 			return nullptr;
-		}
+		}*/
 
 		return pDeclaration;
 	}
 
-	CASTNode* CParser::_parseIdentifiersDecl(ILexer* lexer)
+	/*!
+		\brief Try to parse an identifiers list
+
+		<identifiers> ::= <identifier>
+		<identifier> , <identifiers>;
+
+		\param[in] lexer A pointer to lexer's object
+
+		\return A pointer to node, which contains identifiers' names
+	*/
+
+	CASTNode* CParser::_parseIdentifiers(ILexer* lexer)
 	{
-		CASTNode* pDeclaration = nullptr;
-
-		lexer->SavePosition(); // save the current position at the input stream
-
-		//check the rule accordance
-		const CToken* pTmpToken = nullptr;
-
-		const CIdentifierToken* pIdToken = nullptr;
-		
-		do 
-		{
-			if (pTmpToken != nullptr)
-			{
-				pIdToken = dynamic_cast<const CIdentifierToken*>(pTmpToken);
-
-				pDeclaration->AttachChild(new CASTIdentifierNode(pIdToken->GetName()));
-			}
-
-			pTmpToken = lexer->GetNextToken();
-		}
-		while (pTmpToken->GetType() == TT_IDENTIFIER);
-
-		U32 numOfReadIdentifiers = pDeclaration->GetChildrenCount();
-
-		//if (numOfReadIdentifiers < 1 || 
-		//	!SUCCESS(_expect(TT_COLON, lexer->GetCurrToken(), errorInfo)) ||
-		//	lexer->GetNextToken()->GetType() == TT_ASSIGN_OP) // it's not a declaration
-		//{
-		//	lexer->RestorePosition();
-
-		//	return nullptr;
-		//}
-		//
-		//CASTNode* pTypeNode = nullptr;
-		//
-		//if (!(pTypeNode = _parseType(lexer, errorInfo)))
-		//{
-		//	lexer->RestorePosition();
-
-		//	return nullptr;
-		//}
-
-		return pDeclaration;
+		return nullptr;
 	}
+
+	/*!
+		\brief Try to parse a single identifier
+
+		\param[in] lexer A pointer to lexer's object
+
+		\return A pointer to node, which contains identifier
+	*/
+
+	CASTNode* CParser::_parseSingleIdentifier(ILexer* lexer)
+	{
+		const CToken* pCurrToken = lexer->GetCurrToken();
+
+		const CIdentifierToken* pIdentifierToken = dynamic_cast<const CIdentifierToken*>(pCurrToken);
+
+		if (!pIdentifierToken) { //it's not an identifier
+			TParserErrorInfo errorInfo;
+
+			memset(&errorInfo, 0, sizeof(errorInfo));
+
+			C8 tmpStrBuf[255];
+
+			sprintf_s(tmpStrBuf, sizeof(C8) * 255, "An unexpected token was found at %d. %d instead of %d\0", pCurrToken->GetPos(), pCurrToken->GetType(), TT_IDENTIFIER);
+
+			errorInfo.mMessage = tmpStrBuf;
+			errorInfo.mErrorCode = RV_UNEXPECTED_TOKEN;
+			errorInfo.mPos = pCurrToken->GetPos();
+
+			OnErrorOutput.Invoke(errorInfo);
+		}
+
+		return new CASTIdentifierNode(pIdentifierToken->GetName());
+	}
+
+	//CASTNode* CParser::_parseIdentifiersDecl(ILexer* lexer)
+	//{
+	//	CASTNode* pDeclaration = nullptr;
+
+	//	lexer->SavePosition(); // save the current position at the input stream
+
+	//	//check the rule accordance
+	//	const CToken* pTmpToken = nullptr;
+
+	//	const CIdentifierToken* pIdToken = nullptr;
+	//	
+	//	do 
+	//	{
+	//		if (pTmpToken != nullptr)
+	//		{
+	//			pIdToken = dynamic_cast<const CIdentifierToken*>(pTmpToken);
+
+	//			pDeclaration->AttachChild(new CASTIdentifierNode(pIdToken->GetName()));
+	//		}
+
+	//		pTmpToken = lexer->GetNextToken();
+	//	}
+	//	while (pTmpToken->GetType() == TT_IDENTIFIER);
+
+	//	U32 numOfReadIdentifiers = pDeclaration->GetChildrenCount();
+
+	//	//if (numOfReadIdentifiers < 1 || 
+	//	//	!SUCCESS(_expect(TT_COLON, lexer->GetCurrToken(), errorInfo)) ||
+	//	//	lexer->GetNextToken()->GetType() == TT_ASSIGN_OP) // it's not a declaration
+	//	//{
+	//	//	lexer->RestorePosition();
+
+	//	//	return nullptr;
+	//	//}
+	//	//
+	//	//CASTNode* pTypeNode = nullptr;
+	//	//
+	//	//if (!(pTypeNode = _parseType(lexer, errorInfo)))
+	//	//{
+	//	//	lexer->RestorePosition();
+
+	//	//	return nullptr;
+	//	//}
+
+	//	return pDeclaration;
+	//}
 
 	/*!
 		\brief Try to parse a type

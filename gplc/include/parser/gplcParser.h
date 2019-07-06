@@ -90,7 +90,7 @@ namespace gplc
 			/*!
 				\brief Try to parse a single statement
 
-				<statement> ::= <operator> ; ; 
+				<statement> ::= <operator> ;
 				
 				\todo There is no <directive> non-terminal. It will be added later.
 
@@ -126,7 +126,30 @@ namespace gplc
 
 			CASTNode* _parseDeclaration(ILexer* lexer);
 
-			CASTNode* _parseIdentifiersDecl(ILexer* lexer);
+			/*!
+				\brief Try to parse an identifiers list
+
+				<identifiers> ::= <identifier> 
+								  <identifier> , <identifiers>;
+
+				\param[in] lexer A pointer to lexer's object
+
+				\return A pointer to node, which contains identifiers' names
+			*/
+
+			CASTNode* _parseIdentifiers(ILexer* lexer);
+
+			/*!
+				\brief Try to parse a single identifier
+				
+				\param[in] lexer A pointer to lexer's object
+
+				\return A pointer to node, which contains identifier
+			*/
+
+			CASTNode* _parseSingleIdentifier(ILexer* lexer);
+
+			//CASTNode* _parseIdentifiersDecl(ILexer* lexer);
 
 			CASTNode* _parseStructDecl(ILexer* lexer);
 
