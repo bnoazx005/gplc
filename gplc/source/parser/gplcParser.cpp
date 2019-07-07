@@ -186,9 +186,10 @@ namespace gplc
 	{
 		CASTNode* pOperator = nullptr;
 
-		if ((pOperator = _parseDeclaration(lexer)))
+		if (_match(lexer->GetCurrToken(), TT_IDENTIFIER) && 
+			(_match(lexer->PeekNextToken(1), TT_COMMA) || _match(lexer->PeekNextToken(1), TT_COLON)))
 		{
-			return pOperator;
+			return _parseDeclaration(lexer);
 		}
 
 		/*if ((pOperator = _parseDeclaration(lexer)))
@@ -222,19 +223,18 @@ namespace gplc
 
 	CASTNode* CParser::_parseDeclaration(ILexer* lexer)
 	{
-		CASTNode* pDeclaration = nullptr;
+		CASTNode* pDeclaration = new CASTNode(NT_DECL);
 
-		CASTNode* pIdentifiers = _parseIdentifiers(lexer);
-		/*CASTNode* pTypeDecl = _parseTypeDecl(lexer);
+		pDeclaration->AttachChild(_parseIdentifiers(lexer));
 
-		if ((pDeclaration = _parseIdentifiersDecl(lexer)))
+		if (!SUCCESS(_expect(TT_COLON, lexer->GetCurrToken())))
 		{
 			return pDeclaration;
 		}
-		else
-		{
-			return nullptr;
-		}*/
+
+		lexer->GetNextToken();
+
+		pDeclaration->AttachChild(_parseType(lexer));
 
 		return pDeclaration;
 	}
@@ -252,89 +252,31 @@ namespace gplc
 
 	CASTNode* CParser::_parseIdentifiers(ILexer* lexer)
 	{
-		return nullptr;
+		CASTNode* pIdentifiersRoot = new CASTNode(NT_IDENTIFIERS_LIST);
+
+		const CToken* pCurrToken = nullptr;
+
+		do
+		{
+			pCurrToken = lexer->GetCurrToken();
+
+			if (pCurrToken->GetType() == TT_COMMA)
+			{
+				pCurrToken = lexer->GetNextToken(); // should be identifier
+			}
+
+			if (!SUCCESS(_expect(TT_IDENTIFIER, pCurrToken)))
+			{
+				return pIdentifiersRoot;
+			}
+
+			pIdentifiersRoot->AttachChild(new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()));
+		} 
+		while (lexer->GetNextToken()->GetType() == TT_COMMA || lexer->GetCurrToken()->GetType() == TT_IDENTIFIER);
+
+		return pIdentifiersRoot;
 	}
-
-	/*!
-		\brief Try to parse a single identifier
-
-		\param[in] lexer A pointer to lexer's object
-
-		\return A pointer to node, which contains identifier
-	*/
-
-	CASTNode* CParser::_parseSingleIdentifier(ILexer* lexer)
-	{
-		const CToken* pCurrToken = lexer->GetCurrToken();
-
-		const CIdentifierToken* pIdentifierToken = dynamic_cast<const CIdentifierToken*>(pCurrToken);
-
-		if (!pIdentifierToken) { //it's not an identifier
-			TParserErrorInfo errorInfo;
-
-			memset(&errorInfo, 0, sizeof(errorInfo));
-
-			C8 tmpStrBuf[255];
-
-			sprintf_s(tmpStrBuf, sizeof(C8) * 255, "An unexpected token was found at %d. %d instead of %d\0", pCurrToken->GetPos(), pCurrToken->GetType(), TT_IDENTIFIER);
-
-			errorInfo.mMessage = tmpStrBuf;
-			errorInfo.mErrorCode = RV_UNEXPECTED_TOKEN;
-			errorInfo.mPos = pCurrToken->GetPos();
-
-			OnErrorOutput.Invoke(errorInfo);
-		}
-
-		return new CASTIdentifierNode(pIdentifierToken->GetName());
-	}
-
-	//CASTNode* CParser::_parseIdentifiersDecl(ILexer* lexer)
-	//{
-	//	CASTNode* pDeclaration = nullptr;
-
-	//	lexer->SavePosition(); // save the current position at the input stream
-
-	//	//check the rule accordance
-	//	const CToken* pTmpToken = nullptr;
-
-	//	const CIdentifierToken* pIdToken = nullptr;
-	//	
-	//	do 
-	//	{
-	//		if (pTmpToken != nullptr)
-	//		{
-	//			pIdToken = dynamic_cast<const CIdentifierToken*>(pTmpToken);
-
-	//			pDeclaration->AttachChild(new CASTIdentifierNode(pIdToken->GetName()));
-	//		}
-
-	//		pTmpToken = lexer->GetNextToken();
-	//	}
-	//	while (pTmpToken->GetType() == TT_IDENTIFIER);
-
-	//	U32 numOfReadIdentifiers = pDeclaration->GetChildrenCount();
-
-	//	//if (numOfReadIdentifiers < 1 || 
-	//	//	!SUCCESS(_expect(TT_COLON, lexer->GetCurrToken(), errorInfo)) ||
-	//	//	lexer->GetNextToken()->GetType() == TT_ASSIGN_OP) // it's not a declaration
-	//	//{
-	//	//	lexer->RestorePosition();
-
-	//	//	return nullptr;
-	//	//}
-	//	//
-	//	//CASTNode* pTypeNode = nullptr;
-	//	//
-	//	//if (!(pTypeNode = _parseType(lexer, errorInfo)))
-	//	//{
-	//	//	lexer->RestorePosition();
-
-	//	//	return nullptr;
-	//	//}
-
-	//	return pDeclaration;
-	//}
-
+	
 	/*!
 		\brief Try to parse a type
 
@@ -351,24 +293,7 @@ namespace gplc
 
 	CASTNode* CParser::_parseType(ILexer* lexer)
 	{
-		CASTNode* pOperator = nullptr;
-/*
-		if ((pOperator = _parseBuiltInType(lexer)))
-		{
-			return pOperator;
-		}
-		else
-		{
-			errorInfo = new TParserErrorInfo();
-
-			errorInfo->mMessage = "Unrecognized tokens sequence";
-			errorInfo->mMessage = RV_UNRECOGNIZED_TOKENS_SEQ;
-			errorInfo->mPos = lexer->GetCurrToken()->GetPos();
-
-			return nullptr;
-		}*/
-
-		return nullptr;
+		return _parseBuiltInType(lexer);
 	}
 
 	/*!
@@ -467,57 +392,50 @@ namespace gplc
 				switch (pTypeName->GetType())
 				{
 					case TT_INT8_TYPE:
-						pBuiltinType = new CASTNode(NT_INT8);
-						break;
+						return new CASTNode(NT_INT8);
 
 					case TT_INT16_TYPE:
-						pBuiltinType = new CASTNode(NT_INT16);
-						break;
+						return new CASTNode(NT_INT16);
 
 					case TT_INT32_TYPE:
-						pBuiltinType = new CASTNode(NT_INT32);
-						break;
+						return new CASTNode(NT_INT32);						
 
 					case TT_INT64_TYPE:
-						pBuiltinType = new CASTNode(NT_INT64);
-						break;
+						return new CASTNode(NT_INT64);						
 
 					case TT_UINT8_TYPE:
-						pBuiltinType = new CASTNode(NT_UINT8);
-						break;
+						return new CASTNode(NT_UINT8);						
 
 					case TT_UINT16_TYPE:
-						pBuiltinType = new CASTNode(NT_UINT16);
-						break;
+						return new CASTNode(NT_UINT16);						
 
 					case TT_UINT32_TYPE:
-						pBuiltinType = new CASTNode(NT_UINT32);
-						break;
+						return new CASTNode(NT_UINT32);						
 
 					case TT_UINT64_TYPE:
-						pBuiltinType = new CASTNode(NT_UINT64);
-						break;
+						return new CASTNode(NT_UINT64);						
 
 					case TT_CHAR_TYPE:
-						pBuiltinType = new CASTNode(NT_CHAR);
-						break;
+						return new CASTNode(NT_CHAR);						
 
 					case TT_STRING_TYPE:
-						pBuiltinType = new CASTNode(NT_STRING);
-						break;
+						return new CASTNode(NT_STRING);						
 
 					case TT_BOOL_TYPE:
-						pBuiltinType = new CASTNode(NT_BOOL);
-						break;
+						return new CASTNode(NT_BOOL);
 
 					case TT_VOID_TYPE:
-						pBuiltinType = new CASTNode(NT_VOID);
-						break;
+						return new CASTNode(NT_VOID);
 				}
 
 				break;
 		}
 
 		return pBuiltinType;
+	}
+
+	bool CParser::_match(const CToken* pToken, E_TOKEN_TYPE type)
+	{
+		return pToken->GetType() == type;
 	}
 }

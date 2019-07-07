@@ -139,18 +139,6 @@ namespace gplc
 
 			CASTNode* _parseIdentifiers(ILexer* lexer);
 
-			/*!
-				\brief Try to parse a single identifier
-				
-				\param[in] lexer A pointer to lexer's object
-
-				\return A pointer to node, which contains identifier
-			*/
-
-			CASTNode* _parseSingleIdentifier(ILexer* lexer);
-
-			//CASTNode* _parseIdentifiersDecl(ILexer* lexer);
-
 			CASTNode* _parseStructDecl(ILexer* lexer);
 
 			/*!
@@ -189,6 +177,8 @@ namespace gplc
 			*/
 
 			CASTNode* _parseBuiltInType(ILexer* lexer);
+
+			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 		private:
 	};
 }

@@ -5,7 +5,7 @@
 
 TEST_CASE("Parser's tests")
 {
-	gplc::TParserErrorInfo* errorInfo;
+	gplc::TParserErrorInfo* pErrorInfo = nullptr;
 
 	CStubLexer* pStubLexerObject = new CStubLexer();
 	pStubLexerObject->Init("identifier", ".tokens");
@@ -21,9 +21,9 @@ TEST_CASE("Parser's tests")
 		//delete pMain;
 	}
 
-	if (errorInfo != nullptr)
+	if (pErrorInfo != nullptr)
 	{
-		delete errorInfo;
+		delete pErrorInfo;
 	}
 		
 	delete pParser;
