@@ -536,7 +536,7 @@ namespace gplc
 
 							if (numberType & NB_LONG && !(numberType & NB_ADD_LONG)) // long
 							{
-								return new CTypedValueToken<IL32>(TT_INT, mCurrPos, (numberStr.c_str(), nullptr, numSysBasis));
+								return new CTypedValueToken<IL32>(TT_INT, mCurrPos, strtol(numberStr.c_str(), nullptr, numSysBasis));
 							}
 							else if (numberType & NB_LONG && numberType & NB_ADD_LONG) // long long
 							{

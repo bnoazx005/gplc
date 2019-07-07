@@ -148,7 +148,7 @@ namespace gplc
 	/*!
 		\brief Try to parse a single statement
 
-		<statement> ::= <operator> ;
+		<statement> ::= <operator>
 
 		\param[in] lexer A pointer to lexer's object
 
@@ -158,17 +158,7 @@ namespace gplc
 	CASTNode* CParser::_parseStatement(ILexer* lexer)
 	{
 		CASTNode* pOperator = _parseOperator(lexer);
-
-		/*if (!SUCCESS(_expect(TT_SEMICOLON, lexer->GetCurrToken())))
-		{
-			C8 tmpStrBuf[255];
-
-			sprintf_s(tmpStrBuf, sizeof(C8) * 255, "Missing ; at %d\0", errorInfo->mPos);
-			errorInfo->mMessage = tmpStrBuf;
-
-			return pOperator;
-		}*/
-		
+				
 		return pOperator;
 	}
 
@@ -189,25 +179,12 @@ namespace gplc
 		if (_match(lexer->GetCurrToken(), TT_IDENTIFIER) && 
 			(_match(lexer->PeekNextToken(1), TT_COMMA) || _match(lexer->PeekNextToken(1), TT_COLON)))
 		{
-			return _parseDeclaration(lexer);
+			pOperator = _parseDeclaration(lexer);
 		}
 
-		/*if ((pOperator = _parseDeclaration(lexer)))
-		{
-			return pOperator;
-		}
-		else
-		{
-			errorInfo = new TParserErrorInfo();
+		_expect(TT_SEMICOLON, lexer->GetCurrToken());
 
-			errorInfo->mMessage = "Unrecognized tokens sequence";
-			errorInfo->mMessage = RV_UNRECOGNIZED_TOKENS_SEQ;
-			errorInfo->mPos     = lexer->GetCurrToken()->GetPos();
-
-			return nullptr;
-		}
-*/
-		return nullptr;
+		return pOperator;
 	}
 
 	/*!
@@ -233,6 +210,12 @@ namespace gplc
 		}
 
 		lexer->GetNextToken();
+
+		// parse definition not declaration
+		if (_match(lexer->PeekNextToken(1), TT_ASSIGN_OP))
+		{
+			return pDeclaration;
+		}
 
 		pDeclaration->AttachChild(_parseType(lexer));
 
@@ -260,7 +243,7 @@ namespace gplc
 		{
 			pCurrToken = lexer->GetCurrToken();
 
-			if (pCurrToken->GetType() == TT_COMMA)
+			if (_match(pCurrToken, TT_COMMA))
 			{
 				pCurrToken = lexer->GetNextToken(); // should be identifier
 			}
@@ -272,7 +255,7 @@ namespace gplc
 
 			pIdentifiersRoot->AttachChild(new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()));
 		} 
-		while (lexer->GetNextToken()->GetType() == TT_COMMA || lexer->GetCurrToken()->GetType() == TT_IDENTIFIER);
+		while (_match(lexer->GetNextToken(), TT_COMMA) || _match(lexer->GetCurrToken(), TT_IDENTIFIER));
 
 		return pIdentifiersRoot;
 	}
@@ -388,6 +371,7 @@ namespace gplc
 				break;
 
 			default: //just a builtin type
+				lexer->GetNextToken(); // move to ;
 
 				switch (pTypeName->GetType())
 				{

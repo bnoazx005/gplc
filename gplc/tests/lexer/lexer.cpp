@@ -305,13 +305,13 @@ TEST_CASE("Lexer's tests")
 	{
 		REQUIRE(pLexer->Init("'f'  'g'", pathToConfig) == gplc::RV_SUCCESS);
 
-		const gplc::CTypedValueToken<gplc::W16>* pCurrToken = dynamic_cast<const gplc::CTypedValueToken<gplc::W16>*>(pLexer->GetCurrToken());
+		const gplc::CTypedValueToken<gplc::C8>* pCurrToken = dynamic_cast<const gplc::CTypedValueToken<gplc::C8>*>(pLexer->GetCurrToken());
 
 		REQUIRE(pCurrToken != nullptr);
 		REQUIRE(pCurrToken->GetType() == gplc::TT_CHAR);
 		REQUIRE(pCurrToken->GetValue() == L'f');
 
-		pCurrToken = dynamic_cast<const gplc::CTypedValueToken<gplc::W16>*>(pLexer->GetNextToken());
+		pCurrToken = dynamic_cast<const gplc::CTypedValueToken<gplc::C8>*>(pLexer->GetNextToken());
 
 		REQUIRE(pCurrToken != nullptr);
 		REQUIRE(pCurrToken->GetType() == gplc::TT_CHAR);
