@@ -12,12 +12,14 @@
 
 
 #include "lexer\gplcLexer.h"
+#include "lexer\gplcTokens.h"
+#include <vector>
 
 
 class CStubLexer : public gplc::ILexer
 {
 	public:
-		CStubLexer();
+		CStubLexer(const std::vector<gplc::CToken*>& tokens);
 		virtual ~CStubLexer();
 
 		/*!
@@ -81,6 +83,7 @@ class CStubLexer : public gplc::ILexer
 
 		virtual void RestorePosition();
 	protected:
+		CStubLexer() = default;
 		CStubLexer(const CStubLexer& lexer);
 	private:
 		gplc::U32                  mCurrTokenIndex;

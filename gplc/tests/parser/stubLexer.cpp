@@ -2,9 +2,10 @@
 #include "lexer\gplcTokens.h"
 
 
-CStubLexer::CStubLexer():
+CStubLexer::CStubLexer(const std::vector<gplc::CToken*>& tokens):
 	gplc::ILexer(), mCurrTokenIndex(0), mSavedTokenIndex(UINT32_MAX)
 {
+	std::copy(tokens.begin(), tokens.end(), std::back_inserter(mTokens));
 }
 
 CStubLexer::CStubLexer(const CStubLexer& lexer):
@@ -32,16 +33,7 @@ CStubLexer::~CStubLexer()
 }
 
 gplc::Result CStubLexer::Init(const std::string& inputStream, const std::string& configFilename)
-{
-	//fill in the tokens' vector
-	mTokens.push_back(new gplc::CIdentifierToken("x", 0));
-	mTokens.push_back(new gplc::CToken(gplc::TT_COMMA, 1));
-	mTokens.push_back(new gplc::CIdentifierToken("y", 2));
-	//mTokens.push_back(new gplc::CToken(gplc::TT_COMMA, 1));
-	mTokens.push_back(new gplc::CToken(gplc::TT_COLON, 3));
-	mTokens.push_back(new gplc::CToken(gplc::TT_INT32_TYPE, 4));
-	mTokens.push_back(new gplc::CToken(gplc::TT_SEMICOLON, 5));
-	
+{	
 	return gplc::RV_SUCCESS;
 }
 
