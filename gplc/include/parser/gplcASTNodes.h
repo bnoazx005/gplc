@@ -19,6 +19,9 @@
 
 namespace gplc
 {
+	class CBaseLiteral;
+
+
 	/*!
 		\brief E_NODE_TYPE enumeration
 	*/
@@ -47,6 +50,7 @@ namespace gplc
 		NT_ASSIGNMENT,
 		NT_UNARY_EXPR,
 		NT_BINARY_EXPR,
+		NT_LITERAL,
 	};
 
 	/*!
@@ -98,6 +102,21 @@ namespace gplc
 			CASTIdentifierNode(const CASTIdentifierNode& node);
 		protected:
 			std::string mName;
+	};
+
+
+	class CASTLiteralNode : public CASTNode
+	{
+		public:
+			CASTLiteralNode(const CBaseLiteral* pValue);
+			virtual ~CASTLiteralNode();
+
+			const CBaseLiteral* GetValue() const;
+		protected:
+			CASTLiteralNode() = default;
+			CASTLiteralNode(const CASTLiteralNode& node) = default;
+		protected:
+			const CBaseLiteral* mpValue;
 	};
 
 

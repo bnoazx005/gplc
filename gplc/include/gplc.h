@@ -18,6 +18,7 @@
 #include "common\gplcConstants.h"
 #include "common\gplcSymTable.h"
 #include "common\gplcTypeSystem.h"
+#include "common\gplcLiterals.h"
 
 /// Parser's files group
 #include "parser\gplcParser.h"

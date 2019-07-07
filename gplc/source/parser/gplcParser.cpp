@@ -492,14 +492,9 @@ namespace gplc
 			case TT_IDENTIFIER:
 				pNode = new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName());
 				break;
-			case TT_INT:
-			case TT_UINT:
-			case TT_FLOAT:
-			case TT_DOUBLE:
-			case TT_CHAR:
-			case TT_STRING:
+			case TT_LITERAL:
+				pNode = new CASTLiteralNode(dynamic_cast<const CLiteralToken*>(pCurrToken)->GetValue());
 				break;
-				//return new CASTPrimaryExpressionNode()
 		}
 
 		pLexer->GetNextToken();

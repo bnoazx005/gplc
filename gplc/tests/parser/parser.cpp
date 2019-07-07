@@ -44,7 +44,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CToken(gplc::TT_ASSIGN_OP, 1),
 				new gplc::CIdentifierToken("x", 2),
 				new gplc::CToken(gplc::TT_PLUS, 3),
-				new gplc::CIdentifierToken("y", 4),
+				new gplc::CLiteralToken(new gplc::CFloatLiteral(2.0f), 4),
 				new gplc::CToken(gplc::TT_STAR, 5),
 				new gplc::CIdentifierToken("y", 6),
 				new gplc::CToken(gplc::TT_SEMICOLON, 7),

@@ -9,6 +9,7 @@
 */
 
 #include "lexer\gplcTokens.h"
+#include "common/gplcLiterals.h"
 
 
 namespace gplc
@@ -53,10 +54,20 @@ namespace gplc
 	}
 
 
-	CBaseTypedValueToken::CBaseTypedValueToken(E_TOKEN_TYPE type, U32 posAtStream):
-		CToken(type, posAtStream)
+	CLiteralToken::CLiteralToken(const CBaseLiteral* pValue, U32 posAtStream):
+		CToken(TT_LITERAL, posAtStream), mpValue(pValue)
 	{
 	}
+
+	CLiteralToken::~CLiteralToken()
+	{
+	}
+
+	const CBaseLiteral* CLiteralToken::GetValue() const
+	{
+		return mpValue;
+	}
+
 
 	/*!
 		CIdentifierToken defenition

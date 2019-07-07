@@ -9,6 +9,7 @@
 */
 
 #include "parser\gplcASTNodes.h"
+#include "common/gplcLiterals.h"
 #include <stack>
 
 
@@ -190,6 +191,26 @@ namespace gplc
 	const std::string& CASTIdentifierNode::GetName() const
 	{
 		return mName;
+	}
+
+
+	/*!
+		\brief CASTLiteralNode's definition
+	*/
+
+	CASTLiteralNode::CASTLiteralNode(const CBaseLiteral* pValue):
+		CASTNode(NT_LITERAL), mpValue(pValue)
+	{
+	}
+
+	CASTLiteralNode::~CASTLiteralNode()
+	{
+
+	}
+
+	const CBaseLiteral* CASTLiteralNode::GetValue() const
+	{
+		return mpValue;
 	}
 
 

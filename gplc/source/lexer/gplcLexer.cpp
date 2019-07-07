@@ -14,6 +14,7 @@
 #include "lexer\gplcLexer.h"
 #include "lexer\gplcTokens.h"
 #include "common\gplcConstants.h"
+#include "common/gplcLiterals.h"
 #include <fstream>
 
 
@@ -516,42 +517,13 @@ namespace gplc
 					switch (numberType & NB_SIGNED) //Is it signed? If bit is turn on then it's signed value
 					{
 						case 0: //unsigned
-
-							if (numberType & NB_LONG && !(numberType & NB_ADD_LONG)) // long
-							{
-								return new CTypedValueToken<UL32>(TT_UINT, mCurrPos, strtoul(numberStr.c_str(), nullptr, numSysBasis));
-							}
-							else if (numberType & NB_LONG && numberType & NB_ADD_LONG) // long long
-							{
-								return new CTypedValueToken<U64>(TT_UINT, mCurrPos, strtoull(numberStr.c_str(), nullptr, numSysBasis));
-							}
-							else
-							{
-								return new CTypedValueToken<U32>(TT_UINT, mCurrPos, strtoul(numberStr.c_str(), nullptr, numSysBasis));
-							}
-
-							break;
+							return new CLiteralToken(new CUIntLiteral(strtoul(numberStr.c_str(), nullptr, numSysBasis)), mCurrPos);
 
 						case NB_SIGNED: //signed
-
-							if (numberType & NB_LONG && !(numberType & NB_ADD_LONG)) // long
-							{
-								return new CTypedValueToken<IL32>(TT_INT, mCurrPos, strtol(numberStr.c_str(), nullptr, numSysBasis));
-							}
-							else if (numberType & NB_LONG && numberType & NB_ADD_LONG) // long long
-							{
-								return new CTypedValueToken<I64>(TT_INT, mCurrPos, strtoll(numberStr.c_str(), nullptr, numSysBasis));
-							}
-							else
-							{
-								return new CTypedValueToken<I32>(TT_INT, mCurrPos, strtol(numberStr.c_str(), nullptr, numSysBasis));
-							}
-
-							break;
-
+							return new CLiteralToken(new CIntLiteral(strtol(numberStr.c_str(), nullptr, numSysBasis)), mCurrPos);
+							
 						default:
-							return new CTypedValueToken<I32>(TT_INT, mCurrPos, strtol(numberStr.c_str(), nullptr, numSysBasis));
-							break;
+							return new CLiteralToken(new CIntLiteral(strtol(numberStr.c_str(), nullptr, numSysBasis)), mCurrPos);
 					}
 
 					break;
@@ -561,11 +533,10 @@ namespace gplc
 					switch (numberType & NB_LONG) //1 - double; 0; - float
 					{
 						case 0:
-							return new CTypedValueToken<F32>(TT_FLOAT, mCurrPos, atof(numberStr.c_str()));
-							break;
+							return new CLiteralToken(new CFloatLiteral(atof(numberStr.c_str())), mCurrPos);
+
 						case NB_LONG:
-							return new CTypedValueToken<F64>(TT_DOUBLE, mCurrPos, atof(numberStr.c_str()));
-							break;
+							return new CLiteralToken(new CDoubleLiteral(atof(numberStr.c_str())), mCurrPos);
 					}
 
 					break;
@@ -593,24 +564,28 @@ namespace gplc
 
 			_getNextChar(stream); //get \"
 
-			return new CTypedValueToken<std::string>(TT_STRING, mCurrPos - 1, strConstantValue);
+			return new CLiteralToken(new CStringLiteral(strConstantValue), mCurrPos - 1);
 		}
 		
 		//try to get a char value
 		
 		if (currChar == '\'')
 		{
-			currChar = _getNextChar(stream);
+			strConstantValue.clear();
 
-			if (_peekNextChar(stream, 1) != '\'')
+			while ((currChar = _getNextChar(stream)) != '\'' && currChar != EOF)
+			{
+				strConstantValue.push_back(currChar);
+			}
+
+			if (currChar == EOF)
 			{
 				return nullptr;
 			}
 
-			_getNextChar(stream); //get '\''
-			_getNextChar(stream); //get next symbol
+			_getNextChar(stream); //get \'
 
-			return new CTypedValueToken<C8>(TT_CHAR, mCurrPos - 2, currChar);
+			return new CLiteralToken(new CCharLiteral(strConstantValue), mCurrPos - 1);
 		}
 		
 		return nullptr;

@@ -18,6 +18,8 @@
 
 namespace gplc
 {
+	class CBaseLiteral;
+
 
 	/*!
 		\brief enum E_TOKEN_TYPE
@@ -74,6 +76,7 @@ namespace gplc
 		TT_VOID_TYPE       = 44, ///< void
 		TT_ENUM_TYPE       = 45, ///< enum
 		TT_STRUCT_TYPE     = 46, ///< struct
+		TT_LITERAL         = 47,
 		TT_DEFAULT
 	};
 
@@ -102,52 +105,25 @@ namespace gplc
 	};
 
 
-	class CBaseTypedValueToken: public CToken
-	{
-		public:
-			CBaseTypedValueToken(E_TOKEN_TYPE type, U32 posAtStream);
-			virtual ~CBaseTypedValueToken() = default;
-		protected:
-			CBaseTypedValueToken() = default;
-			CBaseTypedValueToken(const CBaseTypedValueToken& token) = default;
-	};
-
-
 	/*!
 		\brief CTypedValueToken class 
 
 		It was derived from CToken.
 	*/
 	
-	template <class T>
-	class CTypedValueToken: public CBaseTypedValueToken
+	class CLiteralToken: public CToken
 	{
 		public:
-			CTypedValueToken(E_TOKEN_TYPE type, U32 posAtStream, T value):
-				CBaseTypedValueToken(type, posAtStream), mValue(value)
-			{
-			}
+			CLiteralToken(const CBaseLiteral* pValue, U32 posAtStream);
 
-			virtual ~CTypedValueToken()
-			{
-			}
+			virtual ~CLiteralToken();
 
-			T GetValue() const
-			{
-				return mValue;
-			}
+			const CBaseLiteral* GetValue() const;
 		protected:
-			CTypedValueToken():
-				CToken(TT_INT)
-			{
-			}
-
-			CTypedValueToken(const CTypedValueToken& token) :
-				CToken(token)
-			{
-			}
+			CLiteralToken() = default;
+			CLiteralToken(const CLiteralToken& token) = default;
 		protected:
-			T mValue;
+			const CBaseLiteral* mpValue;
 	};
 		
 	/*!

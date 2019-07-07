@@ -48,6 +48,7 @@
     <ClCompile Include="source\common\gplcSymTable.cpp">
       <Filter>source\common</Filter>
     </ClCompile>
+    <ClCompile Include="source\common\gplcLiterals.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gplc.h">
@@ -83,5 +84,6 @@
     <ClInclude Include="include\utils\Delegate.h">
       <Filter>include\utils</Filter>
     </ClInclude>
+    <ClInclude Include="include\common\gplcLiterals.h" />
   </ItemGroup>
 </Project>

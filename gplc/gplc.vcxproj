@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\common\gplcLiterals.cpp" />
     <ClCompile Include="source\common\gplcSymTable.cpp" />
     <ClCompile Include="source\common\gplcTypeSystem.cpp" />
     <ClCompile Include="source\lexer\gplcLexer.cpp" />
@@ -28,6 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\common\gplcConstants.h" />
+    <ClInclude Include="include\common\gplcLiterals.h" />
     <ClInclude Include="include\common\gplcSymTable.h" />
     <ClInclude Include="include\common\gplcTypes.h" />
     <ClInclude Include="include\common\gplcTypeSystem.h" />
