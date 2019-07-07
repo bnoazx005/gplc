@@ -34,28 +34,28 @@ namespace gplc
 	{
 	}
 
-	CASTNode* CParser::Parse(ILexer* lexer)
+	CASTNode* CParser::Parse(ILexer* pLexer)
 	{
-		if (lexer == nullptr)
+		if (pLexer == nullptr)
 		{
 			TParserErrorInfo errorInfo;
 
 			memset(&errorInfo, 0, sizeof(errorInfo));
 						
 			errorInfo.mErrorCode = RV_INVALID_ARGUMENTS;
-			errorInfo.mMessage   = "A pointer to lexer equals to null";
+			errorInfo.mMessage   = "A pointer to pLexer equals to null";
 			
 			OnErrorOutput.Invoke(errorInfo);
 			
 			return nullptr;
 		}
 		
-		if (lexer->GetCurrToken() == nullptr) //returns just an empty program unit
+		if (pLexer->GetCurrToken() == nullptr) //returns just an empty program unit
 		{
 			return new CASTNode(NT_PROGRAM_UNIT);
 		}
 
-		return _parseProgramUnit(lexer);
+		return _parseProgramUnit(pLexer);
 	}
 
 	Result CParser::_expect(E_TOKEN_TYPE expectedValue, const CToken* currValue)
@@ -102,16 +102,16 @@ namespace gplc
 
 		<program-unit> ::= <statements>;
 
-		\param[in] lexer A pointer to lexer's object
+		\param[in] pLexer A pointer to pLexer's object
 
 		\return A pointer to node of a program unit
 	*/
 
-	CASTNode* CParser::_parseProgramUnit(ILexer* lexer)
+	CASTNode* CParser::_parseProgramUnit(ILexer* pLexer)
 	{
 		CASTNode* pProgramUnit = new CASTNode(NT_PROGRAM_UNIT);
 
-		CASTNode* pStatements = _parseStatementsList(lexer);
+		CASTNode* pStatements = _parseStatementsList(pLexer);
 		
 		if (pStatements)
 		{
@@ -127,17 +127,17 @@ namespace gplc
 		<statements> ::=   <statement>
 		                 | <statement> <statements>;
 
-		\param[in] lexer A pointer to lexer's object
+		\param[in] pLexer A pointer to pLexer's object
 
 		\return A pointer to node with a statements list
 	*/
 
-	CASTNode* CParser::_parseStatementsList(ILexer* lexer)
+	CASTNode* CParser::_parseStatementsList(ILexer* pLexer)
 	{
 		CASTNode* pStatementsList = new CASTNode(NT_STATEMENTS);
 		CASTNode* pCurrStatement  = nullptr;
 
-		while (pCurrStatement = _parseStatement(lexer))
+		while (pCurrStatement = _parseStatement(pLexer))
 		{
 			pStatementsList->AttachChild(pCurrStatement);
 		}
@@ -150,14 +150,14 @@ namespace gplc
 
 		<statement> ::= <operator>
 
-		\param[in] lexer A pointer to lexer's object
+		\param[in] pLexer A pointer to pLexer's object
 
 		\return A pointer to node with a particular statement
 	*/
 
-	CASTNode* CParser::_parseStatement(ILexer* lexer)
+	CASTNode* CParser::_parseStatement(ILexer* pLexer)
 	{
-		CASTNode* pOperator = _parseOperator(lexer);
+		CASTNode* pOperator = _parseOperator(pLexer);
 				
 		return pOperator;
 	}
@@ -165,24 +165,31 @@ namespace gplc
 	/*!
 		\brief Try to parse a single operator
 
-		<operator> ::= <declaration>;
+		<operator> ::= <declaration> |
+					   <assignment>;
 
-		\param[in] lexer A pointer to lexer's object
+		\param[in] pLexer A pointer to pLexer's object
 
 		\return A pointer to node with an operator
 	*/
 
-	CASTNode* CParser::_parseOperator(ILexer* lexer)
+	CASTNode* CParser::_parseOperator(ILexer* pLexer)
 	{
 		CASTNode* pOperator = nullptr;
 
-		if (_match(lexer->GetCurrToken(), TT_IDENTIFIER) && 
-			(_match(lexer->PeekNextToken(1), TT_COMMA) || _match(lexer->PeekNextToken(1), TT_COLON)))
+		if (_match(pLexer->GetCurrToken(), TT_IDENTIFIER))
 		{
-			pOperator = _parseDeclaration(lexer);
+			if (_match(pLexer->PeekNextToken(1), TT_COMMA) || _match(pLexer->PeekNextToken(1), TT_COLON))
+			{
+				pOperator = _parseDeclaration(pLexer);
+			}
+			else if (_match(pLexer->PeekNextToken(1), TT_ASSIGN_OP))
+			{
+				pOperator = _parseAssignment(pLexer);
+			}
 		}
 
-		_expect(TT_SEMICOLON, lexer->GetCurrToken());
+		_expect(TT_SEMICOLON, pLexer->GetCurrToken());
 
 		return pOperator;
 	}
@@ -193,31 +200,31 @@ namespace gplc
 		<declaration> ::=   <identifiers> : <attributes> <type>
 		                  | <identifiers> : <type>;
 
-		\param[in] lexer A pointer to lexer's object
+		\param[in] pLexer A pointer to pLexer's object
 
 		\return A pointer to node with a declaration
 	*/
 
-	CASTNode* CParser::_parseDeclaration(ILexer* lexer)
+	CASTNode* CParser::_parseDeclaration(ILexer* pLexer)
 	{
 		CASTNode* pDeclaration = new CASTNode(NT_DECL);
 
-		pDeclaration->AttachChild(_parseIdentifiers(lexer));
+		pDeclaration->AttachChild(_parseIdentifiers(pLexer));
 
-		if (!SUCCESS(_expect(TT_COLON, lexer->GetCurrToken())))
+		if (!SUCCESS(_expect(TT_COLON, pLexer->GetCurrToken())))
 		{
 			return pDeclaration;
 		}
 
-		lexer->GetNextToken();
+		pLexer->GetNextToken();
 
 		// parse definition not declaration
-		if (_match(lexer->PeekNextToken(1), TT_ASSIGN_OP))
+		if (_match(pLexer->PeekNextToken(1), TT_ASSIGN_OP))
 		{
 			return pDeclaration;
 		}
 
-		pDeclaration->AttachChild(_parseType(lexer));
+		pDeclaration->AttachChild(_parseType(pLexer));
 
 		return pDeclaration;
 	}
@@ -228,12 +235,12 @@ namespace gplc
 		<identifiers> ::= <identifier>
 		<identifier> , <identifiers>;
 
-		\param[in] lexer A pointer to lexer's object
+		\param[in] pLexer A pointer to pLexer's object
 
 		\return A pointer to node, which contains identifiers' names
 	*/
 
-	CASTNode* CParser::_parseIdentifiers(ILexer* lexer)
+	CASTNode* CParser::_parseIdentifiers(ILexer* pLexer)
 	{
 		CASTNode* pIdentifiersRoot = new CASTNode(NT_IDENTIFIERS_LIST);
 
@@ -241,11 +248,11 @@ namespace gplc
 
 		do
 		{
-			pCurrToken = lexer->GetCurrToken();
+			pCurrToken = pLexer->GetCurrToken();
 
 			if (_match(pCurrToken, TT_COMMA))
 			{
-				pCurrToken = lexer->GetNextToken(); // should be identifier
+				pCurrToken = pLexer->GetNextToken(); // should be identifier
 			}
 
 			if (!SUCCESS(_expect(TT_IDENTIFIER, pCurrToken)))
@@ -255,7 +262,7 @@ namespace gplc
 
 			pIdentifiersRoot->AttachChild(new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()));
 		} 
-		while (_match(lexer->GetNextToken(), TT_COMMA) || _match(lexer->GetCurrToken(), TT_IDENTIFIER));
+		while (_match(pLexer->GetNextToken(), TT_COMMA) || _match(pLexer->GetCurrToken(), TT_IDENTIFIER));
 
 		return pIdentifiersRoot;
 	}
@@ -269,14 +276,14 @@ namespace gplc
 		           | <enum_declaration>
 		           | <func_declaration>;
 
-		\param[in] lexer A pointer to lexer's object
+		\param[in] pLexer A pointer to pLexer's object
 
 		\return A pointer to node with a type
 	*/
 
-	CASTNode* CParser::_parseType(ILexer* lexer)
+	CASTNode* CParser::_parseType(ILexer* pLexer)
 	{
-		return _parseBuiltInType(lexer);
+		return _parseBuiltInType(pLexer);
 	}
 
 	/*!
@@ -293,15 +300,15 @@ namespace gplc
 						   | <pointer>
 						   | <array>
 
-		\param[in] lexer A pointer to lexer's object
+		\param[in] pLexer A pointer to pLexer's object
 
 		\return  A pointer to node with a builtin type
 	*/
 
-	CASTNode* CParser::_parseBuiltInType(ILexer* lexer)
+	CASTNode* CParser::_parseBuiltInType(ILexer* pLexer)
 	{
-		const CToken* pTypeName  = lexer->GetCurrToken();
-		const CToken* pNextToken = lexer->PeekNextToken(1);
+		const CToken* pTypeName  = pLexer->GetCurrToken();
+		const CToken* pNextToken = pLexer->PeekNextToken(1);
 
 		CASTNode* pBuiltinType = nullptr;
 
@@ -371,7 +378,7 @@ namespace gplc
 				break;
 
 			default: //just a builtin type
-				lexer->GetNextToken(); // move to ;
+				pLexer->GetNextToken(); // move to ;
 
 				switch (pTypeName->GetType())
 				{
@@ -416,6 +423,101 @@ namespace gplc
 		}
 
 		return pBuiltinType;
+	}
+
+	CASTExpressionNode* CParser::_parseExpression(ILexer* pLexer)
+	{
+		return _parseHighPrecedenceExpr(pLexer);
+	}
+
+	CASTExpressionNode* CParser::_parseHighPrecedenceExpr(ILexer* pLexer)
+	{
+		CASTExpressionNode* pLeft = _parseLowPrecedenceExpr(pLexer);
+
+		CASTExpressionNode* pRight = nullptr;
+
+		E_TOKEN_TYPE opType = TT_VOID_TYPE;
+
+		while (_match(pLexer->GetCurrToken(), TT_PLUS) || 
+			   _match(pLexer->GetCurrToken(), TT_MINUS))
+		{
+			opType = pLexer->GetCurrToken()->GetType();
+
+			pLexer->GetNextToken();
+
+			pRight = _parseLowPrecedenceExpr(pLexer);
+
+			pLeft = new CASTBinaryExpressionNode(pLeft, opType, pRight);
+		}
+
+		return pLeft;
+	}
+
+	CASTExpressionNode* CParser::_parseLowPrecedenceExpr(ILexer* pLexer)
+	{
+		CASTExpressionNode* pLeft = _parseUnaryExpression(pLexer);
+
+		CASTExpressionNode* pRight = nullptr;
+
+		E_TOKEN_TYPE opType = TT_VOID_TYPE;
+
+		while (_match(pLexer->GetCurrToken(), TT_STAR) ||
+			_match(pLexer->GetCurrToken(), TT_SLASH))
+		{
+			opType = pLexer->GetCurrToken()->GetType();
+
+			pLexer->GetNextToken();
+
+			pRight = _parseUnaryExpression(pLexer);
+
+			pLeft = new CASTBinaryExpressionNode(pLeft, opType, pRight);
+		}
+
+		return pLeft;
+	}
+
+	CASTUnaryExpressionNode* CParser::_parseUnaryExpression(ILexer* pLexer)
+	{
+		return new CASTUnaryExpressionNode(nullptr, _parsePrimaryExpression(pLexer));
+	}
+
+	CASTNode* CParser::_parsePrimaryExpression(ILexer* pLexer)
+	{
+		const CToken* pCurrToken = pLexer->GetCurrToken();
+
+		CASTNode* pNode = nullptr;
+
+		switch (pCurrToken->GetType())
+		{
+			case TT_IDENTIFIER:
+				pNode = new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName());
+				break;
+			case TT_INT:
+			case TT_UINT:
+			case TT_FLOAT:
+			case TT_DOUBLE:
+			case TT_CHAR:
+			case TT_STRING:
+				break;
+				//return new CASTPrimaryExpressionNode()
+		}
+
+		pLexer->GetNextToken();
+
+		return pNode;
+	}
+
+	CASTNode* CParser::_parseAssignment(ILexer* pLexer)
+	{
+		CASTUnaryExpressionNode* pLeftNode = _parseUnaryExpression(pLexer);
+
+		_expect(TT_ASSIGN_OP, pLexer->GetCurrToken());
+
+		pLexer->GetNextToken();
+
+		CASTExpressionNode* pRightNode = _parseExpression(pLexer);
+
+		return new CASTAssignmentNode(pLeftNode, pRightNode);
 	}
 
 	bool CParser::_match(const CToken* pToken, E_TOKEN_TYPE type)

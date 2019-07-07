@@ -52,6 +52,12 @@ namespace gplc
 		return "(Token: TT_DEFAULT)";
 	}
 
+
+	CBaseTypedValueToken::CBaseTypedValueToken(E_TOKEN_TYPE type, U32 posAtStream):
+		CToken(type, posAtStream)
+	{
+	}
+
 	/*!
 		CIdentifierToken defenition
 	*/

@@ -35,6 +35,24 @@ TEST_CASE("Parser's tests")
 		//delete pMain;
 	}
 
+	SECTION("TestParse_PassCorrectExprSequence_ReturnsCorrectAST")
+	{
+		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
+			{
+				//fill in the tokens' vector
+				new gplc::CIdentifierToken("z", 0),
+				new gplc::CToken(gplc::TT_ASSIGN_OP, 1),
+				new gplc::CIdentifierToken("x", 2),
+				new gplc::CToken(gplc::TT_PLUS, 3),
+				new gplc::CIdentifierToken("y", 4),
+				new gplc::CToken(gplc::TT_STAR, 5),
+				new gplc::CIdentifierToken("y", 6),
+				new gplc::CToken(gplc::TT_SEMICOLON, 7),
+			}));
+
+		REQUIRE(pMain != nullptr);
+	}
+
 	if (pErrorInfo != nullptr)
 	{
 		delete pErrorInfo;

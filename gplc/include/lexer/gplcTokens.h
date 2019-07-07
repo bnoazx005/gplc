@@ -102,6 +102,17 @@ namespace gplc
 	};
 
 
+	class CBaseTypedValueToken: public CToken
+	{
+		public:
+			CBaseTypedValueToken(E_TOKEN_TYPE type, U32 posAtStream);
+			virtual ~CBaseTypedValueToken() = default;
+		protected:
+			CBaseTypedValueToken() = default;
+			CBaseTypedValueToken(const CBaseTypedValueToken& token) = default;
+	};
+
+
 	/*!
 		\brief CTypedValueToken class 
 
@@ -109,11 +120,11 @@ namespace gplc
 	*/
 	
 	template <class T>
-	class CTypedValueToken: public CToken
+	class CTypedValueToken: public CBaseTypedValueToken
 	{
 		public:
 			CTypedValueToken(E_TOKEN_TYPE type, U32 posAtStream, T value):
-				CToken(type, posAtStream), mValue(value)
+				CBaseTypedValueToken(type, posAtStream), mValue(value)
 			{
 			}
 

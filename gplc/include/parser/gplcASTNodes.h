@@ -13,6 +13,7 @@
 
 
 #include "common\gplcTypes.h"
+#include "..\lexer\gplcTokens.h"
 #include <vector>
 
 
@@ -43,7 +44,9 @@ namespace gplc
 		NT_BOOL,
 		NT_VOID,
 		NT_POINTER,
-
+		NT_ASSIGNMENT,
+		NT_UNARY_EXPR,
+		NT_BINARY_EXPR,
 	};
 
 	/*!
@@ -95,6 +98,66 @@ namespace gplc
 			CASTIdentifierNode(const CASTIdentifierNode& node);
 		protected:
 			std::string mName;
+	};
+
+
+	class CASTExpressionNode : public CASTNode
+	{
+		public:
+			CASTExpressionNode(E_NODE_TYPE type);
+			virtual ~CASTExpressionNode() = default;
+		protected:
+			CASTExpressionNode() = default;
+			CASTExpressionNode(const CASTExpressionNode& node) = default;
+	};
+
+
+	class CASTUnaryExpressionNode : public CASTExpressionNode
+	{
+		public:
+			CASTUnaryExpressionNode(const CASTNode* pOpNode, const CASTNode* pNode);
+			virtual ~CASTUnaryExpressionNode();
+
+			const CASTNode* GetOperator() const;
+
+			const CASTNode* GetData() const;
+		protected:
+			CASTUnaryExpressionNode() = default;
+			CASTUnaryExpressionNode(const CASTUnaryExpressionNode& node) = default;
+	};
+
+	
+	class CASTBinaryExpressionNode : public CASTExpressionNode
+	{
+		public:
+			CASTBinaryExpressionNode(const CASTExpressionNode* pLeft, E_TOKEN_TYPE opType, const CASTExpressionNode* pRight);
+			virtual ~CASTBinaryExpressionNode();
+
+			const CASTExpressionNode* GetLeft() const;
+
+			const CASTExpressionNode* GetRight() const;
+
+			E_TOKEN_TYPE GetOpType() const;
+		protected:
+			CASTBinaryExpressionNode() = default;
+			CASTBinaryExpressionNode(const CASTBinaryExpressionNode& node) = default;
+		protected:
+			E_TOKEN_TYPE mOpType;
+	};
+
+
+	class CASTAssignmentNode : public CASTNode
+	{
+		public:
+			CASTAssignmentNode(const CASTUnaryExpressionNode* pLeft, const CASTExpressionNode* pRight);
+			virtual ~CASTAssignmentNode();
+
+			const CASTUnaryExpressionNode* GetLeft() const;
+
+			const CASTExpressionNode* GetRight() const;
+		protected:
+			CASTAssignmentNode() = default;
+			CASTAssignmentNode(const CASTAssignmentNode& node) = default;
 	};
 
 }

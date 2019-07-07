@@ -22,6 +22,8 @@ namespace gplc
 	class CASTNode;
 	class ILexer;
 	class CType;
+	class CASTExpressionNode;
+	class CASTUnaryExpressionNode;
 
 
 	/*!
@@ -36,7 +38,7 @@ namespace gplc
 			IParser() {}
 			virtual ~IParser() {}
 
-			virtual CASTNode* Parse(ILexer* lexer) = 0;
+			virtual CASTNode* Parse(ILexer* pLexer) = 0;
 		public:
 			CDelegate<void, const TParserErrorInfo&> OnErrorOutput;
 		protected:
@@ -56,7 +58,7 @@ namespace gplc
 			CParser();
 			virtual ~CParser();
 
-			virtual CASTNode* Parse(ILexer* lexer);
+			virtual CASTNode* Parse(ILexer* pLexer);
 		private:
 			CParser(const CParser& parser);
 
@@ -67,12 +69,12 @@ namespace gplc
 
 				<program-unit> ::= <statements>;
 
-				\param[in] lexer A pointer to lexer's object
+				\param[in] pLexer A pointer to pLexer's object
 
 				\return A pointer to node of a program unit
 			*/
 			
-			CASTNode* _parseProgramUnit(ILexer* lexer);
+			CASTNode* _parseProgramUnit(ILexer* pLexer);
 
 			/*!
 				\brief Try to parse the list of statements.
@@ -80,12 +82,12 @@ namespace gplc
 				<statements> ::=   <statement> 
                                  | <statement> <statements>;
 
-				\param[in] lexer A pointer to lexer's object
+				\param[in] pLexer A pointer to pLexer's object
 
 				\return A pointer to node with a statements list
 			*/
 
-			CASTNode* _parseStatementsList(ILexer* lexer);
+			CASTNode* _parseStatementsList(ILexer* pLexer);
 
 			/*!
 				\brief Try to parse a single statement
@@ -94,24 +96,24 @@ namespace gplc
 				
 				\todo There is no <directive> non-terminal. It will be added later.
 
-				\param[in] lexer A pointer to lexer's object
+				\param[in] pLexer A pointer to pLexer's object
 
 				\return A pointer to node with a particular statement
 			*/
 
-			CASTNode* _parseStatement(ILexer* lexer);
+			CASTNode* _parseStatement(ILexer* pLexer);
 
 			/*!
 				\brief Try to parse a single operator
 
 				<operator> ::= <declaration>;
 
-				\param[in] lexer A pointer to lexer's object
+				\param[in] pLexer A pointer to pLexer's object
 
 				\return A pointer to node with an operator
 			*/
 
-			CASTNode* _parseOperator(ILexer* lexer);
+			CASTNode* _parseOperator(ILexer* pLexer);
 
 			/*!
 				\brief Try to parse a declaration
@@ -119,12 +121,12 @@ namespace gplc
 				<declaration> ::=   <identifiers> : <attributes> <type>
                                   | <identifiers> : <type>;
 
-				\param[in] lexer A pointer to lexer's object
+				\param[in] pLexer A pointer to pLexer's object
 
 				\return A pointer to node with a declaration
 			*/
 
-			CASTNode* _parseDeclaration(ILexer* lexer);
+			CASTNode* _parseDeclaration(ILexer* pLexer);
 
 			/*!
 				\brief Try to parse an identifiers list
@@ -132,14 +134,14 @@ namespace gplc
 				<identifiers> ::= <identifier> 
 								  <identifier> , <identifiers>;
 
-				\param[in] lexer A pointer to lexer's object
+				\param[in] pLexer A pointer to pLexer's object
 
 				\return A pointer to node, which contains identifiers' names
 			*/
 
-			CASTNode* _parseIdentifiers(ILexer* lexer);
+			CASTNode* _parseIdentifiers(ILexer* pLexer);
 
-			CASTNode* _parseStructDecl(ILexer* lexer);
+			CASTNode* _parseStructDecl(ILexer* pLexer);
 
 			/*!
 				\brief Try to parse a type
@@ -150,12 +152,12 @@ namespace gplc
 				           | <enum_declaration>
 				           | <func_declaration>;
 
-				\param[in] lexer A pointer to lexer's object
+				\param[in] pLexer A pointer to pLexer's object
 
 				\return  A pointer to node with a type
 			*/
 
-			CASTNode* _parseType(ILexer* lexer);
+			CASTNode* _parseType(ILexer* pLexer);
 
 			/*!
 				\brief Try to parse a type
@@ -171,12 +173,64 @@ namespace gplc
 								   | <pointer>
 								   | <array>
 
-				\param[in] lexer A pointer to lexer's object
+				\param[in] pLexer A pointer to pLexer's object
 
 				\return  A pointer to node with a builtin type
 			*/
 
-			CASTNode* _parseBuiltInType(ILexer* lexer);
+			CASTNode* _parseBuiltInType(ILexer* pLexer);
+
+			/*!
+				\brief The method tries to parse an expression
+
+				<expression> ::= <expr_value> | <unary_expr> | <binary_expr> | <group_expr>
+			*/
+
+			CASTExpressionNode* _parseExpression(ILexer* pLexer);
+
+			/*!
+				\brief The method tries to parse high precedence expression
+				including mul, div
+
+				<expr1> ::= <expression> '*' <expression> |
+							<expression> '/' <expression> 
+			*/
+
+			CASTExpressionNode* _parseHighPrecedenceExpr(ILexer* pLexer);
+
+			/*!
+				\brief The method tries to parse low precedence expression
+				including mul, div
+
+				<expr1> ::= <expression> '+' <expression> |
+							<expression> '-' <expression>
+			*/
+
+			CASTExpressionNode* _parseLowPrecedenceExpr(ILexer* pLexer);
+
+			/*!
+				\brief The method tries to parse an unary expression
+
+				<unary_expr> ::= <identifier> | <value> 
+			*/
+
+			CASTUnaryExpressionNode* _parseUnaryExpression(ILexer* pLexer);
+
+			/*!
+				\brief The method tries to parse primary expression
+
+				<value> ::= 
+			*/
+
+			CASTNode* _parsePrimaryExpression(ILexer* pLexer);
+
+			/*!
+				\brief The method tries to parse an assigment operator
+
+				<assignment> ::= <unary_expr> '=' <expression>
+			*/
+
+			CASTNode* _parseAssignment(ILexer* pLexer);
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 		private:

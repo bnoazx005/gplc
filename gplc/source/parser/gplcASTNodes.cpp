@@ -165,7 +165,7 @@ namespace gplc
 	}
 
 	/*!
-		CASTIdentifierNode defenition
+		CASTIdentifierNode definition
 	*/
 
 	CASTIdentifierNode::CASTIdentifierNode() :
@@ -190,5 +190,97 @@ namespace gplc
 	const std::string& CASTIdentifierNode::GetName() const
 	{
 		return mName;
+	}
+
+
+	CASTExpressionNode::CASTExpressionNode(E_NODE_TYPE type):
+		CASTNode(type)
+	{
+	}
+
+
+	/*!
+		\brief CASTUnaryExpressionNode's definition
+	*/
+	
+	CASTUnaryExpressionNode::CASTUnaryExpressionNode(const CASTNode* pOpNode, const CASTNode* pNode):
+		CASTExpressionNode(NT_UNARY_EXPR)
+	{
+		AttachChild(pOpNode);
+		AttachChild(pNode);
+	}
+
+	CASTUnaryExpressionNode:: ~CASTUnaryExpressionNode()
+	{
+		// \todo add implementation of the destructor
+	}
+
+	const CASTNode* CASTUnaryExpressionNode::GetOperator() const
+	{
+		return mChildren[0];
+	}
+
+	const CASTNode* CASTUnaryExpressionNode::GetData() const
+	{
+		return mChildren[1];
+	}
+
+
+	/*!
+		\brief CASTBinaryExpressionNode's definition
+	*/
+
+	CASTBinaryExpressionNode::CASTBinaryExpressionNode(const CASTExpressionNode* pLeft, E_TOKEN_TYPE opType, const CASTExpressionNode* pRight):
+		CASTExpressionNode(NT_BINARY_EXPR), mOpType(opType)
+	{
+		AttachChild(pLeft);
+		AttachChild(pRight);
+	}
+
+	CASTBinaryExpressionNode::~CASTBinaryExpressionNode()
+	{
+		// \todo add implementation of the destructor
+	}
+
+	const CASTExpressionNode* CASTBinaryExpressionNode::GetLeft() const
+	{
+		return dynamic_cast<const CASTExpressionNode*>(mChildren[0]);
+	}
+
+	const CASTExpressionNode* CASTBinaryExpressionNode::GetRight() const
+	{
+		return dynamic_cast<const CASTExpressionNode*>(mChildren[1]);
+	}
+
+	E_TOKEN_TYPE CASTBinaryExpressionNode::GetOpType() const
+	{
+		return mOpType;
+	}
+
+
+	/*!
+		\brief CASTAssignmentNode definition
+	*/
+
+	CASTAssignmentNode::CASTAssignmentNode(const CASTUnaryExpressionNode* pLeft, const CASTExpressionNode* pRight) :
+		CASTNode(NT_ASSIGNMENT)
+	{
+		AttachChild(pLeft);
+		AttachChild(pRight);
+	}
+
+	CASTAssignmentNode::~CASTAssignmentNode()
+	{
+		// \todo add implementation of the destructor
+	}
+
+	const CASTUnaryExpressionNode* CASTAssignmentNode::GetLeft() const
+	{
+		return dynamic_cast<const CASTUnaryExpressionNode*>(mChildren[0]);
+	}
+
+	const CASTExpressionNode* CASTAssignmentNode::GetRight() const
+	{
+		return dynamic_cast<const CASTExpressionNode*>(mChildren[1]);
 	}
 }
