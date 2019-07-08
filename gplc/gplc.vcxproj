@@ -42,6 +42,7 @@
     <ClInclude Include="include\parser\gplcASTNodes.h" />
     <ClInclude Include="include\utils\Callback.h" />
     <ClInclude Include="include\utils\CASTLispyPrinter.h" />
+    <ClInclude Include="include\utils\CResult.h" />
     <ClInclude Include="include\utils\Delegate.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -88,5 +88,6 @@
     <ClInclude Include="include\common\gplcLiterals.h" />
     <ClInclude Include="include\common\gplcVisitor.h" />
     <ClInclude Include="include\utils\CASTLispyPrinter.h" />
+    <ClInclude Include="include\utils\CResult.h" />
   </ItemGroup>
 </Project>
