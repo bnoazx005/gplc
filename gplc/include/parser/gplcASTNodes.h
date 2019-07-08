@@ -52,6 +52,8 @@ namespace gplc
 		NT_UNARY_EXPR,
 		NT_BINARY_EXPR,
 		NT_LITERAL,
+		NT_IF_STATEMENT,
+		NT_LOOP_STATEMENT,
 		NT_BLOCK
 	};
 
@@ -119,6 +121,7 @@ namespace gplc
 			CASTDeclarationNode() = default;
 			CASTDeclarationNode(const CASTDeclarationNode& node) = default;
 	};
+
 
 	class CASTBlockNode : public CASTNode
 	{
@@ -237,6 +240,42 @@ namespace gplc
 		protected:
 			CASTAssignmentNode() = default;
 			CASTAssignmentNode(const CASTAssignmentNode& node) = default;
+	};
+
+
+	class CASTIfStatementNode : public CASTNode
+	{
+		public:
+			CASTIfStatementNode(CASTExpressionNode* pCondition, CASTBlockNode* pThenBlock, CASTBlockNode* pElseBlock);
+			virtual ~CASTIfStatementNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
+
+			CASTExpressionNode* GetCondition() const;
+
+			CASTBlockNode* GetThenBlock() const;
+
+			CASTBlockNode* GetElseBlock() const;
+		protected:
+			CASTIfStatementNode() = default;
+			CASTIfStatementNode(const CASTIfStatementNode& node) = default;
+	};
+
+
+	class CASTLoopStatementNode : public CASTNode
+	{
+		public:
+			CASTLoopStatementNode(CASTExpressionNode* pCondition, CASTBlockNode* pBody);
+			virtual ~CASTLoopStatementNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
+
+			CASTExpressionNode* GetCondition() const;
+
+			CASTBlockNode* Body() const;
+		protected:
+			CASTLoopStatementNode() = default;
+			CASTLoopStatementNode(const CASTLoopStatementNode& node) = default;
 	};
 
 }

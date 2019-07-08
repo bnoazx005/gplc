@@ -76,7 +76,12 @@ namespace gplc
 		TT_VOID_TYPE       = 44, ///< void
 		TT_ENUM_TYPE       = 45, ///< enum
 		TT_STRUCT_TYPE     = 46, ///< struct
-		TT_LITERAL         = 47,
+		TT_IF_KEYWORD      = 47,
+		TT_ELSE_KEYWORD    = 48,
+		TT_WHILE_KEYWORD   = 49,
+		TT_FOR_KEYWORD     = 50,
+		TT_LOOP_KEYWORD    = 51,
+		TT_LITERAL,
 		TT_DEFAULT
 	};
 

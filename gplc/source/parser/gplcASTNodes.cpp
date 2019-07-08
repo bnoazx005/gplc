@@ -405,4 +405,72 @@ namespace gplc
 	{
 		return dynamic_cast<CASTExpressionNode*>(mChildren[1]);
 	}
+
+
+	/*!
+		\brief CASTIfStatementNode's definition
+	*/
+
+	CASTIfStatementNode::CASTIfStatementNode(CASTExpressionNode* pCondition, CASTBlockNode* pThenBlock, CASTBlockNode* pElseBlock):
+		CASTNode(NT_IF_STATEMENT)
+	{
+		AttachChild(pCondition);
+		AttachChild(pThenBlock);
+		AttachChild(pElseBlock);
+	}
+
+	CASTIfStatementNode::~CASTIfStatementNode()
+	{
+	}
+
+	std::string CASTIfStatementNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	CASTExpressionNode* CASTIfStatementNode::GetCondition() const
+	{
+		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
+	}
+
+	CASTBlockNode* CASTIfStatementNode::GetThenBlock() const
+	{
+		return dynamic_cast<CASTBlockNode*>(mChildren[0]);
+	}
+
+	CASTBlockNode* CASTIfStatementNode::GetElseBlock() const
+	{
+		return dynamic_cast<CASTBlockNode*>(mChildren[0]);
+	}
+
+
+	/*!
+		\brief CASTLoopStatementNode's definition
+	*/
+
+	CASTLoopStatementNode::CASTLoopStatementNode(CASTExpressionNode* pCondition, CASTBlockNode* pBody):
+		CASTNode(NT_LOOP_STATEMENT)
+	{
+		AttachChild(pCondition);
+		AttachChild(pBody);
+	}
+
+	CASTLoopStatementNode::~CASTLoopStatementNode()
+	{
+	}
+
+	std::string CASTLoopStatementNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	CASTExpressionNode* CASTLoopStatementNode::GetCondition() const
+	{
+		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
+	}
+
+	CASTBlockNode* CASTLoopStatementNode::Body() const
+	{
+		return dynamic_cast<CASTBlockNode*>(mChildren[1]);
+	}
 }

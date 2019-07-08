@@ -78,6 +78,49 @@ TEST_CASE("Parser's tests")
 		REQUIRE(pMain->GetChildrenCount() == 2);
 	}
 
+	SECTION("TestParse_PassSimpleIfStatement_ReturnsCorrectAST")
+	{
+		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
+			{
+				//fill in the tokens' vector
+				new gplc::CToken(gplc::TT_IF_KEYWORD, 0),
+				new gplc::CIdentifierToken("x", 1),
+				new gplc::CToken(gplc::TT_OPEN_BRACE, 2),
+				new gplc::CIdentifierToken("y", 3),
+				new gplc::CToken(gplc::TT_ASSIGN_OP, 4),
+				new gplc::CLiteralToken(new gplc::CIntLiteral(42), 5),
+				new gplc::CToken(gplc::TT_SEMICOLON, 6),
+				new gplc::CToken(gplc::TT_CLOSE_BRACE, 7),
+			}), new gplc::CSymTable());
+
+		REQUIRE(pMain != nullptr);
+	}
+
+	SECTION("TestParse_PassSimpleIfElseStatement_ReturnsCorrectAST")
+	{
+		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
+			{
+				//fill in the tokens' vector
+				new gplc::CToken(gplc::TT_IF_KEYWORD, 0),
+				new gplc::CIdentifierToken("x", 1),
+				new gplc::CToken(gplc::TT_OPEN_BRACE, 2),
+				new gplc::CIdentifierToken("y", 3),
+				new gplc::CToken(gplc::TT_ASSIGN_OP, 4),
+				new gplc::CLiteralToken(new gplc::CIntLiteral(42), 5),
+				new gplc::CToken(gplc::TT_SEMICOLON, 6),
+				new gplc::CToken(gplc::TT_CLOSE_BRACE, 7),
+				new gplc::CToken(gplc::TT_ELSE_KEYWORD, 8),
+				new gplc::CToken(gplc::TT_OPEN_BRACE, 9),
+				new gplc::CIdentifierToken("y", 10),
+				new gplc::CToken(gplc::TT_ASSIGN_OP, 11),
+				new gplc::CLiteralToken(new gplc::CIntLiteral(24), 12),
+				new gplc::CToken(gplc::TT_SEMICOLON, 13),
+				new gplc::CToken(gplc::TT_CLOSE_BRACE, 14),
+			}), new gplc::CSymTable());
+
+		REQUIRE(pMain != nullptr);
+	}
+
 	if (pErrorInfo != nullptr)
 	{
 		delete pErrorInfo;

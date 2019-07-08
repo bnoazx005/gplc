@@ -24,6 +24,9 @@ namespace gplc
 	class CType;
 	class CASTExpressionNode;
 	class CASTUnaryExpressionNode;
+	class CASTIfStatementNode;
+	class CASTBlockNode;
+	class CASTLoopStatementNode;
 	class ISymTable;
 
 
@@ -93,7 +96,9 @@ namespace gplc
 			/*!
 				\brief Try to parse a single statement
 
-				<statement> ::= <operator> ;
+				<statement> ::=   <operator> 
+				                | <block>
+								| <if-statement>;
 				
 				\todo There is no <directive> non-terminal. It will be added later.
 
@@ -122,7 +127,7 @@ namespace gplc
 				<block> ::= statement> <statements>
 			*/
 
-			CASTNode* _parseBlockStatements(ILexer* pLexer);
+			CASTBlockNode* _parseBlockStatements(ILexer* pLexer);
 
 			/*!
 				\brief Try to parse a declaration
@@ -240,6 +245,23 @@ namespace gplc
 			*/
 
 			CASTNode* _parseAssignment(ILexer* pLexer);
+
+			/*!
+				\brief The method tries to parse the following rule
+
+				<if-statement> ::= if <expression> <block> else <block>
+								 | if <expression> <block>
+			*/
+
+			CASTIfStatementNode* _parseIfStatement(ILexer* pLexer);
+
+			/*!
+				\brief The method tries to parse the following rule
+
+				<loop-statement> ::= 'loop' <block>
+			*/
+
+			CASTLoopStatementNode* _parseLoopStatement(ILexer* pLexer);
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 		private:

@@ -151,8 +151,10 @@ namespace gplc
 	/*!
 		\brief Try to parse a single statement
 
-		<statement> ::= <operator> |
-						<block>
+		<statement> ::= <operator>     |
+						<block>        |
+						<if-statement> |
+						<loop-statement> 
 
 		\param[in] pLexer A pointer to pLexer's object
 
@@ -175,14 +177,28 @@ namespace gplc
 			return pBlockNode;
 		}
 
+		if (_match(pLexer->GetCurrToken(), TT_IF_KEYWORD))
+		{
+			pLexer->GetNextToken();
+
+			return _parseIfStatement(pLexer);
+		}
+
+		if (_match(pLexer->GetCurrToken(), TT_LOOP_KEYWORD))
+		{
+			pLexer->GetNextToken();
+
+			return _parseLoopStatement(pLexer);
+		}
+
 		CASTNode* pOperator = _parseOperator(pLexer);
 				
 		return pOperator;
 	}
 
-	CASTNode* CParser::_parseBlockStatements(ILexer* pLexer)
+	CASTBlockNode* CParser::_parseBlockStatements(ILexer* pLexer)
 	{
-		CASTNode* pBlockNode = new CASTBlockNode();
+		CASTBlockNode* pBlockNode = new CASTBlockNode();
 
 		CASTNode* pStatements = _parseStatementsList(pLexer);
 
@@ -571,6 +587,54 @@ namespace gplc
 		CASTExpressionNode* pRightNode = _parseExpression(pLexer);
 
 		return new CASTAssignmentNode(pLeftNode, pRightNode);
+	}
+
+	CASTIfStatementNode* CParser::_parseIfStatement(ILexer* pLexer)
+	{
+		CASTExpressionNode* pCondition = _parseExpression(pLexer);
+
+		if (!SUCCESS(_expect(TT_OPEN_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take {
+
+		CASTBlockNode* pThenBlock = _parseBlockStatements(pLexer);
+
+		if (!SUCCESS(_expect(TT_CLOSE_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take }
+
+		CASTBlockNode* pElseBlock = _match(pLexer->GetCurrToken(), TT_ELSE_KEYWORD) ? _parseBlockStatements(pLexer) : nullptr;
+
+		return new CASTIfStatementNode(pCondition, pThenBlock, pElseBlock);
+	}
+	
+	CASTLoopStatementNode* CParser::_parseLoopStatement(ILexer* pLexer)
+	{
+		CASTExpressionNode* pCondition = _parseExpression(pLexer);
+
+		if (!SUCCESS(_expect(TT_OPEN_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take {
+
+		CASTBlockNode* pBodyBlock = _parseBlockStatements(pLexer);
+
+		if (!SUCCESS(_expect(TT_CLOSE_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take }
+
+		return new CASTLoopStatementNode(pCondition, pBodyBlock);
 	}
 
 	bool CParser::_match(const CToken* pToken, E_TOKEN_TYPE type)
