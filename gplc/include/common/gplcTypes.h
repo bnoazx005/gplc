@@ -60,6 +60,7 @@ namespace gplc
 		RV_INCORRECT_TOKEN         = 0x10, ///< This is lexer's error, which happens, when token's structure is incorrect or cannot be recognized.
 		RV_UNEXPECTED_TOKEN        = 0x20, ///< This is parser's error, which happens, when it recognizes unexpected token.
 		RV_UNRECOGNIZED_TOKENS_SEQ = 0x40, ///< SAn input tokens sequence doesn't match with any grammar rule
+		RV_ALREADY_DEFINED_VAR     = 0x80, ///< Some variable has been already declared 
 	};
 
 	/*!

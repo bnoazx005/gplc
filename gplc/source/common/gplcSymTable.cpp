@@ -90,7 +90,7 @@ namespace gplc
 
 	Result CSymTable::AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc)
 	{
-		if (_lookUp(mpCurrScopeEntry, variableName) || _lookUp(mpGlobalScopeEntry, variableName))
+		if (_lookUp(mpCurrScopeEntry, variableName).IsOk() || _lookUp(mpGlobalScopeEntry, variableName).IsOk())
 		{
 			return RV_FAIL;
 		}
@@ -100,12 +100,12 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 	
-	const TSymbolDesc* CSymTable::LookUp(const std::string& variableName) const
+	TResult<TSymbolDesc> CSymTable::LookUp(const std::string& variableName) const
 	{
 		return _lookUp(mpCurrScopeEntry, variableName);
 	}
 
-	const TSymbolDesc* CSymTable::_lookUp(const TSymTableEntry* entry, const std::string& variableName) const
+	TResult<TSymbolDesc> CSymTable::_lookUp(const TSymTableEntry* entry, const std::string& variableName) const
 	{
 		TSymbolsMap table = entry->mVariables;
 
@@ -113,7 +113,7 @@ namespace gplc
 		
 		if ((varDesc = table.find(variableName)) != table.cend())
 		{
-			return &varDesc->second;
+			return TOkValue<TSymbolDesc>(varDesc->second);
 		}
 
 		//search in inner scopes
@@ -121,17 +121,19 @@ namespace gplc
 
 		U32 numOfNestedScopes = nestedScopes.size();
 
-		const TSymbolDesc* pCurrDesc;
+		TSymbolDesc currDesc;
 
 		for (U32 i = 0; i < numOfNestedScopes; i++)
 		{
-			if ((pCurrDesc = _lookUp(nestedScopes[i], variableName)) != nullptr)
+			auto result = _lookUp(nestedScopes[i], variableName);
+
+			if (result.IsOk())
 			{
-				return pCurrDesc;
+				return result;
 			}
 		}
 
-		return nullptr;
+		return TErrorValue<E_RESULT_VALUE>(RV_FAIL);
 	}
 
 	void CSymTable::_removeScope(TSymTableEntry** scope)
