@@ -13,12 +13,21 @@
 
 #include "gplcTypes.h"
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 
 namespace gplc
 {
+	class CBaseLiteral;
 	class CType;
+
+
+	struct TSymbolDesc
+	{
+		CBaseLiteral* mpValue;
+
+		CType*        mpType;
+	};
 
 
 	/*!
@@ -28,8 +37,7 @@ namespace gplc
 	class ISymTable
 	{
 		protected:
-
-		#pragma pack(push, 1)
+			typedef std::unordered_map<std::string, TSymbolDesc> TSymbolsMap;
 
 			/*!
 				\brief The TSymTableEntry structure
@@ -37,14 +45,12 @@ namespace gplc
 
 			struct TSymTableEntry
 			{
-				TSymTableEntry*                     mParentScope;
+				TSymTableEntry*              mParentScope;
 
-				std::vector<TSymTableEntry*>        mNestedScopes;
+				std::vector<TSymTableEntry*> mNestedScopes;
 
-				std::map<std::string, const CType*> mVariables;
+				TSymbolsMap                  mVariables;
 			};
-
-		#pragma pack(pop)
 
 		public:
 			ISymTable();
@@ -54,9 +60,9 @@ namespace gplc
 
 			virtual Result LeaveScope() = 0;
 
-			virtual Result AddVariable(const std::string& variableName, const CType* typeDesc) = 0;
+			virtual Result AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc) = 0;
 
-			virtual const CType* LookUp(const std::string& variableName) const = 0;
+			virtual const TSymbolDesc* LookUp(const std::string& variableName) const = 0;
 		protected:
 			ISymTable(const ISymTable& table);
 	};
@@ -76,13 +82,13 @@ namespace gplc
 
 			Result LeaveScope() override;
 
-			Result AddVariable(const std::string& variableName, const CType* typeDesc) override;
+			Result AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc) override;
 
-			const CType* LookUp(const std::string& variableName) const override;
+			const TSymbolDesc* LookUp(const std::string& variableName) const override;
 		protected:
 			CSymTable(const CSymTable& table);
 
-			const CType* _lookUp(const TSymTableEntry* entry, const std::string& variableName) const;
+			const TSymbolDesc* _lookUp(const TSymTableEntry* entry, const std::string& variableName) const;
 
 			void _removeScope(TSymTableEntry** scope);
 		protected:

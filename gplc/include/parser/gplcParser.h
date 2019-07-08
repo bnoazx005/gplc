@@ -24,6 +24,7 @@ namespace gplc
 	class CType;
 	class CASTExpressionNode;
 	class CASTUnaryExpressionNode;
+	class ISymTable;
 
 
 	/*!
@@ -38,7 +39,7 @@ namespace gplc
 			IParser() {}
 			virtual ~IParser() {}
 
-			virtual CASTNode* Parse(ILexer* pLexer) = 0;
+			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable) = 0;
 		public:
 			CDelegate<void, const TParserErrorInfo&> OnErrorOutput;
 		protected:
@@ -58,7 +59,7 @@ namespace gplc
 			CParser();
 			virtual ~CParser();
 
-			virtual CASTNode* Parse(ILexer* pLexer);
+			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable);
 		private:
 			CParser(const CParser& parser);
 
@@ -234,6 +235,7 @@ namespace gplc
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 		private:
+			ISymTable* mpSymTable;
 	};
 }
 

@@ -28,7 +28,7 @@ TEST_CASE("Parser's tests")
 			new gplc::CToken(gplc::TT_COLON, 3),
 			new gplc::CToken(gplc::TT_INT32_TYPE, 4),
 			new gplc::CToken(gplc::TT_SEMICOLON, 5),
-			}));
+			}), new gplc::CSymTable());
 
 		REQUIRE(pMain != nullptr);
 
@@ -48,7 +48,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CToken(gplc::TT_STAR, 5),
 				new gplc::CIdentifierToken("y", 6),
 				new gplc::CToken(gplc::TT_SEMICOLON, 7),
-			}));
+			}), new gplc::CSymTable());
 
 		REQUIRE(pMain != nullptr);
 	}

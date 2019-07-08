@@ -12,6 +12,7 @@
 #include "parser\gplcASTNodes.h"
 #include "lexer\gplcLexer.h"
 #include "common\gplcTypeSystem.h"
+#include "common/gplcSymTable.h"
 
 
 namespace gplc
@@ -34,22 +35,24 @@ namespace gplc
 	{
 	}
 
-	CASTNode* CParser::Parse(ILexer* pLexer)
+	CASTNode* CParser::Parse(ILexer* pLexer, ISymTable* pSymTable)
 	{
-		if (pLexer == nullptr)
+		if (pLexer == nullptr || pSymTable == nullptr)
 		{
 			TParserErrorInfo errorInfo;
 
 			memset(&errorInfo, 0, sizeof(errorInfo));
 						
 			errorInfo.mErrorCode = RV_INVALID_ARGUMENTS;
-			errorInfo.mMessage   = "A pointer to pLexer equals to null";
+			errorInfo.mMessage   = "A pointer to either pLexer or pSymTable equals to null";
 			
 			OnErrorOutput.Invoke(errorInfo);
 			
 			return nullptr;
 		}
 		
+		mpSymTable = pSymTable;
+
 		if (pLexer->GetCurrToken() == nullptr) //returns just an empty program unit
 		{
 			return new CASTNode(NT_PROGRAM_UNIT);

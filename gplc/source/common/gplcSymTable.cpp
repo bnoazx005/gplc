@@ -8,12 +8,15 @@
 	\todo
 */
 
-#include "common\gplcSymTable.h"
-#include "common\gplcTypeSystem.h"
+#include "common/gplcSymTable.h"
+#include "common/gplcTypeSystem.h"
+#include "common/gplcLiterals.h"
+#include <cassert>
 
 
 namespace gplc
 {
+
 	/*!
 		ISymTable defenition
 	*/
@@ -85,27 +88,32 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 
-	Result CSymTable::AddVariable(const std::string& variableName, const CType* typeDesc)
+	Result CSymTable::AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc)
 	{
-		mpCurrScopeEntry->mVariables.insert(std::make_pair(variableName, typeDesc));
+		if (_lookUp(mpCurrScopeEntry, variableName) || _lookUp(mpGlobalScopeEntry, variableName))
+		{
+			return RV_FAIL;
+		}
 
-		return RV_FAIL;
+		mpCurrScopeEntry->mVariables.insert({ variableName, typeDesc });
+		
+		return RV_SUCCESS;
 	}
 	
-	const CType* CSymTable::LookUp(const std::string& variableName) const
+	const TSymbolDesc* CSymTable::LookUp(const std::string& variableName) const
 	{
-		return _lookUp(mpGlobalScopeEntry, variableName);
+		return _lookUp(mpCurrScopeEntry, variableName);
 	}
 
-	const CType* CSymTable::_lookUp(const TSymTableEntry* entry, const std::string& variableName) const
+	const TSymbolDesc* CSymTable::_lookUp(const TSymTableEntry* entry, const std::string& variableName) const
 	{
-		std::map<std::string, const CType*> table = entry->mVariables;
+		TSymbolsMap table = entry->mVariables;
 
-		std::map<std::string, const CType*>::const_iterator varDesc = table.cend();
-
+		auto varDesc = table.cend();
+		
 		if ((varDesc = table.find(variableName)) != table.cend())
 		{
-			return (*varDesc).second;
+			return &varDesc->second;
 		}
 
 		//search in inner scopes
@@ -113,13 +121,13 @@ namespace gplc
 
 		U32 numOfNestedScopes = nestedScopes.size();
 
-		const CType* pTmpTypeNode = nullptr;
+		const TSymbolDesc* pCurrDesc;
 
 		for (U32 i = 0; i < numOfNestedScopes; i++)
 		{
-			if ((pTmpTypeNode = _lookUp(nestedScopes[i], variableName)) != nullptr)
+			if ((pCurrDesc = _lookUp(nestedScopes[i], variableName)) != nullptr)
 			{
-				return pTmpTypeNode;
+				return pCurrDesc;
 			}
 		}
 
@@ -135,17 +143,12 @@ namespace gplc
 
 		TSymTableEntry* pScope = *scope;
 
-		std::map<std::string, const CType*> currTable = pScope->mVariables;
+		TSymbolsMap currTable = pScope->mVariables;
 
 		if (!currTable.empty())
 		{
-			std::map<std::string, const CType*>::iterator var = currTable.begin();
-
-			for (var = currTable.begin(); var != currTable.end(); var++)
-			{
-				delete (*var).second;
-			}
-
+			TSymbolsMap::iterator var = currTable.begin();
+			
 			currTable.clear();
 		}
 
