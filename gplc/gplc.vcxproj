@@ -26,6 +26,7 @@
     <ClCompile Include="source\lexer\gplcTokens.cpp" />
     <ClCompile Include="source\parser\gplcASTNodes.cpp" />
     <ClCompile Include="source\parser\gplcParser.cpp" />
+    <ClCompile Include="source\utils\CASTLispyPrinter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\common\gplcConstants.h" />
@@ -33,12 +34,14 @@
     <ClInclude Include="include\common\gplcSymTable.h" />
     <ClInclude Include="include\common\gplcTypes.h" />
     <ClInclude Include="include\common\gplcTypeSystem.h" />
+    <ClInclude Include="include\common\gplcVisitor.h" />
     <ClInclude Include="include\gplc.h" />
     <ClInclude Include="include\lexer\gplcLexer.h" />
     <ClInclude Include="include\lexer\gplcTokens.h" />
     <ClInclude Include="include\parser\gplcParser.h" />
     <ClInclude Include="include\parser\gplcASTNodes.h" />
     <ClInclude Include="include\utils\Callback.h" />
+    <ClInclude Include="include\utils\CASTLispyPrinter.h" />
     <ClInclude Include="include\utils\Delegate.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

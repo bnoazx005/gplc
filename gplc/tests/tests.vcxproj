@@ -155,6 +155,7 @@
     <ClCompile Include="parser\parser.cpp" />
     <ClCompile Include="parser\stubLexer.cpp" />
     <ClCompile Include="tests.cpp" />
+    <ClCompile Include="utils\ASTLispyPrinterTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="parser\stubLexer.h" />

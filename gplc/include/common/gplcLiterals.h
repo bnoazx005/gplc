@@ -37,6 +37,8 @@ namespace gplc
 			virtual ~CBaseLiteral() = default;
 
 			E_LITERAL_TYPE GetType() const;
+
+			virtual std::string ToString() const = 0;
 		protected:
 			CBaseLiteral() = default;
 			CBaseLiteral(const CBaseLiteral& literal) = default;
@@ -75,6 +77,11 @@ namespace gplc
 				CGenericBaseLiteral(LT_INT, value)
 			{
 			}
+
+			std::string ToString() const override
+			{
+				return std::to_string(mValue);
+			}
 	};
 
 
@@ -84,7 +91,12 @@ namespace gplc
 			CUIntLiteral(U64 value) :
 				CGenericBaseLiteral(LT_UINT, value)
 			{
-			}	
+			}
+
+			std::string ToString() const override
+			{
+				return std::to_string(mValue);
+			}
 	};
 
 
@@ -94,6 +106,11 @@ namespace gplc
 			CFloatLiteral(F32 value) :
 				CGenericBaseLiteral(LT_FLOAT, value)
 			{
+			}
+
+			std::string ToString() const override
+			{
+				return std::to_string(mValue);
 			}
 	};
 
@@ -105,6 +122,11 @@ namespace gplc
 				CGenericBaseLiteral(LT_DOUBLE, value)
 			{
 			}
+
+			std::string ToString() const override
+			{
+				return std::to_string(mValue);
+			}
 	};
 
 
@@ -114,6 +136,11 @@ namespace gplc
 			CStringLiteral(const std::string& value) :
 				CGenericBaseLiteral(LT_STRING, value)
 			{
+			}
+
+			std::string ToString() const override
+			{
+				return std::string("\"").append(mValue).append("\"");
 			}
 	};
 
@@ -125,6 +152,11 @@ namespace gplc
 				CGenericBaseLiteral(LT_CHAR, value)
 			{
 			}
+
+			std::string ToString() const override
+			{
+				return std::string("\'").append(mValue).append("\'");
+			}
 	};
 
 
@@ -134,6 +166,11 @@ namespace gplc
 			CBoolLiteral(bool value) :
 				CGenericBaseLiteral(LT_BOOLEAN, value)
 			{
+			}
+
+			std::string ToString() const override
+			{
+				return std::to_string(mValue);
 			}
 	};
 }

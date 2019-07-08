@@ -25,4 +25,6 @@
 #include "parser/gplcParser.h"
 #include "parser/gplcASTNodes.h"
 
+#include "utils/CASTLispyPrinter.h"
+
 #endif

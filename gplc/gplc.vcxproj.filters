@@ -49,6 +49,7 @@
       <Filter>source\common</Filter>
     </ClCompile>
     <ClCompile Include="source\common\gplcLiterals.cpp" />
+    <ClCompile Include="source\utils\CASTLispyPrinter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gplc.h">
@@ -85,5 +86,7 @@
       <Filter>include\utils</Filter>
     </ClInclude>
     <ClInclude Include="include\common\gplcLiterals.h" />
+    <ClInclude Include="include\common\gplcVisitor.h" />
+    <ClInclude Include="include\utils\CASTLispyPrinter.h" />
   </ItemGroup>
 </Project>

@@ -14,6 +14,7 @@
 
 #include "common\gplcTypes.h"
 #include "..\lexer\gplcTokens.h"
+#include "common/gplcVisitor.h"
 #include <vector>
 
 
@@ -57,19 +58,21 @@ namespace gplc
 		\brief CASTNode class
 	*/
 
-	class CASTNode
+	class CASTNode: public virtual IVisitable<std::string>
 	{
 		public:
 			CASTNode(E_NODE_TYPE type);
-			virtual ~CASTNode();
-
-			Result AttachChild(const CASTNode* node);
+			virtual ~CASTNode(); 
 			
-			Result AttachChildren(const std::vector<const CASTNode*>& nodes);
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
+
+			Result AttachChild(CASTNode* node);
+			
+			Result AttachChildren(const std::vector<CASTNode*>& nodes);
 
 			Result DettachChild(CASTNode** node);
 			
-			const std::vector<const CASTNode*> GetChildren() const;
+			const std::vector<CASTNode*> GetChildren() const;
 
 			U32 GetChildrenCount() const;
 
@@ -80,9 +83,23 @@ namespace gplc
 
 			virtual void _removeNode(CASTNode** node);
 		protected:
-			E_NODE_TYPE                  mType;
+			E_NODE_TYPE            mType;
 
-			std::vector<const CASTNode*> mChildren;
+			std::vector<CASTNode*> mChildren;
+	};
+	
+
+	class CASTSourceUnitNode: public CASTNode
+	{
+		public:
+			CASTSourceUnitNode();
+			virtual ~CASTSourceUnitNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
+
+			const std::vector<CASTNode*>& GetStatements() const;
+		protected:
+			CASTSourceUnitNode(const CASTSourceUnitNode& node) = default;
 	};
 
 
@@ -95,6 +112,8 @@ namespace gplc
 		public:
 			CASTIdentifierNode(const std::string& name);
 			virtual ~CASTIdentifierNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
 
 			const std::string& GetName() const;
 		protected:
@@ -110,6 +129,8 @@ namespace gplc
 		public:
 			CASTLiteralNode(const CBaseLiteral* pValue);
 			virtual ~CASTLiteralNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
 
 			const CBaseLiteral* GetValue() const;
 		protected:
@@ -134,27 +155,33 @@ namespace gplc
 	class CASTUnaryExpressionNode : public CASTExpressionNode
 	{
 		public:
-			CASTUnaryExpressionNode(const CASTNode* pOpNode, const CASTNode* pNode);
+			CASTUnaryExpressionNode(E_TOKEN_TYPE opType, CASTNode* pNode);
 			virtual ~CASTUnaryExpressionNode();
 
-			const CASTNode* GetOperator() const;
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
 
-			const CASTNode* GetData() const;
+			E_TOKEN_TYPE GetOpType() const;
+
+			CASTNode* GetData() const;
 		protected:
 			CASTUnaryExpressionNode() = default;
 			CASTUnaryExpressionNode(const CASTUnaryExpressionNode& node) = default;
+		protected:
+			E_TOKEN_TYPE mOpType;
 	};
 
 	
 	class CASTBinaryExpressionNode : public CASTExpressionNode
 	{
 		public:
-			CASTBinaryExpressionNode(const CASTExpressionNode* pLeft, E_TOKEN_TYPE opType, const CASTExpressionNode* pRight);
+			CASTBinaryExpressionNode(CASTExpressionNode* pLeft, E_TOKEN_TYPE opType, CASTExpressionNode* pRight);
 			virtual ~CASTBinaryExpressionNode();
 
-			const CASTExpressionNode* GetLeft() const;
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
 
-			const CASTExpressionNode* GetRight() const;
+			CASTExpressionNode* GetLeft() const;
+
+			CASTExpressionNode* GetRight() const;
 
 			E_TOKEN_TYPE GetOpType() const;
 		protected:
@@ -168,12 +195,14 @@ namespace gplc
 	class CASTAssignmentNode : public CASTNode
 	{
 		public:
-			CASTAssignmentNode(const CASTUnaryExpressionNode* pLeft, const CASTExpressionNode* pRight);
+			CASTAssignmentNode(CASTUnaryExpressionNode* pLeft, CASTExpressionNode* pRight);
 			virtual ~CASTAssignmentNode();
 
-			const CASTUnaryExpressionNode* GetLeft() const;
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
 
-			const CASTExpressionNode* GetRight() const;
+			CASTUnaryExpressionNode* GetLeft() const;
+
+			CASTExpressionNode* GetRight() const;
 		protected:
 			CASTAssignmentNode() = default;
 			CASTAssignmentNode(const CASTAssignmentNode& node) = default;

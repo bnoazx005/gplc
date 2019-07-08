@@ -63,8 +63,13 @@ namespace gplc
 			}
 		}
 	}
+	
+	std::string CASTNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return std::string();
+	}
 
-	Result CASTNode::AttachChild(const CASTNode* node)
+	Result CASTNode::AttachChild(CASTNode* node)
 	{
 		if (node == nullptr)
 		{
@@ -76,7 +81,7 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 	
-	Result CASTNode::AttachChildren(const std::vector<const CASTNode*>& nodes)
+	Result CASTNode::AttachChildren(const std::vector<CASTNode*>& nodes)
 	{
 		if (nodes.empty())
 		{
@@ -95,7 +100,7 @@ namespace gplc
 			return RV_INVALID_ARGUMENTS;
 		}
 
-		std::vector<const CASTNode*>::iterator currElement = std::find(mChildren.begin(), mChildren.end(), *node);
+		std::vector<CASTNode*>::iterator currElement = std::find(mChildren.begin(), mChildren.end(), *node);
 
 		if (currElement == mChildren.end())
 		{
@@ -111,7 +116,7 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 
-	const std::vector<const CASTNode*> CASTNode::GetChildren() const
+	const std::vector<CASTNode*> CASTNode::GetChildren() const
 	{
 		return mChildren;
 	}
@@ -142,7 +147,7 @@ namespace gplc
 			return;
 		}
 
-		std::stack<const CASTNode*> nodesInStack;
+		std::stack<CASTNode*> nodesInStack;
 
 		nodesInStack.push(pNode->mChildren[0]);
 
@@ -164,6 +169,31 @@ namespace gplc
 			pCurrNode = nullptr;
 		}
 	}
+
+
+	/*!
+		\brief CASTSourceUnitNode's definition
+	*/
+
+	CASTSourceUnitNode::CASTSourceUnitNode():
+		CASTNode(NT_PROGRAM_UNIT)
+	{
+	}
+
+	CASTSourceUnitNode::~CASTSourceUnitNode()
+	{
+	}
+
+	std::string CASTSourceUnitNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitProgramUnit(this);
+	}
+
+	const std::vector<CASTNode*>& CASTSourceUnitNode::GetStatements() const
+	{
+		return mChildren;
+	}
+
 
 	/*!
 		CASTIdentifierNode definition
@@ -188,6 +218,11 @@ namespace gplc
 	{
 	}
 
+	std::string CASTIdentifierNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitIdentifier(this);
+	}
+
 	const std::string& CASTIdentifierNode::GetName() const
 	{
 		return mName;
@@ -208,6 +243,11 @@ namespace gplc
 
 	}
 
+	std::string CASTLiteralNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitLiteral(this);
+	}
+
 	const CBaseLiteral* CASTLiteralNode::GetValue() const
 	{
 		return mpValue;
@@ -224,10 +264,9 @@ namespace gplc
 		\brief CASTUnaryExpressionNode's definition
 	*/
 	
-	CASTUnaryExpressionNode::CASTUnaryExpressionNode(const CASTNode* pOpNode, const CASTNode* pNode):
-		CASTExpressionNode(NT_UNARY_EXPR)
+	CASTUnaryExpressionNode::CASTUnaryExpressionNode(E_TOKEN_TYPE opType, CASTNode* pNode):
+		CASTExpressionNode(NT_UNARY_EXPR), mOpType(opType)
 	{
-		AttachChild(pOpNode);
 		AttachChild(pNode);
 	}
 
@@ -236,14 +275,19 @@ namespace gplc
 		// \todo add implementation of the destructor
 	}
 
-	const CASTNode* CASTUnaryExpressionNode::GetOperator() const
+	std::string CASTUnaryExpressionNode::Accept(IVisitor<std::string>* pVisitor)
 	{
-		return mChildren[0];
+		return pVisitor->VisitUnaryExpression(this);
 	}
 
-	const CASTNode* CASTUnaryExpressionNode::GetData() const
+	E_TOKEN_TYPE CASTUnaryExpressionNode::GetOpType() const
 	{
-		return mChildren[1];
+		return mOpType;
+	}
+
+	CASTNode* CASTUnaryExpressionNode::GetData() const
+	{
+		return mChildren[0];
 	}
 
 
@@ -251,7 +295,7 @@ namespace gplc
 		\brief CASTBinaryExpressionNode's definition
 	*/
 
-	CASTBinaryExpressionNode::CASTBinaryExpressionNode(const CASTExpressionNode* pLeft, E_TOKEN_TYPE opType, const CASTExpressionNode* pRight):
+	CASTBinaryExpressionNode::CASTBinaryExpressionNode(CASTExpressionNode* pLeft, E_TOKEN_TYPE opType, CASTExpressionNode* pRight):
 		CASTExpressionNode(NT_BINARY_EXPR), mOpType(opType)
 	{
 		AttachChild(pLeft);
@@ -263,14 +307,19 @@ namespace gplc
 		// \todo add implementation of the destructor
 	}
 
-	const CASTExpressionNode* CASTBinaryExpressionNode::GetLeft() const
+	std::string CASTBinaryExpressionNode::Accept(IVisitor<std::string>* pVisitor)
 	{
-		return dynamic_cast<const CASTExpressionNode*>(mChildren[0]);
+		return pVisitor->VisitBinaryExpression(this);
 	}
 
-	const CASTExpressionNode* CASTBinaryExpressionNode::GetRight() const
+	CASTExpressionNode* CASTBinaryExpressionNode::GetLeft() const
 	{
-		return dynamic_cast<const CASTExpressionNode*>(mChildren[1]);
+		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
+	}
+
+	CASTExpressionNode* CASTBinaryExpressionNode::GetRight() const
+	{
+		return dynamic_cast<CASTExpressionNode*>(mChildren[1]);
 	}
 
 	E_TOKEN_TYPE CASTBinaryExpressionNode::GetOpType() const
@@ -283,7 +332,7 @@ namespace gplc
 		\brief CASTAssignmentNode definition
 	*/
 
-	CASTAssignmentNode::CASTAssignmentNode(const CASTUnaryExpressionNode* pLeft, const CASTExpressionNode* pRight) :
+	CASTAssignmentNode::CASTAssignmentNode(CASTUnaryExpressionNode* pLeft, CASTExpressionNode* pRight) :
 		CASTNode(NT_ASSIGNMENT)
 	{
 		AttachChild(pLeft);
@@ -295,13 +344,18 @@ namespace gplc
 		// \todo add implementation of the destructor
 	}
 
-	const CASTUnaryExpressionNode* CASTAssignmentNode::GetLeft() const
+	std::string CASTAssignmentNode::Accept(IVisitor<std::string>* pVisitor)
 	{
-		return dynamic_cast<const CASTUnaryExpressionNode*>(mChildren[0]);
+		return pVisitor->VisitAssignment(this);
 	}
 
-	const CASTExpressionNode* CASTAssignmentNode::GetRight() const
+	CASTUnaryExpressionNode* CASTAssignmentNode::GetLeft() const
 	{
-		return dynamic_cast<const CASTExpressionNode*>(mChildren[1]);
+		return dynamic_cast<CASTUnaryExpressionNode*>(mChildren[0]);
+	}
+
+	CASTExpressionNode* CASTAssignmentNode::GetRight() const
+	{
+		return dynamic_cast<CASTExpressionNode*>(mChildren[1]);
 	}
 }

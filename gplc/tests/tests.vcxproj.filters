@@ -10,6 +10,9 @@
     <Filter Include="parser">
       <UniqueIdentifier>{6f884e7c-18bb-4682-864f-6713aa6dab0c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{89ed77e2-0324-432f-8a9d-68af56eeafb9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tests.cpp" />
@@ -25,6 +28,7 @@
     <ClCompile Include="common\symTable.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="utils\ASTLispyPrinterTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="parser\stubLexer.h">

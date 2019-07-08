@@ -109,7 +109,7 @@ namespace gplc
 
 	CASTNode* CParser::_parseProgramUnit(ILexer* pLexer)
 	{
-		CASTNode* pProgramUnit = new CASTNode(NT_PROGRAM_UNIT);
+		CASTNode* pProgramUnit = new CASTSourceUnitNode();
 
 		CASTNode* pStatements = _parseStatementsList(pLexer);
 		
@@ -478,7 +478,14 @@ namespace gplc
 
 	CASTUnaryExpressionNode* CParser::_parseUnaryExpression(ILexer* pLexer)
 	{
-		return new CASTUnaryExpressionNode(nullptr, _parsePrimaryExpression(pLexer));
+		const CToken* pCurrToken = pLexer->GetCurrToken();
+
+		if (_match(pCurrToken, TT_MINUS))
+		{
+			return new CASTUnaryExpressionNode(TT_MINUS, _parsePrimaryExpression(pLexer));
+		}
+
+		return new CASTUnaryExpressionNode(TT_DEFAULT, _parsePrimaryExpression(pLexer));
 	}
 
 	CASTNode* CParser::_parsePrimaryExpression(ILexer* pLexer)
