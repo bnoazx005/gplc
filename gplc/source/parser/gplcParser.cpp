@@ -210,13 +210,11 @@ namespace gplc
 
 	CASTNode* CParser::_parseDeclaration(ILexer* pLexer)
 	{
-		CASTNode* pDeclaration = new CASTNode(NT_DECL);
-
-		pDeclaration->AttachChild(_parseIdentifiers(pLexer));
+		CASTNode* pIdentifiers = _parseIdentifiers(pLexer);
 
 		if (!SUCCESS(_expect(TT_COLON, pLexer->GetCurrToken())))
 		{
-			return pDeclaration;
+			return nullptr;
 		}
 
 		pLexer->GetNextToken();
@@ -224,12 +222,31 @@ namespace gplc
 		// parse definition not declaration
 		if (_match(pLexer->PeekNextToken(1), TT_ASSIGN_OP))
 		{
-			return pDeclaration;
+			return nullptr;
 		}
 
-		pDeclaration->AttachChild(_parseType(pLexer));
+		CASTNode* pTypeInfo = _parseType(pLexer);
+/*
+		if (!SUCCESS(mpSymTable->AddVariable(pCurrIdentifierToken->GetName(), { nullptr, nullptr })))
+		{
+			TParserErrorInfo errorInfo;
 
-		return pDeclaration;
+			memset(&errorInfo, 0, sizeof(errorInfo));
+
+			C8 tmpStrBuf[255];
+
+			sprintf_s(tmpStrBuf, sizeof(C8) * 255, "Try to initialize already declared variable: %s at %d\0", pCurrIdentifierToken->GetName(), pCurrToken->GetPos());
+
+			errorInfo.mMessage = tmpStrBuf;
+			errorInfo.mErrorCode = RV_ALREADY_DEFINED_VAR;
+			errorInfo.mPos = pCurrToken->GetPos();
+
+			OnErrorOutput.Invoke(errorInfo);
+
+			return pIdentifiersRoot;
+		}*/
+
+		return new CASTDeclarationNode(pIdentifiers, pTypeInfo);
 	}
 
 	/*!

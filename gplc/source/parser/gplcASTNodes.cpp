@@ -195,6 +195,33 @@ namespace gplc
 	}
 
 
+	CASTDeclarationNode::CASTDeclarationNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo):
+		CASTNode(NT_DECL)
+	{
+		AttachChild(pIdentifiers);
+		AttachChild(pTypeInfo);
+	}
+
+	CASTDeclarationNode::~CASTDeclarationNode()
+	{
+	}
+
+	std::string CASTDeclarationNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	CASTNode* CASTDeclarationNode::GetIdentifiers() const
+	{
+		return mChildren[0];
+	}
+
+	CASTNode* CASTDeclarationNode::GetTypeInfo() const
+	{
+		return mChildren[1];
+	}
+
+
 	/*!
 		CASTIdentifierNode definition
 	*/
