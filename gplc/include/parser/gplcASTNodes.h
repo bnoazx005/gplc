@@ -52,6 +52,7 @@ namespace gplc
 		NT_UNARY_EXPR,
 		NT_BINARY_EXPR,
 		NT_LITERAL,
+		NT_BLOCK
 	};
 
 	/*!
@@ -117,6 +118,19 @@ namespace gplc
 		protected:
 			CASTDeclarationNode() = default;
 			CASTDeclarationNode(const CASTDeclarationNode& node) = default;
+	};
+
+	class CASTBlockNode : public CASTNode
+	{
+		public:
+			CASTBlockNode();
+			virtual ~CASTBlockNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
+
+			const std::vector<CASTNode*>& GetStatements() const;
+		protected:
+			CASTBlockNode(const CASTBlockNode& node) = default;
 	};
 
 

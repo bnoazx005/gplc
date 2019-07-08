@@ -151,7 +151,8 @@ namespace gplc
 	/*!
 		\brief Try to parse a single statement
 
-		<statement> ::= <operator>
+		<statement> ::= <operator> |
+						<block>
 
 		\param[in] pLexer A pointer to pLexer's object
 
@@ -160,9 +161,37 @@ namespace gplc
 
 	CASTNode* CParser::_parseStatement(ILexer* pLexer)
 	{
+		if (_match(pLexer->GetCurrToken(), TT_OPEN_BRACE))
+		{
+			pLexer->GetNextToken();
+
+			CASTNode* pBlockNode = _parseBlockStatements(pLexer);
+
+			if (!SUCCESS(_expect(TT_CLOSE_BRACE, pLexer->GetCurrToken())))
+			{
+				return nullptr;
+			}
+
+			return pBlockNode;
+		}
+
 		CASTNode* pOperator = _parseOperator(pLexer);
 				
 		return pOperator;
+	}
+
+	CASTNode* CParser::_parseBlockStatements(ILexer* pLexer)
+	{
+		CASTNode* pBlockNode = new CASTBlockNode();
+
+		CASTNode* pStatements = _parseStatementsList(pLexer);
+
+		if (pStatements)
+		{
+			pBlockNode->AttachChildren(pStatements->GetChildren());
+		}
+
+		return pBlockNode;
 	}
 
 	/*!
@@ -190,9 +219,11 @@ namespace gplc
 			{
 				pOperator = _parseAssignment(pLexer);
 			}
-		}
 
-		_expect(TT_SEMICOLON, pLexer->GetCurrToken());
+			_expect(TT_SEMICOLON, pLexer->GetCurrToken());
+
+			pLexer->GetNextToken();
+		}
 
 		return pOperator;
 	}

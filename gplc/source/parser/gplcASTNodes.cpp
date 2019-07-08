@@ -222,6 +222,26 @@ namespace gplc
 	}
 
 
+	CASTBlockNode::CASTBlockNode():
+		CASTNode(NT_BLOCK)
+	{
+	}
+
+	CASTBlockNode::~CASTBlockNode()
+	{
+	}
+
+	std::string CASTBlockNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	const std::vector<CASTNode*>& CASTBlockNode::GetStatements() const
+	{
+		return mChildren;
+	}
+
+
 	/*!
 		CASTIdentifierNode definition
 	*/

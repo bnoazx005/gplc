@@ -117,6 +117,14 @@ namespace gplc
 			CASTNode* _parseOperator(ILexer* pLexer);
 
 			/*!
+				\brief The method tries to parse the following construct
+
+				<block> ::= statement> <statements>
+			*/
+
+			CASTNode* _parseBlockStatements(ILexer* pLexer);
+
+			/*!
 				\brief Try to parse a declaration
 
 				<declaration> ::=   <identifiers> : <attributes> <type>
