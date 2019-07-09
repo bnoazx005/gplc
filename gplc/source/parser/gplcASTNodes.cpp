@@ -573,4 +573,33 @@ namespace gplc
 	{
 		return {};
 	}
+
+
+	/*!
+		\brief CASTFunctionCallNode's definition
+	*/
+
+	CASTFunctionCallNode::CASTFunctionCallNode(CASTUnaryExpressionNode* pIdentifier, CASTNode* pArgsList):
+		CASTNode(NT_FUNC_CALL)
+	{
+	}
+
+	CASTFunctionCallNode::~CASTFunctionCallNode()
+	{
+	}
+
+	std::string CASTFunctionCallNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	CASTUnaryExpressionNode* CASTFunctionCallNode::GetIdentifier() const
+	{
+		return dynamic_cast<CASTUnaryExpressionNode*>(mChildren[0]);
+	}
+
+	CASTNode* CASTFunctionCallNode::GetArgs() const
+	{
+		return mChildren[1];
+	}
 }

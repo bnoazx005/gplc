@@ -563,10 +563,20 @@ namespace gplc
 
 		if (_match(pCurrToken, TT_MINUS))
 		{
+			pLexer->GetNextToken();
+
 			return new CASTUnaryExpressionNode(TT_MINUS, _parsePrimaryExpression(pLexer));
 		}
 
-		return new CASTUnaryExpressionNode(TT_DEFAULT, _parsePrimaryExpression(pLexer));
+		CASTUnaryExpressionNode* pPrimaryNode = new CASTUnaryExpressionNode(TT_DEFAULT, _parsePrimaryExpression(pLexer));
+
+		// function's call
+		if (_match(pLexer->GetCurrToken(), TT_OPEN_BRACKET))
+		{
+			return new CASTUnaryExpressionNode(TT_DEFAULT, _parseFunctionCall(pPrimaryNode, pLexer));
+		}
+
+		return pPrimaryNode;
 	}
 
 	CASTNode* CParser::_parsePrimaryExpression(ILexer* pLexer)
@@ -754,6 +764,11 @@ namespace gplc
 		pLexer->GetNextToken(); // take )
 
 		return pArgsNode;
+	}
+
+	CASTFunctionCallNode* CParser::_parseFunctionCall(CASTUnaryExpressionNode* pPrimaryExpr, ILexer* pLexer)
+	{
+		return nullptr;
 	}
 
 	bool CParser::_match(const CToken* pToken, E_TOKEN_TYPE type)

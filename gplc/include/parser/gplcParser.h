@@ -32,6 +32,7 @@ namespace gplc
 	class CASTFunctionDeclNode;
 	class CASTFunctionClosureNode;
 	class CASTFunctionArgsNode;
+	class CASTFunctionCallNode;
 
 
 	/*!
@@ -231,7 +232,7 @@ namespace gplc
 			/*!
 				\brief The method tries to parse an unary expression
 
-				<unary_expr> ::= <identifier> | <value> 
+				<unary_expr> ::= <identifier> | <value> | <function-call> 
 			*/
 
 			CASTUnaryExpressionNode* _parseUnaryExpression(ILexer* pLexer);
@@ -303,6 +304,14 @@ namespace gplc
 			*/
 
 			CASTFunctionArgsNode* _parseFunctionArgs(ILexer* pLexer);
+
+			/*!
+				\brief The method parses the following rule
+
+				<function-call> ::= <primary> '(' <expression> [,<expression>]* ')'
+			*/
+
+			CASTFunctionCallNode* _parseFunctionCall(CASTUnaryExpressionNode* pPrimaryExpr, ILexer* pLexer);
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 		private:

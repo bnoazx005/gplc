@@ -58,6 +58,7 @@ namespace gplc
 		NT_FUNC_DECL,
 		NT_FUNC_CLOSURE,
 		NT_FUNC_ARGS,
+		NT_FUNC_CALL,
 		NT_BLOCK
 	};
 
@@ -340,6 +341,22 @@ namespace gplc
 			CASTFunctionDeclNode(const CASTFunctionDeclNode& node) = default;
 	};
 
+
+	class CASTFunctionCallNode : public CASTNode
+	{
+		public:
+			CASTFunctionCallNode(CASTUnaryExpressionNode* pIdentifier, CASTNode* pArgsList);
+			virtual ~CASTFunctionCallNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
+
+			CASTUnaryExpressionNode* GetIdentifier() const;
+
+			CASTNode* GetArgs() const;
+		protected:
+			CASTFunctionCallNode() = default;
+			CASTFunctionCallNode(const CASTFunctionCallNode& node) = default;
+	};
 }
 
 #endif
