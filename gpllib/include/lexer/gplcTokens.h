@@ -82,6 +82,7 @@ namespace gplc
 		TT_FOR_KEYWORD     = 50,
 		TT_LOOP_KEYWORD    = 51,
 		TT_ARROW           = 52,
+		TT_RETURN_KEYWORD  = 53,
 		TT_LITERAL,
 		TT_DEFAULT
 	};

@@ -604,4 +604,29 @@ namespace gplc
 	{
 		return mChildren[1];
 	}
+
+	
+	/*!
+		\brief CASTReturnStatementNode's definition
+	*/
+
+	CASTReturnStatementNode::CASTReturnStatementNode(CASTExpressionNode* pExpression):
+		CASTNode(NT_RETURN_STATEMENT)
+	{
+		AttachChild(pExpression);
+	}
+
+	CASTReturnStatementNode::~CASTReturnStatementNode()
+	{
+	}
+
+	std::string CASTReturnStatementNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	CASTExpressionNode* CASTReturnStatementNode::GetExpr() const
+	{
+		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
+	}
 }

@@ -154,7 +154,9 @@ namespace gplc
 		<statement> ::= <operator>     |
 						<block>        |
 						<if-statement> |
-						<loop-statement> 
+						<loop-statement> |
+						<while-loop-stmt> |
+						<return-stmt>
 
 		\param[in] pLexer A pointer to pLexer's object
 
@@ -196,6 +198,13 @@ namespace gplc
 			pLexer->GetNextToken();
 
 			return _parseWhileLoopStatement(pLexer);
+		}
+
+		if (_match(pLexer->GetCurrToken(), TT_RETURN_KEYWORD))
+		{
+			pLexer->GetNextToken();
+
+			return _parseReturnStatement(pLexer);
 		}
 
 		CASTNode* pOperator = _parseOperator(pLexer);
@@ -807,6 +816,11 @@ namespace gplc
 		pLexer->GetNextToken(); // take )
 
 		return new CASTFunctionCallNode(pPrimaryExpr, pArgsNode);
+	}
+
+	CASTReturnStatementNode* CParser::_parseReturnStatement(ILexer* pLexer)
+	{
+		return new CASTReturnStatementNode(_parseExpression(pLexer));
 	}
 
 	bool CParser::_match(const CToken* pToken, E_TOKEN_TYPE type)

@@ -33,6 +33,7 @@ namespace gplc
 	class CASTFunctionClosureNode;
 	class CASTFunctionArgsNode;
 	class CASTFunctionCallNode;
+	class CASTReturnStatementNode;
 
 
 	/*!
@@ -312,6 +313,14 @@ namespace gplc
 			*/
 
 			CASTFunctionCallNode* _parseFunctionCall(CASTUnaryExpressionNode* pPrimaryExpr, ILexer* pLexer);
+
+			/*!
+				\brief The method parses the following rule
+
+				<return-stmt> ::= 'return' <expression>
+			*/
+
+			CASTReturnStatementNode* _parseReturnStatement(ILexer* pLexer);
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 		private:

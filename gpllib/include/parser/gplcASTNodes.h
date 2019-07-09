@@ -59,6 +59,7 @@ namespace gplc
 		NT_FUNC_CLOSURE,
 		NT_FUNC_ARGS,
 		NT_FUNC_CALL,
+		NT_RETURN_STATEMENT,
 		NT_BLOCK
 	};
 
@@ -356,6 +357,21 @@ namespace gplc
 		protected:
 			CASTFunctionCallNode() = default;
 			CASTFunctionCallNode(const CASTFunctionCallNode& node) = default;
+	};
+
+
+	class CASTReturnStatementNode : public CASTNode
+	{
+		public:
+			CASTReturnStatementNode(CASTExpressionNode* pExpression);
+			virtual ~CASTReturnStatementNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
+
+			CASTExpressionNode* GetExpr() const;
+		protected:
+			CASTReturnStatementNode() = default;
+			CASTReturnStatementNode(const CASTReturnStatementNode& node) = default;
 	};
 }
 

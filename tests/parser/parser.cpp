@@ -149,7 +149,7 @@ TEST_CASE("Parser's tests")
 	SECTION("TestParse_PassFuncCall_ReturnsCorrectAST")
 	{
 		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer({
-			//the sequence below specifies the following declaration of a function: f: [x, y](z: int32) -> int32;
+			// f(x, y, z);
 			new gplc::CIdentifierToken("f", 0),
 			new gplc::CToken(gplc::TT_OPEN_BRACKET, 1),
 			new gplc::CIdentifierToken("x", 2),
@@ -159,6 +159,20 @@ TEST_CASE("Parser's tests")
 			new gplc::CIdentifierToken("z", 6),
 			new gplc::CToken(gplc::TT_CLOSE_BRACKET, 7),
 			new gplc::CToken(gplc::TT_SEMICOLON, 8),
+			}), new gplc::CSymTable());
+
+		REQUIRE(pMain != nullptr);
+	}
+
+	SECTION("TestParse_PassReturnStatement_ReturnsCorrectAST")
+	{
+		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer({
+			//the sequence below specifies the following statement: return 2.0 + x;
+			new gplc::CToken(gplc::TT_RETURN_KEYWORD, 0),
+			new gplc::CLiteralToken(new gplc::CIntLiteral(2), 1),
+			new gplc::CToken(gplc::TT_PLUS, 3),
+			new gplc::CIdentifierToken("x", 4),
+			new gplc::CToken(gplc::TT_SEMICOLON, 5),
 			}), new gplc::CSymTable());
 
 		REQUIRE(pMain != nullptr);
