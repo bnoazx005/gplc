@@ -28,6 +28,7 @@ namespace gplc
 	class CASTBlockNode;
 	class CASTLoopStatementNode;
 	class ISymTable;
+	class CASTWhileLoopStatementNode;
 
 
 	/*!
@@ -262,6 +263,14 @@ namespace gplc
 			*/
 
 			CASTLoopStatementNode* _parseLoopStatement(ILexer* pLexer);
+
+			/*!
+				\brief The method parses the following rule
+
+				<while-loop-stmt> ::= 'while' <expression> '{' <block> '}'
+			*/
+
+			CASTWhileLoopStatementNode* CParser::_parseWhileLoopStatement(ILexer* pLexer);
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 		private:

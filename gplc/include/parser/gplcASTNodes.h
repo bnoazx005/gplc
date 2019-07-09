@@ -54,6 +54,7 @@ namespace gplc
 		NT_LITERAL,
 		NT_IF_STATEMENT,
 		NT_LOOP_STATEMENT,
+		NT_WHILE_STATEMENT,
 		NT_BLOCK
 	};
 
@@ -265,8 +266,23 @@ namespace gplc
 	class CASTLoopStatementNode : public CASTNode
 	{
 		public:
-			CASTLoopStatementNode(CASTExpressionNode* pCondition, CASTBlockNode* pBody);
+			CASTLoopStatementNode(CASTBlockNode* pBody);
 			virtual ~CASTLoopStatementNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
+
+			CASTBlockNode* Body() const;
+		protected:
+			CASTLoopStatementNode() = default;
+			CASTLoopStatementNode(const CASTLoopStatementNode& node) = default;
+	};
+
+	
+	class CASTWhileLoopStatementNode : public CASTNode
+	{
+		public:
+			CASTWhileLoopStatementNode(CASTExpressionNode* pCondition, CASTBlockNode* pBody);
+			virtual ~CASTWhileLoopStatementNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
 
@@ -274,8 +290,8 @@ namespace gplc
 
 			CASTBlockNode* Body() const;
 		protected:
-			CASTLoopStatementNode() = default;
-			CASTLoopStatementNode(const CASTLoopStatementNode& node) = default;
+			CASTWhileLoopStatementNode() = default;
+			CASTWhileLoopStatementNode(const CASTWhileLoopStatementNode& node) = default;
 	};
 
 }

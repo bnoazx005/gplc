@@ -448,10 +448,9 @@ namespace gplc
 		\brief CASTLoopStatementNode's definition
 	*/
 
-	CASTLoopStatementNode::CASTLoopStatementNode(CASTExpressionNode* pCondition, CASTBlockNode* pBody):
+	CASTLoopStatementNode::CASTLoopStatementNode(CASTBlockNode* pBody):
 		CASTNode(NT_LOOP_STATEMENT)
 	{
-		AttachChild(pCondition);
 		AttachChild(pBody);
 	}
 
@@ -464,12 +463,38 @@ namespace gplc
 		return {};
 	}
 
-	CASTExpressionNode* CASTLoopStatementNode::GetCondition() const
+	CASTBlockNode* CASTLoopStatementNode::Body() const
+	{
+		return dynamic_cast<CASTBlockNode*>(mChildren[0]);
+	}
+
+
+	/*!
+		\brief CASTWhileLoopStatementNode's definition
+	*/
+
+	CASTWhileLoopStatementNode::CASTWhileLoopStatementNode(CASTExpressionNode* pCondition, CASTBlockNode* pBody) :
+		CASTNode(NT_WHILE_STATEMENT)
+	{
+		AttachChild(pCondition);
+		AttachChild(pBody);
+	}
+
+	CASTWhileLoopStatementNode::~CASTWhileLoopStatementNode()
+	{
+	}
+
+	std::string CASTWhileLoopStatementNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	CASTExpressionNode* CASTWhileLoopStatementNode::GetCondition() const
 	{
 		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
 	}
 
-	CASTBlockNode* CASTLoopStatementNode::Body() const
+	CASTBlockNode* CASTWhileLoopStatementNode::Body() const
 	{
 		return dynamic_cast<CASTBlockNode*>(mChildren[1]);
 	}

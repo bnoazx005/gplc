@@ -191,6 +191,13 @@ namespace gplc
 			return _parseLoopStatement(pLexer);
 		}
 
+		if (_match(pLexer->GetCurrToken(), TT_WHILE_KEYWORD))
+		{
+			pLexer->GetNextToken();
+
+			return _parseWhileLoopStatement(pLexer);
+		}
+
 		CASTNode* pOperator = _parseOperator(pLexer);
 				
 		return pOperator;
@@ -616,6 +623,27 @@ namespace gplc
 	
 	CASTLoopStatementNode* CParser::_parseLoopStatement(ILexer* pLexer)
 	{
+		if (!SUCCESS(_expect(TT_OPEN_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take {
+
+		CASTBlockNode* pBodyBlock = _parseBlockStatements(pLexer);
+
+		if (!SUCCESS(_expect(TT_CLOSE_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take }
+
+		return new CASTLoopStatementNode(pBodyBlock);
+	}
+	   
+	CASTWhileLoopStatementNode* CParser::_parseWhileLoopStatement(ILexer* pLexer)
+	{
 		CASTExpressionNode* pCondition = _parseExpression(pLexer);
 
 		if (!SUCCESS(_expect(TT_OPEN_BRACE, pLexer->GetCurrToken())))
@@ -634,7 +662,7 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take }
 
-		return new CASTLoopStatementNode(pCondition, pBodyBlock);
+		return new CASTWhileLoopStatementNode(pCondition, pBodyBlock);
 	}
 
 	bool CParser::_match(const CToken* pToken, E_TOKEN_TYPE type)
