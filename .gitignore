@@ -6,3 +6,6 @@ gplc/tests/tmp/
 *.sdf
 .vs/
 gplc/docs/
+bin/
+/bin/
+CMakeSettings.json
