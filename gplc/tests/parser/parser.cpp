@@ -121,6 +121,31 @@ TEST_CASE("Parser's tests")
 		REQUIRE(pMain != nullptr);
 	}
 
+	SECTION("TestParse_PassFullFunctionDecl_ReturnsCorrectAST")
+	{
+		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
+			{
+				//the sequence below specifies the following declaration of a function: f: [x, y](z: int32) -> int32;
+				new gplc::CIdentifierToken("f", 0),
+				new gplc::CToken(gplc::TT_COLON, 1),
+				new gplc::CToken(gplc::TT_OPEN_SQR_BRACE, 2),
+				new gplc::CIdentifierToken("x", 3),
+				new gplc::CToken(gplc::TT_COMMA, 4),
+				new gplc::CIdentifierToken("y", 5),
+				new gplc::CToken(gplc::TT_CLOSE_SQR_BRACE, 6),
+				new gplc::CToken(gplc::TT_OPEN_BRACKET, 7),
+				new gplc::CIdentifierToken("z", 8),
+				new gplc::CToken(gplc::TT_COLON, 9),
+				new gplc::CToken(gplc::TT_INT32_TYPE, 10),
+				new gplc::CToken(gplc::TT_CLOSE_BRACKET, 11),
+				new gplc::CToken(gplc::TT_ARROW, 12),
+				new gplc::CToken(gplc::TT_INT32_TYPE, 13),
+				new gplc::CToken(gplc::TT_SEMICOLON, 14),
+			}), new gplc::CSymTable());
+
+		REQUIRE(pMain != nullptr);
+	}
+
 	if (pErrorInfo != nullptr)
 	{
 		delete pErrorInfo;

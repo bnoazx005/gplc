@@ -357,6 +357,13 @@ namespace gplc
 
 	CASTNode* CParser::_parseType(ILexer* pLexer)
 	{
+		// function's declaration
+		if (_match(pLexer->GetCurrToken(), TT_OPEN_SQR_BRACE) || 
+			_match(pLexer->GetCurrToken(), TT_OPEN_BRACKET))
+		{
+			return _parseFunctionDeclaration(pLexer);
+		}
+
 		return _parseBuiltInType(pLexer);
 	}
 
@@ -663,6 +670,90 @@ namespace gplc
 		pLexer->GetNextToken(); // take }
 
 		return new CASTWhileLoopStatementNode(pCondition, pBodyBlock);
+	}
+
+	CASTFunctionDeclNode* CParser::_parseFunctionDeclaration(ILexer* pLexer)
+	{
+		// parse a closure's declaration if it exists
+		CASTFunctionClosureNode* pClosureDecl = _match(pLexer->GetCurrToken(), TT_OPEN_SQR_BRACE) ? _parseFunctionClosure(pLexer) : nullptr;
+
+		// parse arguments
+		CASTFunctionArgsNode* pArgsList = _match(pLexer->GetCurrToken(), TT_OPEN_BRACKET) ? _parseFunctionArgs(pLexer) : nullptr;
+
+		if (!SUCCESS(_expect(TT_ARROW, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take ->
+
+		// parse return value's type
+		CASTNode* pReturnType = _parseType(pLexer);
+
+		return new CASTFunctionDeclNode(pClosureDecl, pArgsList, pReturnType);
+	}
+	
+	CASTFunctionClosureNode* CParser::_parseFunctionClosure(ILexer* pLexer)
+	{
+		if (!SUCCESS(_expect(TT_OPEN_SQR_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+		
+		pLexer->GetNextToken(); // take [
+
+		CASTFunctionClosureNode* pClosureDecl = new CASTFunctionClosureNode();
+
+		do
+		{
+			if (_match(pLexer->GetCurrToken(), TT_COMMA))
+			{
+				pLexer->GetNextToken();
+			}
+
+			pClosureDecl->AttachChild(_parseUnaryExpression(pLexer));
+		} 
+		while (_match(pLexer->GetCurrToken(), TT_COMMA));
+
+		if (!SUCCESS(_expect(TT_CLOSE_SQR_BRACE, pLexer->GetCurrToken())))
+		{
+			return pClosureDecl;
+		}
+
+		pLexer->GetNextToken(); // take ]
+
+		return pClosureDecl;
+	}
+
+	CASTFunctionArgsNode* CParser::_parseFunctionArgs(ILexer* pLexer)
+	{
+		if (!SUCCESS(_expect(TT_OPEN_BRACKET, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take (
+
+		CASTFunctionArgsNode* pArgsNode = new CASTFunctionArgsNode();
+
+		do
+		{
+			if (_match(pLexer->GetCurrToken(), TT_COMMA))
+			{
+				pLexer->GetNextToken();
+			}
+
+			pArgsNode->AttachChild(_parseDeclaration(pLexer)); ///< \todo function's arguments can't have attributes before type's description
+		} while (_match(pLexer->GetCurrToken(), TT_COMMA));
+
+		if (!SUCCESS(_expect(TT_CLOSE_BRACKET, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take )
+
+		return pArgsNode;
 	}
 
 	bool CParser::_match(const CToken* pToken, E_TOKEN_TYPE type)

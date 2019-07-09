@@ -81,6 +81,7 @@ namespace gplc
 		TT_WHILE_KEYWORD   = 49,
 		TT_FOR_KEYWORD     = 50,
 		TT_LOOP_KEYWORD    = 51,
+		TT_ARROW           = 52,
 		TT_LITERAL,
 		TT_DEFAULT
 	};

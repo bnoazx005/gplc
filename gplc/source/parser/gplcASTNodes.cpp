@@ -498,4 +498,79 @@ namespace gplc
 	{
 		return dynamic_cast<CASTBlockNode*>(mChildren[1]);
 	}
+
+
+	/*!
+		\brief CASTFunctionDeclNode's definition
+	*/
+
+
+	CASTFunctionDeclNode::CASTFunctionDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue)
+	{
+
+	}
+
+	CASTFunctionDeclNode::~CASTFunctionDeclNode()
+	{
+	}
+
+	std::string CASTFunctionDeclNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	CASTFunctionClosureNode* CASTFunctionDeclNode::GetClosure() const
+	{
+		return dynamic_cast<CASTFunctionClosureNode*>(mChildren[0]);
+	}
+
+	CASTFunctionArgsNode* CASTFunctionDeclNode::GetArgs() const
+	{
+		return dynamic_cast<CASTFunctionArgsNode*>(mChildren[1]);
+	}
+
+	CASTNode* CASTFunctionDeclNode::GetReturnValueType() const
+	{
+		return mChildren[2];
+	}
+
+
+	/*!
+		\brief CASTFunctionClosureNode's definition
+	*/
+
+
+	CASTFunctionClosureNode::CASTFunctionClosureNode():
+		CASTNode(NT_FUNC_CLOSURE)
+	{
+	}
+
+	CASTFunctionClosureNode::~CASTFunctionClosureNode() 
+	{
+	}
+
+	std::string CASTFunctionClosureNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+
+	/*!
+		\brief CASTFunctionArgsNode's definition
+	*/
+
+
+	CASTFunctionArgsNode::CASTFunctionArgsNode() :
+		CASTNode(NT_FUNC_ARGS)
+	{
+	}
+
+	CASTFunctionArgsNode::~CASTFunctionArgsNode()
+	{
+	}
+
+	std::string CASTFunctionArgsNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
 }

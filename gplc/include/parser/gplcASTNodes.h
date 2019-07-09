@@ -55,6 +55,9 @@ namespace gplc
 		NT_IF_STATEMENT,
 		NT_LOOP_STATEMENT,
 		NT_WHILE_STATEMENT,
+		NT_FUNC_DECL,
+		NT_FUNC_CLOSURE,
+		NT_FUNC_ARGS,
 		NT_BLOCK
 	};
 
@@ -292,6 +295,49 @@ namespace gplc
 		protected:
 			CASTWhileLoopStatementNode() = default;
 			CASTWhileLoopStatementNode(const CASTWhileLoopStatementNode& node) = default;
+	};
+
+
+	class CASTFunctionClosureNode : public CASTNode
+	{
+		public:
+			CASTFunctionClosureNode();
+			virtual ~CASTFunctionClosureNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
+		protected:
+			CASTFunctionClosureNode(const CASTFunctionClosureNode& node) = default;
+	};
+
+
+	class CASTFunctionArgsNode : public CASTNode
+	{
+		public:
+			CASTFunctionArgsNode();
+			virtual ~CASTFunctionArgsNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
+		protected:
+			CASTFunctionArgsNode(const CASTFunctionArgsNode& node) = default;
+	};
+	
+
+	class CASTFunctionDeclNode : public CASTNode
+	{
+		public:
+			CASTFunctionDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue);
+			virtual ~CASTFunctionDeclNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
+
+			CASTFunctionClosureNode* GetClosure() const;
+
+			CASTFunctionArgsNode* GetArgs() const;
+
+			CASTNode* GetReturnValueType() const;
+		protected:
+			CASTFunctionDeclNode() = default;
+			CASTFunctionDeclNode(const CASTFunctionDeclNode& node) = default;
 	};
 
 }

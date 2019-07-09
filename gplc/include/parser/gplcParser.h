@@ -22,13 +22,16 @@ namespace gplc
 	class CASTNode;
 	class ILexer;
 	class CType;
+	class ISymTable;
 	class CASTExpressionNode;
 	class CASTUnaryExpressionNode;
 	class CASTIfStatementNode;
 	class CASTBlockNode;
 	class CASTLoopStatementNode;
-	class ISymTable;
 	class CASTWhileLoopStatementNode;
+	class CASTFunctionDeclNode;
+	class CASTFunctionClosureNode;
+	class CASTFunctionArgsNode;
 
 
 	/*!
@@ -99,7 +102,9 @@ namespace gplc
 
 				<statement> ::=   <operator> 
 				                | <block>
-								| <if-statement>;
+								| <if-statement>
+								| <loop-statement>
+								| <while-loop-stmt>;
 				
 				\todo There is no <directive> non-terminal. It will be added later.
 
@@ -194,7 +199,7 @@ namespace gplc
 			*/
 
 			CASTNode* _parseBuiltInType(ILexer* pLexer);
-
+			
 			/*!
 				\brief The method tries to parse an expression
 
@@ -271,6 +276,33 @@ namespace gplc
 			*/
 
 			CASTWhileLoopStatementNode* CParser::_parseWhileLoopStatement(ILexer* pLexer);
+
+			/*!
+				\brief The method parses the following rule
+
+				<function-decl> ::=   <function-closure> '(' <func-args-declaration> ')' -> <type>
+									| (<expr> [,<expr>]*) -> <type>;
+			*/
+
+			CASTFunctionDeclNode* _parseFunctionDeclaration(ILexer* pLexer);
+						
+			/*!
+				\brief The method parses the following rule
+			
+				<function-closure> ::=   '['<expr> [,<expr>]*']'
+			*/
+
+			CASTFunctionClosureNode* _parseFunctionClosure(ILexer* pLexer);
+
+			/*!
+				\brief The method parses the following rule
+			
+				<func-arg> ::= <identifier> : <type>
+				
+				<function-args-declaration> ::=   <func-arg> [,<func-arg>]*
+			*/
+
+			CASTFunctionArgsNode* _parseFunctionArgs(ILexer* pLexer);
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 		private:
