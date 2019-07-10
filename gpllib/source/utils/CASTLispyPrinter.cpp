@@ -95,25 +95,29 @@ namespace gplc
 
 	std::string CASTLispyPrinter::VisitIfStatement(CASTIfStatementNode* pNode) 
 	{
-		std::string t = std::string("(if ")
+		return std::string("(if ")
 						.append(pNode->GetCondition()->Accept(this))
 						.append(" ")
 						.append(pNode->GetThenBlock()->Accept(this))
 						.append(" ")
 						.append(pNode->GetElseBlock()->Accept(this))
 						.append(")");
-
-		return t;
 	}
 
 	std::string CASTLispyPrinter::VisitLoopStatement(CASTLoopStatementNode* pNode) 
 	{
-		return {};
+		return std::string("(loop ")
+				.append(pNode->GetBody()->Accept(this))
+				.append(")");
 	}
 
 	std::string CASTLispyPrinter::VisitWhileLoopStatement(CASTWhileLoopStatementNode* pNode) 
 	{
-		return {};
+		return std::string("(while ")
+			.append(pNode->GetCondition()->Accept(this))
+			.append(" ")
+			.append(pNode->GetBody()->Accept(this))
+			.append(")");
 	}
 
 	std::string CASTLispyPrinter::VisitFunctionDeclaration(CASTFunctionDeclNode* pNode) 
@@ -138,7 +142,9 @@ namespace gplc
 
 	std::string CASTLispyPrinter::VisitReturnStatement(CASTReturnStatementNode* pNode) 
 	{
-		return {};
+		return std::string("(return ")
+					.append(pNode->GetExpr()->Accept(this))
+					.append(")");
 	}
 
 	std::string CASTLispyPrinter::VisitDefinitionNode(CASTDefinitionNode* pNode) 

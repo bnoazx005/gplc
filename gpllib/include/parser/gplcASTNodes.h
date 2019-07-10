@@ -277,7 +277,7 @@ namespace gplc
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
 
-			CASTBlockNode* Body() const;
+			CASTBlockNode* GetBody() const;
 		protected:
 			CASTLoopStatementNode() = default;
 			CASTLoopStatementNode(const CASTLoopStatementNode& node) = default;
@@ -294,7 +294,7 @@ namespace gplc
 
 			CASTExpressionNode* GetCondition() const;
 
-			CASTBlockNode* Body() const;
+			CASTBlockNode* GetBody() const;
 		protected:
 			CASTWhileLoopStatementNode() = default;
 			CASTWhileLoopStatementNode(const CASTWhileLoopStatementNode& node) = default;

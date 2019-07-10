@@ -50,4 +50,25 @@ TEST_CASE("CASTLispyPrinter tests")
 		REQUIRE(pASTPrinter->Print(new gplc::CASTIfStatementNode(new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("x")), 
 																 pThenBlock, pElseBlock)) == "(if x ((+ y 2)) (42))");
 	}
+
+	SECTION("TestPrint_PassLoopStatements_Returns(loop (<block>))")
+	{
+		gplc::CASTBlockNode* pBlock = new gplc::CASTBlockNode();
+
+		pBlock->AttachChild(new gplc::CASTBinaryExpressionNode(
+			new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("y")),
+			gplc::TT_PLUS,
+			new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CIntLiteral(2)))));
+
+		REQUIRE(pASTPrinter->Print(new gplc::CASTLoopStatementNode(pBlock)) == "(loop ((+ y 2)))");
+		REQUIRE(pASTPrinter->Print(new gplc::CASTWhileLoopStatementNode(new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("x")), pBlock)) == "(while x ((+ y 2)))");
+	}
+
+	SECTION("TestPrint_PassReturnStatement_Returns(return <expr>)")
+	{
+		REQUIRE(pASTPrinter->Print(new gplc::CASTReturnStatementNode(new gplc::CASTBinaryExpressionNode(
+											new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("y")),
+											gplc::TT_PLUS,
+											new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CIntLiteral(2)))))) == "(return (+ y 2))");
+	}
 }

@@ -463,7 +463,7 @@ namespace gplc
 		return pVisitor->VisitLoopStatement(this);
 	}
 
-	CASTBlockNode* CASTLoopStatementNode::Body() const
+	CASTBlockNode* CASTLoopStatementNode::GetBody() const
 	{
 		return dynamic_cast<CASTBlockNode*>(mChildren[0]);
 	}
@@ -494,7 +494,7 @@ namespace gplc
 		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
 	}
 
-	CASTBlockNode* CASTWhileLoopStatementNode::Body() const
+	CASTBlockNode* CASTWhileLoopStatementNode::GetBody() const
 	{
 		return dynamic_cast<CASTBlockNode*>(mChildren[1]);
 	}
