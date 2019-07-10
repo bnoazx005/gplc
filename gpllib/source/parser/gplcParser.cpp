@@ -165,51 +165,63 @@ namespace gplc
 
 	CASTNode* CParser::_parseStatement(ILexer* pLexer)
 	{
+		CASTNode* pStatementNode = nullptr;
+
 		if (_match(pLexer->GetCurrToken(), TT_OPEN_BRACE))
 		{
 			pLexer->GetNextToken();
 
-			CASTNode* pBlockNode = _parseBlockStatements(pLexer);
+			pStatementNode = _parseBlockStatements(pLexer);
 
 			if (!SUCCESS(_expect(TT_CLOSE_BRACE, pLexer->GetCurrToken())))
 			{
 				return nullptr;
 			}
 
-			return pBlockNode;
+			return pStatementNode;
 		}
-
+		
 		if (_match(pLexer->GetCurrToken(), TT_IF_KEYWORD))
 		{
 			pLexer->GetNextToken();
 
 			return _parseIfStatement(pLexer);
 		}
-
+		
 		if (_match(pLexer->GetCurrToken(), TT_LOOP_KEYWORD))
 		{
 			pLexer->GetNextToken();
 
 			return _parseLoopStatement(pLexer);
 		}
-
+		
 		if (_match(pLexer->GetCurrToken(), TT_WHILE_KEYWORD))
 		{
 			pLexer->GetNextToken();
 
 			return _parseWhileLoopStatement(pLexer);
 		}
-
+		
 		if (_match(pLexer->GetCurrToken(), TT_RETURN_KEYWORD))
 		{
 			pLexer->GetNextToken();
 
-			return _parseReturnStatement(pLexer);
+			pStatementNode = _parseReturnStatement(pLexer);
+		}
+		else
+		{
+			pStatementNode = _parseOperator(pLexer);
 		}
 
-		CASTNode* pOperator = _parseOperator(pLexer);
-				
-		return pOperator;
+		// all statements should ends up with ';' delimiter
+		if (pStatementNode)
+		{
+			_expect(TT_SEMICOLON, pLexer->GetCurrToken());
+
+			pLexer->GetNextToken();
+		}
+
+		return pStatementNode;
 	}
 
 	CASTBlockNode* CParser::_parseBlockStatements(ILexer* pLexer)
@@ -263,10 +275,6 @@ namespace gplc
 					return pFuncCallNode;
 				}
 			}
-
-			_expect(TT_SEMICOLON, pLexer->GetCurrToken());
-
-			pLexer->GetNextToken();
 		}
 
 		return pOperator;
@@ -294,34 +302,29 @@ namespace gplc
 
 		pLexer->GetNextToken();
 
-		// parse definition not declaration
-		if (_match(pLexer->PeekNextToken(1), TT_ASSIGN_OP))
+		CASTNode* pTypeInfo = nullptr;
+
+		// parse a definition with incompatible type's information, the case :=
+		if (_match(pLexer->GetCurrToken(), TT_ASSIGN_OP))
 		{
-			return nullptr;
+			pLexer->GetNextToken();
+
+			return _parseDefinition(new CASTDeclarationNode(pIdentifiers, nullptr), pLexer);
 		}
 
-		CASTNode* pTypeInfo = _parseType(pLexer);
-/*
-		if (!SUCCESS(mpSymTable->AddVariable(pCurrIdentifierToken->GetName(), { nullptr, nullptr })))
+		pTypeInfo = _parseType(pLexer);
+
+		CASTDeclarationNode* pDeclaration = new CASTDeclarationNode(pIdentifiers, pTypeInfo);
+
+		// parse definition not declaration, full def : type = <value>
+		if (_match(pLexer->GetCurrToken(), TT_ASSIGN_OP))
 		{
-			TParserErrorInfo errorInfo;
+			pLexer->GetNextToken();
 
-			memset(&errorInfo, 0, sizeof(errorInfo));
+			return _parseDefinition(pDeclaration, pLexer);
+		}
 
-			C8 tmpStrBuf[255];
-
-			sprintf_s(tmpStrBuf, sizeof(C8) * 255, "Try to initialize already declared variable: %s at %d\0", pCurrIdentifierToken->GetName(), pCurrToken->GetPos());
-
-			errorInfo.mMessage = tmpStrBuf;
-			errorInfo.mErrorCode = RV_ALREADY_DEFINED_VAR;
-			errorInfo.mPos = pCurrToken->GetPos();
-
-			OnErrorOutput.Invoke(errorInfo);
-
-			return pIdentifiersRoot;
-		}*/
-
-		return new CASTDeclarationNode(pIdentifiers, pTypeInfo);
+		return pDeclaration;
 	}
 
 	/*!
@@ -821,6 +824,40 @@ namespace gplc
 	CASTReturnStatementNode* CParser::_parseReturnStatement(ILexer* pLexer)
 	{
 		return new CASTReturnStatementNode(_parseExpression(pLexer));
+	}
+
+	CASTDefinitionNode* CParser::_parseDefinition(CASTDeclarationNode* pDecl, ILexer* pLexer)
+	{
+		if (pDecl->GetTypeInfo()->GetType() == NT_FUNC_DECL)
+		{
+			//parse function's body
+			return _parseFunctionDefinition(pDecl, pLexer);
+		}
+
+		return new CASTDefinitionNode(pDecl, _parseExpression(pLexer));
+	}
+
+	CASTFuncDefinitionNode* CParser::_parseFunctionDefinition(CASTDeclarationNode* pDecl, ILexer* pLexer)
+	{
+		CASTFunctionDeclNode* pLambdaDefType = _parseFunctionDeclaration(pLexer);
+
+		if (!SUCCESS(_expect(TT_OPEN_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take {
+		
+		CASTBlockNode* pLambdaBody = _parseBlockStatements(pLexer);
+
+		if (!SUCCESS(_expect(TT_CLOSE_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take }
+
+		return new CASTFuncDefinitionNode(pDecl, pLambdaDefType, pLambdaBody);
 	}
 
 	bool CParser::_match(const CToken* pToken, E_TOKEN_TYPE type)

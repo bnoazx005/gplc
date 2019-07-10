@@ -233,7 +233,7 @@ namespace gplc
 
 	std::string CASTBlockNode::Accept(IVisitor<std::string>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitStatementsBlock(this);
 	}
 
 	const std::vector<CASTNode*>& CASTBlockNode::GetStatements() const
@@ -425,7 +425,7 @@ namespace gplc
 
 	std::string CASTIfStatementNode::Accept(IVisitor<std::string>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitIfStatement(this);
 	}
 
 	CASTExpressionNode* CASTIfStatementNode::GetCondition() const
@@ -435,12 +435,12 @@ namespace gplc
 
 	CASTBlockNode* CASTIfStatementNode::GetThenBlock() const
 	{
-		return dynamic_cast<CASTBlockNode*>(mChildren[0]);
+		return dynamic_cast<CASTBlockNode*>(mChildren[1]);
 	}
 
 	CASTBlockNode* CASTIfStatementNode::GetElseBlock() const
 	{
-		return dynamic_cast<CASTBlockNode*>(mChildren[0]);
+		return dynamic_cast<CASTBlockNode*>(mChildren[2]);
 	}
 
 
@@ -460,7 +460,7 @@ namespace gplc
 
 	std::string CASTLoopStatementNode::Accept(IVisitor<std::string>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitLoopStatement(this);
 	}
 
 	CASTBlockNode* CASTLoopStatementNode::Body() const
@@ -486,7 +486,7 @@ namespace gplc
 
 	std::string CASTWhileLoopStatementNode::Accept(IVisitor<std::string>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitWhileLoopStatement(this);
 	}
 
 	CASTExpressionNode* CASTWhileLoopStatementNode::GetCondition() const
@@ -505,9 +505,12 @@ namespace gplc
 	*/
 
 
-	CASTFunctionDeclNode::CASTFunctionDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue)
+	CASTFunctionDeclNode::CASTFunctionDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue):
+		CASTNode(NT_FUNC_DECL)
 	{
-
+		AttachChild(pClosure);
+		AttachChild(pArgs);
+		AttachChild(pReturnValue);
 	}
 
 	CASTFunctionDeclNode::~CASTFunctionDeclNode()
@@ -516,7 +519,7 @@ namespace gplc
 
 	std::string CASTFunctionDeclNode::Accept(IVisitor<std::string>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitFunctionDeclaration(this);
 	}
 
 	CASTFunctionClosureNode* CASTFunctionDeclNode::GetClosure() const
@@ -551,7 +554,7 @@ namespace gplc
 
 	std::string CASTFunctionClosureNode::Accept(IVisitor<std::string>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitFunctionClosure(this);
 	}
 
 
@@ -571,7 +574,7 @@ namespace gplc
 
 	std::string CASTFunctionArgsNode::Accept(IVisitor<std::string>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitFunctionArgs(this);
 	}
 
 
@@ -592,7 +595,7 @@ namespace gplc
 
 	std::string CASTFunctionCallNode::Accept(IVisitor<std::string>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitFunctionCall(this);
 	}
 
 	CASTUnaryExpressionNode* CASTFunctionCallNode::GetIdentifier() const
@@ -622,11 +625,67 @@ namespace gplc
 
 	std::string CASTReturnStatementNode::Accept(IVisitor<std::string>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitReturnStatement(this);
 	}
 
 	CASTExpressionNode* CASTReturnStatementNode::GetExpr() const
 	{
 		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
+	}
+
+
+	/*!
+		\brief CASTDefinitionNode's definition
+	*/
+
+	CASTDefinitionNode::CASTDefinitionNode(CASTDeclarationNode* pDecl, CASTNode* pValue) :
+		CASTNode(NT_DEFINITION)
+	{
+		AttachChild(pDecl);
+		AttachChild(pValue);
+	}
+
+	CASTDefinitionNode::~CASTDefinitionNode()
+	{
+	}
+
+	std::string CASTDefinitionNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitDefinitionNode(this);
+	}
+
+	CASTDeclarationNode* CASTDefinitionNode::GetDeclaration() const
+	{
+		return dynamic_cast<CASTDeclarationNode*>(mChildren[0]);
+	}
+
+	CASTNode* CASTDefinitionNode::GetValue() const
+	{
+		return mChildren[1];
+	}
+
+
+	/*!
+		\brief CASTFuncDefinitionNode's definition
+	*/
+	
+	CASTFuncDefinitionNode::CASTFuncDefinitionNode(CASTDeclarationNode* pDecl, CASTFunctionDeclNode* pLambdaType, CASTNode* pBody):
+		CASTDefinitionNode(pDecl, pBody)
+	{
+		AttachChild(pLambdaType);
+	}
+
+	CASTFuncDefinitionNode::~CASTFuncDefinitionNode()
+	{
+	}
+
+	std::string CASTFuncDefinitionNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitFunctionDefNode(this);
+	}
+
+	CASTFunctionDeclNode* CASTFuncDefinitionNode::GetLambdaTypeInfo() const
+	{
+		return dynamic_cast<CASTFunctionDeclNode*>(mChildren[2]);
 	}
 }

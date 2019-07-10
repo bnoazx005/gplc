@@ -18,6 +18,17 @@ namespace gplc
 	class CASTUnaryExpressionNode;
 	class CASTBinaryExpressionNode;
 	class CASTAssignmentNode;
+	class CASTIfStatementNode;
+	class CASTLoopStatementNode;
+	class CASTWhileLoopStatementNode;
+	class CASTFunctionDeclNode;
+	class CASTFunctionClosureNode;
+	class CASTFunctionArgsNode;
+	class CASTFunctionCallNode;
+	class CASTReturnStatementNode;
+	class CASTDefinitionNode;
+	class CASTFuncDefinitionNode;
+	class CASTBlockNode;
 
 
 	template <typename T>
@@ -32,6 +43,17 @@ namespace gplc
 			virtual T VisitUnaryExpression(CASTUnaryExpressionNode* pNode) = 0;
 			virtual T VisitBinaryExpression(CASTBinaryExpressionNode* pNode) = 0;
 			virtual T VisitAssignment(CASTAssignmentNode* pNode) = 0;
+			virtual T VisitStatementsBlock(CASTBlockNode* pNode) = 0;
+			virtual T VisitIfStatement(CASTIfStatementNode* pNode) = 0;
+			virtual T VisitLoopStatement(CASTLoopStatementNode* pNode) = 0;
+			virtual T VisitWhileLoopStatement(CASTWhileLoopStatementNode* pNode) = 0;
+			virtual T VisitFunctionDeclaration(CASTFunctionDeclNode* pNode) = 0;
+			virtual T VisitFunctionClosure(CASTFunctionClosureNode* pNode) = 0;
+			virtual T VisitFunctionArgs(CASTFunctionArgsNode* pNode) = 0;
+			virtual T VisitFunctionCall(CASTFunctionCallNode* pNode) = 0;
+			virtual T VisitReturnStatement(CASTReturnStatementNode* pNode) = 0;
+			virtual T VisitDefinitionNode(CASTDefinitionNode* pNode) = 0;
+			virtual T VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) = 0;
 		protected:
 			IVisitor() = default;
 			IVisitor(const IVisitor& visitor) = default;

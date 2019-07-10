@@ -38,6 +38,29 @@ namespace gplc
 			std::string VisitBinaryExpression(CASTBinaryExpressionNode* pNode) override;
 
 			std::string VisitAssignment(CASTAssignmentNode* pNode) override;
+
+			std::string VisitStatementsBlock(CASTBlockNode* pNode) override;
+
+			std::string VisitIfStatement(CASTIfStatementNode* pNode) override;
+
+			std::string VisitLoopStatement(CASTLoopStatementNode* pNode) override;
+
+			std::string VisitWhileLoopStatement(CASTWhileLoopStatementNode* pNode) override;
+
+			std::string VisitFunctionDeclaration(CASTFunctionDeclNode* pNode) override;
+
+			std::string VisitFunctionClosure(CASTFunctionClosureNode* pNode) override;
+
+			std::string VisitFunctionArgs(CASTFunctionArgsNode* pNode) override;
+
+			std::string VisitFunctionCall(CASTFunctionCallNode* pNode) override;
+
+			std::string VisitReturnStatement(CASTReturnStatementNode* pNode) override;
+
+			std::string VisitDefinitionNode(CASTDefinitionNode* pNode) override;
+
+			std::string VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) override;
+
 		protected:
 			CASTLispyPrinter(const CASTLispyPrinter& printer) = default;
 		protected:

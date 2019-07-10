@@ -78,4 +78,76 @@ namespace gplc
 
 		return "(set! " + leftStr + " " + rightStr + ")";
 	}
+
+	std::string CASTLispyPrinter::VisitStatementsBlock(CASTBlockNode* pNode)
+	{
+		auto children = pNode->GetChildren();
+
+		std::string output { "(" };
+
+		for (auto iter : children)
+		{
+			output.append(iter->Accept(this));
+		}
+
+		return output.append(")");
+	}
+
+	std::string CASTLispyPrinter::VisitIfStatement(CASTIfStatementNode* pNode) 
+	{
+		std::string t = std::string("(if ")
+						.append(pNode->GetCondition()->Accept(this))
+						.append(" ")
+						.append(pNode->GetThenBlock()->Accept(this))
+						.append(" ")
+						.append(pNode->GetElseBlock()->Accept(this))
+						.append(")");
+
+		return t;
+	}
+
+	std::string CASTLispyPrinter::VisitLoopStatement(CASTLoopStatementNode* pNode) 
+	{
+		return {};
+	}
+
+	std::string CASTLispyPrinter::VisitWhileLoopStatement(CASTWhileLoopStatementNode* pNode) 
+	{
+		return {};
+	}
+
+	std::string CASTLispyPrinter::VisitFunctionDeclaration(CASTFunctionDeclNode* pNode) 
+	{
+		return {};
+	}
+
+	std::string CASTLispyPrinter::VisitFunctionClosure(CASTFunctionClosureNode* pNode) 
+	{
+		return {};
+	}
+
+	std::string CASTLispyPrinter::VisitFunctionArgs(CASTFunctionArgsNode* pNode) 
+	{
+		return {};
+	}
+
+	std::string CASTLispyPrinter::VisitFunctionCall(CASTFunctionCallNode* pNode) 
+	{
+		return {};
+	}
+
+	std::string CASTLispyPrinter::VisitReturnStatement(CASTReturnStatementNode* pNode) 
+	{
+		return {};
+	}
+
+	std::string CASTLispyPrinter::VisitDefinitionNode(CASTDefinitionNode* pNode) 
+	{
+		return {};
+	}
+
+	std::string CASTLispyPrinter::VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) 
+	{
+		return {};
+	}
 }

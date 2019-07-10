@@ -60,6 +60,7 @@ namespace gplc
 		NT_FUNC_ARGS,
 		NT_FUNC_CALL,
 		NT_RETURN_STATEMENT,
+		NT_DEFINITION,
 		NT_BLOCK
 	};
 
@@ -373,6 +374,40 @@ namespace gplc
 			CASTReturnStatementNode() = default;
 			CASTReturnStatementNode(const CASTReturnStatementNode& node) = default;
 	};
+
+
+	class CASTDefinitionNode : public CASTNode
+	{
+		public:
+			CASTDefinitionNode(CASTDeclarationNode* pDecl, CASTNode* pValue);
+			virtual ~CASTDefinitionNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
+
+			CASTDeclarationNode* GetDeclaration() const;
+
+			CASTNode* GetValue() const;
+		protected:
+			CASTDefinitionNode() = default;
+			CASTDefinitionNode(const CASTDefinitionNode& node) = default;
+	};
+
+
+	class CASTFuncDefinitionNode : public CASTDefinitionNode
+	{
+		public:
+			CASTFuncDefinitionNode(CASTDeclarationNode* pDecl, CASTFunctionDeclNode* pLambdaType, CASTNode* pBody);
+			virtual ~CASTFuncDefinitionNode();
+
+			std::string Accept(IVisitor<std::string>* pVisitor) override;
+
+			CASTFunctionDeclNode* GetLambdaTypeInfo() const;
+		protected:
+			CASTFuncDefinitionNode() = default;
+			CASTFuncDefinitionNode(const CASTFuncDefinitionNode& node) = default;
+	};
+
+
 }
 
 #endif

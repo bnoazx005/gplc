@@ -34,6 +34,9 @@ namespace gplc
 	class CASTFunctionArgsNode;
 	class CASTFunctionCallNode;
 	class CASTReturnStatementNode;
+	class CASTDefinitionNode;
+	class CASTFuncDefinitionNode;
+	class CASTDeclarationNode;
 
 
 	/*!
@@ -120,7 +123,8 @@ namespace gplc
 			/*!
 				\brief Try to parse a single operator
 
-				<operator> ::= <declaration>;
+				<operator> ::= <declaration> 
+				               | <definition>;
 
 				\param[in] pLexer A pointer to pLexer's object
 
@@ -321,6 +325,22 @@ namespace gplc
 			*/
 
 			CASTReturnStatementNode* _parseReturnStatement(ILexer* pLexer);
+
+			/*!
+				\brief The method parses the following rule
+
+				<definition> ::= <function-def>
+			*/
+
+			CASTDefinitionNode* _parseDefinition(CASTDeclarationNode* pDecl, ILexer* pLexer);
+
+			/*!
+				\brief The method parses the following rule
+
+				<function-def> ::= <>
+			*/
+
+			CASTFuncDefinitionNode* _parseFunctionDefinition(CASTDeclarationNode* pDecl, ILexer* pLexer);
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 		private:

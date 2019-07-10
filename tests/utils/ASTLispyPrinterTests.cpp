@@ -35,4 +35,19 @@ TEST_CASE("CASTLispyPrinter tests")
 												gplc::TT_STAR,
 												new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("y")))))) == "(set! z (+ x (* 2.000000 y)))");
 	}
+
+	SECTION("TestPrint_PassIfStatement_Returns(if (<condition>) (<then-branch>) (<else-branch>))")
+	{
+		gplc::CASTBlockNode* pThenBlock = new gplc::CASTBlockNode();
+		pThenBlock->AttachChild(new gplc::CASTBinaryExpressionNode(
+									new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("y")),
+									gplc::TT_PLUS,
+									new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CIntLiteral(2)))));
+
+		gplc::CASTBlockNode* pElseBlock = new gplc::CASTBlockNode();
+		pElseBlock->AttachChild(new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CIntLiteral(42))));
+
+		REQUIRE(pASTPrinter->Print(new gplc::CASTIfStatementNode(new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("x")), 
+																 pThenBlock, pElseBlock)) == "(if x ((+ y 2)) (42))");
+	}
 }
