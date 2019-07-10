@@ -209,7 +209,7 @@ namespace gplc
 			/*!
 				\brief The method tries to parse an expression
 
-				<expression> ::= <expr_value> | <unary_expr> | <binary_expr> | <group_expr>
+				<expression> ::= <equality>
 			*/
 
 			CASTExpressionNode* _parseExpression(ILexer* pLexer);
@@ -233,6 +233,28 @@ namespace gplc
 			*/
 
 			CASTExpressionNode* _parseLowPrecedenceExpr(ILexer* pLexer);
+
+			/*!
+				\brief The method tries to parse low precedence expression
+				including equal or not equal
+
+				<equality> ::= <expression> '==' <expression> |
+							   <expression> '!=' <expression>
+			*/
+
+			CASTExpressionNode* _parseEqualityExpr(ILexer* pLexer);
+			
+			/*!
+				\brief The method tries to parse low precedence expression
+				including equal or not equal
+
+				<comparison> ::= <expression> '>' <expression> |
+							   <expression> '<' <expression> |
+							   <expression> '<=' <expression> |
+							   <expression> '>=' <expression> 
+			*/
+
+			CASTExpressionNode* _parseComparisonExpr(ILexer* pLexer);
 
 			/*!
 				\brief The method tries to parse an unary expression

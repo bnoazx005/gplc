@@ -581,6 +581,54 @@ namespace gplc
 		return pLeft;
 	}
 
+	CASTExpressionNode* CParser::_parseEqualityExpr(ILexer* pLexer)
+	{
+		CASTExpressionNode* pLeft = _parseComparisonExpr(pLexer);
+
+		CASTExpressionNode* pRight = nullptr;
+
+		E_TOKEN_TYPE opType = TT_VOID_TYPE;
+
+		while (_match(pLexer->GetCurrToken(), TT_EQ) ||
+			_match(pLexer->GetCurrToken(), TT_NE))
+		{
+			opType = pLexer->GetCurrToken()->GetType();
+
+			pLexer->GetNextToken();
+
+			pRight = _parseComparisonExpr(pLexer);
+
+			pLeft = new CASTBinaryExpressionNode(pLeft, opType, pRight);
+		}
+
+		return pLeft;
+	}
+
+	CASTExpressionNode* CParser::_parseComparisonExpr(ILexer* pLexer)
+	{
+		CASTExpressionNode* pLeft = _parseLowPrecedenceExpr(pLexer);
+
+		CASTExpressionNode* pRight = nullptr;
+
+		E_TOKEN_TYPE opType = TT_VOID_TYPE;
+
+		while (_match(pLexer->GetCurrToken(), TT_GE) || 
+			   _match(pLexer->GetCurrToken(), TT_GT) ||
+			   _match(pLexer->GetCurrToken(), TT_LE) || 
+			   _match(pLexer->GetCurrToken(), TT_LT))
+		{
+			opType = pLexer->GetCurrToken()->GetType();
+
+			pLexer->GetNextToken();
+
+			pRight = _parseLowPrecedenceExpr(pLexer);
+
+			pLeft = new CASTBinaryExpressionNode(pLeft, opType, pRight);
+		}
+
+		return pLeft;
+	}
+
 	CASTUnaryExpressionNode* CParser::_parseUnaryExpression(ILexer* pLexer)
 	{
 		const CToken* pCurrToken = pLexer->GetCurrToken();
@@ -590,6 +638,13 @@ namespace gplc
 			pLexer->GetNextToken();
 
 			return new CASTUnaryExpressionNode(TT_MINUS, _parsePrimaryExpression(pLexer));
+		}
+
+		if (_match(pCurrToken, TT_NOT))
+		{
+			pLexer->GetNextToken();
+
+			return new CASTUnaryExpressionNode(TT_NOT, _parsePrimaryExpression(pLexer));
 		}
 
 		CASTUnaryExpressionNode* pPrimaryNode = new CASTUnaryExpressionNode(TT_DEFAULT, _parsePrimaryExpression(pLexer));

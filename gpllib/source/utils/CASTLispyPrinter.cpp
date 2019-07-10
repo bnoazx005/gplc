@@ -63,6 +63,30 @@ namespace gplc
 			case TT_SLASH:
 				result.append("/ ");
 				break;
+			case TT_AND:
+				result.append("and ");
+				break;
+			case TT_OR:
+				result.append("or ");
+				break;
+			case TT_LE:
+				result.append("<= ");
+				break;
+			case TT_LT:
+				result.append("< ");
+				break;
+			case TT_GE:
+				result.append(">= ");
+				break;
+			case TT_GT:
+				result.append("> ");
+				break;
+			case TT_NE:
+				result.append("!= ");
+				break;
+			case TT_EQ:
+				result.append("== ");
+				break;
 		}
 
 		return result.append(pNode->GetLeft()->Accept(this))
@@ -122,7 +146,7 @@ namespace gplc
 
 	std::string CASTLispyPrinter::VisitFunctionDeclaration(CASTFunctionDeclNode* pNode) 
 	{
-		return {};
+		return std::string("(lambda ");
 	}
 
 	std::string CASTLispyPrinter::VisitFunctionClosure(CASTFunctionClosureNode* pNode) 
