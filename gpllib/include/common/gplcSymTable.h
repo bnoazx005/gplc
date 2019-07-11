@@ -63,7 +63,7 @@ namespace gplc
 
 			virtual Result AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc) = 0;
 
-			virtual TResult<TSymbolDesc> LookUp(const std::string& variableName) const = 0;
+			virtual TSymbolDesc* LookUp(const std::string& variableName) const = 0;
 		protected:
 			ISymTable(const ISymTable& table);
 	};
@@ -84,12 +84,12 @@ namespace gplc
 			Result LeaveScope() override;
 
 			Result AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc) override;
-
-			TResult<TSymbolDesc> LookUp(const std::string& variableName) const override;
+			
+			TSymbolDesc* LookUp(const std::string& variableName) const override;
 		protected:
 			CSymTable(const CSymTable& table);
 
-			TResult<TSymbolDesc> _lookUp(const TSymTableEntry* entry, const std::string& variableName) const;
+			TSymbolDesc* _lookUp(TSymTableEntry* entry, const std::string& variableName) const;
 
 			void _removeScope(TSymTableEntry** scope);
 		protected:

@@ -6,7 +6,11 @@ TEST_CASE("CSymTable tests")
 {
 	gplc::ISymTable* pSymTable = new gplc::CSymTable();
 	
-	//const gplc::TSymbolDesc* pTypeDesc = nullptr;
+	auto checkAsserts = [](gplc::TSymbolDesc* pCurrDesc, gplc::E_COMPILER_TYPES expectedType)
+	{
+		REQUIRE(pCurrDesc != nullptr);
+		REQUIRE(pCurrDesc->mpType->GetType() == expectedType);
+	};
 
 	SECTION("Global scope test")
 	{
@@ -16,31 +20,14 @@ TEST_CASE("CSymTable tests")
 		pSymTable->AddVariable("y", gplc::TSymbolDesc { nullptr, new gplc::CType(gplc::CT_INT16, gplc::BTS_INT16, 0x0) });
 		pSymTable->AddVariable("z", gplc::TSymbolDesc { nullptr, new gplc::CType(gplc::CT_INT64, gplc::BTS_INT64, 0x0) });
 
-		{
-			auto pTypeDesc = pSymTable->LookUp("x");
-
-			REQUIRE(pTypeDesc.IsOk());
-			REQUIRE(pTypeDesc.Get().mpType->GetType() == gplc::CT_INT32);
-		}
-
-		{
-			auto pTypeDesc = pSymTable->LookUp("y");
-
-			REQUIRE(pTypeDesc.IsOk());
-			REQUIRE(pTypeDesc.Get().mpType->GetType() == gplc::CT_INT16);
-		}
-
-		{
-			auto pTypeDesc = pSymTable->LookUp("z");
-
-			REQUIRE(pTypeDesc.IsOk());
-			REQUIRE(pTypeDesc.Get().mpType->GetType() == gplc::CT_INT64);
-		}
-		
+		checkAsserts(pSymTable->LookUp("x"), gplc::CT_INT32);
+		checkAsserts(pSymTable->LookUp("y"), gplc::CT_INT16);
+		checkAsserts(pSymTable->LookUp("z"), gplc::CT_INT64);
+				
 		{
 			auto pTypeDesc = pSymTable->LookUp("unknown");
 
-			REQUIRE(pTypeDesc.HasError());
+			REQUIRE(!pTypeDesc);
 		}
 	}
 
@@ -49,38 +36,23 @@ TEST_CASE("CSymTable tests")
 		pSymTable->AddVariable("x", { nullptr, new gplc::CType(gplc::CT_INT32, gplc::BTS_INT32, 0x0) });
 
 		pSymTable->EnterScope();
+
 		pSymTable->AddVariable("x", { nullptr, new gplc::CType(gplc::CT_INT16, gplc::BTS_INT16, 0x0) });
+		checkAsserts(pSymTable->LookUp("x"), gplc::CT_INT16);
+
 		pSymTable->LeaveScope();
 
 		pSymTable->AddVariable("z", { nullptr, new gplc::CType(gplc::CT_INT64, gplc::BTS_INT64, 0x0) });
 
-		{
-			auto pTypeDesc = pSymTable->LookUp("x");
-
-			REQUIRE(pTypeDesc.IsOk());
-			REQUIRE(pTypeDesc.Get().mpType->GetType() == gplc::CT_INT32);
-		}
-
-		{
-			auto pTypeDesc = pSymTable->LookUp("x");
-
-			REQUIRE(pTypeDesc.IsOk());
-			REQUIRE(pTypeDesc.Get().mpType->GetType() == gplc::CT_INT32);
-		}
-
-		{
-			auto pTypeDesc = pSymTable->LookUp("z");
-
-			REQUIRE(pTypeDesc.IsOk());
-			REQUIRE(pTypeDesc.Get().mpType->GetType() == gplc::CT_INT64);
-		}
+		checkAsserts(pSymTable->LookUp("x"), gplc::CT_INT32);
+		checkAsserts(pSymTable->LookUp("z"), gplc::CT_INT64);
 
 		{
 			auto pTypeDesc = pSymTable->LookUp("unknown");
 
-			REQUIRE(pTypeDesc.HasError());
+			REQUIRE(!pTypeDesc);
 		}
 	}
-
+	
 	delete pSymTable;
 }

@@ -60,18 +60,18 @@ namespace gplc
 
 	Result CSymTable::EnterScope()
 	{
-		mpCurrScopeEntry->mNestedScopes.push_back(new TSymTableEntry());
-
-		TSymTableEntry* pParent = mpCurrScopeEntry;
-
-		mpCurrScopeEntry = mpCurrScopeEntry->mNestedScopes.front();
-
-		mpCurrScopeEntry->mParentScope = pParent;
-
 		if (mpCurrScopeEntry == nullptr)
 		{
 			return RV_FAIL;
 		}
+
+		TSymTableEntry* pNestedTable = new TSymTableEntry();
+
+		mpCurrScopeEntry->mNestedScopes.push_back(pNestedTable);
+
+		pNestedTable->mParentScope = mpCurrScopeEntry;
+
+		mpCurrScopeEntry = pNestedTable;
 
 		return RV_SUCCESS;
 	}
@@ -90,7 +90,7 @@ namespace gplc
 
 	Result CSymTable::AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc)
 	{
-		if (_lookUp(mpCurrScopeEntry, variableName).IsOk() || _lookUp(mpGlobalScopeEntry, variableName).IsOk())
+		if (_lookUp(mpCurrScopeEntry, variableName))
 		{
 			return RV_FAIL;
 		}
@@ -99,41 +99,30 @@ namespace gplc
 		
 		return RV_SUCCESS;
 	}
-	
-	TResult<TSymbolDesc> CSymTable::LookUp(const std::string& variableName) const
+
+	TSymbolDesc* CSymTable::LookUp(const std::string& variableName) const
 	{
 		return _lookUp(mpCurrScopeEntry, variableName);
 	}
 
-	TResult<TSymbolDesc> CSymTable::_lookUp(const TSymTableEntry* entry, const std::string& variableName) const
+	TSymbolDesc* CSymTable::_lookUp(TSymTableEntry* entry, const std::string& variableName) const
 	{
-		TSymbolsMap table = entry->mVariables;
-
-		auto varDesc = table.cend();
-		
-		if ((varDesc = table.find(variableName)) != table.cend())
+		TSymbolsMap& table = entry->mVariables;
+				
+		if (table.find(variableName) != table.cend())
 		{
-			return TOkValue<TSymbolDesc>(varDesc->second);
+			return &table[variableName];
 		}
 
-		//search in inner scopes
-		std::vector<TSymTableEntry*> nestedScopes = entry->mNestedScopes;
+		//search in outter scopes
+		TSymTableEntry* pCurrSymTable = mpCurrScopeEntry->mParentScope;
 
-		U32 numOfNestedScopes = nestedScopes.size();
-
-		TSymbolDesc currDesc;
-
-		for (U32 i = 0; i < numOfNestedScopes; i++)
+		while (pCurrSymTable && !_lookUp(pCurrSymTable, variableName))
 		{
-			auto result = _lookUp(nestedScopes[i], variableName);
-
-			if (result.IsOk())
-			{
-				return result;
-			}
+			pCurrSymTable = pCurrSymTable->mParentScope;
 		}
 
-		return TErrorValue<E_RESULT_VALUE>(RV_FAIL);
+		return nullptr;
 	}
 
 	void CSymTable::_removeScope(TSymTableEntry** scope)
