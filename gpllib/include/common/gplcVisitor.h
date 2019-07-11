@@ -3,7 +3,7 @@
 	\date   08.07.2019
 	\copyright
 
-	\brief The file contains definitions of IVisitor interface
+	\brief The file contains definitions of IASTNodeVisitor interface
 */
 
 #ifndef GPLC_VISITOR_H
@@ -33,10 +33,10 @@ namespace gplc
 
 
 	template <typename T>
-	class IVisitor
+	class IASTNodeVisitor
 	{
 		public:
-			virtual ~IVisitor() = default;
+			virtual ~IASTNodeVisitor() = default;
 
 			virtual T VisitProgramUnit(CASTNode* pProgramNode) = 0;
 			virtual T VisitDeclaration(CASTDeclarationNode* pNode) = 0;
@@ -57,8 +57,8 @@ namespace gplc
 			virtual T VisitDefinitionNode(CASTDefinitionNode* pNode) = 0;
 			virtual T VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) = 0;
 		protected:
-			IVisitor() = default;
-			IVisitor(const IVisitor& visitor) = default;
+			IASTNodeVisitor() = default;
+			IASTNodeVisitor(const IASTNodeVisitor& visitor) = default;
 	};
 
 
@@ -68,7 +68,7 @@ namespace gplc
 		public:
 			virtual ~IVisitable() = default;
 
-			virtual T Accept(IVisitor<T>* pVisitor) = 0;
+			virtual T Accept(IASTNodeVisitor<T>* pVisitor) = 0;
 		protected:
 			IVisitable() = default;
 			IVisitable(const IVisitable& visitable) = default;

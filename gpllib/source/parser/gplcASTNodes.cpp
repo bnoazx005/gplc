@@ -64,12 +64,12 @@ namespace gplc
 		}
 	}
 	
-	std::string CASTNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return std::string();
 	}
 
-	bool CASTNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return false;
 	}
@@ -189,12 +189,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTSourceUnitNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTSourceUnitNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitProgramUnit(this);
 	}
 
-	bool CASTSourceUnitNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTSourceUnitNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitProgramUnit(this);
 	}
@@ -216,12 +216,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTDeclarationNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTDeclarationNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitDeclaration(this);
 	}
 
-	bool CASTDeclarationNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTDeclarationNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitDeclaration(this);
 	}
@@ -246,12 +246,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTBlockNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTBlockNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitStatementsBlock(this);
 	}
 
-	bool CASTBlockNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTBlockNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitStatementsBlock(this);
 	}
@@ -285,12 +285,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTIdentifierNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTIdentifierNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitIdentifier(this);
 	}
 
-	bool CASTIdentifierNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTIdentifierNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitIdentifier(this);
 	}
@@ -315,12 +315,12 @@ namespace gplc
 
 	}
 
-	std::string CASTLiteralNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTLiteralNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitLiteral(this);
 	}
 
-	bool CASTLiteralNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTLiteralNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitLiteral(this);
 	}
@@ -352,12 +352,12 @@ namespace gplc
 		// \todo add implementation of the destructor
 	}
 
-	std::string CASTUnaryExpressionNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTUnaryExpressionNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitUnaryExpression(this);
 	}
 
-	bool CASTUnaryExpressionNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTUnaryExpressionNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitUnaryExpression(this);
 	}
@@ -389,12 +389,12 @@ namespace gplc
 		// \todo add implementation of the destructor
 	}
 
-	std::string CASTBinaryExpressionNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTBinaryExpressionNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitBinaryExpression(this);
 	}
 
-	bool CASTBinaryExpressionNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTBinaryExpressionNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitBinaryExpression(this);
 	}
@@ -431,12 +431,12 @@ namespace gplc
 		// \todo add implementation of the destructor
 	}
 
-	std::string CASTAssignmentNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTAssignmentNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitAssignment(this);
 	}
 
-	bool CASTAssignmentNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTAssignmentNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitAssignment(this);
 	}
@@ -468,12 +468,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTIfStatementNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTIfStatementNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitIfStatement(this);
 	}
 
-	bool CASTIfStatementNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTIfStatementNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitIfStatement(this);
 	}
@@ -508,12 +508,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTLoopStatementNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTLoopStatementNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitLoopStatement(this);
 	}
 
-	bool CASTLoopStatementNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTLoopStatementNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitLoopStatement(this);
 	}
@@ -539,12 +539,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTWhileLoopStatementNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTWhileLoopStatementNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitWhileLoopStatement(this);
 	}
 
-	bool CASTWhileLoopStatementNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTWhileLoopStatementNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitWhileLoopStatement(this);
 	}
@@ -577,12 +577,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTFunctionDeclNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTFunctionDeclNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitFunctionDeclaration(this);
 	}
 
-	bool CASTFunctionDeclNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTFunctionDeclNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitFunctionDeclaration(this);
 	}
@@ -617,12 +617,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTFunctionClosureNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTFunctionClosureNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitFunctionClosure(this);
 	}
 
-	bool CASTFunctionClosureNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTFunctionClosureNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitFunctionClosure(this);
 	}
@@ -641,12 +641,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTFunctionArgsNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTFunctionArgsNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitFunctionArgs(this);
 	}
 
-	bool CASTFunctionArgsNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTFunctionArgsNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitFunctionArgs(this);
 	}
@@ -667,12 +667,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTFunctionCallNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTFunctionCallNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitFunctionCall(this);
 	}
 
-	bool CASTFunctionCallNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTFunctionCallNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitFunctionCall(this);
 	}
@@ -702,12 +702,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTReturnStatementNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTReturnStatementNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitReturnStatement(this);
 	}
 
-	bool CASTReturnStatementNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTReturnStatementNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitReturnStatement(this);
 	}
@@ -733,12 +733,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTDefinitionNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTDefinitionNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitDefinitionNode(this);
 	}
 	
-	bool CASTDefinitionNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTDefinitionNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitDefinitionNode(this);
 	}
@@ -768,12 +768,12 @@ namespace gplc
 	{
 	}
 
-	std::string CASTFuncDefinitionNode::Accept(IVisitor<std::string>* pVisitor)
+	std::string CASTFuncDefinitionNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitFunctionDefNode(this);
 	}
 
-	bool CASTFuncDefinitionNode::Accept(IVisitor<bool>* pVisitor)
+	bool CASTFuncDefinitionNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitFunctionDefNode(this);
 	}

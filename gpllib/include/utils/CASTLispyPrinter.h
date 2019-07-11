@@ -19,7 +19,7 @@
 
 namespace gplc
 {
-	class CASTLispyPrinter : public IVisitor<std::string>
+	class CASTLispyPrinter : public IASTNodeVisitor<std::string>
 	{
 		public:
 			CASTLispyPrinter() = default;
