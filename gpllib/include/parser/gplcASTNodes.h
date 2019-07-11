@@ -68,13 +68,14 @@ namespace gplc
 		\brief CASTNode class
 	*/
 
-	class CASTNode: public virtual IVisitable<std::string>
+	class CASTNode: public virtual IVisitable<std::string>, public virtual IVisitable<bool>
 	{
 		public:
 			CASTNode(E_NODE_TYPE type);
 			virtual ~CASTNode(); 
 			
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			Result AttachChild(CASTNode* node);
 			
@@ -106,6 +107,7 @@ namespace gplc
 			virtual ~CASTSourceUnitNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			const std::vector<CASTNode*>& GetStatements() const;
 		protected:
@@ -120,6 +122,7 @@ namespace gplc
 			virtual ~CASTDeclarationNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			CASTNode* GetIdentifiers() const;
 
@@ -137,6 +140,7 @@ namespace gplc
 			virtual ~CASTBlockNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			const std::vector<CASTNode*>& GetStatements() const;
 		protected:
@@ -155,6 +159,7 @@ namespace gplc
 			virtual ~CASTIdentifierNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			const std::string& GetName() const;
 		protected:
@@ -172,6 +177,7 @@ namespace gplc
 			virtual ~CASTLiteralNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			const CBaseLiteral* GetValue() const;
 		protected:
@@ -200,6 +206,7 @@ namespace gplc
 			virtual ~CASTUnaryExpressionNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			E_TOKEN_TYPE GetOpType() const;
 
@@ -219,6 +226,7 @@ namespace gplc
 			virtual ~CASTBinaryExpressionNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			CASTExpressionNode* GetLeft() const;
 
@@ -240,6 +248,7 @@ namespace gplc
 			virtual ~CASTAssignmentNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			CASTUnaryExpressionNode* GetLeft() const;
 
@@ -257,6 +266,7 @@ namespace gplc
 			virtual ~CASTIfStatementNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			CASTExpressionNode* GetCondition() const;
 
@@ -276,6 +286,7 @@ namespace gplc
 			virtual ~CASTLoopStatementNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			CASTBlockNode* GetBody() const;
 		protected:
@@ -291,6 +302,7 @@ namespace gplc
 			virtual ~CASTWhileLoopStatementNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			CASTExpressionNode* GetCondition() const;
 
@@ -308,6 +320,7 @@ namespace gplc
 			virtual ~CASTFunctionClosureNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 		protected:
 			CASTFunctionClosureNode(const CASTFunctionClosureNode& node) = default;
 	};
@@ -320,6 +333,7 @@ namespace gplc
 			virtual ~CASTFunctionArgsNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 		protected:
 			CASTFunctionArgsNode(const CASTFunctionArgsNode& node) = default;
 	};
@@ -332,6 +346,7 @@ namespace gplc
 			virtual ~CASTFunctionDeclNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			CASTFunctionClosureNode* GetClosure() const;
 
@@ -351,6 +366,7 @@ namespace gplc
 			virtual ~CASTFunctionCallNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			CASTUnaryExpressionNode* GetIdentifier() const;
 
@@ -368,6 +384,7 @@ namespace gplc
 			virtual ~CASTReturnStatementNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			CASTExpressionNode* GetExpr() const;
 		protected:
@@ -383,6 +400,7 @@ namespace gplc
 			virtual ~CASTDefinitionNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			CASTDeclarationNode* GetDeclaration() const;
 
@@ -400,6 +418,7 @@ namespace gplc
 			virtual ~CASTFuncDefinitionNode();
 
 			std::string Accept(IVisitor<std::string>* pVisitor) override;
+			bool Accept(IVisitor<bool>* pVisitor) override;
 
 			CASTFunctionDeclNode* GetLambdaTypeInfo() const;
 		protected:

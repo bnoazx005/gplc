@@ -36,6 +36,7 @@ set(SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/common/symTable.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/lexer/lexer.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/parser/parser.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/parser/semanticAnalyser.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/parser/stubLexer.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/parser/stubLexer.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/utils/ASTLispyPrinterTests.cpp"

@@ -13,6 +13,7 @@
 namespace gplc
 {
 	class CASTNode;
+	class CASTDeclarationNode;
 	class CASTIdentifierNode;
 	class CASTLiteralNode;
 	class CASTUnaryExpressionNode;
@@ -38,6 +39,7 @@ namespace gplc
 			virtual ~IVisitor() = default;
 
 			virtual T VisitProgramUnit(CASTNode* pProgramNode) = 0;
+			virtual T VisitDeclaration(CASTDeclarationNode* pNode) = 0;
 			virtual T VisitIdentifier(CASTIdentifierNode* pNode) = 0;
 			virtual T VisitLiteral(CASTLiteralNode* pNode) = 0;
 			virtual T VisitUnaryExpression(CASTUnaryExpressionNode* pNode) = 0;

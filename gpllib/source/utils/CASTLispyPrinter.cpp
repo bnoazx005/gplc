@@ -20,6 +20,11 @@ namespace gplc
 		return "()";
 	}
 
+	std::string CASTLispyPrinter::VisitDeclaration(CASTDeclarationNode* pNode)
+	{
+		return {};
+	}
+
 	std::string CASTLispyPrinter::VisitIdentifier(CASTIdentifierNode* pNode) 
 	{
 		if (pNode == nullptr)

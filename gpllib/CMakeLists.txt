@@ -26,6 +26,7 @@ set(GPL_HEADERS
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/lexer/gplcTokens.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/parser/gplcParser.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/parser/gplcASTNodes.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/parser/gplcSemanticAnalyser.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/utils/Callback.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/utils/CASTLispyPrinter.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/utils/CResult.h"
@@ -40,6 +41,7 @@ set(GPL_SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/lexer/gplcTokens.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/parser/gplcParser.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/parser/gplcASTNodes.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/source/parser/gplcSemanticAnalyser.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/utils/CASTLispyPrinter.cpp"
 	)
 

@@ -69,6 +69,11 @@ namespace gplc
 		return std::string();
 	}
 
+	bool CASTNode::Accept(IVisitor<bool>* pVisitor)
+	{
+		return false;
+	}
+
 	Result CASTNode::AttachChild(CASTNode* node)
 	{
 		if (node == nullptr)
@@ -189,6 +194,11 @@ namespace gplc
 		return pVisitor->VisitProgramUnit(this);
 	}
 
+	bool CASTSourceUnitNode::Accept(IVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitProgramUnit(this);
+	}
+
 	const std::vector<CASTNode*>& CASTSourceUnitNode::GetStatements() const
 	{
 		return mChildren;
@@ -208,7 +218,12 @@ namespace gplc
 
 	std::string CASTDeclarationNode::Accept(IVisitor<std::string>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitDeclaration(this);
+	}
+
+	bool CASTDeclarationNode::Accept(IVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitDeclaration(this);
 	}
 
 	CASTNode* CASTDeclarationNode::GetIdentifiers() const
@@ -232,6 +247,11 @@ namespace gplc
 	}
 
 	std::string CASTBlockNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitStatementsBlock(this);
+	}
+
+	bool CASTBlockNode::Accept(IVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitStatementsBlock(this);
 	}
@@ -270,6 +290,11 @@ namespace gplc
 		return pVisitor->VisitIdentifier(this);
 	}
 
+	bool CASTIdentifierNode::Accept(IVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitIdentifier(this);
+	}
+
 	const std::string& CASTIdentifierNode::GetName() const
 	{
 		return mName;
@@ -291,6 +316,11 @@ namespace gplc
 	}
 
 	std::string CASTLiteralNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitLiteral(this);
+	}
+
+	bool CASTLiteralNode::Accept(IVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitLiteral(this);
 	}
@@ -327,6 +357,11 @@ namespace gplc
 		return pVisitor->VisitUnaryExpression(this);
 	}
 
+	bool CASTUnaryExpressionNode::Accept(IVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitUnaryExpression(this);
+	}
+
 	E_TOKEN_TYPE CASTUnaryExpressionNode::GetOpType() const
 	{
 		return mOpType;
@@ -355,6 +390,11 @@ namespace gplc
 	}
 
 	std::string CASTBinaryExpressionNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitBinaryExpression(this);
+	}
+
+	bool CASTBinaryExpressionNode::Accept(IVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitBinaryExpression(this);
 	}
@@ -396,6 +436,11 @@ namespace gplc
 		return pVisitor->VisitAssignment(this);
 	}
 
+	bool CASTAssignmentNode::Accept(IVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitAssignment(this);
+	}
+
 	CASTUnaryExpressionNode* CASTAssignmentNode::GetLeft() const
 	{
 		return dynamic_cast<CASTUnaryExpressionNode*>(mChildren[0]);
@@ -424,6 +469,11 @@ namespace gplc
 	}
 
 	std::string CASTIfStatementNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitIfStatement(this);
+	}
+
+	bool CASTIfStatementNode::Accept(IVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitIfStatement(this);
 	}
@@ -463,6 +513,11 @@ namespace gplc
 		return pVisitor->VisitLoopStatement(this);
 	}
 
+	bool CASTLoopStatementNode::Accept(IVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitLoopStatement(this);
+	}
+
 	CASTBlockNode* CASTLoopStatementNode::GetBody() const
 	{
 		return dynamic_cast<CASTBlockNode*>(mChildren[0]);
@@ -485,6 +540,11 @@ namespace gplc
 	}
 
 	std::string CASTWhileLoopStatementNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitWhileLoopStatement(this);
+	}
+
+	bool CASTWhileLoopStatementNode::Accept(IVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitWhileLoopStatement(this);
 	}
@@ -518,6 +578,11 @@ namespace gplc
 	}
 
 	std::string CASTFunctionDeclNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitFunctionDeclaration(this);
+	}
+
+	bool CASTFunctionDeclNode::Accept(IVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitFunctionDeclaration(this);
 	}
@@ -557,6 +622,10 @@ namespace gplc
 		return pVisitor->VisitFunctionClosure(this);
 	}
 
+	bool CASTFunctionClosureNode::Accept(IVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitFunctionClosure(this);
+	}
 
 	/*!
 		\brief CASTFunctionArgsNode's definition
@@ -573,6 +642,11 @@ namespace gplc
 	}
 
 	std::string CASTFunctionArgsNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitFunctionArgs(this);
+	}
+
+	bool CASTFunctionArgsNode::Accept(IVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitFunctionArgs(this);
 	}
@@ -594,6 +668,11 @@ namespace gplc
 	}
 
 	std::string CASTFunctionCallNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitFunctionCall(this);
+	}
+
+	bool CASTFunctionCallNode::Accept(IVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitFunctionCall(this);
 	}
@@ -628,6 +707,11 @@ namespace gplc
 		return pVisitor->VisitReturnStatement(this);
 	}
 
+	bool CASTReturnStatementNode::Accept(IVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitReturnStatement(this);
+	}
+
 	CASTExpressionNode* CASTReturnStatementNode::GetExpr() const
 	{
 		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
@@ -650,6 +734,11 @@ namespace gplc
 	}
 
 	std::string CASTDefinitionNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitDefinitionNode(this);
+	}
+	
+	bool CASTDefinitionNode::Accept(IVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitDefinitionNode(this);
 	}
@@ -680,6 +769,11 @@ namespace gplc
 	}
 
 	std::string CASTFuncDefinitionNode::Accept(IVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitFunctionDefNode(this);
+	}
+
+	bool CASTFuncDefinitionNode::Accept(IVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitFunctionDefNode(this);
 	}

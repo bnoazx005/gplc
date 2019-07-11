@@ -24,6 +24,7 @@
 /// Parser's files group
 #include "parser/gplcParser.h"
 #include "parser/gplcASTNodes.h"
+#include "parser/gplcSemanticAnalyser.h"
 
 #include "utils/CASTLispyPrinter.h"
 #include "utils/CResult.h"
