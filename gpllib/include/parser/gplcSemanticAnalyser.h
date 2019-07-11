@@ -13,11 +13,14 @@
 
 
 #include "common/gplcVisitor.h"
+#include "utils/Delegate.h"
+#include "common/gplcTypes.h"
 
 
 namespace gplc
 {
 	class CASTNode;
+	class ITypeResolver;
 	class ISymTable;
 
 
@@ -25,7 +28,7 @@ namespace gplc
 		\brief The interface describes a functionality of a semantic analyser stage
 	*/
 
-	class ISemanticAnalyser: public IVisitor<bool>
+	class ISemanticAnalyser: public IASTNodeVisitor<bool>
 	{
 		public:
 			ISemanticAnalyser() = default;
@@ -39,7 +42,9 @@ namespace gplc
 				false in other cases
 			*/
 
-			virtual bool Analyze(CASTNode* pInput, ISymTable* pSymTable) = 0;
+			virtual bool Analyze(CASTNode* pInput, ITypeResolver* pTypeResolver, ISymTable* pSymTable) = 0;
+		public:
+			CDelegate<void, E_SEMANTIC_ANALYSER_ERRORS> OnErrorOutput;
 	};
 
 
@@ -57,7 +62,7 @@ namespace gplc
 				false in other cases
 			*/
 
-			bool Analyze(CASTNode* pInput, ISymTable* pSymTable) override;
+			bool Analyze(CASTNode* pInput, ITypeResolver* pTypeResolver, ISymTable* pSymTable) override;
 
 			bool VisitProgramUnit(CASTNode* pProgramNode) override;
 
@@ -95,7 +100,9 @@ namespace gplc
 
 			bool VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) override;
 		protected:
-			ISymTable* mpSymTable;
+			ITypeResolver* mpTypeResolver;
+
+			ISymTable*     mpSymTable;
 	};
 }
 

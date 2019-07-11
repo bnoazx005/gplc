@@ -34,6 +34,7 @@ set(HEADERS )
 
 set(SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/common/symTable.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/common/typeSystemTests.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/lexer/lexer.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/parser/parser.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/parser/semanticAnalyser.cpp"

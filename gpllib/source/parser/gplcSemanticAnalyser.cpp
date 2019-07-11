@@ -1,18 +1,20 @@
 #include "parser/gplcSemanticAnalyser.h"
 #include "common/gplcSymTable.h"
 #include "parser/gplcASTNodes.h"
+#include "common/gplcTypeSystem.h"
 
 
 namespace gplc
 {
-	bool CSemanticAnalyser::Analyze(CASTNode* pInput, ISymTable* pSymTable) 
+	bool CSemanticAnalyser::Analyze(CASTNode* pInput, ITypeResolver* pTypeResolver, ISymTable* pSymTable)
 	{
-		if (!pSymTable || !pInput)
+		if (!pSymTable || !pInput || !pTypeResolver)
 		{
 			return false;
 		}
 
-		mpSymTable = pSymTable;
+		mpTypeResolver = pTypeResolver;
+		mpSymTable     = pSymTable;
 
 		return pInput->Accept(this);
 	}
@@ -26,14 +28,18 @@ namespace gplc
 	{
 		CASTNode* pIdentifiersList = pNode->GetIdentifiers();
 
+		CType* pTypeInfo = mpTypeResolver->Resolve(pNode->GetTypeInfo(), mpSymTable); // visit node and deduce the type's info
+
 		CASTIdentifierNode* pCurrIdentifierNode = nullptr;
 
 		for (CASTNode* pCurrChild : pIdentifiersList->GetChildren())
 		{
 			pCurrIdentifierNode = dynamic_cast<CASTIdentifierNode*>(pCurrChild);
-
-			if (!SUCCESS(mpSymTable->AddVariable(pCurrIdentifierNode->GetName(), {})))
+			
+			if (!SUCCESS(mpSymTable->AddVariable(pCurrIdentifierNode->GetName(), { pTypeInfo->GetDefaultValue(), pTypeInfo })))
 			{
+				OnErrorOutput.Invoke(SAE_IDENTIFIER_ALREADY_DECLARED);
+
 				return false;
 			}
 		}

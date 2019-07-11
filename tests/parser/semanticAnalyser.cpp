@@ -13,9 +13,9 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 	SECTION("TestAnalyze_PassNullptr_ReturnsFalse")
 	{
-		REQUIRE(!pSemanticAnalyser->Analyze(nullptr, new CSymTable()));
-		REQUIRE(!pSemanticAnalyser->Analyze(new CASTBlockNode(), nullptr));
-		REQUIRE(!pSemanticAnalyser->Analyze(nullptr, nullptr));
+		REQUIRE(!pSemanticAnalyser->Analyze(nullptr, nullptr, new CSymTable()));
+		REQUIRE(!pSemanticAnalyser->Analyze(new CASTBlockNode(), nullptr, nullptr));
+		REQUIRE(!pSemanticAnalyser->Analyze(nullptr, new CTypeResolver(), nullptr));
 	}
 
 	SECTION("TestAnalyze_PassDoubledInitializedVariable_ReturnsFalse")
@@ -25,7 +25,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
 		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
 
-		REQUIRE(!pSemanticAnalyser->Analyze(new CASTDeclarationNode(pIdentifiersList, new CASTNode(NT_INT32)), new CSymTable()));
+		REQUIRE(!pSemanticAnalyser->Analyze(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_INT32)), new CTypeResolver(), new CSymTable()));
 	}
 
 	delete pSemanticAnalyser;

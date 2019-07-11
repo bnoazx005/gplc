@@ -13,11 +13,19 @@
 
 
 #include "gplcTypes.h"
+#include "parser/gplcASTNodes.h"
 #include <vector>
+#include <unordered_map>
 
 
 namespace gplc
 {
+	class CASTTypeNode;
+	class ISymTable;
+	class CType;
+	class CBaseLiteral;
+
+
 	/*!
 		\brief The sizes of builtin types in bytes
 	*/
@@ -42,6 +50,47 @@ namespace gplc
 
 
 	/*!
+		\brief The interface describes a functionality of a type
+		resolver which is used within semantic analysys pass
+	*/
+
+	class ITypeResolver
+	{
+		public:
+			ITypeResolver() = default;
+			virtual ~ITypeResolver() = default;
+
+			/*!
+				\brief The method deduces type based on information's taken from pTypeNode and pSymTable
+			*/
+
+			virtual CType* Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable) = 0;
+
+			virtual CType* VisitBaseNode(CASTTypeNode* pNode) = 0;
+	};
+
+
+	class CTypeResolver: public ITypeResolver
+	{
+		public:
+			CTypeResolver() = default;
+			virtual ~CTypeResolver() = default;
+
+			/*!
+				\brief The method deduces type based on information's taken from pTypeNode and pSymTable
+			*/
+
+			CType* Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable) override;
+
+			CType* VisitBaseNode(CASTTypeNode* pNode) override;
+		protected:
+			CType* _deduceBuiltinType(E_NODE_TYPE type);
+		protected:
+			ISymTable* mpSymTable;
+	};
+
+
+	/*!
 		\brief CType class
 	*/
 
@@ -62,6 +111,8 @@ namespace gplc
 			U32 GetSize() const;
 
 			U32 GetAttributes() const;
+
+			virtual CBaseLiteral* GetDefaultValue() const;
 		protected:
 			CType();
 			CType(const CType& type);
@@ -69,6 +120,8 @@ namespace gplc
 			Result _addChildTypeDesc(const CType* type);
 
 			Result _removeChildTypeDesc(CType** type);
+
+			CBaseLiteral* _getBuiltinTypeDefaultValue(E_COMPILER_TYPES type) const;
 		protected:
 			E_COMPILER_TYPES    mType;
 

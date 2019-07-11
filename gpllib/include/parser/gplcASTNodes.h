@@ -21,6 +21,10 @@
 namespace gplc
 {
 	class CBaseLiteral;
+	class CASTTypeNode;
+	class CType;
+	class ITypeResolver;
+	class ISymTable;
 
 
 	/*!
@@ -46,6 +50,8 @@ namespace gplc
 		NT_CHAR,
 		NT_STRING,
 		NT_BOOL,
+		NT_FLOAT,
+		NT_DOUBLE,
 		NT_VOID,
 		NT_POINTER,
 		NT_ASSIGNMENT,
@@ -126,7 +132,7 @@ namespace gplc
 
 			CASTNode* GetIdentifiers() const;
 
-			CASTNode* GetTypeInfo() const;
+			CASTTypeNode* GetTypeInfo() const;
 		protected:
 			CASTDeclarationNode() = default;
 			CASTDeclarationNode(const CASTDeclarationNode& node) = default;
@@ -147,6 +153,20 @@ namespace gplc
 			CASTBlockNode(const CASTBlockNode& node) = default;
 	};
 
+
+	class CASTTypeNode : public CASTNode
+	{
+		public:
+			CASTTypeNode(E_NODE_TYPE type);
+			virtual ~CASTTypeNode();
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+
+			virtual CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable);
+		protected:
+			CASTTypeNode(const CASTTypeNode& node) = default;
+	};
 
 	/*!
 		\brief CASTIdentifierNode
@@ -339,7 +359,7 @@ namespace gplc
 	};
 	
 
-	class CASTFunctionDeclNode : public CASTNode
+	class CASTFunctionDeclNode : public CASTTypeNode
 	{
 		public:
 			CASTFunctionDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue);

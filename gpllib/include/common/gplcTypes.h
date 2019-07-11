@@ -137,6 +137,12 @@ namespace gplc
 		CT_ENUM,
 		CT_ARRAY,
 	};
+
+
+	enum E_SEMANTIC_ANALYSER_ERRORS: U16
+	{
+		SAE_IDENTIFIER_ALREADY_DECLARED
+	};
 }
 
 #endif

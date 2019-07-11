@@ -10,6 +10,8 @@
 
 #include "parser/gplcASTNodes.h"
 #include "common/gplcLiterals.h"
+#include "common/gplcTypeSystem.h"
+#include "common/gplcSymTable.h"
 #include <stack>
 
 
@@ -231,9 +233,9 @@ namespace gplc
 		return mChildren[0];
 	}
 
-	CASTNode* CASTDeclarationNode::GetTypeInfo() const
+	CASTTypeNode* CASTDeclarationNode::GetTypeInfo() const
 	{
-		return mChildren[1];
+		return dynamic_cast<CASTTypeNode*>(mChildren[1]);
 	}
 
 
@@ -259,6 +261,35 @@ namespace gplc
 	const std::vector<CASTNode*>& CASTBlockNode::GetStatements() const
 	{
 		return mChildren;
+	}
+
+	
+	/*!
+		\brief CASTTypeNode's definition
+	*/
+
+	CASTTypeNode::CASTTypeNode(E_NODE_TYPE type):
+		CASTNode(type)
+	{
+	}
+
+	CASTTypeNode::~CASTTypeNode()
+	{
+	}
+
+	std::string CASTTypeNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	bool CASTTypeNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return true;
+	}
+
+	CType* CASTTypeNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	{
+		return pResolver->VisitBaseNode(this);
 	}
 
 
@@ -566,7 +597,7 @@ namespace gplc
 
 
 	CASTFunctionDeclNode::CASTFunctionDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue):
-		CASTNode(NT_FUNC_DECL)
+		CASTTypeNode(NT_FUNC_DECL)
 	{
 		AttachChild(pClosure);
 		AttachChild(pArgs);

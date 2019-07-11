@@ -488,40 +488,46 @@ namespace gplc
 				switch (pTypeName->GetType())
 				{
 					case TT_INT8_TYPE:
-						return new CASTNode(NT_INT8);
+						return new CASTTypeNode(NT_INT8);
 
 					case TT_INT16_TYPE:
-						return new CASTNode(NT_INT16);
+						return new CASTTypeNode(NT_INT16);
 
 					case TT_INT32_TYPE:
-						return new CASTNode(NT_INT32);						
+						return new CASTTypeNode(NT_INT32);						
 
 					case TT_INT64_TYPE:
-						return new CASTNode(NT_INT64);						
+						return new CASTTypeNode(NT_INT64);						
 
 					case TT_UINT8_TYPE:
-						return new CASTNode(NT_UINT8);						
+						return new CASTTypeNode(NT_UINT8);						
 
 					case TT_UINT16_TYPE:
-						return new CASTNode(NT_UINT16);						
+						return new CASTTypeNode(NT_UINT16);						
 
 					case TT_UINT32_TYPE:
-						return new CASTNode(NT_UINT32);						
+						return new CASTTypeNode(NT_UINT32);						
 
 					case TT_UINT64_TYPE:
-						return new CASTNode(NT_UINT64);						
+						return new CASTTypeNode(NT_UINT64);						
 
 					case TT_CHAR_TYPE:
-						return new CASTNode(NT_CHAR);						
+						return new CASTTypeNode(NT_CHAR);						
 
 					case TT_STRING_TYPE:
-						return new CASTNode(NT_STRING);						
+						return new CASTTypeNode(NT_STRING);						
 
 					case TT_BOOL_TYPE:
-						return new CASTNode(NT_BOOL);
+						return new CASTTypeNode(NT_BOOL);
 
 					case TT_VOID_TYPE:
-						return new CASTNode(NT_VOID);
+						return new CASTTypeNode(NT_VOID);
+
+					case TT_FLOAT:
+						return new CASTTypeNode(NT_FLOAT);
+
+					case TT_DOUBLE:
+						return new CASTTypeNode(NT_DOUBLE);
 				}
 
 				break;
