@@ -208,7 +208,7 @@ namespace gplc
 
 
 	CASTDeclarationNode::CASTDeclarationNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo):
-		CASTNode(NT_DECL)
+		CASTTypeNode(NT_DECL)
 	{
 		AttachChild(pIdentifiers);
 		AttachChild(pTypeInfo);
@@ -226,6 +226,11 @@ namespace gplc
 	bool CASTDeclarationNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitDeclaration(this);
+	}
+
+	CType* CASTDeclarationNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	{
+		return pResolver->VisitDeclaration(this);
 	}
 
 	CASTNode* CASTDeclarationNode::GetIdentifiers() const

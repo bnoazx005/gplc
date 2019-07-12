@@ -100,6 +100,11 @@ namespace gplc
 		return _deduceExprType(pNode->GetOpType(), pLeftExprTypeInfo->GetType(), pRightExprTypeInfo->GetType());
 	}
 
+	CType* CTypeResolver::VisitDeclaration(CASTDeclarationNode* pNode)
+	{
+		return pNode->GetTypeInfo()->Resolve(this, mpSymTable);
+	}
+
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type)
 	{
 		switch (type)

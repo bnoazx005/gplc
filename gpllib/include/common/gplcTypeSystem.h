@@ -74,6 +74,7 @@ namespace gplc
 			virtual CType* VisitLiteral(CASTLiteralNode* pNode) = 0;
 			virtual CType* VisitUnaryExpression(CASTUnaryExpressionNode* pNode) = 0;
 			virtual CType* VisitBinaryExpression(CASTBinaryExpressionNode* pNode) = 0;
+			virtual CType* VisitDeclaration(CASTDeclarationNode* pNode) = 0;
 	};
 
 
@@ -94,6 +95,7 @@ namespace gplc
 			CType* VisitLiteral(CASTLiteralNode* pNode) override;
 			CType* VisitUnaryExpression(CASTUnaryExpressionNode* pNode) override;
 			CType* VisitBinaryExpression(CASTBinaryExpressionNode* pNode) override;
+			CType* VisitDeclaration(CASTDeclarationNode* pNode) override;
 		protected:
 			CType* _deduceBuiltinType(E_NODE_TYPE type);
 

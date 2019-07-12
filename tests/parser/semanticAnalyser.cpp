@@ -140,6 +140,20 @@ TEST_CASE("CSemanticAnalyser's tests")
 		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
 	}
 
+	SECTION("TestAnalyze_PassDefinitionOfBuiltinTypeWithCorrectValue_ReturnsTrue")
+	{
+		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+
+		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
+
+		/*
+			x : double = -0.5;
+		*/
+		REQUIRE(pSemanticAnalyser->Analyze(new CASTDefinitionNode(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)),
+																  new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(-0.5)))), 
+										   pTypeResolver, new CSymTable()));
+	}
+
 	delete pTypeResolver;
 	delete pSemanticAnalyser;
 }

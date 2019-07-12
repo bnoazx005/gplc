@@ -186,7 +186,28 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitDefinitionNode(CASTDefinitionNode* pNode) 
 	{
-		return false;
+		auto pDeclNode  = pNode->GetDeclaration();
+		auto pValueNode = dynamic_cast<CASTExpressionNode*>(pNode->GetValue());
+
+		// check a declaration
+		CType* pDeclType = nullptr;
+
+		if (!pDeclNode->Accept(this) || !(pDeclType = pDeclNode->Resolve(mpTypeResolver, mpSymTable)))
+		{
+			return false;
+		}
+
+		// check value
+		CType* pValueType = nullptr;
+
+		if (!pValueNode->Accept(this) || !(pValueType = pValueNode->Resolve(mpTypeResolver, mpSymTable)))
+		{
+			return false;
+		}
+
+		// check their compatibility
+
+		return pDeclType->AreSame(pValueType);
 	}
 
 	bool CSemanticAnalyser::VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) 

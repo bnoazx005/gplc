@@ -121,7 +121,21 @@ namespace gplc
 	};
 
 
-	class CASTDeclarationNode : public CASTNode
+	class CASTTypeNode : public CASTNode
+	{
+		public:
+			CASTTypeNode(E_NODE_TYPE type);
+			virtual ~CASTTypeNode();
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+
+			virtual CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable);
+		protected:
+			CASTTypeNode(const CASTTypeNode& node) = default;
+	};
+
+	class CASTDeclarationNode : public CASTTypeNode
 	{
 		public:
 			CASTDeclarationNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo);
@@ -129,6 +143,8 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+
+			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
 
 			CASTNode* GetIdentifiers() const;
 
@@ -153,20 +169,6 @@ namespace gplc
 			CASTBlockNode(const CASTBlockNode& node) = default;
 	};
 
-
-	class CASTTypeNode : public CASTNode
-	{
-		public:
-			CASTTypeNode(E_NODE_TYPE type);
-			virtual ~CASTTypeNode();
-
-			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
-			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
-
-			virtual CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable);
-		protected:
-			CASTTypeNode(const CASTTypeNode& node) = default;
-	};
 
 	/*!
 		\brief CASTIdentifierNode
