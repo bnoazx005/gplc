@@ -154,6 +154,66 @@ TEST_CASE("CSemanticAnalyser's tests")
 										   pTypeResolver, new CSymTable()));
 	}
 
+	SECTION("TestAnalyze_PassIfStatementWithIncorrectCondition_ReturnsFalse")
+	{
+		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+
+		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
+
+		/*
+			x : double = -0.5;
+
+			if x {
+				x = 1.0;
+			}
+		*/
+		auto pProgram = new CASTSourceUnitNode();
+
+		pProgram->AttachChild(new CASTDefinitionNode(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)),
+													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(-0.5)))));
+
+		auto pThenBlock = new CASTBlockNode();
+
+		pThenBlock->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
+													   new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(1.0f)))));
+
+		pProgram->AttachChild(new CASTIfStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")), pThenBlock, nullptr));
+
+		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+	}
+
+	SECTION("TestAnalyze_PassIfStatementWithBooleanCondition_ReturnsTrue")
+	{
+		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+
+		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
+
+		/*
+			x : double = -0.5;
+
+			if x < 0 {
+				x = 1.0;
+			}
+		*/
+		auto pProgram = new CASTSourceUnitNode();
+
+		pProgram->AttachChild(new CASTDefinitionNode(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)),
+			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(-0.5)))));
+
+		auto pThenBlock = new CASTBlockNode();
+
+		pThenBlock->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
+			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(1.0f)))));
+
+		pProgram->AttachChild(new CASTIfStatementNode(new CASTBinaryExpressionNode(
+																	new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")), 
+																	TT_LE,
+																	new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(0.0)))),
+													  pThenBlock, nullptr));
+
+		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+	}
+
 	delete pTypeResolver;
 	delete pSemanticAnalyser;
 }

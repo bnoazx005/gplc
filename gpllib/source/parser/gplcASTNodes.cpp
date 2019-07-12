@@ -536,6 +536,11 @@ namespace gplc
 
 	CASTBlockNode* CASTIfStatementNode::GetElseBlock() const
 	{
+		if (mChildren.size() < 3)
+		{
+			return nullptr;
+		}
+
 		return dynamic_cast<CASTBlockNode*>(mChildren[2]);
 	}
 

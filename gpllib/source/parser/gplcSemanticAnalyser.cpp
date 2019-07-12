@@ -141,22 +141,84 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitStatementsBlock(CASTBlockNode* pNode) 
 	{
-		return false;
+		auto pStatements = pNode->GetStatements();
+
+		for (auto pCurrStatement : pStatements)
+		{
+			if (!pCurrStatement->Accept(this))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	bool CSemanticAnalyser::VisitIfStatement(CASTIfStatementNode* pNode) 
 	{
-		return false;
+		auto pCondition = pNode->GetCondition();
+		auto pThenBlock = pNode->GetThenBlock();
+		auto pElseBlock = pNode->GetElseBlock();
+
+		// check condition
+		CType* pConditionType = nullptr;
+
+		if (!pCondition->Accept(this) || !(pConditionType = pCondition->Resolve(mpTypeResolver, mpSymTable)))
+		{
+			return false;
+		}
+
+		if (pConditionType->GetType() != CT_BOOL)
+		{
+			OnErrorOutput.Invoke(SAE_LOGIC_EXPR_IS_EXPECTED);
+
+			return false;
+		}
+
+		if (!pThenBlock->Accept(this) || (pElseBlock && !pElseBlock->Accept(this)))
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	bool CSemanticAnalyser::VisitLoopStatement(CASTLoopStatementNode* pNode) 
 	{
-		return false;
+		if (pNode->GetBody()->GetChildrenCount() < 1)
+		{
+			OnErrorOutput.Invoke(SAE_REDUNDANT_LOOP_STATEMENT);
+		}
+
+		return pNode->GetBody()->Accept(this);
 	}
 
 	bool CSemanticAnalyser::VisitWhileLoopStatement(CASTWhileLoopStatementNode* pNode) 
 	{
-		return false;
+		if (pNode->GetBody()->GetChildrenCount() < 1)
+		{
+			OnErrorOutput.Invoke(SAE_REDUNDANT_LOOP_STATEMENT);
+		}
+
+		auto pCondition = pNode->GetCondition();
+		auto pLoopBody  = pNode->GetBody();
+
+		// check condition
+		CType* pConditionType = nullptr;
+
+		if (!pCondition->Accept(this) || !(pConditionType = pCondition->Resolve(mpTypeResolver, mpSymTable)))
+		{
+			return false;
+		}
+
+		if (pConditionType->GetType() != CT_BOOL)
+		{
+			OnErrorOutput.Invoke(SAE_LOGIC_EXPR_IS_EXPECTED);
+
+			return false;
+		}
+
+		return pLoopBody->Accept(this);
 	}
 
 	bool CSemanticAnalyser::VisitFunctionDeclaration(CASTFunctionDeclNode* pNode) 
@@ -181,7 +243,7 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitReturnStatement(CASTReturnStatementNode* pNode) 
 	{
-		return false;
+		return true;
 	}
 
 	bool CSemanticAnalyser::VisitDefinitionNode(CASTDefinitionNode* pNode) 

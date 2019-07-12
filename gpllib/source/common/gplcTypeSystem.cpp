@@ -156,6 +156,18 @@ namespace gplc
 
 				// compiler-time error
 				return nullptr;
+			case TT_LE:
+			case TT_LT:
+			case TT_GE:
+			case TT_GT:
+			case TT_EQ:
+			case TT_NE:
+				if (leftType == rightType)
+				{
+					return _deduceBuiltinType(NT_BOOL);
+				}
+
+				return nullptr;
 		}
 
 		return nullptr;
