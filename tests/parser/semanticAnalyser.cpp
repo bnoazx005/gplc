@@ -9,6 +9,8 @@ TEST_CASE("CSemanticAnalyser's tests")
 {
 	ISemanticAnalyser* pSemanticAnalyser = new CSemanticAnalyser();
 
+	ITypeResolver* pTypeResolver = new CTypeResolver();
+
 	REQUIRE(pSemanticAnalyser != nullptr);
 
 	SECTION("TestAnalyze_PassNullptr_ReturnsFalse")
@@ -25,8 +27,57 @@ TEST_CASE("CSemanticAnalyser's tests")
 		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
 		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
 
-		REQUIRE(!pSemanticAnalyser->Analyze(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_INT32)), new CTypeResolver(), new CSymTable()));
+		REQUIRE(!pSemanticAnalyser->Analyze(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_INT32)), pTypeResolver, new CSymTable()));
 	}
 
+	SECTION("TestAnalyse_UsageOfUndeclaredVariable_ReturnsFalse")
+	{
+		auto pExprNode = new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
+			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(-0.5))));
+
+		REQUIRE(!pSemanticAnalyser->Analyze(pExprNode, pTypeResolver, new CSymTable()));
+	}
+
+	SECTION("TestAnalyze_CorrectTypesOfLValueAndRValueInSimpleStatement_ReturnsTrue")
+	{
+		/*
+			x : double;
+
+			x = -0.5;
+		*/
+		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+
+		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
+
+		auto pProgram = new CASTSourceUnitNode();
+
+		pProgram->AttachChild(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)));
+		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
+			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(-0.5)))));
+
+		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+	}
+
+	SECTION("TestAnalyze_IncompatibleTypesOfLValueAndRValueInSimpleStatement_ReturnsFalse")
+	{
+		/* 
+			x : double;
+
+			x = -0.5;
+		*/
+		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+
+		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
+
+		auto pProgram = new CASTSourceUnitNode();
+
+		pProgram->AttachChild(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)));
+		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
+													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(42)))));
+
+		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+	}
+
+	delete pTypeResolver;
 	delete pSemanticAnalyser;
 }

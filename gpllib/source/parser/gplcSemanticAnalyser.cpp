@@ -19,9 +19,24 @@ namespace gplc
 		return pInput->Accept(this);
 	}
 
-	bool CSemanticAnalyser::VisitProgramUnit(CASTNode* pProgramNode) 
+	bool CSemanticAnalyser::VisitProgramUnit(CASTSourceUnitNode* pProgramNode) 
 	{
-		return false;
+		if (pProgramNode->GetChildrenCount() < 1)
+		{
+			return true;
+		}
+
+		auto pStatements = pProgramNode->GetStatements();
+
+		for (auto pCurrStatement : pStatements)
+		{
+			if (!pCurrStatement->Accept(this))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	bool CSemanticAnalyser::VisitDeclaration(CASTDeclarationNode* pNode)
@@ -49,17 +64,24 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitIdentifier(CASTIdentifierNode* pNode) 
 	{
-		return false;
+		if (!mpSymTable->LookUp(pNode->GetName()))
+		{
+			OnErrorOutput.Invoke(SAE_UNDECLARED_IDENTIFIER);
+
+			return false;
+		}
+
+		return true;
 	}
 
 	bool CSemanticAnalyser::VisitLiteral(CASTLiteralNode* pNode) 
 	{
-		return false;
+		return true; // for now all literals are assumed as valid 
 	}
 
 	bool CSemanticAnalyser::VisitUnaryExpression(CASTUnaryExpressionNode* pNode) 
 	{
-		return false;
+		return pNode->GetData()->Accept(this);
 	}
 
 	bool CSemanticAnalyser::VisitBinaryExpression(CASTBinaryExpressionNode* pNode) 
@@ -69,7 +91,29 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitAssignment(CASTAssignmentNode* pNode) 
 	{
-		return false;
+		CASTExpressionNode* pLeftExpr  = pNode->GetLeft();
+		CASTExpressionNode* pRightExpr = pNode->GetRight();
+
+		// check left side
+		CType* pLeftValueType = nullptr;
+
+		if (!pLeftExpr->Accept(this) ||
+			!(pLeftValueType = pLeftExpr->Resolve(mpTypeResolver, mpSymTable)))
+		{
+			return false;
+		}
+
+		// check right side
+		CType* pRightValueType = nullptr;
+
+		if (!pRightExpr->Accept(this) ||
+			!(pRightValueType = pRightExpr->Resolve(mpTypeResolver, mpSymTable)))
+		{
+			return false;
+		}
+
+		// check their compatibility
+		return pLeftValueType->AreSame(pRightValueType);
 	}
 
 	bool CSemanticAnalyser::VisitStatementsBlock(CASTBlockNode* pNode) 

@@ -18,6 +18,9 @@
 
 namespace gplc
 {
+	class CType;
+
+
 	enum E_LITERAL_TYPE
 	{
 		LT_INT = 0,  ///< Signed integer type
@@ -39,6 +42,8 @@ namespace gplc
 			E_LITERAL_TYPE GetType() const;
 
 			virtual std::string ToString() const = 0;
+
+			virtual CType* GetTypeInfo() const = 0;
 		protected:
 			CBaseLiteral() = default;
 			CBaseLiteral(const CBaseLiteral& literal) = default;
@@ -62,6 +67,8 @@ namespace gplc
 			{
 				return mValue;
 			}
+
+			virtual CType* GetTypeInfo() const = 0;
 		protected:
 			CGenericBaseLiteral() = default;
 			CGenericBaseLiteral(const CGenericBaseLiteral& literal) = default;
@@ -78,10 +85,9 @@ namespace gplc
 			{
 			}
 
-			std::string ToString() const override
-			{
-				return std::to_string(mValue);
-			}
+			std::string ToString() const override;
+			
+			CType* GetTypeInfo() const override;
 	};
 
 
@@ -93,10 +99,9 @@ namespace gplc
 			{
 			}
 
-			std::string ToString() const override
-			{
-				return std::to_string(mValue);
-			}
+			std::string ToString() const override;
+
+			CType* GetTypeInfo() const override;
 	};
 
 
@@ -108,10 +113,9 @@ namespace gplc
 			{
 			}
 
-			std::string ToString() const override
-			{
-				return std::to_string(mValue);
-			}
+			std::string ToString() const override;
+
+			CType* GetTypeInfo() const override;
 	};
 
 
@@ -123,10 +127,9 @@ namespace gplc
 			{
 			}
 
-			std::string ToString() const override
-			{
-				return std::to_string(mValue);
-			}
+			std::string ToString() const override;
+
+			CType* GetTypeInfo() const override;
 	};
 
 
@@ -138,10 +141,9 @@ namespace gplc
 			{
 			}
 
-			std::string ToString() const override
-			{
-				return std::string("\"").append(mValue).append("\"");
-			}
+			std::string ToString() const override;
+
+			CType* GetTypeInfo() const override;
 	};
 
 
@@ -153,10 +155,9 @@ namespace gplc
 			{
 			}
 
-			std::string ToString() const override
-			{
-				return std::string("\'").append(mValue).append("\'");
-			}
+			std::string ToString() const override;
+
+			CType* GetTypeInfo() const override;
 	};
 
 
@@ -168,10 +169,9 @@ namespace gplc
 			{
 			}
 
-			std::string ToString() const override
-			{
-				return std::to_string(mValue);
-			}
+			std::string ToString() const override;
+
+			CType* GetTypeInfo() const override;
 	};
 }
 

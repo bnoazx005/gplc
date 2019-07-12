@@ -296,19 +296,9 @@ namespace gplc
 	/*!
 		CASTIdentifierNode definition
 	*/
-
-	CASTIdentifierNode::CASTIdentifierNode() :
-		CASTNode(NT_IDENTIFIER)
-	{
-	}
-
-	CASTIdentifierNode::CASTIdentifierNode(const CASTIdentifierNode& node) :
-		CASTNode(node)
-	{
-	}
-
+	
 	CASTIdentifierNode::CASTIdentifierNode(const std::string& name) :
-		CASTNode(NT_IDENTIFIER), mName(name)
+		CASTTypeNode(NT_IDENTIFIER), mName(name)
 	{
 	}
 
@@ -326,6 +316,11 @@ namespace gplc
 		return pVisitor->VisitIdentifier(this);
 	}
 
+	CType* CASTIdentifierNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	{
+		return pResolver->VisitIdentifier(this);
+	}
+
 	const std::string& CASTIdentifierNode::GetName() const
 	{
 		return mName;
@@ -337,7 +332,7 @@ namespace gplc
 	*/
 
 	CASTLiteralNode::CASTLiteralNode(const CBaseLiteral* pValue):
-		CASTNode(NT_LITERAL), mpValue(pValue)
+		CASTTypeNode(NT_LITERAL), mpValue(pValue)
 	{
 	}
 
@@ -355,6 +350,11 @@ namespace gplc
 	{
 		return pVisitor->VisitLiteral(this);
 	}
+	
+	CType* CASTLiteralNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	{
+		return pResolver->VisitLiteral(this);
+	}
 
 	const CBaseLiteral* CASTLiteralNode::GetValue() const
 	{
@@ -363,7 +363,7 @@ namespace gplc
 
 
 	CASTExpressionNode::CASTExpressionNode(E_NODE_TYPE type):
-		CASTNode(type)
+		CASTTypeNode(type)
 	{
 	}
 
@@ -391,6 +391,11 @@ namespace gplc
 	bool CASTUnaryExpressionNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitUnaryExpression(this);
+	}
+	
+	CType* CASTUnaryExpressionNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	{
+		return pResolver->VisitUnaryExpression(this);
 	}
 
 	E_TOKEN_TYPE CASTUnaryExpressionNode::GetOpType() const

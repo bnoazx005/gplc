@@ -172,7 +172,7 @@ namespace gplc
 		\brief CASTIdentifierNode
 	*/
 
-	class CASTIdentifierNode : public CASTNode
+	class CASTIdentifierNode : public CASTTypeNode
 	{
 		public:
 			CASTIdentifierNode(const std::string& name);
@@ -181,16 +181,18 @@ namespace gplc
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 
+			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+
 			const std::string& GetName() const;
 		protected:
-			CASTIdentifierNode();
-			CASTIdentifierNode(const CASTIdentifierNode& node);
+			CASTIdentifierNode() = default;
+			CASTIdentifierNode(const CASTIdentifierNode& node) = default;
 		protected:
 			std::string mName;
 	};
 
 
-	class CASTLiteralNode : public CASTNode
+	class CASTLiteralNode : public CASTTypeNode
 	{
 		public:
 			CASTLiteralNode(const CBaseLiteral* pValue);
@@ -198,6 +200,8 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+
+			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
 
 			const CBaseLiteral* GetValue() const;
 		protected:
@@ -208,7 +212,7 @@ namespace gplc
 	};
 
 
-	class CASTExpressionNode : public CASTNode
+	class CASTExpressionNode : public CASTTypeNode
 	{
 		public:
 			CASTExpressionNode(E_NODE_TYPE type);
@@ -227,6 +231,8 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+
+			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
 
 			E_TOKEN_TYPE GetOpType() const;
 

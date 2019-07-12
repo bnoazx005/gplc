@@ -64,7 +64,7 @@ namespace gplc
 
 			bool Analyze(CASTNode* pInput, ITypeResolver* pTypeResolver, ISymTable* pSymTable) override;
 
-			bool VisitProgramUnit(CASTNode* pProgramNode) override;
+			bool VisitProgramUnit(CASTSourceUnitNode* pProgramNode) override;
 
 			bool VisitDeclaration(CASTDeclarationNode* pNode) override;
 

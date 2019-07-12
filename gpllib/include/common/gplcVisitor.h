@@ -13,6 +13,7 @@
 namespace gplc
 {
 	class CASTNode;
+	class CASTSourceUnitNode;
 	class CASTDeclarationNode;
 	class CASTIdentifierNode;
 	class CASTLiteralNode;
@@ -38,7 +39,7 @@ namespace gplc
 		public:
 			virtual ~IASTNodeVisitor() = default;
 
-			virtual T VisitProgramUnit(CASTNode* pProgramNode) = 0;
+			virtual T VisitProgramUnit(CASTSourceUnitNode* pProgramNode) = 0;
 			virtual T VisitDeclaration(CASTDeclarationNode* pNode) = 0;
 			virtual T VisitIdentifier(CASTIdentifierNode* pNode) = 0;
 			virtual T VisitLiteral(CASTLiteralNode* pNode) = 0;

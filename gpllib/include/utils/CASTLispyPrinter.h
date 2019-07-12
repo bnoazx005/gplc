@@ -27,7 +27,7 @@ namespace gplc
 			
 			std::string Print(CASTNode* pSourceUnitNode);
 
-			std::string VisitProgramUnit(CASTNode* pProgramNode) override;
+			std::string VisitProgramUnit(CASTSourceUnitNode* pProgramNode) override;
 
 			std::string VisitDeclaration(CASTDeclarationNode* pNode) override;
 

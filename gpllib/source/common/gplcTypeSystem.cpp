@@ -11,6 +11,7 @@
 #include "common\gplcTypeSystem.h"
 #include "parser/gplcASTNodes.h"
 #include "common/gplcLiterals.h"
+#include "common/gplcSymTable.h"
 
 
 namespace gplc
@@ -21,12 +22,38 @@ namespace gplc
 
 	CType* CTypeResolver::Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable)
 	{
+		if (!pSymTable)
+		{
+			return nullptr;
+		}
+
+		mpSymTable = pSymTable;
+
 		return pTypeNode->Resolve(this, pSymTable);
 	}
 
 	CType* CTypeResolver::VisitBaseNode(CASTTypeNode* pNode)
 	{
 		return _deduceBuiltinType(pNode->GetType());
+	}
+
+	CType* CTypeResolver::VisitIdentifier(CASTIdentifierNode* pNode)
+	{
+		TSymbolDesc* pSymbolDesc = mpSymTable->LookUp(pNode->GetName());
+
+		return pSymbolDesc ? pSymbolDesc->mpType : nullptr;
+	}
+
+	CType* CTypeResolver::VisitLiteral(CASTLiteralNode* pNode)
+	{
+		return pNode->GetValue()->GetTypeInfo();
+	}
+
+	CType* CTypeResolver::VisitUnaryExpression(CASTUnaryExpressionNode* pNode)
+	{
+		auto pOperandNode = pNode->GetData();
+
+		return pOperandNode ? dynamic_cast<CASTTypeNode*>(pOperandNode)->Resolve(this, mpSymTable) : nullptr;
 	}
 
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type)
@@ -126,6 +153,16 @@ namespace gplc
 		}
 
 		return nullptr;
+	}
+
+	bool CType::AreSame(const CType* pType) const
+	{
+		if (!pType)
+		{
+			return false;
+		}
+
+		return (mType == pType->mType) && (mSize == pType->mSize);
 	}
 
 	Result CType::_addChildTypeDesc(const CType* type)

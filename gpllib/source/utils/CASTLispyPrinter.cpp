@@ -15,7 +15,7 @@ namespace gplc
 		return pSourceUnitNode->Accept(this);
 	}
 
-	std::string CASTLispyPrinter::VisitProgramUnit(CASTNode* pProgramNode)
+	std::string CASTLispyPrinter::VisitProgramUnit(CASTSourceUnitNode* pProgramNode)
 	{
 		return "()";
 	}

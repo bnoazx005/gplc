@@ -67,6 +67,9 @@ namespace gplc
 			virtual CType* Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable) = 0;
 
 			virtual CType* VisitBaseNode(CASTTypeNode* pNode) = 0;
+			virtual CType* VisitIdentifier(CASTIdentifierNode* pNode) = 0;
+			virtual CType* VisitLiteral(CASTLiteralNode* pNode) = 0;
+			virtual CType* VisitUnaryExpression(CASTUnaryExpressionNode* pNode) = 0;
 	};
 
 
@@ -83,6 +86,9 @@ namespace gplc
 			CType* Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable) override;
 
 			CType* VisitBaseNode(CASTTypeNode* pNode) override;
+			CType* VisitIdentifier(CASTIdentifierNode* pNode) override;
+			CType* VisitLiteral(CASTLiteralNode* pNode) override;
+			CType* VisitUnaryExpression(CASTUnaryExpressionNode* pNode) override;
 		protected:
 			CType* _deduceBuiltinType(E_NODE_TYPE type);
 		protected:
@@ -113,6 +119,15 @@ namespace gplc
 			U32 GetAttributes() const;
 
 			virtual CBaseLiteral* GetDefaultValue() const;
+
+			/*!
+				\brief The operator of equality checks up whether two
+				types are same or not. Type's attributes aren't considered
+				within the comparison. This implementation doesn't support
+				implicit type castings
+			*/
+
+			virtual bool AreSame(const CType* pType) const;
 		protected:
 			CType();
 			CType(const CType& type);
