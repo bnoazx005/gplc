@@ -86,7 +86,30 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitBinaryExpression(CASTBinaryExpressionNode* pNode) 
 	{
-		return false;
+		CASTExpressionNode* pLeftExpr  = pNode->GetLeft();
+		CASTExpressionNode* pRightExpr = pNode->GetRight();
+
+		// check left expression
+		CType* pLeftValueType = nullptr;
+
+		if (!pLeftExpr->Accept(this) ||
+			!(pLeftValueType = pLeftExpr->Resolve(mpTypeResolver, mpSymTable)))
+		{
+			return false;
+		}
+
+		// check right expression
+		CType* pRightValueType = nullptr;
+
+		if (!pRightExpr->Accept(this) ||
+			!(pRightValueType = pRightExpr->Resolve(mpTypeResolver, mpSymTable)))
+		{
+			return false;
+		}
+
+		// \todo check whether an operator is implemented for both these types
+
+		return pLeftValueType->AreSame(pRightValueType);
 	}
 
 	bool CSemanticAnalyser::VisitAssignment(CASTAssignmentNode* pNode) 

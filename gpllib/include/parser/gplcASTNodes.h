@@ -254,6 +254,8 @@ namespace gplc
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 
+			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+
 			CASTExpressionNode* GetLeft() const;
 
 			CASTExpressionNode* GetRight() const;

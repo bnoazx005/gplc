@@ -435,6 +435,11 @@ namespace gplc
 		return pVisitor->VisitBinaryExpression(this);
 	}
 
+	CType* CASTBinaryExpressionNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	{
+		return pResolver->VisitBinaryExpression(this);
+	}
+
 	CASTExpressionNode* CASTBinaryExpressionNode::GetLeft() const
 	{
 		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);

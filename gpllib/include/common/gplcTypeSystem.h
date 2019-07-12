@@ -26,6 +26,9 @@ namespace gplc
 	class CBaseLiteral;
 
 
+	E_COMPILER_TYPES NodeToCompilerType(E_NODE_TYPE nodeType);
+
+
 	/*!
 		\brief The sizes of builtin types in bytes
 	*/
@@ -70,6 +73,7 @@ namespace gplc
 			virtual CType* VisitIdentifier(CASTIdentifierNode* pNode) = 0;
 			virtual CType* VisitLiteral(CASTLiteralNode* pNode) = 0;
 			virtual CType* VisitUnaryExpression(CASTUnaryExpressionNode* pNode) = 0;
+			virtual CType* VisitBinaryExpression(CASTBinaryExpressionNode* pNode) = 0;
 	};
 
 
@@ -89,8 +93,11 @@ namespace gplc
 			CType* VisitIdentifier(CASTIdentifierNode* pNode) override;
 			CType* VisitLiteral(CASTLiteralNode* pNode) override;
 			CType* VisitUnaryExpression(CASTUnaryExpressionNode* pNode) override;
+			CType* VisitBinaryExpression(CASTBinaryExpressionNode* pNode) override;
 		protected:
 			CType* _deduceBuiltinType(E_NODE_TYPE type);
+
+			CType* _deduceExprType(E_TOKEN_TYPE opType, E_COMPILER_TYPES leftType, E_COMPILER_TYPES rightType);
 		protected:
 			ISymTable* mpSymTable;
 	};

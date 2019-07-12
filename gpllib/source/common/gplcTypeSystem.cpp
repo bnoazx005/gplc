@@ -16,6 +16,39 @@
 
 namespace gplc
 {
+	E_NODE_TYPE NodeToCompilerType(E_COMPILER_TYPES nodeType)
+	{
+		switch (nodeType)
+		{
+			case CT_INT8:
+				return NT_INT8;
+			case CT_INT16:
+				return NT_INT16;
+			case CT_INT32:
+				return NT_INT32;
+			case CT_INT64:
+				return NT_INT64;
+			case CT_UINT8:
+				return NT_UINT8;
+			case CT_UINT16:
+				return NT_UINT16;
+			case CT_UINT32:
+				return NT_UINT32;
+			case CT_UINT64:
+				return NT_UINT64;
+			case CT_FLOAT:
+				return NT_FLOAT;
+			case CT_DOUBLE:
+				return NT_DOUBLE;
+			case CT_STRING:
+				return NT_STRING;
+			case CT_CHAR:
+				return NT_CHAR;
+			case CT_BOOL:
+				return NT_BOOL;
+		}
+	}
+
 	/*!
 		\brief CTypeResolver's definition
 	*/
@@ -55,6 +88,17 @@ namespace gplc
 
 		return pOperandNode ? dynamic_cast<CASTTypeNode*>(pOperandNode)->Resolve(this, mpSymTable) : nullptr;
 	}
+	
+	CType* CTypeResolver::VisitBinaryExpression(CASTBinaryExpressionNode* pNode)
+	{
+		auto pLeftExprNode  = pNode->GetLeft();
+		auto pRightExprNode = pNode->GetRight();
+
+		CType* pLeftExprTypeInfo  = pLeftExprNode->Resolve(this, mpSymTable);
+		CType* pRightExprTypeInfo = pRightExprNode->Resolve(this, mpSymTable);
+
+		return _deduceExprType(pNode->GetOpType(), pLeftExprTypeInfo->GetType(), pRightExprTypeInfo->GetType());
+	}
 
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type)
 	{
@@ -86,6 +130,27 @@ namespace gplc
 				return new CType(CT_CHAR, BTS_CHAR, 0x0);
 			case NT_BOOL:
 				return new CType(CT_BOOL, BTS_BOOL, 0x0);
+		}
+
+		return nullptr;
+	}
+
+	CType* CTypeResolver::_deduceExprType(E_TOKEN_TYPE opType, E_COMPILER_TYPES leftType, E_COMPILER_TYPES rightType)
+	{
+		// here the type inference table is placed
+		switch (opType)
+		{
+			case TT_PLUS:
+			case TT_MINUS:
+			case TT_STAR:
+			case TT_SLASH:
+				if (leftType == rightType)
+				{
+					return _deduceBuiltinType(NodeToCompilerType(leftType));
+				}
+
+				// compiler-time error
+				return nullptr;
 		}
 
 		return nullptr;
