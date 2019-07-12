@@ -223,7 +223,13 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitFunctionDeclaration(CASTFunctionDeclNode* pNode) 
 	{
-		return false;
+		auto pClosureDecl     = pNode->GetClosure();
+		auto pArgs            = pNode->GetArgs();
+		auto pReturnValueType = pNode->GetReturnValueType();
+		
+		return pClosureDecl->Accept(this) && 
+			   pArgs->Accept(this) && 
+			   pReturnValueType->Accept(this);
 	}
 
 	bool CSemanticAnalyser::VisitFunctionClosure(CASTFunctionClosureNode* pNode) 
