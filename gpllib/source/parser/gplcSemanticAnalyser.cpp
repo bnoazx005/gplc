@@ -227,7 +227,7 @@ namespace gplc
 		auto pArgs            = pNode->GetArgs();
 		auto pReturnValueType = pNode->GetReturnValueType();
 		
-		return pClosureDecl->Accept(this) && 
+		return (pClosureDecl ? pClosureDecl->Accept(this) : true) && 
 			   pArgs->Accept(this) && 
 			   pReturnValueType->Accept(this);
 	}
