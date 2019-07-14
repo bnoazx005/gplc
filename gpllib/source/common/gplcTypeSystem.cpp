@@ -323,4 +323,64 @@ namespace gplc
 
 		return nullptr; ///< unknown type
 	}
+
+	/*!
+		CFunctionType's definition
+	*/
+
+	CFunctionType::CFunctionType(const std::vector<CType*>& argsTypes, CType* pReturnValueType, U32 attributes):
+		CType(CT_FUNCTION, CT_POINTER, attributes), mpReturnValueType(pReturnValueType)
+	{
+		std::copy(argsTypes.begin(), argsTypes.end(), std::back_inserter(mArgsTypes));
+	}
+
+	const std::vector<CType*>& CFunctionType::GetArgsTypes() const
+	{
+		return mArgsTypes;
+	}
+
+	CType* CFunctionType::GetReturnValueType() const
+	{
+		return mpReturnValueType;
+	}
+
+	CBaseLiteral* CFunctionType::GetDefaultValue() const
+	{
+		// \todo implement nullptr type
+		return nullptr;
+	}
+
+	bool CFunctionType::AreSame(const CType* pType) const
+	{
+		if (pType->GetType() != CT_FUNCTION)
+		{
+			return false;
+		}
+
+		const CFunctionType* pFunctionType = dynamic_cast<const CFunctionType*>(pType);
+
+		auto pArgsTypes = pFunctionType->GetArgsTypes();
+
+		// different arities
+		if (pArgsTypes.size() != mArgsTypes.size())
+		{
+			return false;
+		}
+
+		CType* pCurrFuncArg  = nullptr;
+		CType* pOtherFuncArg = nullptr;
+
+		for (I32 i = 0; i < pArgsTypes.size(); ++i)
+		{
+			pOtherFuncArg = pFunctionType->mArgsTypes[i];
+			pCurrFuncArg  = mArgsTypes[i];
+
+			if (!pOtherFuncArg || !pCurrFuncArg || !pOtherFuncArg->AreSame(pCurrFuncArg))
+			{
+				return false;
+			}
+		}
+
+		return mpReturnValueType->AreSame(pFunctionType->GetReturnValueType());
+	}
 }

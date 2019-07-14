@@ -338,5 +338,21 @@ TEST_CASE("Lexer's tests")
 		REQUIRE(pLexer->GetCurrToken() == pSavedToken);
 	}
 
+	SECTION("true false")
+	{
+		REQUIRE(pLexer->Init("true false", pathToConfig) == gplc::RV_SUCCESS);
+
+		REQUIRE(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetCurrToken()));
+		REQUIRE(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()));
+	}
+
+	SECTION("null")
+	{
+		REQUIRE(pLexer->Init("null", pathToConfig) == gplc::RV_SUCCESS);
+
+		REQUIRE(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetCurrToken()));
+	}
+
+
 	delete pLexer;
 }

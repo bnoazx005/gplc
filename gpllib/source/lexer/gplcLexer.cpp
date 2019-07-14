@@ -325,7 +325,7 @@ namespace gplc
 		currChar = _getCurrChar(stream);
 		
 		//try to read identifier's token
-		if (iswalpha(currChar) || currChar == '_') 
+		if (isalpha(currChar) || currChar == '_') 
 		{
 			std::string identifierName;
 
@@ -346,10 +346,26 @@ namespace gplc
 				return new CToken((*token).second, mCurrPos); //return reserved keyword's token
 			}
 
+			// try to parse some of literals true, false, null
+			if (identifierName == "false")
+			{
+				return new CLiteralToken(new CBoolLiteral(false), mCurrPos);
+			}
+
+			if (identifierName == "true")
+			{
+				return new CLiteralToken(new CBoolLiteral(true), mCurrPos);
+			}
+
+			if (identifierName == "null")
+			{
+				return new CLiteralToken(nullptr, mCurrPos);
+			}
+
 			return new CIdentifierToken(identifierName, mCurrPos);	//if it's not reserved just return it as identifier
 		}
 
-		if (iswdigit(currChar) || currChar == '.') //try to get number
+		if (isdigit(currChar) || currChar == '.') //try to get number
 		{
 			std::string numberStr;
 

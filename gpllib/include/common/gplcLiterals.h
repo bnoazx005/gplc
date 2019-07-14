@@ -29,7 +29,8 @@ namespace gplc
 		LT_DOUBLE = 3,  ///< Double precision floating point type
 		LT_STRING = 4,  ///< String type
 		LT_CHAR = 5,  ///< Char type
-		LT_BOOLEAN
+		LT_BOOLEAN,
+		LT_POINTER,
 	};
 
 
@@ -166,6 +167,20 @@ namespace gplc
 		public:
 			CBoolLiteral(bool value) :
 				CGenericBaseLiteral(LT_BOOLEAN, value)
+			{
+			}
+
+			std::string ToString() const override;
+
+			CType* GetTypeInfo() const override;
+	};
+
+
+	class CNullLiteral : public CGenericBaseLiteral<uintptr_t>
+	{
+		public:
+			CNullLiteral() :
+				CGenericBaseLiteral(LT_POINTER, 0x0)
 			{
 			}
 

@@ -182,9 +182,30 @@ namespace gplc
 
 	
 	/*!
-		\brief CFunctionType class
+		\brief CFunctionType's definition
 	*/
 
+	class CFunctionType : public CType
+	{
+		public:
+			CFunctionType(const std::vector<CType*>& argsTypes, CType* pReturnValueType, U32 attributes = 0x0);
+			virtual ~CFunctionType() = default;
+
+			const std::vector<CType*>& GetArgsTypes() const;
+
+			CType* GetReturnValueType() const;
+
+			CBaseLiteral* GetDefaultValue() const override;
+
+			bool AreSame(const CType* pType) const override;
+		protected:
+			CFunctionType() = default;
+			CFunctionType(const CFunctionType& function) = default;
+		protected:
+			std::vector<CType*> mArgsTypes;
+
+			CType*              mpReturnValueType;
+	};
 
 	/*!
 		\brief CEnumerationType class

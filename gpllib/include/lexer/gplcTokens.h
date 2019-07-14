@@ -88,6 +88,7 @@ namespace gplc
 		TT_OR              = 56,
 		TT_FALSE           = 57,
 		TT_TRUE            = 58,
+		TT_NULL            = 59,
 		TT_LITERAL,
 		TT_DEFAULT
 	};

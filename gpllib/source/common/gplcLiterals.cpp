@@ -83,4 +83,14 @@ namespace gplc
 	{
 		return new CType(CT_BOOL, BTS_BOOL, 0x0);
 	}
+
+	std::string CNullLiteral::ToString() const
+	{
+		return "null";
+	}
+
+	CType* CNullLiteral::GetTypeInfo() const
+	{
+		return new CType(CT_POINTER, BTS_POINTER, 0x0);
+	}
 }
