@@ -315,6 +315,35 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) 
 	{
-		return false;
+		auto pDeclaration = pNode->GetDeclaration();
+		auto pLambdaType  = pNode->GetLambdaTypeInfo();
+		auto pLambdaBody  = pNode->GetValue();
+
+		// check left side
+		CType* pDeclFuncType = nullptr;
+
+		if (!pDeclaration->Accept(this) || !(pDeclFuncType = mpTypeResolver->Resolve(pDeclaration->GetTypeInfo(), mpSymTable)))
+		{
+			return false;
+		}
+
+		// check lambda type
+		CType* pAssignedLambdaType = nullptr;
+
+		if (!pLambdaType->Accept(this) || !(pAssignedLambdaType = mpTypeResolver->Resolve(pLambdaType, mpSymTable)))
+		{
+			return false;
+		}
+
+		// check whether the left type compatible with right one or not
+		if (!pDeclFuncType->AreSame(pAssignedLambdaType))
+		{
+			OnErrorOutput.Invoke(SAE_INCOMPATIBLE_TYPE_OF_ASSIGNED_LAMBDA);
+
+			return false;
+		}
+
+		// check the lambda's body
+		return pLambdaBody->Accept(this);
 	}
 }

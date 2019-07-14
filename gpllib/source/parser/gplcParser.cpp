@@ -767,10 +767,10 @@ namespace gplc
 		return new CASTWhileLoopStatementNode(pCondition, pBodyBlock);
 	}
 
-	CASTFunctionDeclNode* CParser::_parseFunctionDeclaration(ILexer* pLexer)
+	CASTFunctionDeclNode* CParser::_parseFunctionDeclaration(ILexer* pLexer, bool allowCapture)
 	{
 		// parse a closure's declaration if it exists
-		CASTFunctionClosureNode* pClosureDecl = _match(pLexer->GetCurrToken(), TT_OPEN_SQR_BRACE) ? _parseFunctionClosure(pLexer) : nullptr;
+		CASTFunctionClosureNode* pClosureDecl = allowCapture && _match(pLexer->GetCurrToken(), TT_OPEN_SQR_BRACE) ? _parseFunctionClosure(pLexer) : nullptr;
 
 		// parse arguments
 		CASTFunctionArgsNode* pArgsList = _match(pLexer->GetCurrToken(), TT_OPEN_BRACKET) ? _parseFunctionArgs(pLexer) : nullptr;
@@ -900,7 +900,7 @@ namespace gplc
 
 	CASTFuncDefinitionNode* CParser::_parseFunctionDefinition(CASTDeclarationNode* pDecl, ILexer* pLexer)
 	{
-		CASTFunctionDeclNode* pLambdaDefType = _parseFunctionDeclaration(pLexer);
+		CASTFunctionDeclNode* pLambdaDefType = _parseFunctionDeclaration(pLexer, true);
 
 		if (!SUCCESS(_expect(TT_OPEN_BRACE, pLexer->GetCurrToken())))
 		{

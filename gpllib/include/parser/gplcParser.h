@@ -312,7 +312,7 @@ namespace gplc
 									| (<expr> [,<expr>]*) -> <type>;
 			*/
 
-			CASTFunctionDeclNode* _parseFunctionDeclaration(ILexer* pLexer);
+			CASTFunctionDeclNode* _parseFunctionDeclaration(ILexer* pLexer, bool allowCapture = false);
 						
 			/*!
 				\brief The method parses the following rule

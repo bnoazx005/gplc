@@ -619,9 +619,9 @@ namespace gplc
 	CASTFunctionDeclNode::CASTFunctionDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue):
 		CASTTypeNode(NT_FUNC_DECL)
 	{
-		AttachChild(pClosure);
 		AttachChild(pArgs);
 		AttachChild(pReturnValue);
+		AttachChild(pClosure);
 	}
 
 	CASTFunctionDeclNode::~CASTFunctionDeclNode()
@@ -640,17 +640,22 @@ namespace gplc
 
 	CASTFunctionClosureNode* CASTFunctionDeclNode::GetClosure() const
 	{
-		return dynamic_cast<CASTFunctionClosureNode*>(mChildren[0]);
+		if (mChildren.size() < 3)
+		{
+			return nullptr;
+		}
+
+		return dynamic_cast<CASTFunctionClosureNode*>(mChildren[2]);
 	}
 
 	CASTFunctionArgsNode* CASTFunctionDeclNode::GetArgs() const
 	{
-		return dynamic_cast<CASTFunctionArgsNode*>(mChildren[1]);
+		return dynamic_cast<CASTFunctionArgsNode*>(mChildren[0]);
 	}
 
 	CASTNode* CASTFunctionDeclNode::GetReturnValueType() const
 	{
-		return mChildren[2];
+		return mChildren[1];
 	}
 
 
