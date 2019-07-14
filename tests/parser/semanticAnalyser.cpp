@@ -238,6 +238,38 @@ TEST_CASE("CSemanticAnalyser's tests")
 	//									   pTypeResolver, new CSymTable()));
 	//}
 
+	SECTION("TestAnalyze_PassCorectFunctionArgs_ReturnsTrue")
+	{
+		/*
+			(x: int32);
+		*/
+		auto pArgIdentifier   = new CASTNode(NT_IDENTIFIERS_LIST);
+
+		CASTFunctionArgsNode* pFuncArgs = new CASTFunctionArgsNode();
+
+		pArgIdentifier->AttachChild(new CASTIdentifierNode("x"));
+
+		pFuncArgs->AttachChild(new CASTDeclarationNode(pArgIdentifier, new CASTTypeNode(NT_INT32)));
+
+		REQUIRE(pSemanticAnalyser->Analyze(pFuncArgs, pTypeResolver, new CSymTable()));
+	}
+
+	//SECTION("TestAnalyze_PassFunctionArgsWithUndefinedType_ReturnsFalse")
+	//{
+	//	/*
+	//		(x: int32);
+	//	*/
+	//	auto pArgIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
+
+	//	CASTFunctionArgsNode* pFuncArgs = new CASTFunctionArgsNode();
+
+	//	pArgIdentifier->AttachChild(new CASTIdentifierNode("x"));
+
+	//	pFuncArgs->AttachChild(new CASTDeclarationNode(pArgIdentifier, new CASTIdentifierNode("TType")));
+
+	//	REQUIRE(!pSemanticAnalyser->Analyze(pFuncArgs, pTypeResolver, new CSymTable()));
+	//}
+
 	delete pTypeResolver;
 	delete pSemanticAnalyser;
 }

@@ -234,16 +234,51 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitFunctionClosure(CASTFunctionClosureNode* pNode) 
 	{
-		return false;
+		auto pChildren = pNode->GetChildren();
+
+		for (auto pCurrChild : pChildren)
+		{
+			if (!pCurrChild->Accept(this))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	bool CSemanticAnalyser::VisitFunctionArgs(CASTFunctionArgsNode* pNode) 
 	{
-		return false;
+		auto pChildren = pNode->GetChildren();
+
+		for (auto pCurrChild : pChildren)
+		{
+			if (!pCurrChild->Accept(this))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	bool CSemanticAnalyser::VisitFunctionCall(CASTFunctionCallNode* pNode) 
 	{
+		if (!pNode->GetIdentifier()->Accept(this))
+		{
+			return false;
+		}
+		
+		auto pChildren = pNode->GetArgs()->GetChildren();
+
+		for (auto pCurrChild : pChildren)
+		{
+			if (!pCurrChild->Accept(this))
+			{
+				return false;
+			}
+		}
+
 		return false;
 	}
 
