@@ -25,5 +25,7 @@ TEST_CASE("Type System's tests")
 		REQUIRE(dynamic_cast<CCharLiteral*>((new CType(CT_CHAR, BTS_CHAR, 0x0))->GetDefaultValue())->GetValue() == "\0");
 
 		REQUIRE(dynamic_cast<CBoolLiteral*>((new CType(CT_BOOL, BTS_BOOL, 0x0))->GetDefaultValue())->GetValue() == true);
+
+		REQUIRE(dynamic_cast<CNullLiteral*>((new CFunctionType({}, nullptr, 0x0))->GetDefaultValue())->GetValue() == 0x0);
 	}
 }

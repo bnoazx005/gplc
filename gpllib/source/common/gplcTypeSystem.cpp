@@ -12,6 +12,7 @@
 #include "parser/gplcASTNodes.h"
 #include "common/gplcLiterals.h"
 #include "common/gplcSymTable.h"
+#include <algorithm>
 
 
 namespace gplc
@@ -103,6 +104,20 @@ namespace gplc
 	CType* CTypeResolver::VisitDeclaration(CASTDeclarationNode* pNode)
 	{
 		return pNode->GetTypeInfo()->Resolve(this, mpSymTable);
+	}
+
+	CType* CTypeResolver::VisitFunctionDeclaration(CASTFunctionDeclNode* pNode)
+	{
+		auto args = pNode->GetArgs()->GetChildren();
+
+		std::vector<CType*> argsTypes;
+
+		for (auto pCurrArgNode : args)
+		{
+			argsTypes.push_back(Resolve(dynamic_cast<CASTTypeNode*>(pCurrArgNode), mpSymTable));
+		}
+
+		return new CFunctionType(argsTypes, Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetReturnValueType()), mpSymTable), 0x0);
 	}
 
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type)
@@ -346,13 +361,14 @@ namespace gplc
 
 	CBaseLiteral* CFunctionType::GetDefaultValue() const
 	{
-		// \todo implement nullptr type
-		return nullptr;
+		return new CNullLiteral();
 	}
 
 	bool CFunctionType::AreSame(const CType* pType) const
 	{
-		if (pType->GetType() != CT_FUNCTION)
+		E_COMPILER_TYPES type = pType->GetType();
+
+		if (type != CT_FUNCTION)
 		{
 			return false;
 		}

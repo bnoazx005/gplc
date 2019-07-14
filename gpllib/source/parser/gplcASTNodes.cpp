@@ -638,6 +638,11 @@ namespace gplc
 		return pVisitor->VisitFunctionDeclaration(this);
 	}
 
+	CType* CASTFunctionDeclNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	{
+		return pResolver->VisitFunctionDeclaration(this);
+	}
+
 	CASTFunctionClosureNode* CASTFunctionDeclNode::GetClosure() const
 	{
 		if (mChildren.size() < 3)
