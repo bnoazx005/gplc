@@ -73,7 +73,7 @@ namespace gplc
 
 	CType* CTypeResolver::VisitIdentifier(CASTIdentifierNode* pNode)
 	{
-		TSymbolDesc* pSymbolDesc = mpSymTable->LookUp(pNode->GetName());
+		const TSymbolDesc* pSymbolDesc = mpSymTable->LookUp(pNode->GetName());
 
 		return pSymbolDesc ? pSymbolDesc->mpType : nullptr;
 	}
@@ -118,6 +118,11 @@ namespace gplc
 		}
 
 		return new CFunctionType(argsTypes, Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetReturnValueType()), mpSymTable), 0x0);
+	}
+
+	CType* CTypeResolver::VisitFunctionCall(CASTFunctionCallNode* pNode)
+	{
+		return nullptr;
 	}
 
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type)

@@ -330,6 +330,60 @@ TEST_CASE("CSemanticAnalyser's tests")
 										    pTypeResolver, new CSymTable()));
 	}
 
+	SECTION("TestAnalyze_PassFunctionCallIncompatibleWithExpression_ReturnsFalse")
+	{
+		/*
+			f: (x: int32) -> int32 = (x: int32) -> int32 {
+				return 42;
+			};
+
+			x : double = 0.0;
+
+			x = x + f(0);
+		*/
+
+		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pArgIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
+
+		pIdentifiersList->AttachChild(new CASTIdentifierNode("f"));
+
+		CASTFunctionArgsNode* pFuncArgs = new CASTFunctionArgsNode();
+
+		pArgIdentifier->AttachChild(new CASTIdentifierNode("x"));
+
+		pFuncArgs->AttachChild(new CASTDeclarationNode(pArgIdentifier, new CASTTypeNode(NT_INT32)));
+
+		auto pFuncDeclaration = new CASTFunctionDeclNode(nullptr, pFuncArgs, new CASTTypeNode(NT_INT32));;
+
+		auto pFuncBody = new CASTBlockNode();
+
+		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(42)))));
+
+		auto pXIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
+		pXIdentifier->AttachChild(new CASTIdentifierNode("x"));
+
+		auto pProgram = new CASTSourceUnitNode();
+
+		auto pCallArgs = new CASTNode(NT_FUNC_ARGS);
+		pCallArgs->AttachChild(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(0))));
+
+		pProgram->AttachChild(new CASTFuncDefinitionNode(new CASTDeclarationNode(pIdentifiersList, pFuncDeclaration), pFuncDeclaration, pFuncBody));
+		pProgram->AttachChild(new CASTDefinitionNode(new CASTDeclarationNode(pXIdentifier, new CASTTypeNode(NT_DOUBLE)), new CASTLiteralNode(new CDoubleLiteral(0.0))));
+		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
+													 new CASTBinaryExpressionNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
+																				  TT_PLUS,
+																				  new CASTUnaryExpressionNode(TT_DEFAULT, 
+																						new CASTFunctionCallNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("f")),
+																										         pCallArgs)))));
+
+		pSemanticAnalyser->OnErrorOutput += [](E_SEMANTIC_ANALYSER_ERRORS err)
+		{
+			REQUIRE(false);
+		};
+
+		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+	}
+
 	delete pTypeResolver;
 	delete pSemanticAnalyser;
 }

@@ -718,7 +718,7 @@ namespace gplc
 	*/
 
 	CASTFunctionCallNode::CASTFunctionCallNode(CASTUnaryExpressionNode* pIdentifier, CASTNode* pArgsList):
-		CASTNode(NT_FUNC_CALL)
+		CASTTypeNode(NT_FUNC_CALL)
 	{
 		AttachChild(pIdentifier);
 		AttachChild(pArgsList);
@@ -736,6 +736,11 @@ namespace gplc
 	bool CASTFunctionCallNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return pVisitor->VisitFunctionCall(this);
+	}
+
+	CType* CASTFunctionCallNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	{
+		return pResolver->VisitFunctionCall(this);
 	}
 
 	CASTUnaryExpressionNode* CASTFunctionCallNode::GetIdentifier() const

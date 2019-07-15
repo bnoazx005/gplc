@@ -143,6 +143,8 @@ namespace gplc
 	{
 		auto pStatements = pNode->GetStatements();
 
+		mpSymTable->EnterScope();
+
 		for (auto pCurrStatement : pStatements)
 		{
 			if (!pCurrStatement->Accept(this))
@@ -150,6 +152,8 @@ namespace gplc
 				return false;
 			}
 		}
+
+		mpSymTable->LeaveScope();
 
 		return true;
 	}

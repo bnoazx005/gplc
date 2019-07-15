@@ -90,7 +90,7 @@ namespace gplc
 
 	Result CSymTable::AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc)
 	{
-		if (_lookUp(mpCurrScopeEntry, variableName))
+		if (_internalLookUp(mpCurrScopeEntry, variableName))
 		{
 			return RV_FAIL;
 		}
@@ -100,29 +100,50 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 
-	TSymbolDesc* CSymTable::LookUp(const std::string& variableName) const
+	const TSymbolDesc* CSymTable::LookUp(const std::string& variableName) const
 	{
 		return _lookUp(mpCurrScopeEntry, variableName);
 	}
 
-	TSymbolDesc* CSymTable::_lookUp(TSymTableEntry* entry, const std::string& variableName) const
+	const TSymbolDesc* CSymTable::_lookUp(TSymTableEntry* entry, const std::string& variableName) const
 	{
-		TSymbolsMap& table = entry->mVariables;
+		const TSymbolsMap& table = entry->mVariables;
 				
-		if (table.find(variableName) != table.cend())
+		TSymbolsMap::const_iterator iter;
+
+		if ((iter = table.find(variableName)) != table.cend())
 		{
-			return &table[variableName];
+			return &iter->second;
 		}
 
 		//search in outter scopes
-		TSymTableEntry* pCurrSymTable = mpCurrScopeEntry->mParentScope;
+		TSymTableEntry* pCurrSymTable = entry->mParentScope;
 
-		while (pCurrSymTable && !_lookUp(pCurrSymTable, variableName))
+		const TSymbolDesc* pCurrDesc = nullptr;
+
+		while (pCurrSymTable)
 		{
+			const TSymbolsMap& currTable = pCurrSymTable->mVariables;
+
+			for (auto& currVariable : currTable)
+			{
+				if (pCurrDesc = _lookUp(pCurrSymTable, variableName))
+				{
+					return pCurrDesc;
+				}
+			}
+
 			pCurrSymTable = pCurrSymTable->mParentScope;
 		}
 
 		return nullptr;
+	}
+
+	bool CSymTable::_internalLookUp(TSymTableEntry* entry, const std::string& variableName) const
+	{
+		TSymbolsMap& table = entry->mVariables;
+
+		return table.find(variableName) != table.cend();
 	}
 
 	void CSymTable::_removeScope(TSymTableEntry** scope)
