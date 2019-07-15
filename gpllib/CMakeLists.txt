@@ -16,6 +16,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/deps/cma
 
 set(GPL_HEADERS
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/gplc.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/codegen/gplcCodegen.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/codegen/gplcLLVMCodegen.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/common/gplcConstants.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/common/gplcLiterals.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/common/gplcSymTable.h"

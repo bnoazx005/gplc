@@ -29,4 +29,7 @@
 #include "utils/CASTLispyPrinter.h"
 #include "utils/CResult.h"
 
+#include "codegen/gplcCodegen.h"
+#include "codegen/gplcLLVMCodegen.h"
+
 #endif
