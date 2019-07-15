@@ -49,7 +49,7 @@ namespace gplc
 	}
 
 	CSymTable::CSymTable(const CSymTable& table):
-		ISymTable(table)
+		ISymTable(table), mIsLocked(false)
 	{
 	}
 
@@ -58,9 +58,33 @@ namespace gplc
 		_removeScope(&mpGlobalScopeEntry);
 	}
 
+	Result CSymTable::Lock()
+	{
+		if (mIsLocked)
+		{
+			return RV_FAIL;
+		}
+
+		mIsLocked = true;
+
+		return RV_SUCCESS;
+	}
+
+	Result CSymTable::Unlock()
+	{
+		if (!mIsLocked)
+		{
+			return RV_FAIL;
+		}
+
+		mIsLocked = false;
+
+		return RV_SUCCESS;
+	}
+
 	Result CSymTable::EnterScope()
 	{
-		if (mpCurrScopeEntry == nullptr)
+		if (mIsLocked || mpCurrScopeEntry == nullptr)
 		{
 			return RV_FAIL;
 		}
@@ -78,7 +102,7 @@ namespace gplc
 
 	Result CSymTable::LeaveScope()
 	{
-		if (mpCurrScopeEntry->mParentScope == nullptr) //we stay in a global scope
+		if (mIsLocked || mpCurrScopeEntry->mParentScope == nullptr) //we stay in a global scope
 		{
 			return RV_FAIL;
 		}
@@ -90,7 +114,7 @@ namespace gplc
 
 	Result CSymTable::AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc)
 	{
-		if (_internalLookUp(mpCurrScopeEntry, variableName))
+		if (mIsLocked || _internalLookUp(mpCurrScopeEntry, variableName))
 		{
 			return RV_FAIL;
 		}
@@ -103,6 +127,11 @@ namespace gplc
 	const TSymbolDesc* CSymTable::LookUp(const std::string& variableName) const
 	{
 		return _lookUp(mpCurrScopeEntry, variableName);
+	}
+
+	bool CSymTable::IsLocked() const
+	{
+		return mIsLocked;
 	}
 
 	const TSymbolDesc* CSymTable::_lookUp(TSymTableEntry* entry, const std::string& variableName) const

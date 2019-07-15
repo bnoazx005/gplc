@@ -57,6 +57,10 @@ namespace gplc
 			ISymTable();
 			virtual ~ISymTable();
 
+			virtual Result Lock() = 0;
+
+			virtual Result Unlock() = 0;
+
 			virtual Result EnterScope() = 0;
 
 			virtual Result LeaveScope() = 0;
@@ -64,6 +68,8 @@ namespace gplc
 			virtual Result AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc) = 0;
 
 			virtual const TSymbolDesc* LookUp(const std::string& variableName) const = 0;
+
+			virtual bool IsLocked() const = 0;
 		protected:
 			ISymTable(const ISymTable& table);
 	};
@@ -79,6 +85,10 @@ namespace gplc
 			CSymTable();
 			virtual ~CSymTable();
 
+			Result Lock() override;
+
+			Result Unlock() override;
+
 			Result EnterScope() override;
 
 			Result LeaveScope() override;
@@ -86,6 +96,8 @@ namespace gplc
 			Result AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc) override;
 			
 			const TSymbolDesc* LookUp(const std::string& variableName) const override;
+
+			bool IsLocked() const override;
 		protected:
 			CSymTable(const CSymTable& table);
 
@@ -98,6 +110,8 @@ namespace gplc
 			TSymTableEntry* mpGlobalScopeEntry;
 
 			TSymTableEntry* mpCurrScopeEntry;
+
+			bool            mIsLocked;
 	};
 }
 

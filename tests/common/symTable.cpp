@@ -2,6 +2,9 @@
 #include <gplc.h>
 
 
+using namespace gplc;
+
+
 TEST_CASE("CSymTable tests")
 {
 	gplc::ISymTable* pSymTable = new gplc::CSymTable();
@@ -54,6 +57,23 @@ TEST_CASE("CSymTable tests")
 
 			REQUIRE(!pTypeDesc);
 		}
+	}
+
+	SECTION("TestLock_LockTableAndTryToInsertVariable_DoesNothing")
+	{
+		REQUIRE(SUCCESS(pSymTable->Lock()));
+		REQUIRE(pSymTable->IsLocked());
+
+		REQUIRE(!SUCCESS(pSymTable->AddVariable("x", {})));
+	}
+
+	SECTION("TestUnlock_UnlockPrevioslyLockedTable_UnlocksTable")
+	{
+		REQUIRE(SUCCESS(pSymTable->Lock()));
+		REQUIRE(pSymTable->IsLocked());
+		REQUIRE(SUCCESS(pSymTable->Unlock()));
+
+		REQUIRE(SUCCESS(pSymTable->AddVariable("x", {})));
 	}
 	
 	delete pSymTable;
