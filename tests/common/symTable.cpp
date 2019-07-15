@@ -64,7 +64,8 @@ TEST_CASE("CSymTable tests")
 		REQUIRE(SUCCESS(pSymTable->Lock()));
 		REQUIRE(pSymTable->IsLocked());
 
-		REQUIRE(!SUCCESS(pSymTable->AddVariable("x", {})));
+		REQUIRE(SUCCESS(pSymTable->AddVariable("x", {})));
+		REQUIRE(!pSymTable->LookUp("x"));
 	}
 
 	SECTION("TestUnlock_UnlockPrevioslyLockedTable_UnlocksTable")
@@ -74,6 +75,7 @@ TEST_CASE("CSymTable tests")
 		REQUIRE(SUCCESS(pSymTable->Unlock()));
 
 		REQUIRE(SUCCESS(pSymTable->AddVariable("x", {})));
+		REQUIRE(pSymTable->LookUp("x"));
 	}
 	
 	delete pSymTable;

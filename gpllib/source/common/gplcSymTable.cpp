@@ -114,7 +114,12 @@ namespace gplc
 
 	Result CSymTable::AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc)
 	{
-		if (mIsLocked || _internalLookUp(mpCurrScopeEntry, variableName))
+		if (mIsLocked)
+		{
+			return RV_SUCCESS;
+		}
+
+		if (_internalLookUp(mpCurrScopeEntry, variableName))
 		{
 			return RV_FAIL;
 		}

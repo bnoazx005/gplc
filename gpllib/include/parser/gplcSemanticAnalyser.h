@@ -100,6 +100,8 @@ namespace gplc
 
 			bool VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) override;
 		protected:
+			bool _enterScope(CASTBlockNode* pNode, ISymTable* pSymTable);
+		protected:
 			ITypeResolver* mpTypeResolver;
 
 			ISymTable*     mpSymTable;

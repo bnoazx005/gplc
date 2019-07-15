@@ -95,6 +95,8 @@ namespace gplc
 		if (!pLeftExpr->Accept(this) ||
 			!(pLeftValueType = pLeftExpr->Resolve(mpTypeResolver, mpSymTable)))
 		{
+			OnErrorOutput.Invoke(SAE_INCOMPATIBLE_TYPES_INSIDE_EXPR);
+
 			return false;
 		}
 
@@ -104,6 +106,8 @@ namespace gplc
 		if (!pRightExpr->Accept(this) ||
 			!(pRightValueType = pRightExpr->Resolve(mpTypeResolver, mpSymTable)))
 		{
+			OnErrorOutput.Invoke(SAE_INCOMPATIBLE_TYPES_INSIDE_EXPR);
+
 			return false;
 		}
 
@@ -132,6 +136,8 @@ namespace gplc
 		if (!pRightExpr->Accept(this) ||
 			!(pRightValueType = pRightExpr->Resolve(mpTypeResolver, mpSymTable)))
 		{
+			OnErrorOutput.Invoke(SAE_INCOMPATIBLE_TYPES_INSIDE_EXPR);
+
 			return false;
 		}
 
@@ -142,9 +148,7 @@ namespace gplc
 	bool CSemanticAnalyser::VisitStatementsBlock(CASTBlockNode* pNode) 
 	{
 		auto pStatements = pNode->GetStatements();
-
-		mpSymTable->EnterScope();
-
+		
 		for (auto pCurrStatement : pStatements)
 		{
 			if (!pCurrStatement->Accept(this))
@@ -152,8 +156,6 @@ namespace gplc
 				return false;
 			}
 		}
-
-		mpSymTable->LeaveScope();
 
 		return true;
 	}
@@ -179,7 +181,7 @@ namespace gplc
 			return false;
 		}
 
-		if (!pThenBlock->Accept(this) || (pElseBlock && !pElseBlock->Accept(this)))
+		if (!_enterScope(pThenBlock, mpSymTable) || (pElseBlock && !_enterScope(pElseBlock, mpSymTable)))
 		{
 			return false;
 		}
@@ -194,7 +196,7 @@ namespace gplc
 			OnErrorOutput.Invoke(SAE_REDUNDANT_LOOP_STATEMENT);
 		}
 
-		return pNode->GetBody()->Accept(this);
+		return _enterScope(pNode->GetBody(), mpSymTable);
 	}
 
 	bool CSemanticAnalyser::VisitWhileLoopStatement(CASTWhileLoopStatementNode* pNode) 
@@ -222,7 +224,7 @@ namespace gplc
 			return false;
 		}
 
-		return pLoopBody->Accept(this);
+		return _enterScope(pLoopBody, mpSymTable);
 	}
 
 	bool CSemanticAnalyser::VisitFunctionDeclaration(CASTFunctionDeclNode* pNode) 
@@ -231,9 +233,15 @@ namespace gplc
 		auto pArgs            = pNode->GetArgs();
 		auto pReturnValueType = pNode->GetReturnValueType();
 		
-		return (pClosureDecl ? pClosureDecl->Accept(this) : true) && 
-			   pArgs->Accept(this) && 
-			   pReturnValueType->Accept(this);
+		mpSymTable->Lock();
+
+		bool isCorrect = (pClosureDecl ? pClosureDecl->Accept(this) : true) && 
+						 pArgs->Accept(this) && 
+						 pReturnValueType->Accept(this);
+
+		mpSymTable->Unlock();
+
+		return isCorrect;
 	}
 
 	bool CSemanticAnalyser::VisitFunctionClosure(CASTFunctionClosureNode* pNode) 
@@ -283,7 +291,7 @@ namespace gplc
 			}
 		}
 
-		return false;
+		return true;
 	}
 
 	bool CSemanticAnalyser::VisitReturnStatement(CASTReturnStatementNode* pNode) 
@@ -322,7 +330,7 @@ namespace gplc
 		auto pDeclaration = pNode->GetDeclaration();
 		auto pLambdaType  = pNode->GetLambdaTypeInfo();
 		auto pLambdaBody  = pNode->GetValue();
-
+		
 		// check left side
 		CType* pDeclFuncType = nullptr;
 
@@ -330,6 +338,8 @@ namespace gplc
 		{
 			return false;
 		}
+
+		mpSymTable->EnterScope();
 
 		// check lambda type
 		CType* pAssignedLambdaType = nullptr;
@@ -348,6 +358,21 @@ namespace gplc
 		}
 
 		// check the lambda's body
-		return pLambdaBody->Accept(this);
+		bool isLambdaBodyValid = pLambdaBody->Accept(this);
+
+		mpSymTable->LeaveScope();
+
+		return isLambdaBodyValid;
+	}
+
+	bool CSemanticAnalyser::_enterScope(CASTBlockNode* pNode, ISymTable* pSymTable)
+	{
+		pSymTable->EnterScope();
+
+		bool result = pNode->Accept(this);
+
+		pSymTable->LeaveScope();
+
+		return result;
 	}
 }
