@@ -115,6 +115,8 @@ namespace gplc
 
 	class CType
 	{
+		protected:
+			typedef std::unordered_map<E_COMPILER_TYPES, std::unordered_map<E_COMPILER_TYPES, bool>> TCastMap;
 		public:
 			CType(E_COMPILER_TYPES type, U32 size, U32 attributes);
 			virtual ~CType();
@@ -141,6 +143,8 @@ namespace gplc
 			*/
 
 			virtual bool AreSame(const CType* pType) const;
+
+			virtual bool AreConvertibleTo(const CType* pType) const;
 		protected:
 			CType();
 			CType(const CType& type);
@@ -151,6 +155,8 @@ namespace gplc
 
 			CBaseLiteral* _getBuiltinTypeDefaultValue(E_COMPILER_TYPES type) const;
 		protected:
+			static TCastMap     mCastMap;
+
 			E_COMPILER_TYPES    mType;
 
 			U32                 mSize;

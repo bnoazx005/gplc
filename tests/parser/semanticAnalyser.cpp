@@ -380,7 +380,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 		
 
 		auto pSymTable = new CSymTable();
-
+		
 		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable));
 
 		delete pSymTable;

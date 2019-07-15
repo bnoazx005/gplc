@@ -233,13 +233,9 @@ namespace gplc
 		auto pArgs            = pNode->GetArgs();
 		auto pReturnValueType = pNode->GetReturnValueType();
 		
-		mpSymTable->Lock();
-
 		bool isCorrect = (pClosureDecl ? pClosureDecl->Accept(this) : true) && 
 						 pArgs->Accept(this) && 
 						 pReturnValueType->Accept(this);
-
-		mpSymTable->Unlock();
 
 		return isCorrect;
 	}
@@ -322,7 +318,7 @@ namespace gplc
 
 		// check their compatibility
 
-		return pDeclType->AreSame(pValueType);
+		return pDeclType->AreSame(pValueType) || pValueType->AreConvertibleTo(pDeclType);
 	}
 
 	bool CSemanticAnalyser::VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) 

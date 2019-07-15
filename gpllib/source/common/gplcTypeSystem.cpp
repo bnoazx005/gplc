@@ -209,6 +209,21 @@ namespace gplc
 		CType definition
 	*/
 
+	CType::TCastMap CType::mCastMap
+	{
+		{ CT_INT8, { { CT_INT16, true }, { CT_INT32, true }, { CT_INT64, true },  {CT_UINT8, true}, { CT_UINT16, true }, { CT_UINT32, true }, { CT_UINT64, true } } },
+		{ CT_INT16, { { CT_INT8, true }, { CT_INT32, true }, { CT_INT64, true },  {CT_UINT8, true}, { CT_UINT16, true }, { CT_UINT32, true }, { CT_UINT64, true } } },
+		{ CT_INT32, { { CT_INT8, true }, { CT_INT16, true }, { CT_INT64, true },  {CT_UINT8, true}, { CT_UINT16, true }, { CT_UINT32, true }, { CT_UINT64, true } } },
+		{ CT_INT64, { { CT_INT16, true }, { CT_INT32, true }, { CT_INT8, true },  {CT_UINT8, true}, { CT_UINT16, true }, { CT_UINT32, true }, { CT_UINT64, true } } },
+		{ CT_UINT8, { { CT_INT16, true }, { CT_INT32, true }, { CT_INT64, true },  {CT_INT8, true}, { CT_UINT16, true }, { CT_UINT32, true }, { CT_UINT64, true } } },
+		{ CT_UINT16, { { CT_INT16, true }, { CT_INT32, true }, { CT_INT64, true },  {CT_UINT8, true}, { CT_INT16, true }, { CT_UINT32, true }, { CT_UINT64, true } } },
+		{ CT_UINT32, { { CT_INT16, true }, { CT_INT32, true }, { CT_INT64, true },  {CT_UINT8, true}, { CT_UINT16, true }, { CT_INT32, true }, { CT_UINT64, true } } },
+		{ CT_UINT64, { { CT_INT16, true }, { CT_INT32, true }, { CT_INT64, true },  {CT_UINT8, true}, { CT_UINT16, true }, { CT_UINT32, true }, { CT_INT64, true } } },
+		{ CT_FLOAT, { { CT_DOUBLE, true } } },
+		{ CT_DOUBLE, { { CT_FLOAT, true } } },
+		{ CT_CHAR, { { CT_STRING, true } } },
+	};
+
 	CType::CType() :
 		mType(CT_INT32), mSize(4), mAttributes(0x0)
 	{
@@ -276,6 +291,16 @@ namespace gplc
 		}
 
 		return (mType == pType->mType) && (mSize == pType->mSize);
+	}
+
+	bool CType::AreConvertibleTo(const CType* pType) const
+	{
+		if (!pType)
+		{
+			return false;
+		}
+
+		return mCastMap[mType][pType->mType];
 	}
 
 	Result CType::_addChildTypeDesc(const CType* type)
@@ -354,7 +379,7 @@ namespace gplc
 
 		return nullptr; ///< unknown type
 	}
-
+	
 	/*!
 		CFunctionType's definition
 	*/
