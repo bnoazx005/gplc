@@ -13,6 +13,7 @@
 
 
 #include "common/gplcVisitor.h"
+#include <string>
 
 
 namespace gplc

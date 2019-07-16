@@ -12,12 +12,27 @@
 #define GPLC_LLVM_CODE_GENERATOR_H
 
 
+#include "codegen/gplcCodegen.h"
 #include "common/gplcVisitor.h"
+#include "llvm\IR\Module.h"
+#include <variant>
 
 
 namespace gplc
 {
-	class CLLVMCodeGenerator;
+	typedef std::variant<llvm::Module*, llvm::Value*, llvm::Function*, llvm::Instruction*> TLLVMIRData;
+
+
+	class CLLVMCodeGenerator : public ICodeGenerator
+	{
+		public:
+			CLLVMCodeGenerator() = default;
+			virtual ~CLLVMCodeGenerator() = default;
+
+			std::string Generate(CASTSourceUnitNode* pNode) override;
+		protected:
+			CLLVMCodeGenerator(const CLLVMCodeGenerator& codeGenerator) = default;
+	};
 }
 
 #endif

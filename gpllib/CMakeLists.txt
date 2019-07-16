@@ -2,6 +2,11 @@ cmake_minimum_required (VERSION 3.8)
 
 project (GPL CXX)
 
+find_package(LLVM REQUIRED CONFIG)
+
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin/$<CONFIGURATION>/")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin/$<CONFIGURATION>/")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin/$<CONFIGURATION>/")
@@ -36,6 +41,7 @@ set(GPL_HEADERS
 	)
 
 set(GPL_SOURCES
+	"${CMAKE_CURRENT_SOURCE_DIR}/source/codegen/gplcLLVMCodegen.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/common/gplcLiterals.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/common/gplcSymTable.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/common/gplcTypeSystem.cpp"
@@ -56,17 +62,26 @@ if (MSVC) 	#cl.exe compiler's options
 
 	#Debug compiler's options
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /std:c++17 /MDd /W3 /GS /Zc:inline /Od /Zi  /Zc:wchar_t")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /RTC1 /Gd /Oy- /EHsc /nologo /diagnostics:classic /errorReport:prompt /sdl /permissive- /analyze-")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /RTC1 /Gd /Oy- /EHsc /nologo /diagnostics:classic /errorReport:prompt /sdl- /permissive- /analyze-")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D _DEBUG")
 
 	#Release compiler's options
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /std:c++17 /permissive- /GS /GL /analyze- /W3 /Gy /Zc:wchar_t /Zi /Gm- /O2 /sdl /Zc:inline")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /std:c++17 /permissive- /GS /GL /analyze- /W3 /Gy /Zc:wchar_t /Zi /Gm- /O2 /sdl- /Zc:inline")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /fp:precise /D _WINDLL /D _MBCS /errorReport:prompt /WX- /Zc:forScope /Gd /Oy- /Oi /MD /EHsc /nologo /diagnostics:classic")
 endif()
 
 include_directories ("${PROJECT_SOURCE_DIR}/include/")
 
+include_directories(${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
+
+
 add_library(${GPL_LIBRARY_NAME} STATIC ${GPL_SOURCES} ${GPL_HEADERS})
+
+llvm_map_components_to_libnames(llvm_libs support core irreader)
+
+# Link against LLVM libraries
+target_link_libraries(${GPL_LIBRARY_NAME} ${llvm_libs})
 
 # disable the <libname>_EXPORTS
 set_target_properties(${GPL_LIBRARY_NAME} PROPERTIES DEFINE_SYMBOL "")
