@@ -10,6 +10,9 @@
 #define GPLC_VISITOR_H
 
 
+#include <string>
+
+
 namespace gplc
 {
 	class CASTNode;
@@ -63,17 +66,50 @@ namespace gplc
 	};
 
 
-	template <typename T>
+	template <typename T, typename TVisitor>
 	class IVisitable
 	{
 		public:
 			virtual ~IVisitable() = default;
 
-			virtual T Accept(IASTNodeVisitor<T>* pVisitor) = 0;
+			virtual T Accept(TVisitor* pVisitor) = 0;
 		protected:
 			IVisitable() = default;
 			IVisitable(const IVisitable& visitable) = default;
 	};
+
+
+	class CType;
+	class CIntLiteral;
+	class CUIntLiteral;
+	class CFloatLiteral;
+	class CDoubleLiteral;
+	class CCharLiteral;
+	class CStringLiteral;
+	class CBoolLiteral;
+
+
+	template<typename T>
+	class ILiteralVisitor
+	{
+		public:
+			ILiteralVisitor() = default;
+			virtual ~ILiteralVisitor() = default;
+
+			virtual T VisitIntLiteral(const CIntLiteral* pLiteral) = 0;
+			virtual T VisitUIntLiteral(const CUIntLiteral* pLiteral) = 0;
+			virtual T VisitFloatLiteral(const CFloatLiteral* pLiteral) = 0;
+			virtual T VisitDoubleLiteral(const CDoubleLiteral* pLiteral) = 0;
+			virtual T VititCharLiteral(const CCharLiteral* pLiteral) = 0;
+			virtual T VisitStringLiteral(const CStringLiteral* pLiteral) = 0;
+			virtual T VisitBoolLiteral(const CBoolLiteral* pLiteral) = 0;
+		protected:
+			ILiteralVisitor(const ILiteralVisitor& visitor) = default;
+	};
+
+
+	typedef IASTNodeVisitor<std::string> IStringASTNodeVisitor;
+	typedef IASTNodeVisitor<bool>        IBoolASTNodeVisitor;
 }
 
 

@@ -38,8 +38,8 @@ namespace gplc
 		CSymTable defenition
 	*/
 
-	CSymTable::CSymTable():
-		mpGlobalScopeEntry(nullptr), mpCurrScopeEntry(nullptr)
+	CSymTable::CSymTable() :
+		mpGlobalScopeEntry(nullptr), mpCurrScopeEntry(nullptr), mIsLocked(false)
 	{
 		mpGlobalScopeEntry = new TSymTableEntry();
 

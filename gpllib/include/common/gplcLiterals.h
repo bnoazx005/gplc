@@ -13,6 +13,7 @@
 
 
 #include "gplcTypes.h"
+#include "gplcVisitor.h"
 #include <string>
 
 
@@ -34,11 +35,13 @@ namespace gplc
 	};
 
 
-	class CBaseLiteral
+	class CBaseLiteral : public IVisitable<TLLVMIRData, ILiteralVisitor<TLLVMIRData>>
 	{
 		public:
 			CBaseLiteral(E_LITERAL_TYPE type);
 			virtual ~CBaseLiteral() = default;
+			
+			virtual TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) = 0;
 
 			E_LITERAL_TYPE GetType() const;
 
@@ -86,6 +89,8 @@ namespace gplc
 			{
 			}
 
+			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
+
 			std::string ToString() const override;
 			
 			CType* GetTypeInfo() const override;
@@ -99,6 +104,8 @@ namespace gplc
 				CGenericBaseLiteral(LT_UINT, value)
 			{
 			}
+
+			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
 
 			std::string ToString() const override;
 
@@ -114,6 +121,8 @@ namespace gplc
 			{
 			}
 
+			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
+
 			std::string ToString() const override;
 
 			CType* GetTypeInfo() const override;
@@ -127,6 +136,8 @@ namespace gplc
 				CGenericBaseLiteral(LT_DOUBLE, value)
 			{
 			}
+			
+			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
 
 			std::string ToString() const override;
 
@@ -141,6 +152,8 @@ namespace gplc
 				CGenericBaseLiteral(LT_STRING, value)
 			{
 			}
+			
+			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
 
 			std::string ToString() const override;
 
@@ -156,6 +169,8 @@ namespace gplc
 			{
 			}
 
+			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
+
 			std::string ToString() const override;
 
 			CType* GetTypeInfo() const override;
@@ -170,6 +185,8 @@ namespace gplc
 			{
 			}
 
+			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
+
 			std::string ToString() const override;
 
 			CType* GetTypeInfo() const override;
@@ -183,6 +200,8 @@ namespace gplc
 				CGenericBaseLiteral(LT_POINTER, 0x0)
 			{
 			}
+
+			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
 
 			std::string ToString() const override;
 

@@ -31,5 +31,6 @@
 
 #include "codegen/gplcCodegen.h"
 #include "codegen/gplcLLVMCodegen.h"
+#include "codegen/gplcLLVMLiteralVisitor.h"
 
 #endif

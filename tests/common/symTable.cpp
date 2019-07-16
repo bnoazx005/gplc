@@ -17,9 +17,7 @@ TEST_CASE("CSymTable tests")
 
 	SECTION("Global scope test")
 	{
-		gplc::TSymbolDesc d { nullptr, new gplc::CType(gplc::CT_INT32, gplc::BTS_INT32, 0x0) };
-
-		pSymTable->AddVariable("x", d);
+		pSymTable->AddVariable("x", gplc::TSymbolDesc { nullptr, new gplc::CType(gplc::CT_INT32, gplc::BTS_INT32, 0x0) });
 		pSymTable->AddVariable("y", gplc::TSymbolDesc { nullptr, new gplc::CType(gplc::CT_INT16, gplc::BTS_INT16, 0x0) });
 		pSymTable->AddVariable("z", gplc::TSymbolDesc { nullptr, new gplc::CType(gplc::CT_INT64, gplc::BTS_INT64, 0x0) });
 
@@ -66,6 +64,8 @@ TEST_CASE("CSymTable tests")
 
 		REQUIRE(SUCCESS(pSymTable->AddVariable("x", {})));
 		REQUIRE(!pSymTable->LookUp("x"));
+
+		pSymTable->Unlock();
 	}
 
 	SECTION("TestUnlock_UnlockPrevioslyLockedTable_UnlocksTable")

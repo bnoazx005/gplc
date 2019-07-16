@@ -20,9 +20,6 @@
 
 namespace gplc
 {
-	typedef std::variant<llvm::Module*, llvm::Value*, llvm::Function*, llvm::Instruction*> TLLVMIRData;
-
-
 	class CLLVMCodeGenerator : public ICodeGenerator
 	{
 		public:

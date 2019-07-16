@@ -13,6 +13,17 @@
 
 
 #include <string>
+#include <variant>
+
+
+///< forward declarations for LLVM types
+namespace llvm
+{
+	class Module;
+	class Value;
+	class Function;
+	class Instruction;
+}
 
 
 namespace gplc
@@ -149,6 +160,9 @@ namespace gplc
 		SAE_INCOMPATIBLE_TYPE_OF_ASSIGNED_LAMBDA,
 		SAE_INCOMPATIBLE_TYPES_INSIDE_EXPR,
 	};
+
+
+	typedef std::variant<llvm::Module*, llvm::Value*, llvm::Function*, llvm::Instruction*, std::string> TLLVMIRData;
 }
 
 #endif

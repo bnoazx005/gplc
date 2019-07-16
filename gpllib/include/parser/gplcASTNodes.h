@@ -74,7 +74,7 @@ namespace gplc
 		\brief CASTNode class
 	*/
 
-	class CASTNode: public virtual IVisitable<std::string>, public virtual IVisitable<bool>
+	class CASTNode: public virtual IVisitable<std::string, IStringASTNodeVisitor>, public virtual IVisitable<bool, IBoolASTNodeVisitor>
 	{
 		public:
 			CASTNode(E_NODE_TYPE type);

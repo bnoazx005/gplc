@@ -7,6 +7,10 @@ namespace gplc
 	{
 		llvm::LLVMContext llvmContext;
 
+		llvm::Module* pSourceUnitModule = new llvm::Module("top", llvmContext);
+		
+		delete pSourceUnitModule;
+
 		return {};
 	}
 }
