@@ -243,6 +243,11 @@ namespace gplc
 	{
 	}
 
+	TLLVMIRData CType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitBasicType(this);
+	}
+
 	bool CType::IsBuiltIn() const
 	{
 		return mChildren.empty();
@@ -388,6 +393,11 @@ namespace gplc
 		CType(CT_FUNCTION, CT_POINTER, attributes), mpReturnValueType(pReturnValueType)
 	{
 		std::copy(argsTypes.begin(), argsTypes.end(), std::back_inserter(mArgsTypes));
+	}
+
+	TLLVMIRData CFunctionType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitFunctionType(this);
 	}
 
 	const std::vector<CType*>& CFunctionType::GetArgsTypes() const

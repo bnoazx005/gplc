@@ -108,6 +108,24 @@ namespace gplc
 	};
 
 
+	class CType;
+	class CFunctionType;
+
+
+	template <typename T>
+	class ITypeVisitor
+	{
+		public:
+			ITypeVisitor() = default;
+			virtual ~ITypeVisitor() = default;
+
+			virtual T VisitBasicType(const CType* pType) = 0;
+			virtual T VisitFunctionType(const CFunctionType* pFuncType) = 0;
+		protected:
+			ITypeVisitor(const ITypeVisitor& visitor) = default;
+	};
+
+
 	typedef IASTNodeVisitor<std::string> IStringASTNodeVisitor;
 	typedef IASTNodeVisitor<bool>        IBoolASTNodeVisitor;
 }

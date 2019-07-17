@@ -23,6 +23,7 @@ namespace llvm
 	class Value;
 	class Function;
 	class Instruction;
+	class Type;
 }
 
 
@@ -162,7 +163,7 @@ namespace gplc
 	};
 
 
-	typedef std::variant<llvm::Module*, llvm::Value*, llvm::Function*, llvm::Instruction*, std::string> TLLVMIRData;
+	typedef std::variant<llvm::Module*, llvm::Value*, llvm::Function*, llvm::Instruction*, llvm::Type*, std::string> TLLVMIRData;
 }
 
 #endif

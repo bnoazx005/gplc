@@ -16,6 +16,7 @@
 #include "parser/gplcASTNodes.h"
 #include <vector>
 #include <unordered_map>
+#include "common/gplcVisitor.h"
 
 
 namespace gplc
@@ -113,14 +114,16 @@ namespace gplc
 		\brief CType class
 	*/
 
-	class CType
+	class CType: public IVisitable<TLLVMIRData, ITypeVisitor<TLLVMIRData>>
 	{
 		protected:
 			typedef std::unordered_map<E_COMPILER_TYPES, std::unordered_map<E_COMPILER_TYPES, bool>> TCastMap;
 		public:
 			CType(E_COMPILER_TYPES type, U32 size, U32 attributes);
 			virtual ~CType();
-			
+
+			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
+
 			bool IsBuiltIn() const;
 
 			const std::vector<const CType*> GetChildTypes() const;
@@ -200,6 +203,8 @@ namespace gplc
 		public:
 			CFunctionType(const std::vector<CType*>& argsTypes, CType* pReturnValueType, U32 attributes = 0x0);
 			virtual ~CFunctionType() = default;
+
+			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
 
 			const std::vector<CType*>& GetArgsTypes() const;
 

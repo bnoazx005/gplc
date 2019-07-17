@@ -24,6 +24,7 @@ set(GPL_HEADERS
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/codegen/gplcCodegen.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/codegen/gplcLLVMCodegen.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/codegen/gplcLLVMLiteralVisitor.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/codegen/gplcLLVMTypeVisitor.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/common/gplcConstants.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/common/gplcLiterals.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/common/gplcSymTable.h"
@@ -44,6 +45,7 @@ set(GPL_HEADERS
 set(GPL_SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/codegen/gplcLLVMCodegen.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/codegen/gplcLLVMLiteralVisitor.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/source/codegen/gplcLLVMTypeVisitor.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/common/gplcLiterals.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/common/gplcSymTable.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/common/gplcTypeSystem.cpp"
