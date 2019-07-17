@@ -38,6 +38,7 @@ set(SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/codegen/llvmCodeGeneratorTests.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/codegen/llvmLiteralVisitorTests.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/codegen/llvmTypeVisitorTests.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/codegen/ctplr/llvmCCodeGeneratorTests.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/common/symTable.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/common/typeSystemTests.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/lexer/lexer.cpp"
