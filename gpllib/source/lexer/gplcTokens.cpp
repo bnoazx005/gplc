@@ -54,7 +54,7 @@ namespace gplc
 	}
 
 
-	CLiteralToken::CLiteralToken(const CBaseLiteral* pValue, U32 posAtStream):
+	CLiteralToken::CLiteralToken(CBaseLiteral* pValue, U32 posAtStream):
 		CToken(TT_LITERAL, posAtStream), mpValue(pValue)
 	{
 	}
@@ -63,7 +63,7 @@ namespace gplc
 	{
 	}
 
-	const CBaseLiteral* CLiteralToken::GetValue() const
+	CBaseLiteral* CLiteralToken::GetValue() const
 	{
 		return mpValue;
 	}

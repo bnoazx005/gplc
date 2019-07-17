@@ -74,7 +74,8 @@ namespace gplc
 		\brief CASTNode class
 	*/
 
-	class CASTNode: public virtual IVisitable<std::string, IStringASTNodeVisitor>, public virtual IVisitable<bool, IBoolASTNodeVisitor>
+	class CASTNode: public virtual IVisitable<std::string, IStringASTNodeVisitor>, public virtual IVisitable<bool, IBoolASTNodeVisitor>, 
+					public virtual IVisitable<TLLVMIRData, IASTNodeVisitor<TLLVMIRData>>
 	{
 		public:
 			CASTNode(E_NODE_TYPE type);
@@ -82,6 +83,7 @@ namespace gplc
 			
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			Result AttachChild(CASTNode* node);
 			
@@ -114,6 +116,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			const std::vector<CASTNode*>& GetStatements() const;
 		protected:
@@ -129,6 +132,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			virtual CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable);
 		protected:
@@ -143,6 +147,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
 
@@ -163,6 +168,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			const std::vector<CASTNode*>& GetStatements() const;
 		protected:
@@ -182,6 +188,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
 
@@ -197,20 +204,21 @@ namespace gplc
 	class CASTLiteralNode : public CASTTypeNode
 	{
 		public:
-			CASTLiteralNode(const CBaseLiteral* pValue);
+			CASTLiteralNode(CBaseLiteral* pValue);
 			virtual ~CASTLiteralNode();
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
 
-			const CBaseLiteral* GetValue() const;
+			CBaseLiteral* GetValue() const;
 		protected:
 			CASTLiteralNode() = default;
 			CASTLiteralNode(const CASTLiteralNode& node) = default;
 		protected:
-			const CBaseLiteral* mpValue;
+			CBaseLiteral* mpValue;
 	};
 
 
@@ -233,6 +241,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
 
@@ -255,6 +264,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
 
@@ -279,6 +289,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CASTUnaryExpressionNode* GetLeft() const;
 
@@ -297,6 +308,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CASTExpressionNode* GetCondition() const;
 
@@ -317,6 +329,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CASTBlockNode* GetBody() const;
 		protected:
@@ -333,6 +346,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CASTExpressionNode* GetCondition() const;
 
@@ -351,6 +365,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 		protected:
 			CASTFunctionClosureNode(const CASTFunctionClosureNode& node) = default;
 	};
@@ -364,6 +379,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 		protected:
 			CASTFunctionArgsNode(const CASTFunctionArgsNode& node) = default;
 	};
@@ -377,6 +393,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
 
@@ -399,6 +416,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
 
@@ -419,6 +437,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CASTExpressionNode* GetExpr() const;
 		protected:
@@ -435,6 +454,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CASTDeclarationNode* GetDeclaration() const;
 
@@ -453,6 +473,7 @@ namespace gplc
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CASTFunctionDeclNode* GetLambdaTypeInfo() const;
 		protected:

@@ -76,6 +76,11 @@ namespace gplc
 		return false;
 	}
 
+	TLLVMIRData CASTNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return {};
+	}
+
 	Result CASTNode::AttachChild(CASTNode* node)
 	{
 		if (node == nullptr)
@@ -201,6 +206,11 @@ namespace gplc
 		return pVisitor->VisitProgramUnit(this);
 	}
 
+	TLLVMIRData CASTSourceUnitNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitProgramUnit(this);
+	}
+
 	const std::vector<CASTNode*>& CASTSourceUnitNode::GetStatements() const
 	{
 		return mChildren;
@@ -224,6 +234,11 @@ namespace gplc
 	}
 
 	bool CASTDeclarationNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitDeclaration(this);
+	}
+
+	TLLVMIRData CASTDeclarationNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitDeclaration(this);
 	}
@@ -263,6 +278,11 @@ namespace gplc
 		return pVisitor->VisitStatementsBlock(this);
 	}
 
+	TLLVMIRData CASTBlockNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitStatementsBlock(this);
+	}
+
 	const std::vector<CASTNode*>& CASTBlockNode::GetStatements() const
 	{
 		return mChildren;
@@ -290,6 +310,11 @@ namespace gplc
 	bool CASTTypeNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
 		return true;
+	}
+
+	TLLVMIRData CASTTypeNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return {};
 	}
 
 	CType* CASTTypeNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
@@ -321,6 +346,11 @@ namespace gplc
 		return pVisitor->VisitIdentifier(this);
 	}
 
+	TLLVMIRData CASTIdentifierNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitIdentifier(this);
+	}
+
 	CType* CASTIdentifierNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
 	{
 		return pResolver->VisitIdentifier(this);
@@ -336,7 +366,7 @@ namespace gplc
 		\brief CASTLiteralNode's definition
 	*/
 
-	CASTLiteralNode::CASTLiteralNode(const CBaseLiteral* pValue):
+	CASTLiteralNode::CASTLiteralNode(CBaseLiteral* pValue):
 		CASTTypeNode(NT_LITERAL), mpValue(pValue)
 	{
 	}
@@ -355,13 +385,18 @@ namespace gplc
 	{
 		return pVisitor->VisitLiteral(this);
 	}
-	
+
+	TLLVMIRData CASTLiteralNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitLiteral(this);
+	}
+
 	CType* CASTLiteralNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
 	{
 		return pResolver->VisitLiteral(this);
 	}
 
-	const CBaseLiteral* CASTLiteralNode::GetValue() const
+	CBaseLiteral* CASTLiteralNode::GetValue() const
 	{
 		return mpValue;
 	}
@@ -397,7 +432,12 @@ namespace gplc
 	{
 		return pVisitor->VisitUnaryExpression(this);
 	}
-	
+
+	TLLVMIRData CASTUnaryExpressionNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitUnaryExpression(this);
+	}
+
 	CType* CASTUnaryExpressionNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
 	{
 		return pResolver->VisitUnaryExpression(this);
@@ -436,6 +476,11 @@ namespace gplc
 	}
 
 	bool CASTBinaryExpressionNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitBinaryExpression(this);
+	}
+
+	TLLVMIRData CASTBinaryExpressionNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitBinaryExpression(this);
 	}
@@ -487,6 +532,11 @@ namespace gplc
 		return pVisitor->VisitAssignment(this);
 	}
 
+	TLLVMIRData CASTAssignmentNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitAssignment(this);
+	}
+
 	CASTUnaryExpressionNode* CASTAssignmentNode::GetLeft() const
 	{
 		return dynamic_cast<CASTUnaryExpressionNode*>(mChildren[0]);
@@ -520,6 +570,11 @@ namespace gplc
 	}
 
 	bool CASTIfStatementNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitIfStatement(this);
+	}
+
+	TLLVMIRData CASTIfStatementNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitIfStatement(this);
 	}
@@ -569,6 +624,11 @@ namespace gplc
 		return pVisitor->VisitLoopStatement(this);
 	}
 
+	TLLVMIRData CASTLoopStatementNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitLoopStatement(this);
+	}
+
 	CASTBlockNode* CASTLoopStatementNode::GetBody() const
 	{
 		return dynamic_cast<CASTBlockNode*>(mChildren[0]);
@@ -596,6 +656,11 @@ namespace gplc
 	}
 
 	bool CASTWhileLoopStatementNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitWhileLoopStatement(this);
+	}
+
+	TLLVMIRData CASTWhileLoopStatementNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitWhileLoopStatement(this);
 	}
@@ -634,6 +699,11 @@ namespace gplc
 	}
 
 	bool CASTFunctionDeclNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitFunctionDeclaration(this);
+	}
+
+	TLLVMIRData CASTFunctionDeclNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitFunctionDeclaration(this);
 	}
@@ -688,6 +758,12 @@ namespace gplc
 		return pVisitor->VisitFunctionClosure(this);
 	}
 
+	TLLVMIRData CASTFunctionClosureNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitFunctionClosure(this);
+	}
+
+
 	/*!
 		\brief CASTFunctionArgsNode's definition
 	*/
@@ -708,6 +784,11 @@ namespace gplc
 	}
 
 	bool CASTFunctionArgsNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitFunctionArgs(this);
+	}
+
+	TLLVMIRData CASTFunctionArgsNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitFunctionArgs(this);
 	}
@@ -734,6 +815,11 @@ namespace gplc
 	}
 
 	bool CASTFunctionCallNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitFunctionCall(this);
+	}
+
+	TLLVMIRData CASTFunctionCallNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitFunctionCall(this);
 	}
@@ -778,6 +864,11 @@ namespace gplc
 		return pVisitor->VisitReturnStatement(this);
 	}
 
+	TLLVMIRData CASTReturnStatementNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitReturnStatement(this);
+	}
+
 	CASTExpressionNode* CASTReturnStatementNode::GetExpr() const
 	{
 		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
@@ -805,6 +896,11 @@ namespace gplc
 	}
 	
 	bool CASTDefinitionNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitDefinitionNode(this);
+	}
+
+	TLLVMIRData CASTDefinitionNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitDefinitionNode(this);
 	}
@@ -840,6 +936,11 @@ namespace gplc
 	}
 
 	bool CASTFuncDefinitionNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitFunctionDefNode(this);
+	}
+
+	TLLVMIRData CASTFuncDefinitionNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitFunctionDefNode(this);
 	}

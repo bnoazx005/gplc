@@ -127,16 +127,16 @@ namespace gplc
 	class CLiteralToken: public CToken
 	{
 		public:
-			CLiteralToken(const CBaseLiteral* pValue, U32 posAtStream);
+			CLiteralToken(CBaseLiteral* pValue, U32 posAtStream);
 
 			virtual ~CLiteralToken();
 
-			const CBaseLiteral* GetValue() const;
+			CBaseLiteral* GetValue() const;
 		protected:
 			CLiteralToken() = default;
 			CLiteralToken(const CLiteralToken& token) = default;
 		protected:
-			const CBaseLiteral* mpValue;
+			CBaseLiteral* mpValue;
 	};
 		
 	/*!

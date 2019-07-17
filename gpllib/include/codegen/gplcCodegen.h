@@ -12,19 +12,23 @@
 #define GPLC_CODE_GENERATOR_H
 
 
+#include "common/gplcTypes.h"
 #include "common/gplcVisitor.h"
 #include <string>
 
 
 namespace gplc
 {
-	class ICodeGenerator
+	class ISymTable;
+
+
+	class ICodeGenerator: public IASTNodeVisitor<TLLVMIRData>
 	{
 		public:
 			ICodeGenerator() = default;
 			virtual ~ICodeGenerator() = default;
 
-			virtual std::string Generate(CASTSourceUnitNode* pNode) = 0;
+			virtual TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable) = 0;
 		protected:
 			ICodeGenerator(const ICodeGenerator& codeGenerator) = default;
 	};
