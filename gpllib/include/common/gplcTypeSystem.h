@@ -151,6 +151,8 @@ namespace gplc
 			virtual bool AreSame(const CType* pType) const;
 
 			virtual bool AreConvertibleTo(const CType* pType) const;
+
+			virtual std::string ToShortAliasString() const;
 		protected:
 			CType();
 			CType(const CType& type);
@@ -220,6 +222,8 @@ namespace gplc
 			const std::string& GetName() const;
 
 			bool AreSame(const CType* pType) const override;
+
+			std::string ToShortAliasString() const override;
 		protected:
 			CFunctionType() = default;
 			CFunctionType(const CFunctionType& function) = default;

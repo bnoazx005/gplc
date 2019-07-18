@@ -313,6 +313,41 @@ namespace gplc
 		return mCastMap[mType][pType->mType];
 	}
 
+	std::string CType::ToShortAliasString() const
+	{
+		switch (mType)
+		{
+			case CT_INT8:
+				return "i8";
+			case CT_INT16:
+				return "i16";
+			case CT_INT32:
+				return "i32";
+			case CT_INT64:
+				return "i64";
+			case CT_UINT8:
+				return "u8";
+			case CT_UINT16:
+				return "u16";
+			case CT_UINT32:
+				return "u32";
+			case CT_UINT64:
+				return "u64";
+			case CT_FLOAT:
+				return "f32";
+			case CT_DOUBLE:
+				return "f64";
+			case CT_STRING:
+				return "str";
+			case CT_CHAR:
+				return "c8";
+			case CT_BOOL:
+				return "b";
+		}
+
+		return "unknown";
+	}
+
 	Result CType::_addChildTypeDesc(const CType* type)
 	{
 		if (type == nullptr)
@@ -464,5 +499,11 @@ namespace gplc
 		}
 
 		return mpReturnValueType->AreSame(pFunctionType->GetReturnValueType());
+	}
+
+	std::string CFunctionType::ToShortAliasString() const
+	{
+		// \todo implement the method
+		return {};
 	}
 }

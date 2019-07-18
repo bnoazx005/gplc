@@ -165,6 +165,12 @@ namespace gplc
 
 
 	typedef std::variant<llvm::Module*, llvm::Value*, llvm::Function*, llvm::Instruction*, llvm::Type*, std::string> TLLVMIRData;
+
+
+	enum E_ATTRIBUTES_VALUES : U32
+	{
+		AV_STATIC = 0x1
+	};
 }
 
 #endif

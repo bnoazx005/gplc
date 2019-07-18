@@ -44,7 +44,7 @@ TEST_CASE("CCCodeGenerator tests")
 		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "long x = 0;\nlong y = 0;\nint (*f)() = NULL;\n");
 	}
 
-	/*SECTION("TestGenerate_PassFuncDefinition_ReturnsCorrectOutput")
+	SECTION("TestGenerate_PassFuncDefinition_ReturnsCorrectOutput")
 	{
 		auto pSymTable = new CSymTable();
 
@@ -62,10 +62,10 @@ TEST_CASE("CCCodeGenerator tests")
 
 		CASTBlockNode* pFuncBody = new CASTBlockNode();
 
-		pProgram->AttachChild(new CASTDefinitionNode(pDecl, new CASTFuncDefinitionNode(pDecl, pFuncDecl, pFuncBody)));
+		pProgram->AttachChild(new CASTFuncDefinitionNode(pDecl, pFuncDecl, pFuncBody));
 
-		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "long x = 0;\nlong y = 0;\nint (*f)() = NULL;\n");
-	}*/
+		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "int (*f)() = &lambda;\n");
+	}
 
 	SECTION("TestGenerate_PassEmptyBlock_ReturnsCorrectOutput")
 	{
