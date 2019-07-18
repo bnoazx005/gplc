@@ -31,6 +31,7 @@ namespace gplc
 			TLLVMIRData VititCharLiteral(const CCharLiteral* pLiteral) override;
 			TLLVMIRData VisitStringLiteral(const CStringLiteral* pLiteral) override;
 			TLLVMIRData VisitBoolLiteral(const CBoolLiteral* pLiteral) override;
+			TLLVMIRData VisitNullLiteral(const CNullLiteral* pLiteral) override;
 		protected:
 			CCLiteralVisitor(const CCLiteralVisitor& visitor) = default;
 	};

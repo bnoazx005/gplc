@@ -18,6 +18,9 @@ namespace gplc
 
 		mpSymTable = pSymTable;
 
+		mGlobalDeclarationsContext = std::string();
+		mGlobalDefinitionsContext  = std::string();
+
 		mpTypeVisitor    = new CCTypeVisitor();
 		mpLiteralVisitor = new CCLiteralVisitor();
 
@@ -64,10 +67,14 @@ namespace gplc
 
 			pType = pCurrSymbolDesc->mpType;
 
-			result.append(std::get<std::string>(pType->Accept(mpTypeVisitor)))
-				  .append(" ")
-				  .append(std::get<std::string>(pCurrIdentifier->Accept(this)))
-				  .append(" = ")
+			result.append(std::get<std::string>(pType->Accept(mpTypeVisitor)));
+
+			if (pType->GetType() != CT_FUNCTION)
+			{
+				result.append(" ").append(std::get<std::string>(pCurrIdentifier->Accept(this)));
+			}
+			
+			result.append(" = ")
 				  .append(std::get<std::string>(pCurrSymbolDesc->mpValue->Accept(mpLiteralVisitor)))
 				  .append(";\n");
 		}
@@ -154,9 +161,16 @@ namespace gplc
 
 	TLLVMIRData CCCodeGenerator::VisitStatementsBlock(CASTBlockNode* pNode)
 	{
-		return std::string("{\n")
-						.append(std::get<std::string>(pNode->Accept(this)))
-						.append("}\n");
+		std::string result("{\n");
+
+		auto pStatements = pNode->GetStatements();
+		
+		for (auto pCurrStatement : pStatements)
+		{
+			result.append(std::get<std::string>(pCurrStatement->Accept(this)));
+		}
+
+		return result.append("}\n");
 	}
 
 	TLLVMIRData CCCodeGenerator::VisitIfStatement(CASTIfStatementNode* pNode)
@@ -199,7 +213,18 @@ namespace gplc
 	TLLVMIRData CCCodeGenerator::VisitFunctionCall(CASTFunctionCallNode* pNode)
 	{
 		// \todo 
-		return std::string(std::get<std::string>(pNode->GetIdentifier()->Accept(this)));
+		std::string result = std::string("*(")
+										.append(std::get<std::string>(pNode->GetIdentifier()->Accept(this)))
+										.append(")(");
+
+		auto pArgs = pNode->GetArgs()->GetChildren();
+
+		for (int i = 0; i < pArgs.size(); ++i)
+		{
+			result.append(std::get<std::string>(pArgs[i]->Accept(this))).append(i < pArgs.size() - 1 ? ", " : "");
+		}
+
+		return result.append(")");
 	}
 
 	TLLVMIRData CCCodeGenerator::VisitReturnStatement(CASTReturnStatementNode* pNode)
@@ -209,7 +234,33 @@ namespace gplc
 
 	TLLVMIRData CCCodeGenerator::VisitDefinitionNode(CASTDefinitionNode* pNode)
 	{
-		return {};
+		auto pIdentifiers = pNode->GetDeclaration()->GetChildren();
+
+		std::string result;
+
+		const TSymbolDesc* pCurrSymbolDesc = nullptr;
+
+		CType* pType = nullptr;
+
+		for (auto pCurrIdentifier : pIdentifiers)
+		{
+			pCurrSymbolDesc = mpSymTable->LookUp(dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName());
+
+			pType = pCurrSymbolDesc->mpType;
+
+			result.append(std::get<std::string>(pType->Accept(mpTypeVisitor)));
+
+			if (pType->GetType() != CT_FUNCTION)
+			{
+				result.append(" ").append(std::get<std::string>(pCurrIdentifier->Accept(this)));
+			}
+
+			result.append(" = ")
+				.append(std::get<std::string>(pCurrSymbolDesc->mpValue->Accept(mpLiteralVisitor)))
+				.append(";\n");
+		}
+
+		return result;
 	}
 
 	TLLVMIRData CCCodeGenerator::VisitFunctionDefNode(CASTFuncDefinitionNode* pNode)

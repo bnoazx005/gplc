@@ -121,7 +121,7 @@ namespace gplc
 
 	TLLVMIRData CNullLiteral::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitNullLiteral(this);
 	}
 
 	std::string CNullLiteral::ToString() const

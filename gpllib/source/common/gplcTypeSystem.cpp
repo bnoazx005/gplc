@@ -425,6 +425,11 @@ namespace gplc
 		return new CNullLiteral();
 	}
 
+	const std::string& CFunctionType::GetName() const
+	{
+		return mName;
+	}
+
 	bool CFunctionType::AreSame(const CType* pType) const
 	{
 		E_COMPILER_TYPES type = pType->GetType();

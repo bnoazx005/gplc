@@ -76,6 +76,10 @@ namespace gplc
 			CCTypeVisitor*    mpTypeVisitor;
 
 			CCLiteralVisitor* mpLiteralVisitor;
+
+			std::string       mGlobalDeclarationsContext;
+
+			std::string       mGlobalDefinitionsContext;
 	};
 }
 

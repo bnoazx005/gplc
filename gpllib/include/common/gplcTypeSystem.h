@@ -217,6 +217,8 @@ namespace gplc
 
 			CBaseLiteral* GetDefaultValue() const override;
 
+			const std::string& GetName() const;
+
 			bool AreSame(const CType* pType) const override;
 		protected:
 			CFunctionType() = default;

@@ -43,15 +43,20 @@ namespace gplc
 
 	TLLVMIRData CCTypeVisitor::VisitFunctionType(const CFunctionType* pFuncType)
 	{
-		std::vector<std::string> args;
+		std::string args;
 
 		auto pArgs = pFuncType->GetArgsTypes();
 
 		for (auto pCurrArgType : pArgs)
 		{
-			args.push_back(std::get<std::string>(pCurrArgType->Accept(this)));
+			args.append(std::get<std::string>(pCurrArgType->Accept(this)));
 		}
 
-		return "";
+		return std::get<std::string>(pFuncType->GetReturnValueType()->Accept(this))
+												.append(" (*")
+												.append(pFuncType->GetName())
+												.append(")(")
+												.append(args)
+												.append(")");
 	}
 }

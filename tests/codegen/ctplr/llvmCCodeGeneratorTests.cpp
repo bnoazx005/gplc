@@ -41,7 +41,50 @@ TEST_CASE("CCCodeGenerator tests")
 		pProgram->AttachChild(new CASTDeclarationNode(pIdentifiers, new CASTTypeNode(NT_INT32)));
 		pProgram->AttachChild(new CASTDeclarationNode(pFIdentifier, new CASTFunctionDeclNode(new CASTFunctionClosureNode(), new CASTFunctionArgsNode(), new CASTTypeNode(NT_INT32))));
 
-		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "long x = 0;\nlong y = 0;\n");
+		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "long x = 0;\nlong y = 0;\nint (*f)() = NULL;\n");
+	}
+
+	/*SECTION("TestGenerate_PassFuncDefinition_ReturnsCorrectOutput")
+	{
+		auto pSymTable = new CSymTable();
+
+		pSymTable->AddVariable("f", { new CNullLiteral(), new CFunctionType({}, new CType(CT_INT32, BTS_INT32, 0x0), 0x0) });
+
+		CASTSourceUnitNode* pProgram = new CASTSourceUnitNode();
+		
+		CASTNode* pFIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
+
+		pFIdentifier->AttachChild(new CASTIdentifierNode("f"));
+
+		CASTFunctionDeclNode* pFuncDecl = new CASTFunctionDeclNode(new CASTFunctionClosureNode(), new CASTFunctionArgsNode(), new CASTTypeNode(NT_INT32));
+
+		CASTDeclarationNode* pDecl = new CASTDeclarationNode(pFIdentifier, pFuncDecl);
+
+		CASTBlockNode* pFuncBody = new CASTBlockNode();
+
+		pProgram->AttachChild(new CASTDefinitionNode(pDecl, new CASTFuncDefinitionNode(pDecl, pFuncDecl, pFuncBody)));
+
+		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "long x = 0;\nlong y = 0;\nint (*f)() = NULL;\n");
+	}*/
+
+	SECTION("TestGenerate_PassEmptyBlock_ReturnsCorrectOutput")
+	{
+		auto pSymTable = new CSymTable();
+		CASTSourceUnitNode* pProgram = new CASTSourceUnitNode();
+
+		pProgram->AttachChild(new CASTBlockNode());
+
+		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "{\n}\n");
+	}
+
+	SECTION("TestGenerate_PassloopStatement_ReturnsCorrectOutput")
+	{
+		auto pSymTable = new CSymTable();
+		CASTSourceUnitNode* pProgram = new CASTSourceUnitNode();
+
+		pProgram->AttachChild(new CASTLoopStatementNode(new CASTBlockNode()));
+
+		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "while (true)\n{\n}\n");
 	}
 
 	delete pCodeGenerator;
