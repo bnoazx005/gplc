@@ -327,6 +327,14 @@ namespace gplc
 		auto pLambdaType  = pNode->GetLambdaTypeInfo();
 		auto pLambdaBody  = pNode->GetValue();
 		
+		// only single variable can be defined at once
+		if (pDeclaration->GetIdentifiers()->GetChildrenCount() > 1)
+		{
+			OnErrorOutput.Invoke(SAE_SINGLE_FUNC_IDENTIFIER_IS_EXPECTED);
+
+			return false;
+		}
+
 		// check left side
 		CType* pDeclFuncType = nullptr;
 
