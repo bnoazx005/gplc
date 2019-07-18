@@ -124,6 +124,12 @@ namespace gplc
 			return RV_FAIL;
 		}
 
+		// this trick is used to assign a name for a function pointer, for other types it does nothing
+		if (typeDesc.mpType)
+		{
+			typeDesc.mpType->SetName(variableName); 
+		}
+
 		mpCurrScopeEntry->mVariables.insert({ variableName, typeDesc });
 		
 		return RV_SUCCESS;

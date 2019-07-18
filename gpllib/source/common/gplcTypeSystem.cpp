@@ -253,6 +253,11 @@ namespace gplc
 		return mChildren.empty();
 	}
 
+
+	void CType::SetName(const std::string& name)
+	{
+	}
+
 	const std::vector<const CType*> CType::GetChildTypes() const
 	{
 		return mChildren;
@@ -390,7 +395,7 @@ namespace gplc
 	*/
 
 	CFunctionType::CFunctionType(const std::vector<CType*>& argsTypes, CType* pReturnValueType, U32 attributes):
-		CType(CT_FUNCTION, CT_POINTER, attributes), mpReturnValueType(pReturnValueType)
+		mName(), CType(CT_FUNCTION, CT_POINTER, attributes), mpReturnValueType(pReturnValueType)
 	{
 		std::copy(argsTypes.begin(), argsTypes.end(), std::back_inserter(mArgsTypes));
 	}
@@ -398,6 +403,11 @@ namespace gplc
 	TLLVMIRData CFunctionType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitFunctionType(this);
+	}
+
+	void CFunctionType::SetName(const std::string& name)
+	{
+		mName = name;
 	}
 
 	const std::vector<CType*>& CFunctionType::GetArgsTypes() const

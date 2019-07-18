@@ -15,6 +15,7 @@
 #include "gplcTypes.h"
 #include "parser/gplcASTNodes.h"
 #include <vector>
+#include <string>
 #include <unordered_map>
 #include "common/gplcVisitor.h"
 
@@ -126,6 +127,8 @@ namespace gplc
 
 			bool IsBuiltIn() const;
 
+			virtual void SetName(const std::string& name);
+
 			const std::vector<const CType*> GetChildTypes() const;
 
 			E_COMPILER_TYPES GetType() const;
@@ -206,6 +209,8 @@ namespace gplc
 
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
 
+			void SetName(const std::string& name) override;
+
 			const std::vector<CType*>& GetArgsTypes() const;
 
 			CType* GetReturnValueType() const;
@@ -217,6 +222,8 @@ namespace gplc
 			CFunctionType() = default;
 			CFunctionType(const CFunctionType& function) = default;
 		protected:
+			std::string         mName;
+
 			std::vector<CType*> mArgsTypes;
 
 			CType*              mpReturnValueType;

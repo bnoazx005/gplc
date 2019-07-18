@@ -46,12 +46,14 @@ namespace gplc
 		CType* pTypeInfo = mpTypeResolver->Resolve(pNode->GetTypeInfo(), mpSymTable); // visit node and deduce the type's info
 
 		CASTIdentifierNode* pCurrIdentifierNode = nullptr;
-
+		
 		for (CASTNode* pCurrChild : pIdentifiersList->GetChildren())
 		{
 			pCurrIdentifierNode = dynamic_cast<CASTIdentifierNode*>(pCurrChild);
 			
-			if (!SUCCESS(mpSymTable->AddVariable(pCurrIdentifierNode->GetName(), { pTypeInfo->GetDefaultValue(), pTypeInfo })))
+			const std::string& currIdentifier = pCurrIdentifierNode->GetName();
+
+			if (!SUCCESS(mpSymTable->AddVariable(currIdentifier, { pTypeInfo->GetDefaultValue(), pTypeInfo })))
 			{
 				OnErrorOutput.Invoke(SAE_IDENTIFIER_ALREADY_DECLARED);
 
