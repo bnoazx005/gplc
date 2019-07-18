@@ -217,6 +217,46 @@ namespace gplc
 	}
 
 
+	CASTVariableDeclNode::CASTVariableDeclNode(CASTIdentifierNode* pIdentifier, CASTNode* pTypeInfo):
+		CASTTypeNode(NT_DECL)
+	{
+	}
+
+	CASTVariableDeclNode::~CASTVariableDeclNode()
+	{
+	}
+
+	std::string CASTVariableDeclNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	bool CASTVariableDeclNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return false;
+	}
+
+	TLLVMIRData CASTVariableDeclNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return {};
+	}
+
+	CType* CASTVariableDeclNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	{
+		return nullptr;
+	}
+
+	CASTIdentifierNode* CASTVariableDeclNode::GetIdentifier() const
+	{
+		return dynamic_cast<CASTIdentifierNode*>(mChildren[0]);
+	}
+
+	CASTTypeNode* CASTVariableDeclNode::GetTypeInfo() const
+	{
+		return dynamic_cast<CASTTypeNode*>(mChildren[1]);
+	}
+
+
 	CASTDeclarationNode::CASTDeclarationNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo):
 		CASTTypeNode(NT_DECL)
 	{

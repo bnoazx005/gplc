@@ -139,6 +139,28 @@ namespace gplc
 			CASTTypeNode(const CASTTypeNode& node) = default;
 	};
 
+
+	class CASTVariableDeclNode : public CASTTypeNode
+	{
+		public:
+			CASTVariableDeclNode(CASTIdentifierNode* pIdentifier, CASTNode* pTypeInfo);
+			virtual ~CASTVariableDeclNode();
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+
+			CASTIdentifierNode* GetIdentifier() const;
+
+			CASTTypeNode* GetTypeInfo() const;
+		protected:
+			CASTVariableDeclNode() = default;
+			CASTVariableDeclNode(const CASTVariableDeclNode& node) = default;
+	};
+
+
 	class CASTDeclarationNode : public CASTTypeNode
 	{
 		public:
