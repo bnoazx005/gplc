@@ -114,6 +114,29 @@ TEST_CASE("CCCodeGenerator tests")
 
 		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "while (true)\n{\n}\n");
 	}
+	
+	SECTION("TestGenerate_PassEntryPointFuncDefinition_ReturnsCorrectOutput")
+	{
+		auto pSymTable = new CSymTable();
+
+		pSymTable->AddVariable("main", { new CNullLiteral(), new CFunctionType({}, new CType(CT_INT32, BTS_INT32, 0x0), AV_ENTRY_POINT) });
+
+		CASTSourceUnitNode* pProgram = new CASTSourceUnitNode();
+
+		CASTNode* pFIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
+
+		pFIdentifier->AttachChild(new CASTIdentifierNode("main"));
+
+		CASTFunctionDeclNode* pFuncDecl = new CASTFunctionDeclNode(new CASTFunctionClosureNode(), new CASTFunctionArgsNode(), new CASTTypeNode(NT_INT32));
+
+		CASTDeclarationNode* pDecl = new CASTDeclarationNode(pFIdentifier, pFuncDecl);
+
+		CASTBlockNode* pFuncBody = new CASTBlockNode();
+
+		pProgram->AttachChild(new CASTFuncDefinitionNode(pDecl, pFuncDecl, pFuncBody));
+
+		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "int main()\n{\n}\n");
+	}
 
 	delete pCodeGenerator;
 }

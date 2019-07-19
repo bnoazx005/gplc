@@ -303,7 +303,14 @@ namespace gplc
 
 		const TSymbolDesc* pFuncDesc = mpSymTable->LookUp(pFuncIdentifierNode->GetName());
 
-		return std::get<std::string>(pFuncDesc->mpType->Accept(mpTypeVisitor)).append(" = &").append(pLambdaType->GetName()).append(";\n");
+		std::string result{ std::get<std::string>(pFuncDesc->mpType->Accept(mpTypeVisitor)).append(" = &").append(pLambdaType->GetName()).append(";\n") };
+
+		if ((pFuncDesc->mpType->GetAttributes() & AV_ENTRY_POINT) == AV_ENTRY_POINT)
+		{
+			result.append("int main(int argc, char** argv) {\n return (*_lang_entry_main)();\n}\n");
+		}
+
+		return result;
 	}
 
 	std::string CCCodeGenerator::_generateAnonymousLambdaName(const CFunctionType* pLambdaType) const

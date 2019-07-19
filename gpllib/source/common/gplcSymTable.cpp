@@ -119,7 +119,16 @@ namespace gplc
 			return RV_SUCCESS;
 		}
 
-		if (_internalLookUp(mpCurrScopeEntry, variableName))
+		std::string identifier { variableName };
+
+		// rename "main into "_lang_entry_main"
+		// \todo TEMP code, replace this with proper solution later
+		if (variableName == "main")
+		{
+			identifier = "_lang_entry_main";
+		}
+
+		if (_internalLookUp(mpCurrScopeEntry, identifier))
 		{
 			return RV_FAIL;
 		}
@@ -127,17 +136,26 @@ namespace gplc
 		// this trick is used to assign a name for a function pointer, for other types it does nothing
 		if (typeDesc.mpType)
 		{
-			typeDesc.mpType->SetName(variableName); 
+			typeDesc.mpType->SetName(identifier);
 		}
 
-		mpCurrScopeEntry->mVariables.insert({ variableName, typeDesc });
+		mpCurrScopeEntry->mVariables.insert({ identifier, typeDesc });
 		
 		return RV_SUCCESS;
 	}
 
 	const TSymbolDesc* CSymTable::LookUp(const std::string& variableName) const
 	{
-		return _lookUp(mpCurrScopeEntry, variableName);
+		std::string identifier{ variableName };
+
+		// rename "main into "_lang_entry_main"
+		// \todo TEMP code, replace this with proper solution later
+		if (variableName == "main")
+		{
+			identifier = "_lang_entry_main";
+		}
+
+		return _lookUp(mpCurrScopeEntry, identifier);
 	}
 
 	bool CSymTable::IsLocked() const
