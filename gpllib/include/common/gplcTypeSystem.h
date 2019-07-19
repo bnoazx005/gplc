@@ -213,6 +213,8 @@ namespace gplc
 
 			void SetName(const std::string& name) override;
 
+			void SetAttributes(U32 attributes);
+
 			const std::vector<CType*>& GetArgsTypes() const;
 
 			CType* GetReturnValueType() const;

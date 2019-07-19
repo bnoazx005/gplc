@@ -52,11 +52,22 @@ namespace gplc
 			args.append(std::get<std::string>(pCurrArgType->Accept(this)));
 		}
 
-		return std::get<std::string>(pFuncType->GetReturnValueType()->Accept(this))
-												.append(" (*")
-												.append(pFuncType->GetName())
-												.append(")(")
-												.append(args)
-												.append(")");
+		std::string result = std::get<std::string>(pFuncType->GetReturnValueType()->Accept(this));
+												
+		if ((pFuncType->GetAttributes() & AV_STATIC) != AV_STATIC)
+		{
+			result
+				.append(" (*")
+				.append(pFuncType->GetName())
+				.append(")");
+		}
+		else
+		{
+			result.append(" ").append(pFuncType->GetName());
+		}
+
+		result.append("(").append(args).append(")");
+
+		return result;
 	}
 }

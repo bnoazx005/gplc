@@ -23,6 +23,7 @@ namespace gplc
 {
 	class CCTypeVisitor;
 	class CCLiteralVisitor;
+	class ITypeResolver;
 
 
 	class CCCodeGenerator : public ICodeGenerator
@@ -70,7 +71,11 @@ namespace gplc
 			TLLVMIRData VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) override;
 		protected:
 			CCCodeGenerator(const CCCodeGenerator& codeGenerator) = default;
+
+			std::string _generateAnonymousLambdaName(const CFunctionType* pLambdaType) const;
 		protected:
+			ITypeResolver*    mpTypeResolver;
+
 			ISymTable*        mpSymTable;
 
 			CCTypeVisitor*    mpTypeVisitor;

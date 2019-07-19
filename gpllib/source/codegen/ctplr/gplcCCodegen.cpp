@@ -5,6 +5,7 @@
 #include "codegen/ctplr/gplcCTypeVisitor.h"
 #include "common/gplcTypeSystem.h"
 #include "codegen/ctplr/gplcCLiteralVisitor.h"
+#include <cmath>
 
 
 namespace gplc
@@ -23,9 +24,11 @@ namespace gplc
 
 		mpTypeVisitor    = new CCTypeVisitor();
 		mpLiteralVisitor = new CCLiteralVisitor();
+		mpTypeResolver   = new CTypeResolver();
 
 		std::string result { std::get<std::string>(pNode->Accept(this)) };
 
+		delete mpTypeResolver;
 		delete mpTypeVisitor;
 		delete mpLiteralVisitor;
 
@@ -48,7 +51,7 @@ namespace gplc
 			result.append(std::get<std::string>(pCurrStatement->Accept(this)));
 		}
 
-		return result;
+		return mGlobalDeclarationsContext + mGlobalDefinitionsContext + result;
 	}
 
 	TLLVMIRData CCCodeGenerator::VisitDeclaration(CASTDeclarationNode* pNode)
@@ -283,6 +286,36 @@ namespace gplc
 
 	TLLVMIRData CCCodeGenerator::VisitFunctionDefNode(CASTFuncDefinitionNode* pNode)
 	{
-		return {};
+		CFunctionType* pLambdaType = dynamic_cast<CFunctionType*>(mpTypeResolver->Resolve(pNode->GetLambdaTypeInfo(), mpSymTable));
+
+		pLambdaType->SetAttributes(AV_STATIC);
+		pLambdaType->SetName(_generateAnonymousLambdaName(pLambdaType));
+
+		std::string lambdaDeclaration    = std::get<std::string>(pLambdaType->Accept(mpTypeVisitor));
+		std::string lambdaFullDefinition = lambdaDeclaration + "\n" + std::get<std::string>(pNode->GetValue()->Accept(this));
+
+		mGlobalDeclarationsContext.append(lambdaDeclaration).append(";\n");
+		mGlobalDefinitionsContext.append(lambdaFullDefinition).append("\n");
+
+		auto pFuncDeclaration = pNode->GetDeclaration();
+
+		auto pFuncIdentifierNode = dynamic_cast<CASTIdentifierNode*>(pFuncDeclaration->GetIdentifiers()->GetChildren()[0]);
+
+		const TSymbolDesc* pFuncDesc = mpSymTable->LookUp(pFuncIdentifierNode->GetName());
+
+		return std::get<std::string>(pFuncDesc->mpType->Accept(mpTypeVisitor)).append(" = &").append(pLambdaType->GetName()).append(";\n");
+	}
+
+	std::string CCCodeGenerator::_generateAnonymousLambdaName(const CFunctionType* pLambdaType) const
+	{
+		std::string name = std::string("lambda").append(pLambdaType->GetReturnValueType()->ToShortAliasString());
+
+		for (auto pCurrArgType : pLambdaType->GetArgsTypes())
+		{
+			name.append(pCurrArgType->ToShortAliasString());
+		}
+
+		// random salt
+		return name.append("_").append(std::to_string(rand()));
 	}
 }

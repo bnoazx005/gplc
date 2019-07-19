@@ -445,6 +445,11 @@ namespace gplc
 		mName = name;
 	}
 
+	void CFunctionType::SetAttributes(U32 attributes)
+	{
+		mAttributes = attributes;
+	}
+
 	const std::vector<CType*>& CFunctionType::GetArgsTypes() const
 	{
 		return mArgsTypes;
