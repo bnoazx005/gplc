@@ -86,12 +86,14 @@ namespace gplc
 		TParserErrorInfo errorInfo;
 
 		memset(&errorInfo, 0, sizeof(errorInfo));
-				
-		C8 tmpStrBuf[255];
 
-		sprintf_s(tmpStrBuf, sizeof(C8) * 255, "An unexpected token was found at %d. %d instead of %d\0", currValue->GetPos(), currValueType, expectedValue);
-
-		errorInfo.mMessage   = tmpStrBuf;
+		errorInfo.mMessage = std::string("An unexpected token was found at ")
+															.append(std::to_string(currValue->GetPos()))
+															.append(". ")
+															.append(TokenTypeToString(currValueType))
+															.append(" instead of ")
+															.append(TokenTypeToString(expectedValue));
+		
 		errorInfo.mErrorCode = RV_UNEXPECTED_TOKEN;
 		errorInfo.mPos       = currValue->GetPos();
 

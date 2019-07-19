@@ -147,17 +147,20 @@ namespace gplc
 
 	class CIdentifierToken : public CToken
 	{
-	public:
-		CIdentifierToken(const std::string& name, U32 posAtStream);
-		virtual ~CIdentifierToken();
+		public:
+			CIdentifierToken(const std::string& name, U32 posAtStream);
+			virtual ~CIdentifierToken();
 
-		const std::string GetName() const;
-	protected:
-		CIdentifierToken();
-		CIdentifierToken(const CIdentifierToken& token);
-	protected:
-		const std::string mName;
+			const std::string GetName() const;
+		protected:
+			CIdentifierToken();
+			CIdentifierToken(const CIdentifierToken& token);
+		protected:
+			const std::string mName;
 	};
+
+
+	std::string TokenTypeToString(E_TOKEN_TYPE type);
 }
 
 #endif
