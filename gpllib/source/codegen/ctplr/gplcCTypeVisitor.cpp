@@ -47,9 +47,14 @@ namespace gplc
 
 		auto pArgs = pFuncType->GetArgsTypes();
 
-		for (auto pCurrArgType : pArgs)
+		for (auto iter = pArgs.cbegin(); iter != pArgs.cend(); ++iter)
 		{
-			args.append(std::get<std::string>(pCurrArgType->Accept(this)));
+			args.append(std::get<std::string>((*iter)->Accept(this))).append(" ");
+
+			if (iter + 1 < pArgs.cend())
+			{
+				args.append(", ");
+			}
 		}
 
 		std::string result = std::get<std::string>(pFuncType->GetReturnValueType()->Accept(this));

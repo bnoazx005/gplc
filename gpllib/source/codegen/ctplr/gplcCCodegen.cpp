@@ -234,7 +234,7 @@ namespace gplc
 	TLLVMIRData CCCodeGenerator::VisitFunctionCall(CASTFunctionCallNode* pNode)
 	{
 		// \todo 
-		std::string result = std::string("*(")
+		std::string result = std::string("(*")
 										.append(std::get<std::string>(pNode->GetIdentifier()->Accept(this)))
 										.append(")(");
 
@@ -250,7 +250,7 @@ namespace gplc
 
 	TLLVMIRData CCCodeGenerator::VisitReturnStatement(CASTReturnStatementNode* pNode)
 	{
-		return std::string("return ").append(std::get<std::string>(pNode->GetExpr()->Accept(this)));
+		return std::string("return ").append(std::get<std::string>(pNode->GetExpr()->Accept(this))).append(";\n");
 	}
 
 	TLLVMIRData CCCodeGenerator::VisitDefinitionNode(CASTDefinitionNode* pNode)
@@ -307,7 +307,7 @@ namespace gplc
 
 		if ((pFuncDesc->mpType->GetAttributes() & AV_ENTRY_POINT) == AV_ENTRY_POINT)
 		{
-			result.append("int main(int argc, char** argv) {\n return (*_lang_entry_main)();\n}\n");
+			result.append("int main(int argc, char** argv)\n{\n return (*_lang_entry_main)();\n}\n");
 		}
 
 		return result;

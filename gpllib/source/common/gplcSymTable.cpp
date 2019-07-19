@@ -126,6 +126,10 @@ namespace gplc
 		if (variableName == "main")
 		{
 			identifier = "_lang_entry_main";
+
+			CFunctionType* pMainFuncType = dynamic_cast<CFunctionType*>(typeDesc.mpType);
+
+			pMainFuncType->SetAttributes(pMainFuncType->GetAttributes() | AV_ENTRY_POINT);
 		}
 
 		if (_internalLookUp(mpCurrScopeEntry, identifier))
@@ -136,7 +140,7 @@ namespace gplc
 		// this trick is used to assign a name for a function pointer, for other types it does nothing
 		if (typeDesc.mpType)
 		{
-			typeDesc.mpType->SetName(identifier);
+			typeDesc.mpType->SetName(identifier);			
 		}
 
 		mpCurrScopeEntry->mVariables.insert({ identifier, typeDesc });
