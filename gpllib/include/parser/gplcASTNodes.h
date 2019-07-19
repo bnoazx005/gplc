@@ -164,7 +164,7 @@ namespace gplc
 	class CASTDeclarationNode : public CASTTypeNode
 	{
 		public:
-			CASTDeclarationNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo);
+			CASTDeclarationNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo, U32 attributes = 0x0);
 			virtual ~CASTDeclarationNode();
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
@@ -176,9 +176,13 @@ namespace gplc
 			CASTNode* GetIdentifiers() const;
 
 			CASTTypeNode* GetTypeInfo() const;
+
+			U32 GetAttributes() const;
 		protected:
 			CASTDeclarationNode() = default;
 			CASTDeclarationNode(const CASTDeclarationNode& node) = default;
+		protected:
+			U32 mAttributes;
 	};
 
 

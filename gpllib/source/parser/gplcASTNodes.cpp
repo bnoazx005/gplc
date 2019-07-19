@@ -257,8 +257,8 @@ namespace gplc
 	}
 
 
-	CASTDeclarationNode::CASTDeclarationNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo):
-		CASTTypeNode(NT_DECL)
+	CASTDeclarationNode::CASTDeclarationNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo, U32 attributes):
+		CASTTypeNode(NT_DECL), mAttributes(attributes)
 	{
 		AttachChild(pIdentifiers);
 		AttachChild(pTypeInfo);
@@ -296,6 +296,11 @@ namespace gplc
 	CASTTypeNode* CASTDeclarationNode::GetTypeInfo() const
 	{
 		return dynamic_cast<CASTTypeNode*>(mChildren[1]);
+	}
+
+	U32 CASTDeclarationNode::GetAttributes() const
+	{
+		return mAttributes;
 	}
 
 

@@ -291,9 +291,9 @@ namespace gplc
 		\return A pointer to node with a declaration
 	*/
 
-	CASTNode* CParser::_parseDeclaration(ILexer* pLexer)
+	CASTNode* CParser::_parseDeclaration(ILexer* pLexer, U32 attributes)
 	{
-		CASTNode* pIdentifiers = _parseIdentifiers(pLexer);
+		CASTNode* pIdentifiers = _parseIdentifiers(pLexer, attributes);
 
 		if (!SUCCESS(_expect(TT_COLON, pLexer->GetCurrToken())))
 		{
@@ -309,12 +309,12 @@ namespace gplc
 		{
 			pLexer->GetNextToken();
 
-			return _parseDefinition(new CASTDeclarationNode(pIdentifiers, nullptr), pLexer);
+			return _parseDefinition(new CASTDeclarationNode(pIdentifiers, nullptr, attributes), pLexer);
 		}
 
 		pTypeInfo = _parseType(pLexer);
 
-		CASTDeclarationNode* pDeclaration = new CASTDeclarationNode(pIdentifiers, pTypeInfo);
+		CASTDeclarationNode* pDeclaration = new CASTDeclarationNode(pIdentifiers, pTypeInfo, attributes);
 
 		// parse definition not declaration, full def : type = <value>
 		if (_match(pLexer->GetCurrToken(), TT_ASSIGN_OP))
@@ -338,7 +338,7 @@ namespace gplc
 		\return A pointer to node, which contains identifiers' names
 	*/
 
-	CASTNode* CParser::_parseIdentifiers(ILexer* pLexer)
+	CASTNode* CParser::_parseIdentifiers(ILexer* pLexer, U32 attributes)
 	{
 		CASTNode* pIdentifiersRoot = new CASTNode(NT_IDENTIFIERS_LIST);
 
@@ -359,6 +359,12 @@ namespace gplc
 			}
 
 			pIdentifiersRoot->AttachChild(new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()));
+
+			// function argument doesn't allow multiple variable per declaration
+			/*if ((attributes & AV_FUNC_ARG_DECL) == AV_FUNC_ARG_DECL)
+			{
+				break;
+			}*/
 		} 
 		while (_match(pLexer->GetNextToken(), TT_COMMA) || _match(pLexer->GetCurrToken(), TT_IDENTIFIER));
 

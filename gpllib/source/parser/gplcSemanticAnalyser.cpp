@@ -43,7 +43,20 @@ namespace gplc
 	{
 		CASTNode* pIdentifiersList = pNode->GetIdentifiers();
 
-		CType* pTypeInfo = mpTypeResolver->Resolve(pNode->GetTypeInfo(), mpSymTable); // visit node and deduce the type's info
+		// multiple variable per single function argument's declaration are now allowed
+		if (pIdentifiersList->GetChildrenCount() > 1 && (pNode->GetAttributes() & AV_FUNC_ARG_DECL) == AV_FUNC_ARG_DECL)
+		{
+			OnErrorOutput.Invoke(SAE_FUNC_MULTIPLE_PARAM_PER_DECL_ARE_NOT_ALLOWED);
+
+			return false;
+		}
+
+		CType* pTypeInfo = nullptr;
+		
+		if (!pNode->GetTypeInfo()->Accept(this) || !(pTypeInfo = mpTypeResolver->Resolve(pNode->GetTypeInfo(), mpSymTable))) // visit node and deduce the type's info
+		{
+			return false;
+		}
 
 		CASTIdentifierNode* pCurrIdentifierNode = nullptr;
 		
@@ -235,9 +248,15 @@ namespace gplc
 		auto pArgs            = pNode->GetArgs();
 		auto pReturnValueType = pNode->GetReturnValueType();
 		
-		bool isCorrect = (pClosureDecl ? pClosureDecl->Accept(this) : true) && 
-						 pArgs->Accept(this) && 
-						 pReturnValueType->Accept(this);
+		bool isCorrect = (pClosureDecl ? pClosureDecl->Accept(this) : true);
+		
+		mpSymTable->Lock();
+
+		isCorrect = isCorrect && pArgs->Accept(this);
+
+		mpSymTable->Unlock();
+
+		isCorrect = isCorrect && pReturnValueType->Accept(this);
 
 		return isCorrect;
 	}
