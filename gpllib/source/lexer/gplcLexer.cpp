@@ -445,10 +445,6 @@ namespace gplc
 						currChar = _getNextChar(stream);
 					}
 				}
-				else //error
-				{
-					return nullptr;
-				}
 			}
 
 			//check up literals

@@ -83,10 +83,10 @@ namespace gplc
 
 	Result CASTNode::AttachChild(CASTNode* node)
 	{
-		if (node == nullptr)
+		/*if (node == nullptr)
 		{
 			return RV_INVALID_ARGUMENTS;
-		}
+		}*/
 
 		mChildren.push_back(node);
 

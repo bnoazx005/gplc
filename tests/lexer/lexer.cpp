@@ -353,6 +353,13 @@ TEST_CASE("Lexer's tests")
 		REQUIRE(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetCurrToken()));
 	}
 
+	SECTION("TestInit_Pass0_ReturnsIntLiteral")
+	{
+		REQUIRE(pLexer->Init("0", pathToConfig) == gplc::RV_SUCCESS);
+
+		REQUIRE(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetCurrToken()));
+	}
+
 
 	delete pLexer;
 }

@@ -18,6 +18,7 @@ if (IS_TESTING_ENABLED)
 endif ()
 
 add_subdirectory(gpllib)
+add_subdirectory(gplc)
 
 if (IS_TESTING_ENABLED)
 	add_subdirectory(tests)

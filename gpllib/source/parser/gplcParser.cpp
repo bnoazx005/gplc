@@ -895,7 +895,18 @@ namespace gplc
 
 	CASTDefinitionNode* CParser::_parseDefinition(CASTDeclarationNode* pDecl, ILexer* pLexer)
 	{
-		if (pDecl->GetTypeInfo()->GetType() == NT_FUNC_DECL)
+		auto pTypeInfo = pDecl->GetTypeInfo();
+
+		// infer the type 
+		if (!pTypeInfo)
+		{
+			// function definition
+			if (_match(pLexer->GetCurrToken(), TT_OPEN_SQR_BRACE) || _match(pLexer->GetCurrToken(), TT_OPEN_BRACKET))
+			{
+				return _parseFunctionDefinition(pDecl, pLexer);
+			}
+		}
+		else if (pTypeInfo->GetType() == NT_FUNC_DECL)
 		{
 			//parse function's body
 			return _parseFunctionDefinition(pDecl, pLexer);
