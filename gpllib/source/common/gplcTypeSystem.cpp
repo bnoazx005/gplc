@@ -504,6 +504,6 @@ namespace gplc
 	std::string CFunctionType::ToShortAliasString() const
 	{
 		// \todo implement the method
-		return {};
+		return "fnPtr";
 	}
 }

@@ -74,9 +74,13 @@ namespace gplc
 				result.append(" ").append(std::get<std::string>(pCurrIdentifier->Accept(this)));
 			}
 			
-			result.append(" = ")
-				  .append(std::get<std::string>(pCurrSymbolDesc->mpValue->Accept(mpLiteralVisitor)))
-				  .append(";\n");
+			// don't need initialization because we built function arguments list
+			if ((pNode->GetAttributes() & AV_FUNC_ARG_DECL) != AV_FUNC_ARG_DECL)
+			{
+				result.append(" = ")
+					.append(std::get<std::string>(pCurrSymbolDesc->mpValue->Accept(mpLiteralVisitor)))
+					.append(";\n");
+			}
 		}
 
 		return result;
@@ -207,7 +211,21 @@ namespace gplc
 
 	TLLVMIRData CCCodeGenerator::VisitFunctionArgs(CASTFunctionArgsNode* pNode)
 	{
-		return {};
+		auto pArgs = pNode->GetChildren();
+
+		std::string result{};
+
+		for (auto iter = pArgs.cbegin(); iter != pArgs.cend(); ++iter)
+		{
+			result.append(std::get<std::string>((*iter)->Accept(this)));
+
+			if (iter + 1 != pArgs.cend())
+			{
+				result.append(", ");
+			}
+		}
+
+		return result;
 	}
 
 	TLLVMIRData CCCodeGenerator::VisitFunctionCall(CASTFunctionCallNode* pNode)

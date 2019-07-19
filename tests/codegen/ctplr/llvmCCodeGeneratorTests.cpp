@@ -43,6 +43,34 @@ TEST_CASE("CCCodeGenerator tests")
 
 		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "long x = 0;\nlong y = 0;\nint (*f)() = NULL;\n");
 	}
+
+
+	SECTION("TestGenerate_PassFunctionArgs_ReturnsCorrectOutput")
+	{
+		auto pSymTable = new CSymTable();
+
+		pSymTable->AddVariable("x", { new CIntLiteral(0), new CType(CT_INT64, BTS_INT64, 0x0) });
+		pSymTable->AddVariable("y", { new CIntLiteral(0), new CType(CT_INT64, BTS_INT64, 0x0) });
+
+		CASTSourceUnitNode* pProgram = new CASTSourceUnitNode();
+
+		CASTFunctionArgsNode* pFuncArgs = new CASTFunctionArgsNode();
+
+		CASTNode* pIdentifier1 = new CASTNode(NT_IDENTIFIERS_LIST);
+		pIdentifier1->AttachChild(new CASTIdentifierNode("x"));
+
+		CASTNode* pIdentifier2 = new CASTNode(NT_IDENTIFIERS_LIST);
+		pIdentifier2->AttachChild(new CASTIdentifierNode("y"));
+
+		pFuncArgs->AttachChild(new CASTDeclarationNode(pIdentifier1, new CASTTypeNode(NT_INT32), AV_FUNC_ARG_DECL));
+		pFuncArgs->AttachChild(new CASTDeclarationNode(pIdentifier2, new CASTTypeNode(NT_INT32), AV_FUNC_ARG_DECL));
+
+		pProgram->AttachChild(pFuncArgs);
+
+		// \todo fix literals type inference
+		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "long x, long y");
+	}
+
 /*
 	SECTION("TestGenerate_PassFuncDefinition_ReturnsCorrectOutput")
 	{
