@@ -90,7 +90,7 @@ namespace gplc
 			Result AttachChildren(const std::vector<CASTNode*>& nodes);
 
 			Result DettachChild(CASTNode** node);
-			
+						
 			const std::vector<CASTNode*> GetChildren() const;
 
 			U32 GetChildrenCount() const;
@@ -172,6 +172,8 @@ namespace gplc
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+
+			void SetTypeInfo(CASTNode* pTypeInfo);
 
 			CASTNode* GetIdentifiers() const;
 

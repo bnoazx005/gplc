@@ -288,6 +288,11 @@ namespace gplc
 		return pResolver->VisitDeclaration(this);
 	}
 
+	void CASTDeclarationNode::SetTypeInfo(CASTNode* pTypeInfo)
+	{
+		mChildren[1] = pTypeInfo;
+	}
+
 	CASTNode* CASTDeclarationNode::GetIdentifiers() const
 	{
 		return mChildren[0];

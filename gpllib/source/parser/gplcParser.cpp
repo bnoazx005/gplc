@@ -839,6 +839,14 @@ namespace gplc
 
 		CASTFunctionArgsNode* pArgsNode = new CASTFunctionArgsNode();
 
+		// return empty arguments list
+		if (_match(pLexer->GetCurrToken(), TT_CLOSE_BRACKET))
+		{
+			pLexer->GetNextToken(); // take )
+
+			return pArgsNode;
+		}
+
 		do
 		{
 			if (_match(pLexer->GetCurrToken(), TT_COMMA))
@@ -905,7 +913,11 @@ namespace gplc
 			// function definition
 			if (_match(pLexer->GetCurrToken(), TT_OPEN_SQR_BRACE) || _match(pLexer->GetCurrToken(), TT_OPEN_BRACKET))
 			{
-				return _parseFunctionDefinition(pDecl, pLexer);
+				CASTFuncDefinitionNode* pFuncDefNode = _parseFunctionDefinition(pDecl, pLexer);
+
+				pDecl->SetTypeInfo(pFuncDefNode->GetLambdaTypeInfo());
+
+				return pFuncDefNode;
 			}
 		}
 		else if (pTypeInfo->GetType() == NT_FUNC_DECL)
