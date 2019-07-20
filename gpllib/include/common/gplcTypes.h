@@ -84,24 +84,6 @@ namespace gplc
 	*/
 
 	#define SUCCESS(resultType) (resultType == RV_SUCCESS)	/*(~(resultType & RV_FAIL))*/
-
-
-	/*!
-		\brief The TLexerErrorInfo structure
-
-		Provides information about an appeared error.
-	*/
-	
-	#pragma pack(push, 1)
-
-	typedef struct TLexerErrorInfo
-	{
-		I32 mLine;
-		I32 mPos;
-	} TLexerErrorInfo;
-
-	#pragma pack(pop)
-
 	
 	/*!
 		\brief The TParserErrorInfo structure
@@ -174,6 +156,23 @@ namespace gplc
 		AV_FUNC_ARG_DECL = 0x2,
 		AV_ENTRY_POINT   = 0x4
 	};
+
+
+	enum E_LEXER_ERRORS : U32
+	{
+		LE_INVALID_END_OF_MULTILINE_COMMENT,
+	};
+
+
+	typedef struct TLexerErrorInfo
+	{
+		E_LEXER_ERRORS mErrorType;
+
+		U32            mPos;			// horizontal position
+
+		U32            mLine;			// vertical position
+
+	} TLexerErrorInfo;
 }
 
 #endif

@@ -531,10 +531,10 @@ namespace gplc
 					case TT_VOID_TYPE:
 						return new CASTTypeNode(NT_VOID);
 
-					case TT_FLOAT:
+					case TT_FLOAT_TYPE:
 						return new CASTTypeNode(NT_FLOAT);
 
-					case TT_DOUBLE:
+					case TT_DOUBLE_TYPE:
 						return new CASTTypeNode(NT_DOUBLE);
 				}
 

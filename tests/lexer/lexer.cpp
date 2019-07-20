@@ -1,365 +1,284 @@
 #include <catch2/catch.hpp>
+#include "stubInputStream.h"
 #include <gplc.h>
+
+
+using namespace gplc;
 
 
 TEST_CASE("Lexer's tests")
 {
 	gplc::CLexer* pLexer = new gplc::CLexer();
-
-	const std::string pathToConfig          = ".\\..\\..\\lexer\\configs\\.tokens";
-	const std::string pathToCorrectConfig   = ".\\..\\..\\lexer\\configs\\correct.tokens";
-	const std::string pathToIncorrectConfig = ".\\..\\..\\lexer\\configs\\incorrect.tokens";
-
-	REQUIRE(pLexer != nullptr);
-	
-	SECTION("Correct identifier test")
+		
+	auto checkIdentifierToken = [](const CIdentifierToken* pIdentifierToken, const std::string& expectedIdentifier)
 	{
-		REQUIRE(pLexer->Init("identifier", pathToConfig) == gplc::RV_SUCCESS);
+		REQUIRE(pIdentifierToken);
+		REQUIRE(pIdentifierToken->GetName() == expectedIdentifier);
+	};
 
-		const gplc::CIdentifierToken* pIdentifierToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetCurrToken());
+	SECTION("TestGetNextToken_ParseCorrectIdentifier_ReturnsIdentifierToken")
+	{
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"identifier"
+			});
 
-		REQUIRE(pIdentifierToken->GetType() == gplc::TT_IDENTIFIER);
-		REQUIRE(pIdentifierToken->GetName() == "identifier");
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
+
+		checkIdentifierToken(dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetNextToken()), "identifier");
+		REQUIRE(!pLexer->GetNextToken());
+
+		delete pInputStream;
 	}
 
-	SECTION("Correct identifier with digits test")
+	SECTION("TestGetNextToken_PassIdentifierWithDigits_ReturnsIdentifierToken")
 	{
-		REQUIRE(pLexer->Init("identifier42 identi42fier", pathToConfig) == gplc::RV_SUCCESS);
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"identifier42 identi42fier"
+			});
 
-		const gplc::CIdentifierToken* pIdentifierToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetCurrToken());
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
 
-		REQUIRE(pIdentifierToken->GetType() == gplc::TT_IDENTIFIER);
-		REQUIRE(pIdentifierToken->GetName() == "identifier42");
+		checkIdentifierToken(dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetNextToken()), "identifier42");
+		checkIdentifierToken(dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetNextToken()), "identi42fier");
+		REQUIRE(!pLexer->GetNextToken());
 
-		pIdentifierToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetNextToken());
-
-		REQUIRE(pIdentifierToken->GetType() == gplc::TT_IDENTIFIER);
-		REQUIRE(pIdentifierToken->GetName() == "identi42fier");
+		delete pInputStream;
 	}
 
 	SECTION("Correct identifier with underscope test")
 	{
-		REQUIRE(pLexer->Init("_identifier compound_identifier_test id_", pathToConfig) == gplc::RV_SUCCESS);
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"_identifier compound_identifier_test id_"
+			});
 
-		const gplc::CIdentifierToken* pIdentifierToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetCurrToken());
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
 
-		REQUIRE(pIdentifierToken->GetType() == gplc::TT_IDENTIFIER);
-		REQUIRE(pIdentifierToken->GetName() == "_identifier");
+		checkIdentifierToken(dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetNextToken()), "_identifier");
+		checkIdentifierToken(dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetNextToken()), "compound_identifier_test");
+		checkIdentifierToken(dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetNextToken()), "id_");
+		REQUIRE(!pLexer->GetNextToken());
 
-		pIdentifierToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetNextToken());
-
-		REQUIRE(pIdentifierToken->GetType() == gplc::TT_IDENTIFIER);
-		REQUIRE(pIdentifierToken->GetName() == "compound_identifier_test");
-
-		pIdentifierToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->GetNextToken());
-
-		REQUIRE(pIdentifierToken->GetType() == gplc::TT_IDENTIFIER);
-		REQUIRE(pIdentifierToken->GetName() == "id_");
+		delete pInputStream;
 	}
 
-	//Now it works in other way. A lexer recognizes number and identifier, but not the incorrect identifier. 
-	//Therefore this test should be removed.
-
-	//SECTION("Invalid \'digit at the begining of the identifier\' identifier test")
-	//{
-	//	REQUIRE(pLexer->Init("42identifier", pathToConfig, &error) == gplc::RV_FAIL);
-	//}
-
-	SECTION("GetNextToken test")
+	SECTION("TestPeekNextToken_PassIdentifiers_ReturnsCorrectTokenByItsOffset")
 	{
-		REQUIRE(pLexer->Init("id0 id1 id2 id3 id4 id5", pathToConfig) == gplc::RV_SUCCESS);
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"id0 id1 id2 id3 id4 id5"
+			});
 
-		gplc::U32 numOfTokens = 0;
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
 
-		while (pLexer->GetNextToken())
+		for (U8 i = 1; i < 7; ++i)
 		{
-			numOfTokens++;
+			checkIdentifierToken(dynamic_cast<const gplc::CIdentifierToken*>(pLexer->PeekNextToken(i)), std::string("id").append(std::to_string(i - 1)));
 		}
 
-		REQUIRE(numOfTokens == 5); //5 is because of an access to the first token is provided with GetCurrToken; GetNextToken returns the other five
+		REQUIRE(!pLexer->PeekNextToken(7));
+
+		delete pInputStream;
 	}
 
-	SECTION("PeekNextToken test")
+	SECTION("TestGetNextToken_PassStringWithKeywords_ReturnsCorrectTokensSequence")
 	{
-		REQUIRE(pLexer->Init("id0 id1 id2 id3 id4 id5", pathToConfig) == gplc::RV_SUCCESS);
-
-		const gplc::CIdentifierToken* pCurrToken = nullptr;
-
-		gplc::U32 i = 0;
-
-		std::string currName;
-		gplc::C8 charsBuf[4];
-
-		while (pCurrToken = dynamic_cast<const gplc::CIdentifierToken*>(pLexer->PeekNextToken(i)))
+		std::vector<E_TOKEN_TYPE> tokens
 		{
-			sprintf_s(charsBuf, 4, "id%d\0", i);
+			TT_IDENTIFIER,
+			TT_IDENTIFIER,
+			TT_IDENTIFIER,
+			TT_IDENTIFIER,
+			TT_IDENTIFIER,
+			TT_NE,
+			TT_EQ,
+			TT_ASSIGN_OP,
+			TT_LT,
+			TT_GT,
+			TT_PLUS,
+			TT_MINUS,
+			TT_STAR,
+			TT_OPEN_SQR_BRACE,
+			TT_CLOSE_SQR_BRACE,
+			TT_OPEN_BRACE,
+			TT_CLOSE_BRACE,
+			TT_SEMICOLON,
+			TT_COMMA,
+			TT_POINT,
+			TT_COLON,
+			TT_BACKSLASH,
+			TT_SLASH,
+		};
+		
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"identifier integer  character  floatValue float2int !====<>+-*[]{};,.:\\/"
+			});
 
-			currName.clear();
-			currName.append(charsBuf);
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
+		
+		const CToken* pCurrToken = nullptr;
 
-			i++;
-
-			REQUIRE(pCurrToken->GetName() == currName);
-			REQUIRE(pCurrToken->GetType() == gplc::TT_IDENTIFIER);
-		}
-
-		REQUIRE(pLexer->PeekNextToken(6) == nullptr);
-		REQUIRE(pLexer->PeekNextToken(42) == nullptr);
-	}
-
-	SECTION("_readTokensMapFromFile test")
-	{
-		REQUIRE(pLexer->Init("", pathToIncorrectConfig) == gplc::RV_INCORRECT_CONFIG);
-		REQUIRE(pLexer->Init("", pathToCorrectConfig) == gplc::RV_SUCCESS);
-	}
-
-	SECTION("Keywords test")
-	{
-		REQUIRE(pLexer->Init("identifier integer int character char floatValue float2int float!====<>+-*[]{};,.:\\/", pathToConfig) == gplc::RV_SUCCESS);
-		const gplc::CToken* pCurrToken = pLexer->GetCurrToken();
-
-		std::vector<gplc::E_TOKEN_TYPE> tokens;
-		tokens.push_back(gplc::TT_IDENTIFIER);
-		tokens.push_back(gplc::TT_IDENTIFIER);
-		tokens.push_back(gplc::TT_INT);
-		tokens.push_back(gplc::TT_IDENTIFIER);
-		tokens.push_back(gplc::TT_CHAR);
-		tokens.push_back(gplc::TT_IDENTIFIER);
-		tokens.push_back(gplc::TT_IDENTIFIER);
-		tokens.push_back(gplc::TT_FLOAT);
-		tokens.push_back(gplc::TT_NE);
-		tokens.push_back(gplc::TT_EQ);
-		tokens.push_back(gplc::TT_ASSIGN_OP);
-		tokens.push_back(gplc::TT_LT);
-		tokens.push_back(gplc::TT_GT);
-		tokens.push_back(gplc::TT_PLUS);
-		tokens.push_back(gplc::TT_MINUS);
-		tokens.push_back(gplc::TT_STAR);
-		tokens.push_back(gplc::TT_OPEN_SQR_BRACE);
-		tokens.push_back(gplc::TT_CLOSE_SQR_BRACE);
-		tokens.push_back(gplc::TT_OPEN_BRACE);
-		tokens.push_back(gplc::TT_CLOSE_BRACE);
-		tokens.push_back(gplc::TT_SEMICOLON);
-		tokens.push_back(gplc::TT_COMMA);
-		tokens.push_back(gplc::TT_POINT);
-		tokens.push_back(gplc::TT_COLON);
-		tokens.push_back(gplc::TT_BACKSLASH);
-		tokens.push_back(gplc::TT_SLASH);
-
-		gplc::U32 tokensCount = tokens.size();
-
-		for (gplc::U32 i = 0; i < tokensCount; i++)
+		for (U32 i = 0; i < tokens.size(); ++i)
 		{
-			pCurrToken = pLexer->GetCurrToken();
-
-			REQUIRE(pCurrToken != nullptr);
-			REQUIRE(pCurrToken->GetType() == tokens[i]);
-
 			pCurrToken = pLexer->GetNextToken();
+
+			REQUIRE(pCurrToken);
+			REQUIRE(pCurrToken->GetType() == tokens[i]);
 		}
 
-		pCurrToken = pLexer->GetNextToken();
+		REQUIRE(!pLexer->GetNextToken());
 
-		REQUIRE(pCurrToken == nullptr);
+		delete pInputStream;		
 	}
 
-	SECTION("Numbers' tokens test")
+	SECTION("TestGetNextToken_PassIntegralValuesInDifferentRadixes_ReturnsCorrectLiterals")
 	{
-		REQUIRE(pLexer->Init("42 4.2 0.42 .5", pathToConfig) == gplc::RV_SUCCESS);
+		auto checkLiteral = [](const CLiteralToken* pToken, int expectedValue)
+		{
+			REQUIRE(pToken);
+			REQUIRE(dynamic_cast<const gplc::CIntLiteral*>(pToken->GetValue())->GetValue() == expectedValue);
+		};
 
-		const gplc::CLiteralToken* pCurrIntToken = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetCurrToken());
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"0x42 0b10 042 42 0 42L"
+			});
 
-		REQUIRE(pCurrIntToken != nullptr);
-		REQUIRE(pCurrIntToken->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CIntLiteral*>(pCurrIntToken->GetValue())->GetValue() == 42);
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
 
-		const gplc::CLiteralToken* pCurrFloatToken = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
+		checkLiteral(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()), 0x42);
+		checkLiteral(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()), 0b10);
+		checkLiteral(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()), 042);
+		checkLiteral(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()), 42);
+		checkLiteral(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()), 0);
+		checkLiteral(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()), 42);
+		REQUIRE(!pLexer->GetNextToken());
 
-		REQUIRE(pCurrFloatToken != nullptr);
-		REQUIRE(pCurrFloatToken->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CDoubleLiteral*>(pCurrFloatToken->GetValue())->GetValue() == Approx(4.2));
-
-		pCurrFloatToken = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
-
-		REQUIRE(pCurrFloatToken != nullptr);
-		REQUIRE(pCurrFloatToken->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CDoubleLiteral*>(pCurrFloatToken->GetValue())->GetValue() == Approx(0.42));
-
-		pCurrFloatToken = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
-
-		REQUIRE(pCurrFloatToken != nullptr);
-		REQUIRE(pCurrFloatToken->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CDoubleLiteral*>(pCurrFloatToken->GetValue())->GetValue() == Approx(0.5));
+		delete pInputStream;
 	}
 
-	SECTION("numerical systems test")
+
+	SECTION("TestGetNextToken_PassFloatingPointValues_ReturnsCorrectLiterals")
 	{
-		REQUIRE(pLexer->Init("0x42 0b10 042 42", pathToConfig) == gplc::RV_SUCCESS);
+		auto checkFloatLiteral = [](const CLiteralToken* pToken, F32 expectedValue)
+		{
+			REQUIRE(pToken);
+			REQUIRE(dynamic_cast<const gplc::CFloatLiteral*>(pToken->GetValue())->GetValue() == expectedValue);
+		};
 
-		const gplc::CLiteralToken* pCurrIntToken = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetCurrToken());
+		auto checkDoubleLiteral = [](const CLiteralToken* pToken, F64 expectedValue)
+		{
+			REQUIRE(pToken);
+			REQUIRE(dynamic_cast<const gplc::CDoubleLiteral*>(pToken->GetValue())->GetValue() == expectedValue);
+		};
 
-		REQUIRE(pCurrIntToken != nullptr);
-		REQUIRE(pCurrIntToken->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CIntLiteral*>(pCurrIntToken->GetValue())->GetValue() == 0x42);
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"4.2 0.42 .5 0.f .0f 42f"
+			});
 
-		pCurrIntToken = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
 
-		REQUIRE(pCurrIntToken != nullptr);
-		REQUIRE(pCurrIntToken->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CIntLiteral*>(pCurrIntToken->GetValue())->GetValue() == 2);
+		checkDoubleLiteral(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()), 4.2);
+		checkDoubleLiteral(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()), 0.42);
+		checkDoubleLiteral(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()), 0.5);
+		checkFloatLiteral(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()), 0.0f);
+		checkFloatLiteral(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()), 0.0f);
+		checkFloatLiteral(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()), 42.0f);
+		REQUIRE(!pLexer->GetNextToken());
 
-		pCurrIntToken = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
-
-		REQUIRE(pCurrIntToken != nullptr);
-		REQUIRE(pCurrIntToken->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CIntLiteral*>(pCurrIntToken->GetValue())->GetValue() == 042);
-
-		pCurrIntToken = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
-
-		REQUIRE(pCurrIntToken != nullptr);
-		REQUIRE(pCurrIntToken->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CIntLiteral*>(pCurrIntToken->GetValue())->GetValue() == 42);
+		delete pInputStream;
 	}
 
-	SECTION("number's literals test")
+	SECTION("TestGetNextToken_PassSingleLineComment_ReturnsNothing")
 	{
-		REQUIRE(pLexer->Init("42l 42ul 42s 42uu 42f 42usf", pathToConfig) == gplc::RV_SUCCESS);
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"//42l 42ul 42s 42uu 42f 42usf"
+			});
 
-		const gplc::CLiteralToken* pCurrIntToken1 = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetCurrToken());
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
+
+		REQUIRE(!pLexer->GetNextToken());
+
+		delete pInputStream;
+	}
+
+	SECTION("TestGetNextToken_PassMultilineCommentsWithNesting_ReturnsNothing")
+	{
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"/*42l 42ul 42s /*42uu*//**/ 42f 42usf*/\n/**/"
+			});
+
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
+
+		REQUIRE(!pLexer->GetNextToken());
+
+		delete pInputStream;
+	}
+
+	SECTION("TestGetNextToken_PassStringLiteral_ReturnsLiteralToken")
+	{
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"\"Hello, world!\""
+			});
+
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
+
+		auto pStringLiteral = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
+
+		REQUIRE(pStringLiteral);
+		REQUIRE((dynamic_cast<const CStringLiteral*>(pStringLiteral->GetValue()))->GetValue() == "Hello, world!");
+		REQUIRE(!pLexer->GetNextToken());
+
+		delete pInputStream;
+	}
+
+	SECTION("TestGetNextToken_PassCharLiterals_ReturnsLiteralToken")
+	{
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"'f'  'g'"
+			});
+
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
+
+		auto pCharLiteral = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
+
+		REQUIRE(pCharLiteral);
+		REQUIRE((dynamic_cast<const CCharLiteral*>(pCharLiteral->GetValue()))->GetValue() == "f");
 		
-		REQUIRE(pCurrIntToken1 != nullptr);
-		REQUIRE(pCurrIntToken1->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CIntLiteral*>(pCurrIntToken1->GetValue())->GetValue() == 42);
+		pCharLiteral = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
 
-		const gplc::CLiteralToken* pCurrIntToken2 = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
+		REQUIRE(pCharLiteral);
+		REQUIRE((dynamic_cast<const CCharLiteral*>(pCharLiteral->GetValue()))->GetValue() == "g");
 
-		REQUIRE(pCurrIntToken2 != nullptr);
-		REQUIRE(pCurrIntToken2->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CUIntLiteral*>(pCurrIntToken2->GetValue())->GetValue() == 42);
+		REQUIRE(!pLexer->GetNextToken());
 
-		const gplc::CLiteralToken* pCurrIntToken3 = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
+		delete pInputStream;
+	}	
 
-		REQUIRE(pCurrIntToken3 != nullptr);
-		REQUIRE(pCurrIntToken3->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CIntLiteral*>(pCurrIntToken3->GetValue())->GetValue() == 42);
-
-		const gplc::CLiteralToken* pCurrIntToken4 = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
-
-		REQUIRE(pCurrIntToken4 != nullptr);
-		REQUIRE(pCurrIntToken4->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CUIntLiteral*>(pCurrIntToken4->GetValue())->GetValue() == 42);
-
-		const gplc::CLiteralToken* pCurrFloatToken5 = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
-
-		REQUIRE(pCurrFloatToken5 != nullptr);
-		REQUIRE(pCurrFloatToken5->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CFloatLiteral*>(pCurrFloatToken5->GetValue())->GetValue() == Approx(42.0));
-
-		const gplc::CLiteralToken* pCurrFloatToken6 = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
-
-		REQUIRE(pCurrFloatToken6 != nullptr);
-		REQUIRE(pCurrFloatToken6->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CFloatLiteral*>(pCurrFloatToken6->GetValue())->GetValue() == Approx(42.0));
-	}
-
-	SECTION("single line comments test")
+	SECTION("TestGetNextToken_PassSpecialLiterals_ReturnsCorrectTokens")
 	{
-		REQUIRE(pLexer->Init("//42l 42ul 42s 42uu 42f 42usf", pathToConfig) == gplc::RV_SUCCESS);
-		
-		REQUIRE(pLexer->GetCurrToken() == nullptr);
-	}
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"true false null"
+			});
 
-	SECTION("multi line comments test")
-	{
-		REQUIRE(pLexer->Init("/*42l 42ul 42s 42uu 42f 42usf*/\n/**/", pathToConfig) == gplc::RV_SUCCESS);
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
 
-		REQUIRE(pLexer->GetCurrToken() == nullptr);
+		REQUIRE(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()));
+		REQUIRE(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()));
+		REQUIRE(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()));
+		REQUIRE(!pLexer->GetNextToken());
 
-		REQUIRE(pLexer->Init("/*42l 42ul*/\n    .4f .4", pathToConfig) == gplc::RV_SUCCESS);
-
-		const gplc::CLiteralToken* pCurrFloatToken = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetCurrToken());
-
-		REQUIRE(pCurrFloatToken != nullptr);
-		REQUIRE(pCurrFloatToken->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CFloatLiteral*>(pCurrFloatToken->GetValue())->GetValue() == Approx(0.4f));
-
-		const gplc::CLiteralToken* pCurrDoubleToken = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
-
-		REQUIRE(pCurrDoubleToken != nullptr);
-		REQUIRE(pCurrDoubleToken->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CDoubleLiteral*>(pCurrDoubleToken->GetValue())->GetValue() == Approx(0.4));
-	}
-
-	SECTION("strings test")
-	{
-		REQUIRE(pLexer->Init(R"("Hello, world!")", pathToConfig) == gplc::RV_SUCCESS);
-
-		const gplc::CLiteralToken* pCurrToken = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetCurrToken());
-
-		REQUIRE(pCurrToken != nullptr);
-		REQUIRE(pCurrToken->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CStringLiteral*>(pCurrToken->GetValue())->GetValue() == "Hello, world!");
-	}
-
-	SECTION("chars test")
-	{
-		REQUIRE(pLexer->Init("'f'  'g'", pathToConfig) == gplc::RV_SUCCESS);
-
-		const gplc::CLiteralToken* pCurrToken = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetCurrToken());
-
-		REQUIRE(pCurrToken != nullptr);
-		REQUIRE(pCurrToken->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CCharLiteral*>(pCurrToken->GetValue())->GetValue() == "f");
-
-		pCurrToken = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
-
-		REQUIRE(pCurrToken != nullptr);
-		REQUIRE(pCurrToken->GetType() == gplc::TT_LITERAL);
-		REQUIRE(dynamic_cast<const gplc::CCharLiteral*>(pCurrToken->GetValue())->GetValue() == "g");
+		delete pInputStream;
 	}
 	
-	SECTION("Save- Restore- methods test")
-	{
-		REQUIRE(pLexer->Init("42l 42ul 42s 42uu 42f 42usf\n/**/", pathToConfig) == gplc::RV_SUCCESS);
-
-		REQUIRE(pLexer->GetNextToken() != nullptr);
-
-		pLexer->SavePosition();
-
-		const gplc::CToken* pSavedToken = pLexer->GetCurrToken();
-
-		for (gplc::I32 i = 0; i < 3; i++)
-		{
-			REQUIRE(pLexer->GetNextToken() != nullptr);
-		}
-
-		pLexer->RestorePosition();
-
-		REQUIRE(pLexer->GetCurrToken() == pSavedToken);
-	}
-
-	SECTION("true false")
-	{
-		REQUIRE(pLexer->Init("true false", pathToConfig) == gplc::RV_SUCCESS);
-
-		REQUIRE(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetCurrToken()));
-		REQUIRE(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken()));
-	}
-
-	SECTION("null")
-	{
-		REQUIRE(pLexer->Init("null", pathToConfig) == gplc::RV_SUCCESS);
-
-		REQUIRE(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetCurrToken()));
-	}
-
-	SECTION("TestInit_Pass0_ReturnsIntLiteral")
-	{
-		REQUIRE(pLexer->Init("0", pathToConfig) == gplc::RV_SUCCESS);
-
-		REQUIRE(dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetCurrToken()));
-	}
-
-
 	delete pLexer;
 }

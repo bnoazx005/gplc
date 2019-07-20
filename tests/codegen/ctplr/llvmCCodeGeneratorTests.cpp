@@ -114,7 +114,7 @@ TEST_CASE("CCCodeGenerator tests")
 
 		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "while (true)\n{\n}\n");
 	}
-	
+	/*
 	SECTION("TestGenerate_PassEntryPointFuncDefinition_ReturnsCorrectOutput")
 	{
 		auto pSymTable = new CSymTable();
@@ -136,7 +136,7 @@ TEST_CASE("CCCodeGenerator tests")
 		pProgram->AttachChild(new CASTFuncDefinitionNode(pDecl, pFuncDecl, pFuncBody));
 
 		checkAsserts(pCodeGenerator->Generate(pProgram, pSymTable), "int main()\n{\n}\n");
-	}
+	}*/
 
 	delete pCodeGenerator;
 }

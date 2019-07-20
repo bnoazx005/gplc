@@ -17,11 +17,14 @@
 #include "..\utils\Delegate.h"
 #include <string>
 #include <vector>
-#include <map>
+#include <queue>
+#include <unordered_map>
 
 
 namespace gplc
 {
+	class IInputStream;
+
 
 	/*!
 		\brief ILexer interface
@@ -36,15 +39,14 @@ namespace gplc
 			virtual ~ILexer() = default;
 
 			/*!
-				\brief The function reads input stream of characters and prepares a tokens' sequence.
+				\brief The function reads input stream of characters and prepares a tokens' sequence
 
-				\param[in] inputStream An input characters sequence.
-				\param[in] configFilename A name of file, which stores reserved keywords' declarations.
+				\param[in] pInputStream An input characters sequence
 
 				\return A function's result code.
 			*/
 
-			virtual Result Init(const std::string& inputStream, const std::string& configFilename) = 0;
+			virtual Result Init(IInputStream* pInputStream) = 0;
 
 			/*!
 				\brief The function clears the current state of an object.
@@ -59,12 +61,12 @@ namespace gplc
 			/*!
 				\brief The function returns a current token from tokens' sequence
 
-				A call of this method doesn't change a state of an object.
+				A call of this method doesn't change a state of an object
 
 				\return A current token from tokens' sequence
 			*/
 
-			virtual const CToken* GetCurrToken() const = 0;
+			virtual const CToken* GetCurrToken() = 0;
 
 			/*!
 				\brief The function returns next token from tokens' sequence
@@ -82,23 +84,11 @@ namespace gplc
 				\return A token from tokens' sequence with specified offset from the current one.
 			*/
 
-			virtual const CToken* PeekNextToken(U32 numOfSteps = 1) const = 0;
-
-			/*!
-				\brief The method saves current state of an object. It's used for backtracking.
-			*/
-			
-			virtual void SavePosition() = 0;
-
-			/*!
-				\brief The method restores previous state of an object. It's used for backtracking.
-			*/
-			
-			virtual void RestorePosition() = 0;
+			virtual const CToken* PeekNextToken(U32 numOfSteps = 1) = 0;
 		public:
 			CDelegate<void, const TLexerErrorInfo&> OnErrorOutput;
 		protected:
-			ILexer(const ILexer& lexer) {}
+			ILexer(const ILexer& lexer) = delete;
 	};
 
 
@@ -111,6 +101,9 @@ namespace gplc
 
 	class CLexer : public ILexer
 	{
+		protected:
+			typedef std::unordered_map<std::string, E_TOKEN_TYPE> TReservedTokensTable;
+			typedef std::queue<CToken*>                           TReadTokensQueue;
 		public:
 			CLexer();
 			virtual ~CLexer();
@@ -118,13 +111,12 @@ namespace gplc
 			/*!
 				\brief The function reads input stream of characters and prepares a tokens' sequence.
 
-				\param[in] inputStream An input characters sequence.
-				\param[in] configFilename A name of file, which stores reserved keywords' declarations.
+				\param[in] pInputStream An input characters sequence
 
 				\return A function's result code.
 			*/
 
-			virtual Result Init(const std::string& inputStream, const std::string& configFilename);
+			virtual Result Init(IInputStream* pInputStream);
 
 			/*!
 				\brief The function clears the current state of an object.
@@ -139,12 +131,12 @@ namespace gplc
 			/*!
 				\brief The function returns a current token from tokens' sequence
 
-				A call of this method doesn't change a state of an object.
+				A call of this method doesn't change a state of an object
 
 				\return A current token from tokens' sequence
 			*/
 
-			virtual const CToken* GetCurrToken() const;
+			virtual const CToken* GetCurrToken();
 
 			/*!
 				\brief The function returns next token from tokens' sequence
@@ -162,60 +154,19 @@ namespace gplc
 				\return A token from tokens' sequence with specified offset from the current one.
 			*/
 
-			virtual const CToken* PeekNextToken(U32 numOfSteps = 1) const;
-
-			/*!
-				\brief The method saves current state of an object. It's used for backtracking.
-			*/
-
-			virtual void SavePosition();
-
-			/*!
-				\brief The method restores previous state of an object. It's used for backtracking.
-			*/
-
-			virtual void RestorePosition();
+			virtual const CToken* PeekNextToken(U32 numOfSteps = 1);
 		private:
-			/*!
-				\brief Copy contructor
-				
-				\param[in] lexer A reference to CLexer object-initializer
+			CLexer(const CLexer& lexer) = delete;
 
-				It's don't used. Therefore it's marked as private.
-			*/
+			C8 _getNextChar(std::string& currStreamBuffer, IInputStream* pInputStream, U32& currPos);
 
-			CLexer(const CLexer& lexer);
+			bool _skipComments(C8 currCh);
 
-			/*!
-				\brief The private method returns the current character.
+			void _skipSingleLineComment();
 
-				\param[in] stream An input characters sequence.
+			void _skipMultiLineComment();
 
-				\return A wide character at current position of the inner pointer.
-			*/
-
-			C8 _getCurrChar(const std::string& stream) const;
-
-			/*!
-				\brief The private method returns the next character.
-
-				\param[in] stream An input characters sequence.
-
-				\return A wide character after current position of the inner pointer.
-			*/
-
-			C8 _getNextChar(const std::string& stream);
-			
-			/*!
-				\brief The private method returns a character, which is placed after current one with specified offset.
-
-				\param[in] stream An input characters sequence.
-				\param[in] offset An offset from the current position in the characters' sequence.
-
-				\return A wide character at specified position.
-			*/
-
-			C8 _peekNextChar(const std::string& stream, U32 offset = 1) const;
+			C8 _peekNextChar(std::string& currStreamBuffer, IInputStream* pInputStream, U32& currPos, U32 offset = 1);
 
 			/*!
 				\brief The private method reads input stream and returns recognized tokens.
@@ -227,25 +178,33 @@ namespace gplc
 
 			CToken* _scanToken(const std::string& stream);
 
-			/*!
-				\brief The private method reads a specified file with tokens and contructs a map with following structure map<std::wstring, E_TOKEN_TYPE>.
+			CToken* _scanNextToken();
 
-				\param[in] filename A filename with tokens.
-				\param[out] result It stores a result of method's execution.
+			CToken* _tryRecognizeKeywordOrIdentifier(C8 currCh);
 
-				\return A map of std::wstring to E_TOKEN_TYPE.
-			*/
+			CToken* _tryRecognizeLiteral(C8 currCh);
 
-			std::map<std::string, E_TOKEN_TYPE> _readTokensMapFromFile(const std::string& filename, Result& result);
+			CToken* _tryRecognizeNumberLiteral(C8 currCh);
+
+			CToken* _tryRecognizeStringOrCharLiteral(C8 currCh);
+			
+			void _streamInputData(std::string& currStreamBuffer, IInputStream* pInputStream);
 		private:
-			U32                                 mCurrPos;
-			U32                                 mCurrLine;
-			U32                                 mCurrTokenIndex;
+			static TReservedTokensTable mReservedTokensMap;
 
-			U32                                 mSavedTokenIndex;
+			IInputStream*               mpInputStream;
 
-			std::map<std::string, E_TOKEN_TYPE> mReservedTokensMap;
-			std::vector<CToken*>                mTokens;
+			U32                         mCurrPos;
+
+			U32                         mCurrLine;
+
+			std::string                 mCurrStreamBuffer; ///< The member contains current read line from the input stream
+
+			CToken*                     mpLastRecognizedToken;
+
+			std::vector<CToken*>        mpTokens;
+
+			TReadTokensQueue            mpPeekTokensBuffer;
 	};
 }
 

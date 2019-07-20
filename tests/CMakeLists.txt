@@ -42,6 +42,8 @@ set(SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/common/symTable.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/common/typeSystemTests.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/lexer/lexer.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/lexer/stubInputStream.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/lexer/stubInputStream.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/parser/parser.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/parser/semanticAnalyser.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/parser/stubLexer.h"

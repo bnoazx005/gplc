@@ -5,172 +5,109 @@
 
 	\brief The file contains lexer's class defenition
 
-	\todo
-	1) Add strings and chars tokens
-	2) By now all strings are recognized as wide characters strings (unicode strings). Should thing about the way to change it.
-	3) Add literals for strings
+	\todo", TT_DEFAULT }, Add strings and chars tokens", TT_DEFAULT }, By now all strings are recognized as wide characters strings (unicode strings). Should thing about the way to change it.", TT_DEFAULT }, Add literals for strings
 */
 
 #include "lexer\gplcLexer.h"
 #include "lexer\gplcTokens.h"
 #include "common\gplcConstants.h"
 #include "common/gplcLiterals.h"
-#include <fstream>
+#include "lexer/gplcInputStream.h"
+#include <cctype>
 
 
 namespace gplc
 {
-	CLexer::CLexer():
-		ILexer(), mCurrPos(0), mCurrLine(0), mCurrTokenIndex(0), mSavedTokenIndex(UINT32_MAX)
+	CLexer::TReservedTokensTable CLexer::mReservedTokensMap
 	{
+		{ "=", TT_ASSIGN_OP },
+		{ ":", TT_COLON },
+		{ ";", TT_SEMICOLON },
+		{ ",", TT_COMMA },
+		{ "*", TT_STAR },
+		{ "&", TT_AMPERSAND },
+		{ ">", TT_GT },
+		{ "<", TT_LT },
+		{ ">=", TT_GE },
+		{ "<=", TT_LE },
+		{ "!=", TT_NE },
+		{ "==", TT_EQ },
+		{ "+", TT_PLUS },
+		{ "-", TT_MINUS },
+		{ "/", TT_SLASH },
+		{ "\\", TT_BACKSLASH },
+		{ "(", TT_OPEN_BRACKET },
+		{ ")", TT_CLOSE_BRACKET },
+		{ "[", TT_OPEN_SQR_BRACE },
+		{ "]", TT_CLOSE_SQR_BRACE },
+		{ "{", TT_OPEN_BRACE },
+		{ "}", TT_CLOSE_BRACE },
+		{ "|", TT_VLINE },
+		{ ".", TT_POINT },
+		{ "int8", TT_INT8_TYPE },
+		{ "int16", TT_INT16_TYPE },
+		{ "int32", TT_INT32_TYPE },
+		{ "int64", TT_INT64_TYPE },
+		{ "uint8", TT_UINT8_TYPE },
+		{ "uint16", TT_UINT16_TYPE },
+		{ "uint32", TT_UINT32_TYPE },
+		{ "uint64", TT_UINT64_TYPE },
+		{ "float", TT_FLOAT_TYPE },
+		{ "double", TT_DOUBLE_TYPE },
+		{ "string", TT_STRING_TYPE },
+		{ "char", TT_CHAR_TYPE },
+		{ "bool", TT_BOOL_TYPE },
+		{ "void", TT_VOID_TYPE },
+		{ "enum", TT_ENUM_TYPE },
+		{ "struct", TT_STRUCT_TYPE },
+		{ "if", TT_IF_KEYWORD },
+		{ "else", TT_ELSE_KEYWORD },
+		{ "while", TT_WHILE_KEYWORD },
+		{ "for", TT_FOR_KEYWORD },
+		{ "loop", TT_LOOP_KEYWORD },
+		{ "->", TT_ARROW },
+		{ "return", TT_RETURN_KEYWORD },
+		{ "!", TT_NOT },
+		{ "&&", TT_AND },
+		{ "||", TT_OR },
+		{ "module", TT_MODULE_KEYWORD },
+	};
 
-	}
-
-	CLexer::CLexer(const CLexer& lexer) :
-		ILexer(lexer), mCurrPos(0), mCurrLine(0), mCurrTokenIndex(0), mSavedTokenIndex(UINT32_MAX)
+	CLexer::CLexer():
+		ILexer(), mCurrPos(1), mCurrLine(1), mpLastRecognizedToken(nullptr)
 	{
 	}
 
 	CLexer::~CLexer()
 	{
-		Reset();
 	}
 
-	Result CLexer::Init(const std::string& inputStream, const std::string& configFilename)
+	Result CLexer::Init(IInputStream* pInputStream)
 	{
+		mpInputStream = pInputStream;
+
+		if (!mpInputStream)
+		{
+			return RV_INVALID_ARGUMENTS;
+		}
+
 		Result result = Reset();
-		
-		if (!SUCCESS(result))
-		{
-			return result;
-		}
-
-		//try parse config file with reserved tokens
-		mReservedTokensMap = _readTokensMapFromFile(configFilename, result);
 
 		if (!SUCCESS(result))
 		{
 			return result;
 		}
 
-		C8 currChar = _getCurrChar(inputStream);
-		
-		CToken* pCurrToken = nullptr;
-
-		U8 numOfNestedCommentsBlocks = 0;
-
-		while ((currChar = _getCurrChar(inputStream)) != EOF)
-		{
-			if (iswblank(currChar)) //skip whitespace
-			{
-				currChar = _getNextChar(inputStream);
-
-				continue;
-			}
-
-			if (iswspace(currChar)) //try detect \r and \n, 'cause all spaces and tabulations were passed at the previous case
-			{
-				mCurrLine++;
-
-				currChar = _getNextChar(inputStream);
-
-				continue;
-			}
-
-			// skip comments
-			//try to recognize single- and milti- line comments
-			if (currChar == '/')
-			{
-				currChar = _peekNextChar(inputStream, 1);
-
-				if (currChar == '/') //single-line comment
-				{
-					//skip symbols until neither \n nor \r
-					do
-					{
-						currChar = _getNextChar(inputStream);
-					} while (currChar != '\n' && currChar != '\r' && currChar != EOF);
-
-					continue;
-				}
-				else if (currChar == '*')
-				{
-					currChar = _getNextChar(inputStream); //get '*'
-					numOfNestedCommentsBlocks = 1;
-
-					do
-					{
-						currChar = _getNextChar(inputStream);
-
-						if (currChar == '/' && _peekNextChar(inputStream, 1) == '*')
-						{
-							numOfNestedCommentsBlocks++;
-
-							_getNextChar(inputStream); //get '*'
-
-							continue;
-						}
-
-						if (currChar == '*' && _peekNextChar(inputStream, 1) == '/')
-						{
-							if (numOfNestedCommentsBlocks == 0)
-							{
-								TLexerErrorInfo errorInfo;
-
-								memset(&errorInfo, 0, sizeof(errorInfo));
-
-								errorInfo.mPos = mCurrPos;
-								errorInfo.mLine = mCurrLine;
-
-								OnErrorOutput.Invoke(errorInfo);
-
-								return RV_INCORRECT_TOKEN;
-							}
-
-							numOfNestedCommentsBlocks--;
-
-							_getNextChar(inputStream); //get '/'
-						}
-					} while (currChar != '*' && _peekNextChar(inputStream, 1) != '/' && numOfNestedCommentsBlocks > 0);
-
-					_getNextChar(inputStream);
-
-					continue;
-				}
-			}
-
-			// increment is done implicitly in _scanToken
-			pCurrToken = _scanToken(inputStream);
-
-			if (pCurrToken == nullptr)
-			{
-				TLexerErrorInfo errorInfo;
-
-				memset(&errorInfo, 0, sizeof(errorInfo));
-
-				errorInfo.mPos = mCurrPos;
-				errorInfo.mLine = mCurrLine;
-
-				OnErrorOutput.Invoke(errorInfo);
-
-				return RV_INCORRECT_TOKEN;
-			}
-
-			mTokens.push_back(pCurrToken);
-		}
-
-		return RV_SUCCESS;
+		return mpInputStream->Open();
 	}
 	
 	Result CLexer::Reset()
 	{
-		U32 tokensCount = mTokens.size();
-
 		CToken* pCurrToken = nullptr;
 
-		for (U32 i = 0; i < tokensCount; i++) //release the memory
+		for (U32 i = 0; i < mpTokens.size(); ++i) //release the memory
 		{
-			pCurrToken = mTokens[i];
+			pCurrToken = mpTokens[i];
 
 			if (pCurrToken == nullptr)
 			{
@@ -180,511 +117,543 @@ namespace gplc
 			delete pCurrToken;
 		}
 
-		mTokens.clear();
+		mpTokens.clear();
 
-		mCurrPos         = 0;
-		mCurrTokenIndex  = 0;
-		mSavedTokenIndex = UINT32_MAX;
+		mCurrPos  = 1;
+		mCurrLine = 1;
 
-		if (!mTokens.empty() || mCurrPos != 0)
+		mpLastRecognizedToken = nullptr;
+
+		mCurrStreamBuffer.clear();
+		
+		while (!mpPeekTokensBuffer.empty())
 		{
-			return RV_FAIL;
+			mpPeekTokensBuffer.pop();
 		}
 
 		return RV_SUCCESS;
 	}
 
-	const CToken* CLexer::GetCurrToken() const
+	const CToken* CLexer::GetCurrToken()
 	{
-		if (mTokens.size() <= mCurrTokenIndex)
+		if (!mpLastRecognizedToken)
 		{
-			return nullptr;
+			return GetNextToken();
 		}
 
-		return mTokens[mCurrTokenIndex];
+		return mpLastRecognizedToken;
 	}
 
 	const CToken* CLexer::GetNextToken()
 	{
-		if (mCurrTokenIndex + 1 >= mTokens.size())
-		{
-			return nullptr;
-		}
-
-		return mTokens[++mCurrTokenIndex];
-	}
-
-	const CToken* CLexer::PeekNextToken(U32 numOfSteps) const
-	{
-		U32 neededTokenId = numOfSteps + mCurrTokenIndex;
-
-		if (mTokens.size() <= neededTokenId)
-		{
-			return nullptr;
-		}
-
-		return mTokens[neededTokenId];
-	}
-
-	void CLexer::SavePosition()
-	{
-		mSavedTokenIndex = mCurrTokenIndex;
-	}
-
-	void CLexer::RestorePosition()
-	{
-		if (mSavedTokenIndex >= UINT32_MAX)
-		{
-			return;
-		}
-
-		mCurrTokenIndex = mSavedTokenIndex;
-	}
-
-	C8 CLexer::_getCurrChar(const std::string& stream) const
-	{
-		if (mCurrPos >= stream.length())
-		{
-			return EOF;
-		}
-
-		return stream[mCurrPos];
-	}
-
-	C8 CLexer::_getNextChar(const std::string& stream)
-	{
-		if (mCurrPos + 1 >= stream.length())
-		{
-			mCurrPos++;
-
-			return EOF;
-		}
+		CToken* pToken = nullptr;
 		
-		return stream[++mCurrPos];
-	}
-
-	C8 CLexer::_peekNextChar(const std::string& stream, U32 offset) const
-	{
-		U32 newPositionAtStream = mCurrPos + offset;
-
-		if (newPositionAtStream >= stream.length())
+		if (!mpPeekTokensBuffer.empty())
 		{
-			return EOF;
-		}
-
-		return stream[newPositionAtStream];
-	}
-	
-	CToken* CLexer::_scanToken(const std::string& stream)
-	{
-		C8 currChar = _getCurrChar(stream);
-
-		//try to recognize reserved symbols' sequences
-		std::string expectedToken;
-
-		expectedToken.push_back(currChar);
-		
-		std::map<std::string, E_TOKEN_TYPE>::const_iterator tokenIter, additionalTokenIter;
-
-		if ((tokenIter = mReservedTokensMap.find(expectedToken)) != mReservedTokensMap.end())
-		{
-			currChar = _peekNextChar(stream, 1);
-			
-			expectedToken.push_back(currChar); // try to find another longer token
-
-			if ((additionalTokenIter = mReservedTokensMap.find(expectedToken)) != mReservedTokensMap.end())
-			{
-				_getNextChar(stream);
-				_getNextChar(stream);
-
-				return new CToken((*additionalTokenIter).second, mCurrPos - 2);
-			}
-
-			if ((*tokenIter).second != TT_POINT || !iswdigit(currChar)) //check is it just a point or delimiter in a floating point number
-			{
-				_getNextChar(stream);
-
-				return new CToken((*tokenIter).second, mCurrPos - 1);
-			}
+			pToken = mpPeekTokensBuffer.front();
+			mpPeekTokensBuffer.pop();
 		}
 		else
 		{
-			currChar = _peekNextChar(stream, 1);
-
-			expectedToken.push_back(currChar); // try to find another longer token
-
-			if ((additionalTokenIter = mReservedTokensMap.find(expectedToken)) != mReservedTokensMap.end())
-			{
-				_getNextChar(stream);
-				_getNextChar(stream); //set pos to new char
-
-				return new CToken((*additionalTokenIter).second, mCurrPos - 2);
-			}
+			pToken = _scanNextToken();
 		}
 
-		currChar = _getCurrChar(stream);
-		
-		//try to read identifier's token
-		if (isalpha(currChar) || currChar == '_') 
+		mpTokens.push_back(pToken);
+
+		mpLastRecognizedToken = pToken;
+
+		return mpLastRecognizedToken;
+	}
+
+	const CToken* CLexer::PeekNextToken(U32 numOfSteps)
+	{
+		if (!numOfSteps)
 		{
-			std::string identifierName;
-
-			while (iswalnum(currChar) || currChar == '_')
-			{
-				identifierName.push_back(currChar);
-
-				currChar = _getNextChar(stream);
-			}
-			
-			//try to detect reserved keywords here
-			
-			///<TODO: think about the way to do it 1)hardcode here; 2)loop over keywords from prepared file
-			std::map<std::string, E_TOKEN_TYPE>::const_iterator token;
-
-			if ((token = mReservedTokensMap.find(identifierName)) != mReservedTokensMap.end())
-			{
-				return new CToken((*token).second, mCurrPos); //return reserved keyword's token
-			}
-
-			// try to parse some of literals true, false, null
-			if (identifierName == "false")
-			{
-				return new CLiteralToken(new CBoolLiteral(false), mCurrPos);
-			}
-
-			if (identifierName == "true")
-			{
-				return new CLiteralToken(new CBoolLiteral(true), mCurrPos);
-			}
-
-			if (identifierName == "null")
-			{
-				return new CLiteralToken(nullptr, mCurrPos);
-			}
-
-			return new CIdentifierToken(identifierName, mCurrPos);	//if it's not reserved just return it as identifier
+			return mpLastRecognizedToken;
 		}
 
-		if (isdigit(currChar) || currChar == '.') //try to get number
+		CToken* pToken = nullptr;
+		
+		if (numOfSteps < mpPeekTokensBuffer.size())
 		{
-			std::string numberStr;
-
-			U8 numberType = NB_INT | NB_SIGNED; // flags: 0x0 - int; 0x1 - floating point; 0x80 - signed; 0x40 - long; 0x20 - long; 
-			//0x10 - hex; 0x8 - oct; 0x4 - bin; floating point value always has sign bit and cannot has hex, oct, bin representations' bits.
-
-			//try parse decimal integer or floating point value
-			if (currChar != '0' || (currChar == '0' && _peekNextChar(stream, 1) == '.'))
-			{
-				while (iswdigit(currChar)) // pass integers
-				{                                           
-					numberStr.push_back(currChar);
-
-					currChar = _getNextChar(stream);
-				}
-
-				if (currChar == '.' && iswdigit(_peekNextChar(stream, 1))) //it's floating point value
-				{
-					numberType = NB_FLOAT;
-
-					while (iswdigit(currChar) || currChar == '.') // pass the rest part of the number
-					{
-						numberStr.push_back(currChar);
-
-						currChar = _getNextChar(stream);
-					}
-				}
-			}
-			else if (currChar == '0') //hex, oct or bin representation of an integer value
-			{
-				numberStr.push_back(currChar);
-
-				currChar = _getNextChar(stream);
-
-				if (currChar == 'x' || currChar == 'X') //hex value
-				{
-					numberType |= NB_HEX; //set the flag of hexademical numeral system
-
-					numberStr.push_back(currChar);
-
-					currChar = _getNextChar(stream);
-
-					const std::string hexAlphabet = "abcdefABCDEF"; //not including 0-9 digits
-
-					while (iswdigit(currChar) || (hexAlphabet.find_first_of(currChar) != -1))
-					{
-						numberStr.push_back(currChar);
-
-						currChar = _getNextChar(stream);
-					}
-				}
-				else if (currChar == 'b' || currChar == 'B') //bin value
-				{
-					numberType |= NB_BIN; //set the flag of binary numeral system
-					
-					currChar = _getNextChar(stream);
-
-					while (currChar == '0' || currChar == '1')
-					{
-						numberStr.push_back(currChar);
-
-						currChar = _getNextChar(stream);
-					}
-				}
-				else if (iswdigit(currChar)) //oct value
-				{
-					numberType |= NB_OCT; //set the flag of octal numeral system
-					
-					numberStr.push_back(currChar);
-
-					currChar = _getNextChar(stream);
-
-					while (iswdigit(currChar))
-					{
-						numberStr.push_back(currChar);
-
-						currChar = _getNextChar(stream);
-					}
-				}
-			}
-
-			//check up literals
-			const std::string allowableIntLiterals = "lLuUsS";
-
-			U8 literalsCount = 0x0; 
-
-			switch (numberType & NB_FLOAT)
-			{
-				case NB_INT:
-
-					//all possible literals are placed in allowableLiterals
-					while (allowableIntLiterals.find_first_of(currChar = _getCurrChar(stream)) != -1)
-					{
-						switch (currChar) //only first literal of 'u' or 's' influences on number's mask
-						{
-							case 'l':case 'L':
-
-								if (!(numberType & NB_LONG))
-								{
-									numberType |= NB_LONG;
-								}
-								else
-								{
-									numberType |= NB_ADD_LONG;
-								}
-
-								break;
-							case 'u':case 'U':
-								numberType <<= 1; //clear 8th bit
-								numberType >>= 1; 
-								break;
-							case 's':case 'S':
-								numberType |= NB_SIGNED;
-								break;
-						}
-
-						currChar = _getNextChar(stream);
-					}
-
-					if (currChar == 'f' || currChar == 'F')
-					{
-						numberType |= NB_FLOAT;
-
-						currChar = _getNextChar(stream);
-					}
-
-					break;
-
-				case NB_FLOAT:
-
-					//try to get literals 
-					//there is possible only one kind of literal for floating point values. It's 'f' or 'F'.
-					currChar = _getCurrChar(stream);
-
-					if (currChar == 'f' || currChar == 'F')
-					{
-						currChar = _getNextChar(stream); //read this value from the stream
-
-						numberType &= ~NB_LONG; //clear 'long' bit
-					}
-					else if (allowableIntLiterals.find_first_of(currChar) != -1)
-					{
-						return nullptr; //incorrect literal for floating point was found
-					}
-					else //double
-					{
-						numberType |= NB_LONG;
-					}
-
-					break;
-			}
-			
-			//the contruction of a token
-
-			U32 numSysBasis = (numberType & NB_HEX) | (numberType & NB_OCT) | ((numberType & NB_BIN) >> 1);
-			
-			switch (numberType & NB_FLOAT)
-			{
-				case 0: // integer
-
-					switch (numberType & NB_SIGNED) //Is it signed? If bit is turn on then it's signed value
-					{
-						case 0: //unsigned
-							return new CLiteralToken(new CUIntLiteral(strtoul(numberStr.c_str(), nullptr, numSysBasis)), mCurrPos);
-
-						case NB_SIGNED: //signed
-							return new CLiteralToken(new CIntLiteral(strtol(numberStr.c_str(), nullptr, numSysBasis)), mCurrPos);
-							
-						default:
-							return new CLiteralToken(new CIntLiteral(strtol(numberStr.c_str(), nullptr, numSysBasis)), mCurrPos);
-					}
-
-					break;
-
-				case 1: // floating point
-
-					switch (numberType & NB_LONG) //1 - double; 0; - float
-					{
-						case 0:
-							return new CLiteralToken(new CFloatLiteral(atof(numberStr.c_str())), mCurrPos);
-
-						case NB_LONG:
-							return new CLiteralToken(new CDoubleLiteral(atof(numberStr.c_str())), mCurrPos);
-					}
-
-					break;
-
-				default: // this case won't be never reached, but let it be here for safe code execution
-					return nullptr;
-			}
+			return *(mpPeekTokensBuffer._Get_container().cbegin() + numOfSteps);
 		}
 
-		//try to get a string
-		
-		std::string strConstantValue;
-
-		if (currChar == '\"')
+		for (U32 i = 0; i < numOfSteps - mpPeekTokensBuffer.size(); ++i)
 		{
-			while ((currChar = _getNextChar(stream)) != '\"' && currChar != EOF)
-			{
-				strConstantValue.push_back(currChar);
-			}
+			pToken = _scanNextToken();
 
-			if (currChar == EOF)
-			{
-				return nullptr;
-			}
-
-			_getNextChar(stream); //get \"
-
-			return new CLiteralToken(new CStringLiteral(strConstantValue), mCurrPos - 1);
+			mpPeekTokensBuffer.push(pToken);
 		}
-		
-		//try to get a char value
-		
-		if (currChar == '\'')
-		{
-			strConstantValue.clear();
 
-			while ((currChar = _getNextChar(stream)) != '\'' && currChar != EOF)
-			{
-				strConstantValue.push_back(currChar);
-			}
-
-			if (currChar == EOF)
-			{
-				return nullptr;
-			}
-
-			_getNextChar(stream); //get \'
-
-			return new CLiteralToken(new CCharLiteral(strConstantValue), mCurrPos - 1);
-		}
-		
-		return nullptr;
+		return pToken;
 	}
 	
-	std::map<std::string, E_TOKEN_TYPE> CLexer::_readTokensMapFromFile(const std::string& filename, Result& result)
+	C8 CLexer::_getNextChar(std::string& currStreamBuffer, IInputStream* pInputStream, U32& currPos)
 	{
-		std::map<std::string, E_TOKEN_TYPE> tokensMap;
+		_streamInputData(currStreamBuffer, pInputStream);
 
-		result = RV_SUCCESS;
+		// if current buffer is still empty this means we've reached the end of a file
+		if (currStreamBuffer.empty())
+		{
+			return EOF;
+		}
 
-		std::ifstream configFileWithTokens;
+		C8 currCh = currStreamBuffer.front();
+
+		currStreamBuffer.erase(currStreamBuffer.cbegin()); // remove read symbol
+
+		++currPos;
+
+		return currCh;
+	}
+
+	C8 CLexer::_peekNextChar(std::string& currStreamBuffer, IInputStream* pInputStream, U32& currPos, U32 offset)
+	{
+		_streamInputData(currStreamBuffer, pInputStream);
 		
-		configFileWithTokens.open(filename.c_str());
-
-		if (!configFileWithTokens.is_open())
+		// if current buffer is still empty this means we've reached the end of a file
+		if (currStreamBuffer.empty())
 		{
-			result = RV_FILE_NOT_FOUND;
-
-			return tokensMap;
+			return EOF;
 		}
 
-		//parse config file
-		std::string currConfigLine;
-		std::string tokenName;
-		std::string value;
+		auto iter = currStreamBuffer.begin() + offset;
 
-		U32 pos     = 0;
-		U32 prevPos = 0;
+		return iter != currStreamBuffer.cend() ? *iter : EOF;
+	}
+	
+	CToken* CLexer::_scanNextToken()
+	{
+		C8 currCh = ' ';
 
-		while (std::getline(configFileWithTokens, currConfigLine))
+		CToken* pRecognizedToken = nullptr;
+
+		while ((currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)) != EOF)
 		{
-			//the parsing of a current config line
-			//its representation (token_name  token_value_in_enum_E_TOKEN_TYPE)
-
-			pos = currConfigLine.find_first_of('(');
-
-			if (pos == -1) // there is no open bracket
+			// skip whitespaces
+			if (std::isblank(currCh))
 			{
-				result = RV_INCORRECT_CONFIG;
-
-				break;
+				continue;
 			}
 
-			//skip white spaces
-			pos     = currConfigLine.find_first_not_of(' ', pos + 1);
-			prevPos = pos;
-
-			//try to get a name of token
-			pos = currConfigLine.find_first_of(' ', pos);
-
-			if (pos == -1) // delimiter between name and value is absent
+			if (std::isspace(currCh))
 			{
-				result = RV_INCORRECT_CONFIG;
+				++mCurrLine;
 
-				break;
+				mCurrPos = 1;
+
+				continue;
 			}
 
-			tokenName = currConfigLine.substr(prevPos, pos - prevPos);
+			// skip comments
+			if (_skipComments(currCh))
+			{
+				continue;
+			}
 			
-			//skip white spaces
-			pos     = currConfigLine.find_first_not_of(' ', pos);
-			prevPos = pos;
-			
-			//check close bracket
-			pos = currConfigLine.find_first_of(')', pos);
-
-			if (pos == -1) // there is no close bracket
+			// try to parse literal
+			if (pRecognizedToken = _tryRecognizeLiteral(currCh))
 			{
-				result = RV_INCORRECT_CONFIG;
-
-				break;
+				return pRecognizedToken;
 			}
 
-			value = currConfigLine.substr(prevPos, pos - prevPos);
-			
-			//erase all white spaces if they exist
-			while ((pos = value.find(' ')) != -1)
+			// try to parse reserved keywords
+			if (pRecognizedToken = _tryRecognizeKeywordOrIdentifier(currCh))
 			{
-				value.erase(pos, 1);
+				return pRecognizedToken;
 			}
-
-			tokensMap.insert(std::make_pair(tokenName, (E_TOKEN_TYPE)atoi(value.c_str())));
 		}
 
-		configFileWithTokens.close();
+		return nullptr;
+	}
 
-		return tokensMap;
+	bool CLexer::_skipComments(C8 currCh)
+	{
+		if (currCh != '/')
+		{
+			return false;
+		}
+
+		currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+
+		switch (currCh)
+		{
+			case '/':
+				_skipSingleLineComment();
+				break;
+			case '*':
+				_skipMultiLineComment();
+				break;
+			default:
+				return false;
+		}
+
+		return true;
+	}
+
+	void CLexer::_skipSingleLineComment()
+	{
+		C8 currCh = ' ';
+
+		while ((currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)) != EOF && currCh != '\n')
+		{
+		}
+	}
+
+	void CLexer::_skipMultiLineComment()
+	{
+		C8 currCh = ' ';
+
+		U32 x = mCurrPos;
+		U32 y = mCurrLine;
+
+		while ((currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)) != EOF && currCh != '*')
+		{
+			_skipComments(currCh);
+		}
+
+		switch (currCh)
+		{
+			case EOF:
+				// the end of the file was reached, but there is no end of the comment
+				OnErrorOutput.Invoke({ LE_INVALID_END_OF_MULTILINE_COMMENT, x, y });
+				break;
+
+			case '*':
+				// try to read '/'
+				currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+
+				if (currCh != '/')
+				{
+					// invalid end of the multi-line comment
+					OnErrorOutput.Invoke({ LE_INVALID_END_OF_MULTILINE_COMMENT, x, y });
+				}
+				break;
+		}
+	}
+
+	CToken* CLexer::_tryRecognizeKeywordOrIdentifier(C8 currCh)
+	{
+		if (std::isdigit(currCh))
+		{
+			return nullptr;
+		}
+
+		bool isFound = false;
+
+		std::string currSequence;
+
+		auto iter = mReservedTokensMap.cbegin();
+
+		U32 x = mCurrPos;
+		U32 y = mCurrLine;
+
+		// try to detect identifier
+		if (std::isalpha(currCh) || currCh == '_')
+		{
+			do
+			{
+				currSequence += currCh;
+			} 
+			while ((currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)) != EOF && (std::isalnum(currCh) || currCh == '_'));
+
+			// the sequence is a keyword
+			if ((iter = mReservedTokensMap.find(currSequence)) != mReservedTokensMap.cend())
+			{
+				return new CToken((*iter).second, x, y);
+			}
+
+			// \todo Uncomment this code later when refactoring will be done
+			// try to parse some of literals true, false, null
+			if (currSequence == "false")
+			{
+				return new CLiteralToken(new CBoolLiteral(false), x, y);
+			}
+
+			if (currSequence == "true")
+			{
+				return new CLiteralToken(new CBoolLiteral(true), x, y);
+			}
+
+			if (currSequence == "null")
+			{
+				return new CLiteralToken(nullptr, x, y);
+			}
+
+			return new CIdentifierToken(currSequence, x, y);
+		}
+
+		// try to detect some operator symbol
+		currSequence += currCh;
+		currSequence += _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+
+		// the sequence is a keyword
+		for (U8 i = 0; i < 2; ++i)
+		{
+			if ((iter = mReservedTokensMap.find(currSequence)) != mReservedTokensMap.cend())
+			{
+				if (i == 0)
+				{
+					_getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos); // take symbol from buffer which was peeked
+				}
+
+				return new CToken((*iter).second, x, y);
+			}
+
+			currSequence = currCh;
+		}
+				
+		return nullptr;
+	}
+
+	CToken* CLexer::_tryRecognizeLiteral(C8 currCh)
+	{
+		CToken* pToken = nullptr;
+
+		if (pToken = _tryRecognizeNumberLiteral(currCh))
+		{
+			return pToken;
+		}
+
+		if (pToken = _tryRecognizeStringOrCharLiteral(currCh))
+		{
+			return pToken;
+		}
+
+		return nullptr;
+	}
+
+	CToken* CLexer::_tryRecognizeStringOrCharLiteral(C8 currCh)
+	{
+		bool isString = currCh == '\"';
+
+		if (currCh != '\'' && !isString)
+		{
+			return nullptr;
+		}
+
+		U32 x = mCurrPos;
+		U32 y = mCurrLine;
+
+		std::string literal;
+
+		while ((currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)) != '\'' && currCh != EOF && currCh != '\"')
+		{
+			literal += currCh;
+		}
+
+		if (currCh == EOF)
+		{
+			return nullptr;
+		}
+
+		return isString ? new CLiteralToken(new CStringLiteral(literal), x, y) : new CLiteralToken(new CCharLiteral(literal), x, y);
+	}
+
+	CToken* CLexer::_tryRecognizeNumberLiteral(C8 currCh)
+	{
+		static const std::string hexAlphabet { "abcdefABCDEF" };
+
+		C8 nextCh = _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos, 0);
+
+		if (currCh != '.' && !std::isdigit(currCh) || (currCh == '.' && !std::isdigit(nextCh)))
+		{
+			return nullptr;
+		}
+
+		std::string numberLiteral{ currCh };
+
+		U32 x = mCurrPos;
+		U32 y = mCurrLine;
+		
+		U8 numberType = NB_INT | NB_SIGNED; // flags: 0x0 - int; 0x1 - floating point; 0x80 - signed; 0x40 - long; 0x20 - long; 
+		//0x10 - hex; 0x8 - oct; 0x4 - bin; floating point value always has sign bit and cannot has hex, oct, bin representations' bits.
+		
+		// try recognize radix
+		if (currCh == '0')
+		{
+			if (std::isdigit(nextCh)) // possibly octal, also it can be floatint point value or just 0
+			{
+				numberType |= NB_OCT;
+
+				currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+
+				do
+				{
+					numberLiteral.push_back(currCh);
+
+					currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+				} while (std::isdigit(currCh) && currCh != '9');
+			}
+
+			if (nextCh == 'x' || nextCh == 'X') // hexagonal 
+			{
+				numberType |= NB_HEX;
+
+				currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+
+				do
+				{
+					numberLiteral.push_back(currCh);
+
+					currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+				} 
+				while (std::isdigit(currCh) || hexAlphabet.find(currCh) != std::string::npos);
+			}
+
+			if (nextCh == 'b' || nextCh == 'B') // binary
+			{
+				numberType |= NB_BIN;
+
+				currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+
+				while ((currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)) == '0' || currCh == '1')
+				{
+					numberLiteral.push_back(currCh);
+				} 
+			}
+
+			if (nextCh == '.') // floating point value
+			{
+				numberType |= NB_FLOAT;
+				
+				currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+
+				do
+				{
+					numberLiteral.push_back(currCh);
+				}
+				while (std::isdigit(currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)));
+			}
+
+			// just zero
+		}
+		else if (currCh == '.' || std::isdigit(currCh)) // decimal or floating point value
+		{
+			if (currCh == '.')
+			{
+				numberType |= NB_FLOAT;
+			}
+
+			while (std::isdigit(currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)))
+			{
+				numberLiteral.push_back(currCh);
+			}
+			
+			if (currCh == '.')
+			{
+				numberType |= NB_FLOAT;
+
+				numberLiteral.push_back(currCh);
+
+				while (std::isdigit(currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)))
+				{
+					numberLiteral.push_back(currCh);
+				}
+			}
+		}
+		
+		//check up literals
+		static const std::string allowableIntLiterals = "uL";
+
+		U8 literalsCount = 0x0; 
+
+		switch (numberType & NB_FLOAT)
+		{
+			case NB_INT:
+
+				//all possible literals are placed in allowableLiterals
+				while (allowableIntLiterals.find_first_of(currCh) != -1)
+				{
+					switch (currCh)
+					{
+						case 'L':
+							numberType |= (numberType & NB_LONG) ? NB_ADD_LONG : NB_LONG;
+							break;
+						case 'u':
+							numberType &= ~NB_SIGNED; //clear 'long' bit
+							break;
+						default:
+							numberType |= NB_SIGNED;
+							break;
+					}
+
+					currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+				}
+
+				if (currCh == 'f')
+				{
+					numberType |= NB_FLOAT;
+				}
+
+				break;
+
+			case NB_FLOAT:
+
+				//try to get suffix 
+				//there is possible only one kind of suffix for floating point values. It's 'f'
+				if (currCh == 'f')
+				{
+					numberType &= ~NB_LONG; //clear 'long' bit
+				}
+				else if (allowableIntLiterals.find_first_of(currCh) != -1)
+				{
+					return nullptr; //incorrect literal for floating point was found
+				}
+				else //double
+				{
+					numberType |= NB_LONG;
+				}
+
+				break;
+		}
+				
+		// token's construction
+		U32 numSysBasis = (numberType & NB_HEX) | (numberType & NB_OCT) | ((numberType & NB_BIN) >> 1);
+				
+		switch (numberType & NB_FLOAT)
+		{
+			case 0: // integer
+
+				switch (numberType & NB_SIGNED) //Is it signed? If bit is turn on then it's signed value
+				{
+					case 0: //unsigned
+						return new CLiteralToken(new CUIntLiteral(strtoul(numberLiteral.c_str(), nullptr, numSysBasis)), x, y);
+					default:
+						return new CLiteralToken(new CIntLiteral(strtol(numberLiteral.c_str(), nullptr, numSysBasis)), x, y);
+				}
+
+				break;
+
+			case 1: // floating point
+
+				switch (numberType & NB_LONG) //1 - double; 0; - float
+				{
+					case 0:
+						return new CLiteralToken(new CFloatLiteral(atof(numberLiteral.c_str())), x, y);
+
+					case NB_LONG:
+						return new CLiteralToken(new CDoubleLiteral(atof(numberLiteral.c_str())), x, y);
+				}
+
+				break;
+
+			default: // this case won't be never reached, but let it be here for safe code execution
+				return nullptr;
+		}
+
+		return nullptr;
+	}
+
+	void CLexer::_streamInputData(std::string& currStreamBuffer, IInputStream* pInputStream)
+	{
+		// stream a new portion of data
+		if (currStreamBuffer.empty())
+		{
+			auto result = pInputStream->ReadLine();
+
+			currStreamBuffer.append(result.IsOk() ? result.Get() : "");
+		}
 	}
 }

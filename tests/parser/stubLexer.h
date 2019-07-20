@@ -23,15 +23,14 @@ class CStubLexer : public gplc::ILexer
 		virtual ~CStubLexer();
 
 		/*!
-			\brief The function reads input stream of characters and prepares a tokens' sequence.
+				\brief The function reads input stream of characters and prepares a tokens' sequence.
 
-			\param[in] inputStream An input characters sequence.
-			\param[in] configFilename A name of file, which stores reserved keywords' declarations.
+				\param[in] pInputStream An input characters sequence
 
-			\return A function's result code.
-		*/
+				\return A function's result code.
+			*/
 
-		virtual gplc::Result Init(const std::string& inputStream, const std::string& configFilename);
+		virtual gplc::Result Init(gplc::IInputStream* pInputStream);
 
 		/*!
 			\brief The function clears the current state of an object.
@@ -46,12 +45,12 @@ class CStubLexer : public gplc::ILexer
 		/*!
 			\brief The function returns a current token from tokens' sequence
 
-			A call of this method doesn't change a state of an object.
+			A call of this method doesn't change a state of an object
 
 			\return A current token from tokens' sequence
 		*/
 
-		virtual const gplc::CToken* GetCurrToken() const;
+		virtual const gplc::CToken* GetCurrToken();
 
 		/*!
 			\brief The function returns next token from tokens' sequence
@@ -69,19 +68,7 @@ class CStubLexer : public gplc::ILexer
 			\return A token from tokens' sequence with specified offset from the current one.
 		*/
 
-		virtual const gplc::CToken* PeekNextToken(gplc::U32 numOfSteps = 1) const;
-
-		/*!
-			\brief The method saves current state of an object. It's used for backtracking.
-		*/
-
-		virtual void SavePosition();
-
-		/*!
-			\brief The method restores previous state of an object. It's used for backtracking.
-		*/
-
-		virtual void RestorePosition();
+		virtual const gplc::CToken* PeekNextToken(gplc::U32 numOfSteps = 1);
 	protected:
 		CStubLexer() = default;
 		CStubLexer(const CStubLexer& lexer);

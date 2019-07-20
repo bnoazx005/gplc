@@ -8,11 +8,6 @@ CStubLexer::CStubLexer(const std::vector<gplc::CToken*>& tokens):
 	std::copy(tokens.begin(), tokens.end(), std::back_inserter(mTokens));
 }
 
-CStubLexer::CStubLexer(const CStubLexer& lexer):
-	gplc::ILexer(lexer), mCurrTokenIndex(0), mSavedTokenIndex(UINT32_MAX)
-{
-}
-
 CStubLexer::~CStubLexer()
 {
 	gplc::U32 tokensCount = mTokens.size();
@@ -32,7 +27,7 @@ CStubLexer::~CStubLexer()
 	}
 }
 
-gplc::Result CStubLexer::Init(const std::string& inputStream, const std::string& configFilename)
+gplc::Result CStubLexer::Init(gplc::IInputStream* pInputStream)
 {	
 	return gplc::RV_SUCCESS;
 }
@@ -58,7 +53,7 @@ gplc::Result CStubLexer::Reset()
 	return gplc::RV_SUCCESS;
 }
 
-const gplc::CToken* CStubLexer::GetCurrToken() const
+const gplc::CToken* CStubLexer::GetCurrToken()
 {
 	if (mTokens.size() <= mCurrTokenIndex)
 	{
@@ -78,7 +73,7 @@ const gplc::CToken* CStubLexer::GetNextToken()
 	return mTokens[++mCurrTokenIndex];
 }
 
-const gplc::CToken* CStubLexer::PeekNextToken(gplc::U32 numOfSteps) const
+const gplc::CToken* CStubLexer::PeekNextToken(gplc::U32 numOfSteps)
 {
 	gplc::U32 neededTokenId = numOfSteps + mCurrTokenIndex;
 
@@ -88,19 +83,4 @@ const gplc::CToken* CStubLexer::PeekNextToken(gplc::U32 numOfSteps) const
 	}
 
 	return mTokens[neededTokenId];
-}
-
-void CStubLexer::SavePosition()
-{
-	mSavedTokenIndex = mCurrTokenIndex;
-}
-
-void CStubLexer::RestorePosition()
-{
-	if (mSavedTokenIndex >= UINT32_MAX)
-	{
-		return;
-	}
-
-	mCurrTokenIndex = mSavedTokenIndex;
 }

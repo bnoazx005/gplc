@@ -19,22 +19,8 @@ namespace gplc
 		CToken's defenition
 	*/
 
-	CToken::CToken():
-		mType(TT_DEFAULT)
-	{
-	}
-
-	/*CToken::CToken(const CToken& token):
-		mType(TT_DEFAULT)
-	{
-	}*/
-
-	CToken::CToken(E_TOKEN_TYPE type, U32 posAtStream):
-		mType(type), mPos(posAtStream)
-	{
-	}
-
-	CToken::~CToken()
+	CToken::CToken(E_TOKEN_TYPE type, U32 posAtStream, U32 currLine):
+		mType(type), mPos(posAtStream), mCurrLine(currLine)
 	{
 	}
 
@@ -48,18 +34,19 @@ namespace gplc
 		return mPos;
 	}
 
+	U32 CToken::GetLine() const
+	{
+		return mCurrLine;
+	}
+
 	std::string CToken::ToString() const
 	{
 		return "(Token: TT_DEFAULT)";
 	}
 
 
-	CLiteralToken::CLiteralToken(CBaseLiteral* pValue, U32 posAtStream):
-		CToken(TT_LITERAL, posAtStream), mpValue(pValue)
-	{
-	}
-
-	CLiteralToken::~CLiteralToken()
+	CLiteralToken::CLiteralToken(CBaseLiteral* pValue, U32 posAtStream, U32 currLine):
+		CToken(TT_LITERAL, posAtStream, currLine), mpValue(pValue)
 	{
 	}
 
@@ -73,22 +60,8 @@ namespace gplc
 		CIdentifierToken defenition
 	*/
 
-	CIdentifierToken::CIdentifierToken(const std::string& name, U32 posAtStream):
-		CToken(TT_IDENTIFIER, posAtStream), mName(name)
-	{
-	}
-
-	CIdentifierToken::CIdentifierToken() :
-		CToken(TT_IDENTIFIER, 0)
-	{
-	}
-
-	CIdentifierToken::CIdentifierToken(const CIdentifierToken& token) :
-		CToken(token)
-	{
-	}
-
-	CIdentifierToken::~CIdentifierToken()
+	CIdentifierToken::CIdentifierToken(const std::string& name, U32 posAtStream, U32 currLine):
+		CToken(TT_IDENTIFIER, posAtStream, currLine), mName(name)
 	{
 	}
 
@@ -101,25 +74,7 @@ namespace gplc
 	std::string TokenTypeToString(E_TOKEN_TYPE type)
 	{
 		switch (type)
-		{
-			case TT_INT:
-				return "int";
-  
-			case TT_UINT:
-				return "uint";
-  
-			case TT_FLOAT:
-				return "float";
-  
-			case TT_DOUBLE:
-				return "double";
-  
-			case TT_STRING:
-				return "string";
-  
-			case TT_CHAR:
-				return "char";
-  
+		{  
 			case TT_IDENTIFIER:
 				return "\'identifier\'";
   

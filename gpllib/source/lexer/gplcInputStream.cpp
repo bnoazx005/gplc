@@ -56,6 +56,6 @@ namespace gplc
 			return TErrorValue<E_RESULT_VALUE>(RV_FAIL);
 		}
 
-		return TOkValue(readLine);
+		return TOkValue(readLine.append("\n"));
 	}
 }
