@@ -12,6 +12,7 @@
 /// Lexer's files group
 #include "lexer/gplcLexer.h"
 #include "lexer/gplcTokens.h"
+#include "lexer/gplcInputStream.h"
 
 /// Common data structures and utilities
 #include "common/gplcTypes.h"
