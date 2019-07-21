@@ -139,7 +139,7 @@ TEST_CASE("Lexer's tests")
 		auto checkLiteral = [](const CLiteralToken* pToken, int expectedValue)
 		{
 			REQUIRE(pToken);
-			REQUIRE(dynamic_cast<const gplc::CIntLiteral*>(pToken->GetValue())->GetValue() == expectedValue);
+			REQUIRE(dynamic_cast<const gplc::CIntValue*>(pToken->GetValue())->GetValue() == expectedValue);
 		};
 
 		IInputStream* pInputStream = new CStubInputStream(
@@ -166,13 +166,13 @@ TEST_CASE("Lexer's tests")
 		auto checkFloatLiteral = [](const CLiteralToken* pToken, F32 expectedValue)
 		{
 			REQUIRE(pToken);
-			REQUIRE(dynamic_cast<const gplc::CFloatLiteral*>(pToken->GetValue())->GetValue() == expectedValue);
+			REQUIRE(dynamic_cast<const gplc::CFloatValue*>(pToken->GetValue())->GetValue() == expectedValue);
 		};
 
 		auto checkDoubleLiteral = [](const CLiteralToken* pToken, F64 expectedValue)
 		{
 			REQUIRE(pToken);
-			REQUIRE(dynamic_cast<const gplc::CDoubleLiteral*>(pToken->GetValue())->GetValue() == expectedValue);
+			REQUIRE(dynamic_cast<const gplc::CDoubleValue*>(pToken->GetValue())->GetValue() == expectedValue);
 		};
 
 		IInputStream* pInputStream = new CStubInputStream(
@@ -233,7 +233,7 @@ TEST_CASE("Lexer's tests")
 		auto pStringLiteral = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
 
 		REQUIRE(pStringLiteral);
-		REQUIRE((dynamic_cast<const CStringLiteral*>(pStringLiteral->GetValue()))->GetValue() == "Hello, world!");
+		REQUIRE((dynamic_cast<const CStringValue*>(pStringLiteral->GetValue()))->GetValue() == "Hello, world!");
 		REQUIRE(!pLexer->GetNextToken());
 
 		delete pInputStream;
@@ -251,12 +251,12 @@ TEST_CASE("Lexer's tests")
 		auto pCharLiteral = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
 
 		REQUIRE(pCharLiteral);
-		REQUIRE((dynamic_cast<const CCharLiteral*>(pCharLiteral->GetValue()))->GetValue() == "f");
+		REQUIRE((dynamic_cast<const CCharValue*>(pCharLiteral->GetValue()))->GetValue() == "f");
 		
 		pCharLiteral = dynamic_cast<const gplc::CLiteralToken*>(pLexer->GetNextToken());
 
 		REQUIRE(pCharLiteral);
-		REQUIRE((dynamic_cast<const CCharLiteral*>(pCharLiteral->GetValue()))->GetValue() == "g");
+		REQUIRE((dynamic_cast<const CCharValue*>(pCharLiteral->GetValue()))->GetValue() == "g");
 
 		REQUIRE(!pLexer->GetNextToken());
 

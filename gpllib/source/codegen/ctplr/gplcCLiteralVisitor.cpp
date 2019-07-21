@@ -1,41 +1,41 @@
 #include "codegen/ctplr/gplcCLiteralVisitor.h"
-#include "common/gplcLiterals.h"
+#include "common/gplcValues.h"
 #include "common/gplcTypeSystem.h"
 
 
 namespace gplc
 {
-	TLLVMIRData CCLiteralVisitor::VisitIntLiteral(const CIntLiteral* pLiteral)
+	TLLVMIRData CCLiteralVisitor::VisitIntLiteral(const CIntValue* pLiteral)
 	{
 		return std::to_string(pLiteral->GetValue());
 	}
 
-	TLLVMIRData CCLiteralVisitor::VisitUIntLiteral(const CUIntLiteral* pLiteral)
+	TLLVMIRData CCLiteralVisitor::VisitUIntLiteral(const CUIntValue* pLiteral)
 	{
 		return std::to_string(pLiteral->GetValue());
 	}
 
-	TLLVMIRData CCLiteralVisitor::VisitFloatLiteral(const CFloatLiteral* pLiteral)
+	TLLVMIRData CCLiteralVisitor::VisitFloatLiteral(const CFloatValue* pLiteral)
 	{
 		return std::to_string(pLiteral->GetValue());
 	}
 
-	TLLVMIRData CCLiteralVisitor::VisitDoubleLiteral(const CDoubleLiteral* pLiteral)
+	TLLVMIRData CCLiteralVisitor::VisitDoubleLiteral(const CDoubleValue* pLiteral)
 	{
 		return std::to_string(pLiteral->GetValue());
 	}
 
-	TLLVMIRData CCLiteralVisitor::VititCharLiteral(const CCharLiteral* pLiteral)
+	TLLVMIRData CCLiteralVisitor::VititCharLiteral(const CCharValue* pLiteral)
 	{
 		return pLiteral->GetValue();
 	}
 
-	TLLVMIRData CCLiteralVisitor::VisitStringLiteral(const CStringLiteral* pLiteral)
+	TLLVMIRData CCLiteralVisitor::VisitStringLiteral(const CStringValue* pLiteral)
 	{
 		return pLiteral->GetValue();
 	}
 
-	TLLVMIRData CCLiteralVisitor::VisitBoolLiteral(const CBoolLiteral* pLiteral)
+	TLLVMIRData CCLiteralVisitor::VisitBoolLiteral(const CBoolValue* pLiteral)
 	{
 		return std::to_string(pLiteral->GetValue());
 	}

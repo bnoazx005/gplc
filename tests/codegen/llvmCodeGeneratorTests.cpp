@@ -18,9 +18,9 @@ TEST_CASE("CLLVMCodeGenerator tests")
 	{
 		CASTSourceUnitNode* pProgram = new CASTSourceUnitNode();
 
-		pProgram->AttachChild(new CASTBinaryExpressionNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(2))),
+		pProgram->AttachChild(new CASTBinaryExpressionNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(2))),
 														   TT_PLUS,
-														   new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(3)))));
+														   new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(3)))));
 
 		pCodeGenerator->Generate(pProgram, new CSymTable());
 	}

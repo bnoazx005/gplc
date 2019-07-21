@@ -31,7 +31,7 @@ TEST_CASE("CASTLispyPrinter tests")
 											new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("x")),
 											gplc::TT_PLUS,
 											new gplc::CASTBinaryExpressionNode(
-												new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CFloatLiteral(2.0f))),
+												new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CFloatValue(2.0f))),
 												gplc::TT_STAR,
 												new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("y")))))) == "(set! z (+ x (* 2.000000 y)))");
 	}
@@ -42,10 +42,10 @@ TEST_CASE("CASTLispyPrinter tests")
 		pThenBlock->AttachChild(new gplc::CASTBinaryExpressionNode(
 									new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("y")),
 									gplc::TT_PLUS,
-									new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CIntLiteral(2)))));
+									new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CIntValue(2)))));
 
 		gplc::CASTBlockNode* pElseBlock = new gplc::CASTBlockNode();
-		pElseBlock->AttachChild(new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CIntLiteral(42))));
+		pElseBlock->AttachChild(new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CIntValue(42))));
 
 		REQUIRE(pASTPrinter->Print(new gplc::CASTIfStatementNode(new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("x")), 
 																 pThenBlock, pElseBlock)) == "(if x ((+ y 2)) (42))");
@@ -58,7 +58,7 @@ TEST_CASE("CASTLispyPrinter tests")
 		pBlock->AttachChild(new gplc::CASTBinaryExpressionNode(
 			new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("y")),
 			gplc::TT_PLUS,
-			new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CIntLiteral(2)))));
+			new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CIntValue(2)))));
 
 		REQUIRE(pASTPrinter->Print(new gplc::CASTLoopStatementNode(pBlock)) == "(loop ((+ y 2)))");
 		REQUIRE(pASTPrinter->Print(new gplc::CASTWhileLoopStatementNode(new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("x")), pBlock)) == "(while x ((+ y 2)))");
@@ -69,6 +69,6 @@ TEST_CASE("CASTLispyPrinter tests")
 		REQUIRE(pASTPrinter->Print(new gplc::CASTReturnStatementNode(new gplc::CASTBinaryExpressionNode(
 											new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTIdentifierNode("y")),
 											gplc::TT_PLUS,
-											new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CIntLiteral(2)))))) == "(return (+ y 2))");
+											new gplc::CASTUnaryExpressionNode(gplc::TT_DEFAULT, new gplc::CASTLiteralNode(new gplc::CIntValue(2)))))) == "(return (+ y 2))");
 	}
 }

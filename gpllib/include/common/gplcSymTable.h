@@ -19,13 +19,13 @@
 
 namespace gplc
 {
-	class CBaseLiteral;
+	class CBaseValue;
 	class CType;
 
 
 	struct TSymbolDesc
 	{
-		CBaseLiteral* mpValue;
+		CBaseValue* mpValue;
 
 		CType*        mpType;
 	};

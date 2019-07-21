@@ -9,7 +9,7 @@
 */
 
 #include "lexer/gplcTokens.h"
-#include "common/gplcLiterals.h"
+#include "common/gplcValues.h"
 
 
 namespace gplc
@@ -45,12 +45,12 @@ namespace gplc
 	}
 
 
-	CLiteralToken::CLiteralToken(CBaseLiteral* pValue, U32 posAtStream, U32 currLine):
+	CLiteralToken::CLiteralToken(CBaseValue* pValue, U32 posAtStream, U32 currLine):
 		CToken(TT_LITERAL, posAtStream, currLine), mpValue(pValue)
 	{
 	}
 
-	CBaseLiteral* CLiteralToken::GetValue() const
+	CBaseValue* CLiteralToken::GetValue() const
 	{
 		return mpValue;
 	}

@@ -9,7 +9,7 @@
 */
 
 #include "parser/gplcASTNodes.h"
-#include "common/gplcLiterals.h"
+#include "common/gplcValues.h"
 #include "common/gplcTypeSystem.h"
 #include "common/gplcSymTable.h"
 #include <stack>
@@ -416,7 +416,7 @@ namespace gplc
 		\brief CASTLiteralNode's definition
 	*/
 
-	CASTLiteralNode::CASTLiteralNode(CBaseLiteral* pValue):
+	CASTLiteralNode::CASTLiteralNode(CBaseValue* pValue):
 		CASTTypeNode(NT_LITERAL), mpValue(pValue)
 	{
 	}
@@ -446,7 +446,7 @@ namespace gplc
 		return pResolver->VisitLiteral(this);
 	}
 
-	CBaseLiteral* CASTLiteralNode::GetValue() const
+	CBaseValue* CASTLiteralNode::GetValue() const
 	{
 		return mpValue;
 	}

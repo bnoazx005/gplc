@@ -10,7 +10,7 @@
 
 #include "common\gplcTypeSystem.h"
 #include "parser/gplcASTNodes.h"
-#include "common/gplcLiterals.h"
+#include "common/gplcValues.h"
 #include "common/gplcSymTable.h"
 #include <algorithm>
 
@@ -283,7 +283,7 @@ namespace gplc
 		return mAttributes;
 	}
 	
-	CBaseLiteral* CType::GetDefaultValue() const
+	CBaseValue* CType::GetDefaultValue() const
 	{
 		if (IsBuiltIn())
 		{
@@ -383,7 +383,7 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 
-	CBaseLiteral* CType::_getBuiltinTypeDefaultValue(E_COMPILER_TYPES type) const
+	CBaseValue* CType::_getBuiltinTypeDefaultValue(E_COMPILER_TYPES type) const
 	{
 		/*
 			\todo list of unimplemented types
@@ -401,25 +401,25 @@ namespace gplc
 			case CT_INT16:
 			case CT_INT32:
 			case CT_INT64:
-				return new CIntLiteral(0);
+				return new CIntValue(0);
 
 			case CT_UINT8:
 			case CT_UINT16:
 			case CT_UINT32:
 			case CT_UINT64:
-				return new CUIntLiteral(0);
+				return new CUIntValue(0);
 
 			case CT_FLOAT:
-				return new CFloatLiteral(0.0f);
+				return new CFloatValue(0.0f);
 
 			case CT_DOUBLE:
-				return new CDoubleLiteral(0.0);
+				return new CDoubleValue(0.0);
 
 			case CT_CHAR:
-				return new CCharLiteral("\0");
+				return new CCharValue("\0");
 
 			case CT_BOOL:
-				return new CBoolLiteral(true);
+				return new CBoolValue(true);
 		}
 
 		return nullptr; ///< unknown type
@@ -460,7 +460,7 @@ namespace gplc
 		return mpReturnValueType;
 	}
 
-	CBaseLiteral* CFunctionType::GetDefaultValue() const
+	CBaseValue* CFunctionType::GetDefaultValue() const
 	{
 		return new CNullLiteral();
 	}

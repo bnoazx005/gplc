@@ -35,11 +35,11 @@ namespace gplc
 	};
 
 
-	class CBaseLiteral : public IVisitable<TLLVMIRData, ILiteralVisitor<TLLVMIRData>>
+	class CBaseValue : public IVisitable<TLLVMIRData, ILiteralVisitor<TLLVMIRData>>
 	{
 		public:
-			CBaseLiteral(E_LITERAL_TYPE type);
-			virtual ~CBaseLiteral() = default;
+			CBaseValue(E_LITERAL_TYPE type);
+			virtual ~CBaseValue() = default;
 			
 			virtual TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) = 0;
 
@@ -49,23 +49,23 @@ namespace gplc
 
 			virtual CType* GetTypeInfo() const = 0;
 		protected:
-			CBaseLiteral() = default;
-			CBaseLiteral(const CBaseLiteral& literal) = default;
+			CBaseValue() = default;
+			CBaseValue(const CBaseValue& literal) = default;
 		protected:
 			E_LITERAL_TYPE mLiteralType;
 	};
 
 
 	template <typename T>
-	class CGenericBaseLiteral : public CBaseLiteral
+	class CGenericBaseValue : public CBaseValue
 	{
 		public:
-			CGenericBaseLiteral(E_LITERAL_TYPE type, T value):
-				CBaseLiteral(type), mValue(value)
+			CGenericBaseValue(E_LITERAL_TYPE type, T value):
+				CBaseValue(type), mValue(value)
 			{
 			}
 
-			~CGenericBaseLiteral() = default;
+			~CGenericBaseValue() = default;
 
 			T GetValue() const
 			{
@@ -74,18 +74,18 @@ namespace gplc
 
 			virtual CType* GetTypeInfo() const = 0;
 		protected:
-			CGenericBaseLiteral() = default;
-			CGenericBaseLiteral(const CGenericBaseLiteral& literal) = default;
+			CGenericBaseValue() = default;
+			CGenericBaseValue(const CGenericBaseValue& literal) = default;
 		protected:
 			T mValue;
 	};
 
 
-	class CIntLiteral : public CGenericBaseLiteral<I64>
+	class CIntValue : public CGenericBaseValue<I64>
 	{
 		public:
-			CIntLiteral(I64 value) :
-				CGenericBaseLiteral(LT_INT, value)
+			CIntValue(I64 value) :
+				CGenericBaseValue(LT_INT, value)
 			{
 			}
 
@@ -97,11 +97,11 @@ namespace gplc
 	};
 
 
-	class CUIntLiteral : public CGenericBaseLiteral<U64>
+	class CUIntValue : public CGenericBaseValue<U64>
 	{
 		public:
-			CUIntLiteral(U64 value) :
-				CGenericBaseLiteral(LT_UINT, value)
+			CUIntValue(U64 value) :
+				CGenericBaseValue(LT_UINT, value)
 			{
 			}
 
@@ -113,11 +113,11 @@ namespace gplc
 	};
 
 
-	class CFloatLiteral : public CGenericBaseLiteral<F32>
+	class CFloatValue : public CGenericBaseValue<F32>
 	{
 		public:
-			CFloatLiteral(F32 value) :
-				CGenericBaseLiteral(LT_FLOAT, value)
+			CFloatValue(F32 value) :
+				CGenericBaseValue(LT_FLOAT, value)
 			{
 			}
 
@@ -129,27 +129,11 @@ namespace gplc
 	};
 
 
-	class CDoubleLiteral : public CGenericBaseLiteral<F64>
+	class CDoubleValue : public CGenericBaseValue<F64>
 	{
 		public:
-			CDoubleLiteral(F64 value) :
-				CGenericBaseLiteral(LT_DOUBLE, value)
-			{
-			}
-			
-			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
-
-			std::string ToString() const override;
-
-			CType* GetTypeInfo() const override;
-	};
-
-
-	class CStringLiteral : public CGenericBaseLiteral<std::string>
-	{
-		public:
-			CStringLiteral(const std::string& value) :
-				CGenericBaseLiteral(LT_STRING, value)
+			CDoubleValue(F64 value) :
+				CGenericBaseValue(LT_DOUBLE, value)
 			{
 			}
 			
@@ -161,11 +145,27 @@ namespace gplc
 	};
 
 
-	class CCharLiteral : public CGenericBaseLiteral<std::string>
+	class CStringValue : public CGenericBaseValue<std::string>
 	{
 		public:
-			CCharLiteral(const std::string& value) :
-				CGenericBaseLiteral(LT_CHAR, value)
+			CStringValue(const std::string& value) :
+				CGenericBaseValue(LT_STRING, value)
+			{
+			}
+			
+			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
+
+			std::string ToString() const override;
+
+			CType* GetTypeInfo() const override;
+	};
+
+
+	class CCharValue : public CGenericBaseValue<std::string>
+	{
+		public:
+			CCharValue(const std::string& value) :
+				CGenericBaseValue(LT_CHAR, value)
 			{
 			}
 
@@ -177,11 +177,11 @@ namespace gplc
 	};
 
 
-	class CBoolLiteral : public CGenericBaseLiteral<bool>
+	class CBoolValue : public CGenericBaseValue<bool>
 	{
 		public:
-			CBoolLiteral(bool value) :
-				CGenericBaseLiteral(LT_BOOLEAN, value)
+			CBoolValue(bool value) :
+				CGenericBaseValue(LT_BOOLEAN, value)
 			{
 			}
 
@@ -193,11 +193,11 @@ namespace gplc
 	};
 
 
-	class CNullLiteral : public CGenericBaseLiteral<uintptr_t>
+	class CNullLiteral : public CGenericBaseValue<uintptr_t>
 	{
 		public:
 			CNullLiteral() :
-				CGenericBaseLiteral(LT_POINTER, 0x0)
+				CGenericBaseValue(LT_POINTER, 0x0)
 			{
 			}
 

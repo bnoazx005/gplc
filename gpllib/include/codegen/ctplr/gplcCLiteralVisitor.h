@@ -24,13 +24,13 @@ namespace gplc
 			CCLiteralVisitor() = default;
 			virtual ~CCLiteralVisitor() = default;
 
-			TLLVMIRData VisitIntLiteral(const CIntLiteral* pLiteral) override;
-			TLLVMIRData VisitUIntLiteral(const CUIntLiteral* pLiteral) override;
-			TLLVMIRData VisitFloatLiteral(const CFloatLiteral* pLiteral) override;
-			TLLVMIRData VisitDoubleLiteral(const CDoubleLiteral* pLiteral) override;
-			TLLVMIRData VititCharLiteral(const CCharLiteral* pLiteral) override;
-			TLLVMIRData VisitStringLiteral(const CStringLiteral* pLiteral) override;
-			TLLVMIRData VisitBoolLiteral(const CBoolLiteral* pLiteral) override;
+			TLLVMIRData VisitIntLiteral(const CIntValue* pLiteral) override;
+			TLLVMIRData VisitUIntLiteral(const CUIntValue* pLiteral) override;
+			TLLVMIRData VisitFloatLiteral(const CFloatValue* pLiteral) override;
+			TLLVMIRData VisitDoubleLiteral(const CDoubleValue* pLiteral) override;
+			TLLVMIRData VititCharLiteral(const CCharValue* pLiteral) override;
+			TLLVMIRData VisitStringLiteral(const CStringValue* pLiteral) override;
+			TLLVMIRData VisitBoolLiteral(const CBoolValue* pLiteral) override;
 			TLLVMIRData VisitNullLiteral(const CNullLiteral* pLiteral) override;
 		protected:
 			CCLiteralVisitor(const CCLiteralVisitor& visitor) = default;

@@ -11,7 +11,7 @@
 #include "lexer\gplcLexer.h"
 #include "lexer\gplcTokens.h"
 #include "common\gplcConstants.h"
-#include "common/gplcLiterals.h"
+#include "common/gplcValues.h"
 #include "lexer/gplcInputStream.h"
 #include <cctype>
 
@@ -368,12 +368,12 @@ namespace gplc
 			// try to parse some of literals true, false, null
 			if (currSequence == "false")
 			{
-				return new CLiteralToken(new CBoolLiteral(false), x, y);
+				return new CLiteralToken(new CBoolValue(false), x, y);
 			}
 
 			if (currSequence == "true")
 			{
-				return new CLiteralToken(new CBoolLiteral(true), x, y);
+				return new CLiteralToken(new CBoolValue(true), x, y);
 			}
 
 			if (currSequence == "null")
@@ -448,7 +448,7 @@ namespace gplc
 			return nullptr;
 		}
 
-		return isString ? new CLiteralToken(new CStringLiteral(literal), x, y) : new CLiteralToken(new CCharLiteral(literal), x, y);
+		return isString ? new CLiteralToken(new CStringValue(literal), x, y) : new CLiteralToken(new CCharValue(literal), x, y);
 	}
 
 	CToken* CLexer::_tryRecognizeNumberLiteral(C8 currCh)
@@ -619,9 +619,9 @@ namespace gplc
 				switch (numberType & NB_SIGNED) //Is it signed? If bit is turn on then it's signed value
 				{
 					case 0: //unsigned
-						return new CLiteralToken(new CUIntLiteral(strtoul(numberLiteral.c_str(), nullptr, numSysBasis)), x, y);
+						return new CLiteralToken(new CUIntValue(strtoul(numberLiteral.c_str(), nullptr, numSysBasis)), x, y);
 					default:
-						return new CLiteralToken(new CIntLiteral(strtol(numberLiteral.c_str(), nullptr, numSysBasis)), x, y);
+						return new CLiteralToken(new CIntValue(strtol(numberLiteral.c_str(), nullptr, numSysBasis)), x, y);
 				}
 
 				break;
@@ -631,10 +631,10 @@ namespace gplc
 				switch (numberType & NB_LONG) //1 - double; 0; - float
 				{
 					case 0:
-						return new CLiteralToken(new CFloatLiteral(atof(numberLiteral.c_str())), x, y);
+						return new CLiteralToken(new CFloatValue(atof(numberLiteral.c_str())), x, y);
 
 					case NB_LONG:
-						return new CLiteralToken(new CDoubleLiteral(atof(numberLiteral.c_str())), x, y);
+						return new CLiteralToken(new CDoubleValue(atof(numberLiteral.c_str())), x, y);
 				}
 
 				break;

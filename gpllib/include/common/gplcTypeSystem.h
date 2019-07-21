@@ -25,7 +25,7 @@ namespace gplc
 	class CASTTypeNode;
 	class ISymTable;
 	class CType;
-	class CBaseLiteral;
+	class CBaseValue;
 
 
 	E_COMPILER_TYPES NodeToCompilerType(E_NODE_TYPE nodeType);
@@ -139,7 +139,7 @@ namespace gplc
 
 			U32 GetAttributes() const;
 
-			virtual CBaseLiteral* GetDefaultValue() const;
+			virtual CBaseValue* GetDefaultValue() const;
 
 			/*!
 				\brief The operator of equality checks up whether two
@@ -161,7 +161,7 @@ namespace gplc
 
 			Result _removeChildTypeDesc(CType** type);
 
-			CBaseLiteral* _getBuiltinTypeDefaultValue(E_COMPILER_TYPES type) const;
+			CBaseValue* _getBuiltinTypeDefaultValue(E_COMPILER_TYPES type) const;
 		protected:
 			static TCastMap     mCastMap;
 
@@ -219,7 +219,7 @@ namespace gplc
 
 			CType* GetReturnValueType() const;
 
-			CBaseLiteral* GetDefaultValue() const override;
+			CBaseValue* GetDefaultValue() const override;
 
 			const std::string& GetName() const;
 

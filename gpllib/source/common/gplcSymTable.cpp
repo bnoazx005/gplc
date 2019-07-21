@@ -10,7 +10,7 @@
 
 #include "common/gplcSymTable.h"
 #include "common/gplcTypeSystem.h"
-#include "common/gplcLiterals.h"
+#include "common/gplcValues.h"
 #include <cassert>
 
 

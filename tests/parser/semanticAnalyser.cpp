@@ -33,7 +33,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 	SECTION("TestAnalyse_UsageOfUndeclaredVariable_ReturnsFalse")
 	{
 		auto pExprNode = new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(-0.5))));
+			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5))));
 
 		REQUIRE(!pSemanticAnalyser->Analyze(pExprNode, pTypeResolver, new CSymTable()));
 	}
@@ -53,7 +53,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 		pProgram->AttachChild(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)));
 		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(-0.5)))));
+			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5)))));
 
 		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
 	}
@@ -73,7 +73,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 		pProgram->AttachChild(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)));
 		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(42)))));
+													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(42)))));
 
 		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
 	}
@@ -96,15 +96,15 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 		pProgram->AttachChild(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)));
 		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("y")),
-													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(1.0f)))));
+													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(1.0f)))));
 		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
 													 new CASTBinaryExpressionNode(
 														 new CASTBinaryExpressionNode(
-																new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(-0.5))),
+																new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5))),
 															    TT_STAR,
 																new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("y"))),
 														 TT_PLUS,
-														 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(1.0f))))));
+														 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(1.0f))))));
 
 		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
 	}
@@ -127,15 +127,15 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 		pProgram->AttachChild(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)));
 		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("y")),
-			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(1.0f)))));
+			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(1.0f)))));
 		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
 			new CASTBinaryExpressionNode(
 				new CASTBinaryExpressionNode(
-					new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(-0.5))),
+					new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5))),
 					TT_STAR,
 					new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("y"))),
 				TT_PLUS,
-				new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(1))))));
+				new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(1))))));
 
 		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
 	}
@@ -150,7 +150,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 			x : double = -0.5;
 		*/
 		REQUIRE(pSemanticAnalyser->Analyze(new CASTDefinitionNode(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)),
-																  new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(-0.5)))), 
+																  new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5)))), 
 										   pTypeResolver, new CSymTable()));
 	}
 
@@ -170,12 +170,12 @@ TEST_CASE("CSemanticAnalyser's tests")
 		auto pProgram = new CASTSourceUnitNode();
 
 		pProgram->AttachChild(new CASTDefinitionNode(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)),
-													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(-0.5)))));
+													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5)))));
 
 		auto pThenBlock = new CASTBlockNode();
 
 		pThenBlock->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-													   new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(1.0f)))));
+													   new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(1.0f)))));
 
 		pProgram->AttachChild(new CASTIfStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")), pThenBlock, nullptr));
 
@@ -198,17 +198,17 @@ TEST_CASE("CSemanticAnalyser's tests")
 		auto pProgram = new CASTSourceUnitNode();
 
 		pProgram->AttachChild(new CASTDefinitionNode(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)),
-			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(-0.5)))));
+			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5)))));
 
 		auto pThenBlock = new CASTBlockNode();
 
 		pThenBlock->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(1.0f)))));
+			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(1.0f)))));
 
 		pProgram->AttachChild(new CASTIfStatementNode(new CASTBinaryExpressionNode(
 																	new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")), 
 																	TT_LE,
-																	new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(0.0)))),
+																	new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(0.0)))),
 													  pThenBlock, nullptr));
 
 		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
@@ -293,7 +293,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 		auto pFuncBody = new CASTBlockNode();
 
-		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(42)))));
+		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(42)))));
 
 		REQUIRE(pSemanticAnalyser->Analyze(new CASTFuncDefinitionNode(new CASTDeclarationNode(pIdentifiersList, pFuncDeclaration), pFuncDeclaration, pFuncBody),
 										   pTypeResolver, new CSymTable()));
@@ -322,7 +322,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 		auto pFuncBody = new CASTBlockNode();
 
-		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(42)))));
+		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(42)))));
 
 		REQUIRE(!pSemanticAnalyser->Analyze(new CASTFuncDefinitionNode(new CASTDeclarationNode(pIdentifiersList, pFuncDeclaration), 
 																	   new CASTFunctionDeclNode(nullptr, new CASTFunctionArgsNode(), new CASTTypeNode(NT_INT32)),
@@ -357,7 +357,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 		auto pFuncBody = new CASTBlockNode();
 
-		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(42)))));
+		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(42)))));
 
 		auto pXIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
 		pXIdentifier->AttachChild(new CASTIdentifierNode("x"));
@@ -365,11 +365,11 @@ TEST_CASE("CSemanticAnalyser's tests")
 		auto pProgram = new CASTSourceUnitNode();
 
 		auto pCallArgs = new CASTNode(NT_FUNC_ARGS);
-		pCallArgs->AttachChild(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(0))));
+		pCallArgs->AttachChild(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(0))));
 
 		pProgram->AttachChild(new CASTFuncDefinitionNode(new CASTDeclarationNode(pIdentifiersList, pFuncDeclaration), pFuncDeclaration, pFuncBody));
 		pProgram->AttachChild(new CASTDefinitionNode(new CASTDeclarationNode(pXIdentifier, new CASTTypeNode(NT_DOUBLE)), 
-													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleLiteral(0.0)))));
+													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(0.0)))));
 		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
 													 new CASTBinaryExpressionNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
 																				  TT_PLUS,
@@ -413,7 +413,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 		auto pFuncBody = new CASTBlockNode();
 
-		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(42)))));
+		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(42)))));
 
 		auto pXIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
 		pXIdentifier->AttachChild(new CASTIdentifierNode("x"));
@@ -421,11 +421,11 @@ TEST_CASE("CSemanticAnalyser's tests")
 		auto pProgram = new CASTSourceUnitNode();
 
 		auto pCallArgs = new CASTNode(NT_FUNC_ARGS);
-		pCallArgs->AttachChild(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(0))));
+		pCallArgs->AttachChild(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(0))));
 
 		pProgram->AttachChild(new CASTFuncDefinitionNode(new CASTDeclarationNode(pIdentifiersList, pFuncDeclaration), pFuncDeclaration, pFuncBody));
 		pProgram->AttachChild(new CASTDefinitionNode(new CASTDeclarationNode(pXIdentifier, new CASTTypeNode(NT_INT32)),
-			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(0)))));
+			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(0)))));
 		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
 													new CASTBinaryExpressionNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
 														TT_PLUS,
@@ -465,7 +465,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 		auto pFuncBody = new CASTBlockNode();
 
-		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntLiteral(42)))));
+		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(42)))));
 
 		REQUIRE(!pSemanticAnalyser->Analyze(new CASTFuncDefinitionNode(new CASTDeclarationNode(pIdentifiersList, pFuncDeclaration), pFuncDeclaration, pFuncBody),
 											pTypeResolver, new CSymTable()));

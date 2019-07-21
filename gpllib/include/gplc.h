@@ -19,7 +19,7 @@
 #include "common/gplcConstants.h"
 #include "common/gplcSymTable.h"
 #include "common/gplcTypeSystem.h"
-#include "common/gplcLiterals.h"
+#include "common/gplcValues.h"
 #include "common/gplcVisitor.h"
 
 /// Parser's files group

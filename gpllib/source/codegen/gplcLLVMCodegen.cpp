@@ -2,7 +2,7 @@
 #include "common/gplcSymTable.h"
 #include "codegen/gplcLLVMLiteralVisitor.h"
 #include "parser/gplcASTNodes.h"
-#include "common/gplcLiterals.h"
+#include "common/gplcValues.h"
 
 
 namespace gplc

@@ -80,13 +80,13 @@ namespace gplc
 
 
 	class CType;
-	class CIntLiteral;
-	class CUIntLiteral;
-	class CFloatLiteral;
-	class CDoubleLiteral;
-	class CCharLiteral;
-	class CStringLiteral;
-	class CBoolLiteral;
+	class CIntValue;
+	class CUIntValue;
+	class CFloatValue;
+	class CDoubleValue;
+	class CCharValue;
+	class CStringValue;
+	class CBoolValue;
 	class CNullLiteral;
 
 
@@ -97,13 +97,13 @@ namespace gplc
 			ILiteralVisitor() = default;
 			virtual ~ILiteralVisitor() = default;
 
-			virtual T VisitIntLiteral(const CIntLiteral* pLiteral) = 0;
-			virtual T VisitUIntLiteral(const CUIntLiteral* pLiteral) = 0;
-			virtual T VisitFloatLiteral(const CFloatLiteral* pLiteral) = 0;
-			virtual T VisitDoubleLiteral(const CDoubleLiteral* pLiteral) = 0;
-			virtual T VititCharLiteral(const CCharLiteral* pLiteral) = 0;
-			virtual T VisitStringLiteral(const CStringLiteral* pLiteral) = 0;
-			virtual T VisitBoolLiteral(const CBoolLiteral* pLiteral) = 0;
+			virtual T VisitIntLiteral(const CIntValue* pLiteral) = 0;
+			virtual T VisitUIntLiteral(const CUIntValue* pLiteral) = 0;
+			virtual T VisitFloatLiteral(const CFloatValue* pLiteral) = 0;
+			virtual T VisitDoubleLiteral(const CDoubleValue* pLiteral) = 0;
+			virtual T VititCharLiteral(const CCharValue* pLiteral) = 0;
+			virtual T VisitStringLiteral(const CStringValue* pLiteral) = 0;
+			virtual T VisitBoolLiteral(const CBoolValue* pLiteral) = 0;
 			virtual T VisitNullLiteral(const CNullLiteral* pLiteral) = 0;
 		protected:
 			ILiteralVisitor(const ILiteralVisitor& visitor) = default;

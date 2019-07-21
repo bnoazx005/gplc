@@ -1,7 +1,7 @@
 #include "codegen/ctplr/gplcCCodegen.h"
 #include "common/gplcSymTable.h"
 #include "parser/gplcASTNodes.h"
-#include "common/gplcLiterals.h"
+#include "common/gplcValues.h"
 #include "codegen/ctplr/gplcCTypeVisitor.h"
 #include "common/gplcTypeSystem.h"
 #include "codegen/ctplr/gplcCLiteralVisitor.h"

@@ -20,7 +20,7 @@
 
 namespace gplc
 {
-	class CBaseLiteral;
+	class CBaseValue;
 	class CASTTypeNode;
 	class CType;
 	class ITypeResolver;
@@ -232,7 +232,7 @@ namespace gplc
 	class CASTLiteralNode : public CASTTypeNode
 	{
 		public:
-			CASTLiteralNode(CBaseLiteral* pValue);
+			CASTLiteralNode(CBaseValue* pValue);
 			virtual ~CASTLiteralNode();
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
@@ -241,12 +241,12 @@ namespace gplc
 
 			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
 
-			CBaseLiteral* GetValue() const;
+			CBaseValue* GetValue() const;
 		protected:
 			CASTLiteralNode() = default;
 			CASTLiteralNode(const CASTLiteralNode& node) = default;
 		protected:
-			CBaseLiteral* mpValue;
+			CBaseValue* mpValue;
 	};
 
 

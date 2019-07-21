@@ -20,10 +20,10 @@ TEST_CASE("CLLVMLiteralVisitor tests")
 
 	SECTION("TestVisitIntLiteral_PassIntLiteral_ReturnsLLVMIRValue")
 	{
-		checkAsserts(llvm::dyn_cast<llvm::ConstantInt>(std::get<llvm::Value*>(pLiteralVisitor->VisitIntLiteral(new CIntLiteral(42)))), 42);
+		checkAsserts(llvm::dyn_cast<llvm::ConstantInt>(std::get<llvm::Value*>(pLiteralVisitor->VisitIntLiteral(new CIntValue(42)))), 42);
 
-		checkAsserts(llvm::dyn_cast<llvm::ConstantInt>(std::get<llvm::Value*>(pLiteralVisitor->VisitBoolLiteral(new CBoolLiteral(true)))), true);
-		checkAsserts(llvm::dyn_cast<llvm::ConstantInt>(std::get<llvm::Value*>(pLiteralVisitor->VisitBoolLiteral(new CBoolLiteral(false)))), false);
+		checkAsserts(llvm::dyn_cast<llvm::ConstantInt>(std::get<llvm::Value*>(pLiteralVisitor->VisitBoolLiteral(new CBoolValue(true)))), true);
+		checkAsserts(llvm::dyn_cast<llvm::ConstantInt>(std::get<llvm::Value*>(pLiteralVisitor->VisitBoolLiteral(new CBoolValue(false)))), false);
 	}
 
 	delete pLiteralVisitor;
