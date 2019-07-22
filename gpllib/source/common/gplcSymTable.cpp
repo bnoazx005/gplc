@@ -82,6 +82,31 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 
+	Result CSymTable::EnterNamedScope(const std::string& scopeName)
+	{
+		if (mIsLocked || mpCurrScopeEntry == nullptr)
+		{
+			return RV_FAIL;
+		}
+
+		TSymTableEntry* pNestedTable = new TSymTableEntry();
+
+		auto iter = mpCurrScopeEntry->mNamedScopes.find(scopeName);
+
+		if (iter != mpCurrScopeEntry->mNamedScopes.cend())
+		{
+			return RV_FAIL;
+		}
+
+		mpCurrScopeEntry->mNamedScopes.insert({ scopeName, pNestedTable });
+
+		pNestedTable->mParentScope = mpCurrScopeEntry;
+
+		mpCurrScopeEntry = pNestedTable;
+
+		return RV_SUCCESS;
+	}
+
 	Result CSymTable::EnterScope()
 	{
 		if (mIsLocked || mpCurrScopeEntry == nullptr)

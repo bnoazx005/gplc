@@ -84,6 +84,7 @@ namespace gplc
 		TT_TRUE            = 58,
 		TT_NULL            = 59,
 		TT_MODULE_KEYWORD,
+		TT_STATIC_KEYWORD,
 		TT_LITERAL,
 		TT_DEFAULT
 	};

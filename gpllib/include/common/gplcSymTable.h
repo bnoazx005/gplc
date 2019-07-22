@@ -23,6 +23,29 @@ namespace gplc
 	class CType;
 
 
+	/*!
+		\brief There are few main types of entities which a symbol can refers to:
+				- Unnamed scope (nested local scopes, global scope)
+				- Named scope (structs, enums, modules, etc)
+
+		The main difference between two of these is the named scope's variables are visible
+		everywhere inside of that scope, no matter where they are declared before or after 
+		their usage. Unnamed scopes work in manner of C style scopes, in other words you 
+		should declare or define variable before its usage.
+	*/
+/*
+	class ISymbolInfo
+	{
+		public:
+			virtual ~ISymbolInfo() = default;
+
+
+		protected:
+			ISymbolInfo() = default;
+			ISymbolInfo(const ISymbolInfo& symbolInfo) = default;
+	};*/
+
+
 	struct TSymbolDesc
 	{
 		CBaseValue* mpValue;
@@ -38,7 +61,11 @@ namespace gplc
 	class ISymTable
 	{
 		protected:
-			typedef std::unordered_map<std::string, TSymbolDesc> TSymbolsMap;
+			struct TSymTableEntry;
+
+			typedef std::unordered_map<std::string, TSymbolDesc>     TSymbolsMap;
+
+			typedef std::unordered_map<std::string, TSymTableEntry*> TNamedScopesMap;
 
 			/*!
 				\brief The TSymTableEntry structure
@@ -51,6 +78,8 @@ namespace gplc
 				std::vector<TSymTableEntry*> mNestedScopes;
 
 				TSymbolsMap                  mVariables;
+
+				TNamedScopesMap              mNamedScopes;
 			};
 
 		public:
@@ -61,6 +90,7 @@ namespace gplc
 
 			virtual Result Unlock() = 0;
 
+			virtual Result EnterNamedScope(const std::string& scopeName) = 0;
 			virtual Result EnterScope() = 0;
 
 			virtual Result LeaveScope() = 0;
@@ -89,6 +119,7 @@ namespace gplc
 
 			Result Unlock() override;
 
+			Result EnterNamedScope(const std::string& scopeName) override;
 			Result EnterScope() override;
 
 			Result LeaveScope() override;

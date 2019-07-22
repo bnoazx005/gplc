@@ -71,6 +71,7 @@ namespace gplc
 		{ "&&", TT_AND },
 		{ "||", TT_OR },
 		{ "module", TT_MODULE_KEYWORD },
+		{ "static", TT_STATIC_KEYWORD }
 	};
 
 	CLexer::CLexer():
