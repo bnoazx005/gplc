@@ -92,6 +92,7 @@ TEST_CASE("Lexer's tests")
 			TT_IDENTIFIER,
 			TT_IDENTIFIER,
 			TT_IDENTIFIER,
+			TT_IDENTIFIER,
 			TT_NE,
 			TT_EQ,
 			TT_ASSIGN_OP,
@@ -110,11 +111,16 @@ TEST_CASE("Lexer's tests")
 			TT_COLON,
 			TT_BACKSLASH,
 			TT_SLASH,
+			TT_MINUS,
+			TT_ARROW,
+			TT_MINUS,
+			TT_LITERAL,
+			TT_COMMA
 		};
 		
 		IInputStream* pInputStream = new CStubInputStream(
 			{
-				"identifier integer  character  floatValue float2int !====<>+-*[]{};,.:\\/"
+				"identifier integer  character  floatValue float2int integer!====<>+-*[]{};,.:\\/-->-2,"
 			});
 
 		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);

@@ -175,9 +175,9 @@ namespace gplc
 
 		CToken* pToken = nullptr;
 		
-		if (numOfSteps < mpPeekTokensBuffer.size())
+		if (numOfSteps <= mpPeekTokensBuffer.size())
 		{
-			return *(mpPeekTokensBuffer._Get_container().cbegin() + numOfSteps);
+			return *(mpPeekTokensBuffer._Get_container().cbegin() + (numOfSteps - 1));
 		}
 
 		for (U32 i = 0; i < numOfSteps - mpPeekTokensBuffer.size(); ++i)
@@ -186,7 +186,7 @@ namespace gplc
 
 			mpPeekTokensBuffer.push(pToken);
 		}
-
+		
 		return pToken;
 	}
 	
@@ -276,14 +276,16 @@ namespace gplc
 			return false;
 		}
 
-		currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+		currCh = _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos, 0);
 
 		switch (currCh)
 		{
 			case '/':
+				_getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
 				_skipSingleLineComment();
 				break;
 			case '*':
+				_getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
 				_skipMultiLineComment();
 				break;
 			default:
@@ -353,11 +355,14 @@ namespace gplc
 		// try to detect identifier
 		if (std::isalpha(currCh) || currCh == '_')
 		{
-			do
+			currSequence.push_back(currCh);
+
+			while ((currCh = _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos, 0)) != EOF && (std::isalnum(currCh) || currCh == '_'))
 			{
-				currSequence += currCh;
+				currSequence.push_back(currCh);
+
+				currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
 			} 
-			while ((currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)) != EOF && (std::isalnum(currCh) || currCh == '_'));
 
 			// the sequence is a keyword
 			if ((iter = mReservedTokensMap.find(currSequence)) != mReservedTokensMap.cend())
@@ -387,7 +392,7 @@ namespace gplc
 
 		// try to detect some operator symbol
 		currSequence += currCh;
-		currSequence += _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+		currSequence += _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos, 0);
 
 		// the sequence is a keyword
 		for (U8 i = 0; i < 2; ++i)
@@ -537,9 +542,11 @@ namespace gplc
 				numberType |= NB_FLOAT;
 			}
 
-			while (std::isdigit(currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)))
+			while (std::isdigit(currCh = _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos, 0)))
 			{
 				numberLiteral.push_back(currCh);
+
+				currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
 			}
 			
 			if (currCh == '.')
@@ -548,9 +555,13 @@ namespace gplc
 
 				numberLiteral.push_back(currCh);
 
-				while (std::isdigit(currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)))
+				_getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+
+				while (std::isdigit(currCh = _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos, 0)))
 				{
 					numberLiteral.push_back(currCh);
+
+					currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
 				}
 			}
 		}
@@ -586,6 +597,8 @@ namespace gplc
 				if (currCh == 'f')
 				{
 					numberType |= NB_FLOAT;
+
+					_getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
 				}
 
 				break;
@@ -597,6 +610,8 @@ namespace gplc
 				if (currCh == 'f')
 				{
 					numberType &= ~NB_LONG; //clear 'long' bit
+
+					_getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
 				}
 				else if (allowableIntLiterals.find_first_of(currCh) != -1)
 				{

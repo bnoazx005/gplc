@@ -954,6 +954,6 @@ namespace gplc
 
 	bool CParser::_match(const CToken* pToken, E_TOKEN_TYPE type)
 	{
-		return pToken->GetType() == type;
+		return pToken && pToken->GetType() == type;
 	}
 }
