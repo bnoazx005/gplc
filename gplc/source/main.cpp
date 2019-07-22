@@ -48,7 +48,7 @@ int main(int argc, const char** argv)
 
 	bool result = pSemanticAnalyser->Analyze(pSourceAST, pTypeResolver, pSymTable);
 
-	ICodeGenerator* pCodeGenerator = new CLLVMCodeGenerator(); //new CCCodeGenerator();
+	ICodeGenerator* pCodeGenerator = new CCCodeGenerator();
 
 	auto output = pCodeGenerator->Generate(pSourceAST, pSymTable);
 

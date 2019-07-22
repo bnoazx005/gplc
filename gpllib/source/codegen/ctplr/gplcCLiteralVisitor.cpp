@@ -40,7 +40,7 @@ namespace gplc
 		return std::to_string(pLiteral->GetValue());
 	}
 
-	TLLVMIRData CCLiteralVisitor::VisitNullLiteral(const CNullLiteral* pLiteral)
+	TLLVMIRData CCLiteralVisitor::VisitNullLiteral(const CPointerValue* pLiteral)
 	{
 		return "NULL";
 	}

@@ -87,7 +87,7 @@ namespace gplc
 	class CCharValue;
 	class CStringValue;
 	class CBoolValue;
-	class CNullLiteral;
+	class CPointerValue;
 
 
 	template<typename T>
@@ -104,7 +104,7 @@ namespace gplc
 			virtual T VititCharLiteral(const CCharValue* pLiteral) = 0;
 			virtual T VisitStringLiteral(const CStringValue* pLiteral) = 0;
 			virtual T VisitBoolLiteral(const CBoolValue* pLiteral) = 0;
-			virtual T VisitNullLiteral(const CNullLiteral* pLiteral) = 0;
+			virtual T VisitNullLiteral(const CPointerValue* pLiteral) = 0;
 		protected:
 			ILiteralVisitor(const ILiteralVisitor& visitor) = default;
 	};

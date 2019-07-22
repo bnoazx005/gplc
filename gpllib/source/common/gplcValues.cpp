@@ -119,17 +119,20 @@ namespace gplc
 		return new CType(CT_BOOL, BTS_BOOL, 0x0);
 	}
 
-	TLLVMIRData CNullLiteral::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
+
+	const std::string CPointerValue::mNullPointerValue { "nullptr" };
+
+	TLLVMIRData CPointerValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitNullLiteral(this);
 	}
 
-	std::string CNullLiteral::ToString() const
+	std::string CPointerValue::ToString() const
 	{
 		return "null";
 	}
 
-	CType* CNullLiteral::GetTypeInfo() const
+	CType* CPointerValue::GetTypeInfo() const
 	{
 		return new CType(CT_POINTER, BTS_POINTER, 0x0);
 	}

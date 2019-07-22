@@ -25,7 +25,7 @@ TEST_CASE("CCCodeGenerator tests")
 		 
 		pSymTable->AddVariable("x", { new CIntValue(0), new CType(CT_INT64, BTS_INT64, 0x0) });
 		pSymTable->AddVariable("y", { new CIntValue(0), new CType(CT_INT64, BTS_INT64, 0x0) });
-		pSymTable->AddVariable("f", { new CNullLiteral(), new CFunctionType({}, new CType(CT_INT32, BTS_INT32, 0x0), 0x0) });
+		pSymTable->AddVariable("f", { new CPointerValue(), new CFunctionType({}, new CType(CT_INT32, BTS_INT32, 0x0), 0x0) });
 
 		CASTSourceUnitNode* pProgram = new CASTSourceUnitNode();
 
@@ -76,7 +76,7 @@ TEST_CASE("CCCodeGenerator tests")
 	{
 		auto pSymTable = new CSymTable();
 
-		pSymTable->AddVariable("f", { new CNullLiteral(), new CFunctionType({}, new CType(CT_INT32, BTS_INT32, 0x0), 0x0) });
+		pSymTable->AddVariable("f", { new CPointerValue(), new CFunctionType({}, new CType(CT_INT32, BTS_INT32, 0x0), 0x0) });
 
 		CASTSourceUnitNode* pProgram = new CASTSourceUnitNode();
 		

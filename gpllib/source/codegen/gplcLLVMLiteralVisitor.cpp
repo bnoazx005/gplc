@@ -55,7 +55,7 @@ namespace gplc
 		return pLiteral->GetValue() ? llvm::ConstantInt::getTrue(*mpContext) : llvm::ConstantInt::getFalse(*mpContext);
 	}
 
-	TLLVMIRData CLLVMLiteralVisitor::VisitNullLiteral(const CNullLiteral* pLiteral)
+	TLLVMIRData CLLVMLiteralVisitor::VisitNullLiteral(const CPointerValue* pLiteral)
 	{
 		return {};
 	}

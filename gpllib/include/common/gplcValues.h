@@ -193,11 +193,13 @@ namespace gplc
 	};
 
 
-	class CNullLiteral : public CGenericBaseValue<uintptr_t>
+	class CPointerValue : public CGenericBaseValue<std::string>
 	{
 		public:
-			CNullLiteral() :
-				CGenericBaseValue(LT_POINTER, 0x0)
+			static const std::string mNullPointerValue;
+		public:
+			CPointerValue(const std::string& identifier) :
+				CGenericBaseValue(LT_POINTER, identifier)
 			{
 			}
 

@@ -462,7 +462,7 @@ namespace gplc
 
 	CBaseValue* CFunctionType::GetDefaultValue() const
 	{
-		return new CNullLiteral();
+		return new CPointerValue(CPointerValue::mNullPointerValue);
 	}
 
 	const std::string& CFunctionType::GetName() const
