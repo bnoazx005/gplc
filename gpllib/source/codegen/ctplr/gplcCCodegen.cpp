@@ -161,7 +161,8 @@ namespace gplc
 
 		result.append(std::get<std::string>(pNode->GetLeft()->Accept(this)))
 			  .append(" = ")
-			  .append(std::get<std::string>(pNode->GetRight()->Accept(this)));
+			  .append(std::get<std::string>(pNode->GetRight()->Accept(this)))
+			  .append(";\n");
 
 		return result;
 	}
@@ -259,7 +260,7 @@ namespace gplc
 
 	TLLVMIRData CCCodeGenerator::VisitDefinitionNode(CASTDefinitionNode* pNode)
 	{
-		auto pIdentifiers = pNode->GetDeclaration()->GetChildren();
+		auto pIdentifiers = pNode->GetDeclaration()->GetIdentifiers()->GetChildren();
 
 		std::string result;
 

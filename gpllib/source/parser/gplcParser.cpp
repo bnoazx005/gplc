@@ -553,7 +553,7 @@ namespace gplc
 
 	CASTExpressionNode* CParser::_parseExpression(ILexer* pLexer)
 	{
-		return _parseHighPrecedenceExpr(pLexer);
+		return _parseEqualityExpr(pLexer);
 	}
 
 	CASTExpressionNode* CParser::_parseHighPrecedenceExpr(ILexer* pLexer)
@@ -627,7 +627,7 @@ namespace gplc
 
 	CASTExpressionNode* CParser::_parseComparisonExpr(ILexer* pLexer)
 	{
-		CASTExpressionNode* pLeft = _parseLowPrecedenceExpr(pLexer);
+		CASTExpressionNode* pLeft = _parseHighPrecedenceExpr(pLexer);
 
 		CASTExpressionNode* pRight = nullptr;
 
@@ -642,7 +642,7 @@ namespace gplc
 
 			pLexer->GetNextToken();
 
-			pRight = _parseLowPrecedenceExpr(pLexer);
+			pRight = _parseHighPrecedenceExpr(pLexer);
 
 			pLeft = new CASTBinaryExpressionNode(pLeft, opType, pRight);
 		}
