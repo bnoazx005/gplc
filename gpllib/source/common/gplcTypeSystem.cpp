@@ -110,11 +110,15 @@ namespace gplc
 	{
 		auto args = pNode->GetArgs()->GetChildren();
 
-		std::vector<CType*> argsTypes;
+		CFunctionType::TArgsArray argsTypes;
+
+		CASTIdentifierNode* pCurrArgDecl = nullptr;
 
 		for (auto pCurrArgNode : args)
 		{
-			argsTypes.push_back(Resolve(dynamic_cast<CASTTypeNode*>(pCurrArgNode), mpSymTable));
+			pCurrArgDecl = dynamic_cast<CASTIdentifierNode*>((dynamic_cast<CASTDeclarationNode*>(pCurrArgNode))->GetIdentifiers()->GetChildren()[0]);
+			
+			argsTypes.push_back({ pCurrArgDecl->GetName(), Resolve(dynamic_cast<CASTTypeNode*>(pCurrArgNode), mpSymTable) });
 		}
 
 		return new CFunctionType(argsTypes, Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetReturnValueType()), mpSymTable), 0x0);
@@ -429,7 +433,7 @@ namespace gplc
 		CFunctionType's definition
 	*/
 
-	CFunctionType::CFunctionType(const std::vector<CType*>& argsTypes, CType* pReturnValueType, U32 attributes):
+	CFunctionType::CFunctionType(const TArgsArray& argsTypes, CType* pReturnValueType, U32 attributes):
 		mName(), CType(CT_FUNCTION, CT_POINTER, attributes), mpReturnValueType(pReturnValueType)
 	{
 		std::copy(argsTypes.begin(), argsTypes.end(), std::back_inserter(mArgsTypes));
@@ -450,7 +454,7 @@ namespace gplc
 		mAttributes = attributes;
 	}
 
-	const std::vector<CType*>& CFunctionType::GetArgsTypes() const
+	const CFunctionType::TArgsArray& CFunctionType::GetArgsTypes() const
 	{
 		return mArgsTypes;
 	}
@@ -494,8 +498,8 @@ namespace gplc
 
 		for (I32 i = 0; i < pArgsTypes.size(); ++i)
 		{
-			pOtherFuncArg = pFunctionType->mArgsTypes[i];
-			pCurrFuncArg  = mArgsTypes[i];
+			pOtherFuncArg = pFunctionType->mArgsTypes[i].second;
+			pCurrFuncArg  = mArgsTypes[i].second;
 
 			if (!pOtherFuncArg || !pCurrFuncArg || !pOtherFuncArg->AreSame(pCurrFuncArg))
 			{

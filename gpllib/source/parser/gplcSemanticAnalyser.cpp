@@ -364,7 +364,7 @@ namespace gplc
 			return false;
 		}
 
-		mpSymTable->EnterScope();
+		mpSymTable->CreateScope();
 
 		// check lambda type
 		CType* pAssignedLambdaType = nullptr;
@@ -392,7 +392,7 @@ namespace gplc
 
 	bool CSemanticAnalyser::_enterScope(CASTBlockNode* pNode, ISymTable* pSymTable)
 	{
-		pSymTable->EnterScope();
+		pSymTable->CreateScope();
 
 		bool result = pNode->Accept(this);
 

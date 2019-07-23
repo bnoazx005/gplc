@@ -170,12 +170,16 @@ namespace gplc
 	{
 		std::string result("{\n");
 
+		mpSymTable->VisitScope();
+
 		auto pStatements = pNode->GetStatements();
 		
 		for (auto pCurrStatement : pStatements)
 		{
 			result.append(std::get<std::string>(pCurrStatement->Accept(this)));
 		}
+
+		mpSymTable->LeaveScope();
 
 		return result.append("}\n");
 	}
@@ -288,20 +292,24 @@ namespace gplc
 	{
 		CFunctionType* pLambdaType = dynamic_cast<CFunctionType*>(mpTypeResolver->Resolve(pNode->GetLambdaTypeInfo(), mpSymTable));
 
+		std::string lambdaName = _generateAnonymousLambdaName(pLambdaType);
+
 		pLambdaType->SetAttributes(AV_STATIC);
-		pLambdaType->SetName(_generateAnonymousLambdaName(pLambdaType));
-
-		std::string lambdaDeclaration    = std::get<std::string>(pLambdaType->Accept(mpTypeVisitor));
-		std::string lambdaFullDefinition = lambdaDeclaration + "\n" + std::get<std::string>(pNode->GetValue()->Accept(this));
-
-		mGlobalDeclarationsContext.append(lambdaDeclaration).append(";\n");
-		mGlobalDefinitionsContext.append(lambdaFullDefinition).append("\n");
+		pLambdaType->SetName(lambdaName);
 
 		auto pFuncDeclaration = pNode->GetDeclaration();
 
 		auto pFuncIdentifierNode = dynamic_cast<CASTIdentifierNode*>(pFuncDeclaration->GetIdentifiers()->GetChildren()[0]);
 
 		const TSymbolDesc* pFuncDesc = mpSymTable->LookUp(pFuncIdentifierNode->GetName());
+
+		auto pLambdaTypeInfo = pNode->GetLambdaTypeInfo();
+
+		std::string lambdaDeclaration    = std::get<std::string>(pLambdaType->Accept(mpTypeVisitor));
+		std::string lambdaFullDefinition = lambdaDeclaration + "\n" + std::get<std::string>(pNode->GetValue()->Accept(this));
+		
+		mGlobalDeclarationsContext.append(lambdaDeclaration).append(";\n");
+		mGlobalDefinitionsContext.append(lambdaFullDefinition).append("\n");
 
 		std::string result{ std::get<std::string>(pFuncDesc->mpType->Accept(mpTypeVisitor)).append(" = &").append(pLambdaType->GetName()).append(";\n") };
 
@@ -319,7 +327,7 @@ namespace gplc
 
 		for (auto pCurrArgType : pLambdaType->GetArgsTypes())
 		{
-			name.append(pCurrArgType->ToShortAliasString());
+			name.append(pCurrArgType.second->ToShortAliasString());
 		}
 
 		// random salt

@@ -50,15 +50,13 @@ int main(int argc, const char** argv)
 
 	ICodeGenerator* pCodeGenerator = new CCCodeGenerator();
 
-	auto output = pCodeGenerator->Generate(pSourceAST, pSymTable);
+	std::string transformedSource = std::get<std::string>(pCodeGenerator->Generate(pSourceAST, pSymTable));
 
-	//std::string transformedSource = std::get<std::string>(pCodeGenerator->Generate(pSourceAST, pSymTable));
+	std::ofstream out("main.c");
 
-	//std::ofstream out("main.c");
+	out << transformedSource;
 
-	//out << transformedSource;
-
-	//out.close();
+	out.close();
 
 	delete pInputStream;
 	delete pCodeGenerator;

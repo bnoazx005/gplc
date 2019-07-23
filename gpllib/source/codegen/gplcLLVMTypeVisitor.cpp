@@ -53,7 +53,7 @@ namespace gplc
 
 		for (auto pCurrArgType : pArgs)
 		{
-			args.push_back(std::get<llvm::Type*>(pCurrArgType->Accept(this)));
+			args.push_back(std::get<llvm::Type*>(pCurrArgType.second->Accept(this)));
 		}
 
 		return llvm::FunctionType::get(std::get<llvm::Type*>(pFuncType->GetReturnValueType()->Accept(this)), args, false);

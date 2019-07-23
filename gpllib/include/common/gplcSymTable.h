@@ -94,8 +94,11 @@ namespace gplc
 
 			virtual Result Unlock() = 0;
 
-			virtual Result EnterNamedScope(const std::string& scopeName) = 0;
-			virtual Result EnterScope() = 0;
+			virtual Result CreateNamedScope(const std::string& scopeName) = 0;
+			virtual Result CreateScope() = 0;
+
+			virtual Result VisitNamedScope(const std::string& scopeName) = 0;
+			virtual Result VisitScope() = 0;
 
 			virtual Result LeaveScope() = 0;
 
@@ -124,8 +127,11 @@ namespace gplc
 
 			Result Unlock() override;
 
-			Result EnterNamedScope(const std::string& scopeName) override;
-			Result EnterScope() override;
+			Result CreateNamedScope(const std::string& scopeName) override;
+			Result CreateScope() override;
+
+			Result VisitNamedScope(const std::string& scopeName) override;
+			Result VisitScope() override;
 
 			Result LeaveScope() override;
 

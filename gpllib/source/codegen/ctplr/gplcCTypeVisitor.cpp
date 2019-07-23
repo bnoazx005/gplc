@@ -49,7 +49,7 @@ namespace gplc
 
 		for (auto iter = pArgs.cbegin(); iter != pArgs.cend(); ++iter)
 		{
-			args.append(std::get<std::string>((*iter)->Accept(this))).append(" ");
+			args.append(std::get<std::string>((*iter).second->Accept(this))).append(" ").append((*iter).first);
 
 			if (iter + 1 < pArgs.cend())
 			{

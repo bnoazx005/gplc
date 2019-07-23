@@ -206,7 +206,9 @@ namespace gplc
 	class CFunctionType : public CType
 	{
 		public:
-			CFunctionType(const std::vector<CType*>& argsTypes, CType* pReturnValueType, U32 attributes = 0x0);
+			typedef std::vector<std::pair<std::string, CType*>> TArgsArray;
+		public:
+			CFunctionType(const TArgsArray& argsTypes, CType* pReturnValueType, U32 attributes = 0x0);
 			virtual ~CFunctionType() = default;
 
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
@@ -215,7 +217,7 @@ namespace gplc
 
 			void SetAttributes(U32 attributes);
 
-			const std::vector<CType*>& GetArgsTypes() const;
+			const TArgsArray& GetArgsTypes() const;
 
 			CType* GetReturnValueType() const;
 
@@ -230,11 +232,11 @@ namespace gplc
 			CFunctionType() = default;
 			CFunctionType(const CFunctionType& function) = default;
 		protected:
-			std::string         mName;
+			std::string mName;
 
-			std::vector<CType*> mArgsTypes;
+			TArgsArray  mArgsTypes;
 
-			CType*              mpReturnValueType;
+			CType*      mpReturnValueType;
 	};
 
 	/*!

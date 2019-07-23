@@ -37,7 +37,7 @@ TEST_CASE("CSymTable tests")
 		pSymTable->AddVariable({ "x", nullptr, new gplc::CType(gplc::CT_INT32, gplc::BTS_INT32, 0x0) });
 		pSymTable->AddVariable({ "global", nullptr, new gplc::CType(gplc::CT_INT32, gplc::BTS_INT32, 0x0) });
 
-		pSymTable->EnterScope();
+		pSymTable->CreateScope();
 
 		pSymTable->AddVariable({ "x", nullptr, new gplc::CType(gplc::CT_INT16, gplc::BTS_INT16, 0x0) });
 		checkAsserts(pSymTable->LookUp("x"), gplc::CT_INT16); 
@@ -62,7 +62,7 @@ TEST_CASE("CSymTable tests")
 		pSymTable->AddVariable({ "x", nullptr, new gplc::CType(gplc::CT_INT32, gplc::BTS_INT32, 0x0) });
 		pSymTable->AddVariable({ "global", nullptr, new gplc::CType(gplc::CT_INT32, gplc::BTS_INT32, 0x0) });
 
-		pSymTable->EnterNamedScope("Foo");
+		pSymTable->CreateNamedScope("Foo");
 
 		pSymTable->AddVariable({ "x", nullptr, new gplc::CType(gplc::CT_INT16, gplc::BTS_INT16, 0x0) });
 		checkAsserts(pSymTable->LookUp("x"), gplc::CT_INT16);

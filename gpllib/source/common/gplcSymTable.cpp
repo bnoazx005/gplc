@@ -82,7 +82,7 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 
-	Result CSymTable::EnterNamedScope(const std::string& scopeName)
+	Result CSymTable::CreateNamedScope(const std::string& scopeName)
 	{
 		if (mIsLocked || mpCurrScopeEntry == nullptr)
 		{
@@ -107,7 +107,7 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 
-	Result CSymTable::EnterScope()
+	Result CSymTable::CreateScope()
 	{
 		if (mIsLocked || mpCurrScopeEntry == nullptr)
 		{
@@ -121,6 +121,30 @@ namespace gplc
 		pNestedTable->mParentScope = mpCurrScopeEntry;
 
 		mpCurrScopeEntry = pNestedTable;
+
+		return RV_SUCCESS;
+	}
+
+	Result CSymTable::VisitNamedScope(const std::string& scopeName)
+	{
+		if (mIsLocked || mpCurrScopeEntry == nullptr || (mpCurrScopeEntry->mNamedScopes.find(scopeName) == mpCurrScopeEntry->mNamedScopes.cend()))
+		{
+			return RV_FAIL;
+		}
+
+		mpCurrScopeEntry = mpCurrScopeEntry->mNamedScopes[scopeName];
+
+		return RV_SUCCESS;
+	}
+
+	Result CSymTable::VisitScope()
+	{
+		if (mIsLocked || mpCurrScopeEntry == nullptr || mpCurrScopeEntry->mNestedScopes.size() < 1)
+		{
+			return RV_FAIL;
+		}
+
+		mpCurrScopeEntry = mpCurrScopeEntry->mNestedScopes.front();
 
 		return RV_SUCCESS;
 	}
