@@ -241,6 +241,64 @@ TEST_CASE("Parser's tests")
 		REQUIRE(pMain != nullptr);
 	}
 
+	SECTION("TestParse_PassShortEnumDeclaration_ReturnsCorrectAST")
+	{
+		gplc::ISymTable* pSymbolTable = new gplc::CSymTable();
+
+		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
+			{
+				/*!
+					the sequence below specifies the following declaration 
+					enum NewEnumType {
+						first,
+						second,
+						third,
+					}
+
+					enum SecondEnum {
+						first, second
+					}
+				*/
+				new gplc::CToken(gplc::TT_ENUM_TYPE, 0),
+				new gplc::CIdentifierToken("NewEnumType", 1),
+				new gplc::CToken(gplc::TT_OPEN_BRACE, 2),
+				new gplc::CIdentifierToken("first", 3),
+				new gplc::CToken(gplc::TT_COMMA, 4),
+				new gplc::CIdentifierToken("second", 5),
+				new gplc::CToken(gplc::TT_COMMA, 6),
+				new gplc::CIdentifierToken("third", 7),
+				new gplc::CToken(gplc::TT_COMMA, 8),
+				new gplc::CToken(gplc::TT_CLOSE_BRACE, 9),
+
+				new gplc::CToken(gplc::TT_ENUM_TYPE, 0),
+				new gplc::CIdentifierToken("SecondEnum", 1),
+				new gplc::CToken(gplc::TT_OPEN_BRACE, 2),
+				new gplc::CIdentifierToken("first", 3),
+				new gplc::CToken(gplc::TT_COMMA, 4),
+				new gplc::CIdentifierToken("second", 5),
+				new gplc::CToken(gplc::TT_CLOSE_BRACE, 9),
+			}), pSymbolTable);
+
+		REQUIRE(pMain != nullptr);
+
+		pSymbolTable->VisitNamedScope("NewEnumType");
+
+		REQUIRE(pSymbolTable->LookUp("first"));
+		REQUIRE(pSymbolTable->LookUp("second"));
+		REQUIRE(pSymbolTable->LookUp("third"));
+
+		pSymbolTable->LeaveScope();
+
+		pSymbolTable->VisitNamedScope("SecondEnum");
+
+		REQUIRE(pSymbolTable->LookUp("first"));
+		REQUIRE(pSymbolTable->LookUp("second"));
+
+		pSymbolTable->LeaveScope();
+
+		delete pSymbolTable;
+	}
+
 	if (pErrorInfo != nullptr)
 	{
 		delete pErrorInfo;

@@ -28,7 +28,7 @@ TEST_CASE("CLLVMTypeVisitor tests")
 
 	SECTION("TestVisitFunctionType_PassFunctionTypeDef_ReturnsCorrectLLVMIRType")
 	{
-		auto result = pTypeVisitor->VisitFunctionType(new CFunctionType({ new CType(CT_INT32, BTS_INT32, 0x0), new CType(CT_INT32, BTS_INT32, 0x0) }, new CType(CT_INT32, BTS_INT32, 0x0), 0x0));
+		auto result = pTypeVisitor->VisitFunctionType(new CFunctionType({ { "x", new CType(CT_INT32, BTS_INT32, 0x0)}, { "y", new CType(CT_INT32, BTS_INT32, 0x0)} }, new CType(CT_INT32, BTS_INT32, 0x0), 0x0));
 	}
 
 	delete pTypeVisitor;

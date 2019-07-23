@@ -215,6 +215,13 @@ namespace gplc
 			pStatementNode = _parseOperator(pLexer);
 		}
 
+		if (_match(pLexer->GetCurrToken(), TT_ENUM_TYPE))
+		{
+			pLexer->GetNextToken();
+
+			return _parseEnumDeclaration(pLexer);
+		}
+
 		// all statements should ends up with ';' delimiter
 		if (pStatementNode)
 		{
@@ -950,6 +957,85 @@ namespace gplc
 		pLexer->GetNextToken(); // take }
 
 		return new CASTFuncDefinitionNode(pDecl, pLambdaDefType, pLambdaBody);
+	}
+	
+	CASTEnumDeclNode* CParser::_parseEnumDeclaration(ILexer* pLexer)
+	{
+		if (!SUCCESS(_expect(TT_IDENTIFIER, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		CASTIdentifierNode* pEnumIdentifier = new CASTIdentifierNode((dynamic_cast<const CIdentifierToken*>(pLexer->GetCurrToken()))->GetName());
+
+		pLexer->GetNextToken(); // take enum's name
+
+		if (!SUCCESS(_expect(TT_OPEN_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take {
+
+		// parse enum's values
+		if (!_parseEnumValues(pEnumIdentifier->GetName(), pLexer))
+		{
+			return nullptr;
+		}
+
+		if (!SUCCESS(_expect(TT_CLOSE_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take }
+
+		CASTEnumDeclNode* pEnumDeclNode = new CASTEnumDeclNode(pEnumIdentifier);
+
+		return pEnumDeclNode;
+	}
+
+	bool CParser::_parseEnumValues(const std::string& enumName, ILexer* pLexer)
+	{
+		if (!SUCCESS(mpSymTable->CreateNamedScope(enumName)))
+		{
+			return false;
+		}
+
+		const CToken* pCurrEnumField = nullptr;
+
+		TSymbolHandle currFieldHandle = InvalidSymbolHandle;
+
+		while (_match(pCurrEnumField = pLexer->GetCurrToken(), TT_IDENTIFIER))
+		{
+			if ((currFieldHandle = mpSymTable->AddVariable({ dynamic_cast<const CIdentifierToken*>(pCurrEnumField)->GetName(), nullptr, nullptr })) == InvalidSymbolHandle)
+			{
+				return false;
+			}
+
+			pLexer->GetNextToken(); // take identifier
+
+			if (_match(pLexer->GetCurrToken(), TT_ASSIGN_OP)) // field has an initializer
+			{
+				// \todo implement it later
+			}
+
+			if (_match(pLexer->GetCurrToken(), TT_CLOSE_BRACE))
+			{
+				break;
+			}
+
+			if (!SUCCESS(_expect(TT_COMMA, pLexer->GetCurrToken())))
+			{
+				return false;
+			}
+
+			pLexer->GetNextToken(); // take ,
+		}
+
+		mpSymTable->LeaveScope();
+
+		return true;
 	}
 
 	bool CParser::_match(const CToken* pToken, E_TOKEN_TYPE type)

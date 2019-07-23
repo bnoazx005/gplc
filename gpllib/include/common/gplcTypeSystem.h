@@ -242,6 +242,30 @@ namespace gplc
 	/*!
 		\brief CEnumerationType class
 	*/
+
+	class CEnumType : public CType
+	{
+		public:
+			CEnumType(const std::string& enumName);
+			virtual ~CEnumType() = default;
+			
+			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
+
+			void SetName(const std::string& name) override;
+
+			CBaseValue* GetDefaultValue() const override;
+
+			const std::string& GetName() const;
+
+			bool AreSame(const CType* pType) const override;
+
+			std::string ToShortAliasString() const override;
+		protected:
+			CEnumType() = default;
+			CEnumType(const CEnumType& enumType) = default;
+		protected:
+			std::string mName;
+	};
 }
 
 #endif

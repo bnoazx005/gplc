@@ -67,7 +67,8 @@ namespace gplc
 		NT_FUNC_CALL,
 		NT_RETURN_STATEMENT,
 		NT_DEFINITION,
-		NT_BLOCK
+		NT_BLOCK,
+		NT_ENUM_DECL,
 	};
 
 	/*!
@@ -508,8 +509,25 @@ namespace gplc
 			CASTFuncDefinitionNode() = default;
 			CASTFuncDefinitionNode(const CASTFuncDefinitionNode& node) = default;
 	};
+	
 
+	class CASTEnumDeclNode : public CASTTypeNode
+	{
+		public:
+			CASTEnumDeclNode(CASTIdentifierNode* pEnumName);
+			virtual ~CASTEnumDeclNode();
 
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+
+			// get values
+			CASTIdentifierNode* GetEnumName() const;
+		protected:
+			CASTEnumDeclNode(const CASTEnumDeclNode& node) = default;
+	};
 }
 
 #endif

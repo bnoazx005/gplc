@@ -515,4 +515,42 @@ namespace gplc
 		// \todo implement the method
 		return "fnPtr";
 	}
+
+
+	CEnumType::CEnumType(const std::string& enumName):
+		CType(CT_ENUM, BTS_INT32, 0x0)
+	{
+	}
+
+	TLLVMIRData CEnumType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return {};
+	}
+
+	void CEnumType::SetName(const std::string& name)
+	{
+		mName = name;
+	}
+
+	CBaseValue* CEnumType::GetDefaultValue() const
+	{
+		return nullptr;
+	}
+
+	const std::string& CEnumType::GetName() const
+	{
+		return mName;
+	}
+
+	bool CEnumType::AreSame(const CType* pType) const
+	{
+		const CEnumType* pEnumType = dynamic_cast<const CEnumType*>(pType);
+
+		return pEnumType && (pType->GetType() == mType) && (pEnumType->mName == mName);
+	}
+
+	std::string CEnumType::ToShortAliasString() const
+	{
+		return "enum";
+	}
 }

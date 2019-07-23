@@ -999,4 +999,45 @@ namespace gplc
 	{
 		return dynamic_cast<CASTFunctionDeclNode*>(mChildren[2]);
 	}
+
+
+	/*!
+		\brief CASTEnumDeclNode's definition
+	*/
+
+	CASTEnumDeclNode::CASTEnumDeclNode(CASTIdentifierNode* pEnumName):
+		CASTTypeNode(NT_ENUM_DECL)
+	{
+		AttachChild(pEnumName);
+	}
+
+	CASTEnumDeclNode::~CASTEnumDeclNode()
+	{
+	}
+
+	std::string CASTEnumDeclNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	bool CASTEnumDeclNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return {};
+	}
+
+	TLLVMIRData CASTEnumDeclNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return {};
+	}
+
+	CType* CASTEnumDeclNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	{
+		return {};
+	}
+
+	// get values
+	CASTIdentifierNode* CASTEnumDeclNode::GetEnumName() const
+	{
+		return dynamic_cast<CASTIdentifierNode*>(mChildren[0]);
+	}
 }

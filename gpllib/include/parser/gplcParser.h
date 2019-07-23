@@ -37,6 +37,7 @@ namespace gplc
 	class CASTDefinitionNode;
 	class CASTFuncDefinitionNode;
 	class CASTDeclarationNode;
+	class CASTEnumDeclNode;
 
 
 	/*!
@@ -363,6 +364,10 @@ namespace gplc
 			*/
 
 			CASTFuncDefinitionNode* _parseFunctionDefinition(CASTDeclarationNode* pDecl, ILexer* pLexer);
+
+			CASTEnumDeclNode* _parseEnumDeclaration(ILexer* pLexer);
+
+			bool _parseEnumValues(const std::string& enumName, ILexer* pLexer);
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 		private:
