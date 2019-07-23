@@ -193,13 +193,11 @@ namespace gplc
 	};
 
 
-	class CPointerValue : public CGenericBaseValue<std::string>
+	class CPointerValue : public CGenericBaseValue<TSymbolHandle>
 	{
 		public:
-			static const std::string mNullPointerValue;
-		public:
-			CPointerValue(const std::string& identifier) :
-				CGenericBaseValue(LT_POINTER, identifier)
+			CPointerValue(TSymbolHandle handle = InvalidSymbolHandle) :
+				CGenericBaseValue(LT_POINTER, handle)
 			{
 			}
 

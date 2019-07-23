@@ -137,18 +137,18 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 
-	Result CSymTable::AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc)
+	TSymbolHandle CSymTable::AddVariable(const TSymbolDesc& typeDesc)
 	{
 		if (mIsLocked)
 		{
-			return RV_SUCCESS;
+			return InvalidSymbolHandle;
 		}
 
-		std::string identifier { variableName };
+		std::string identifier { typeDesc.mName };
 
 		// rename "main into "_lang_entry_main"
 		// \todo TEMP code, replace this with proper solution later
-		if (variableName == "main")
+		if (identifier == "main")
 		{
 			identifier = "_lang_entry_main";
 
@@ -159,7 +159,7 @@ namespace gplc
 
 		if (_internalLookUp(mpCurrScopeEntry, identifier))
 		{
-			return RV_FAIL;
+			return InvalidSymbolHandle;
 		}
 
 		// this trick is used to assign a name for a function pointer, for other types it does nothing
@@ -168,9 +168,13 @@ namespace gplc
 			typeDesc.mpType->SetName(identifier);			
 		}
 
-		mpCurrScopeEntry->mVariables.insert({ identifier, typeDesc });
+		TSymbolHandle symbolHandle = mSymbols.size() + 1;
+
+		mSymbols.push_back({ true, typeDesc }); // true means that the record is valid 
+
+		mpCurrScopeEntry->mVariables.insert({ identifier, symbolHandle });
 		
-		return RV_SUCCESS;
+		return symbolHandle;
 	}
 
 	const TSymbolDesc* CSymTable::LookUp(const std::string& variableName) const
@@ -187,6 +191,18 @@ namespace gplc
 		return _lookUp(mpCurrScopeEntry, identifier);
 	}
 
+	const TSymbolDesc* CSymTable::LookUp(TSymbolHandle symbolHandle) const
+	{
+		if (symbolHandle == InvalidSymbolHandle || symbolHandle > mSymbols.size())
+		{
+			return nullptr;
+		}
+
+		auto symbol = mSymbols[symbolHandle - 1];
+
+		return symbol.first /* is valid */ ? &symbol.second : nullptr;
+	}
+
 	bool CSymTable::IsLocked() const
 	{
 		return mIsLocked;
@@ -200,7 +216,7 @@ namespace gplc
 
 		if ((iter = table.find(variableName)) != table.cend())
 		{
-			return &iter->second;
+			return &mSymbols[iter->second - 1].second;
 		}
 
 		//search in outter scopes

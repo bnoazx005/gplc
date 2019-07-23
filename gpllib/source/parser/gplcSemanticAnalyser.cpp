@@ -66,7 +66,7 @@ namespace gplc
 			
 			const std::string& currIdentifier = pCurrIdentifierNode->GetName();
 
-			if (!SUCCESS(mpSymTable->AddVariable(currIdentifier, { pTypeInfo->GetDefaultValue(), pTypeInfo })))
+			if (!mpSymTable->IsLocked() && mpSymTable->AddVariable({ currIdentifier, pTypeInfo->GetDefaultValue(), pTypeInfo }) == InvalidSymbolHandle)
 			{
 				OnErrorOutput.Invoke(SAE_IDENTIFIER_ALREADY_DECLARED);
 

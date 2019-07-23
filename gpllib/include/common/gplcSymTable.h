@@ -48,7 +48,9 @@ namespace gplc
 
 	struct TSymbolDesc
 	{
-		CBaseValue* mpValue;
+		std::string   mName;
+
+		CBaseValue*   mpValue;
 
 		CType*        mpType;
 	};
@@ -63,9 +65,11 @@ namespace gplc
 		protected:
 			struct TSymTableEntry;
 
-			typedef std::unordered_map<std::string, TSymbolDesc>     TSymbolsMap;
+			typedef std::unordered_map<std::string, TSymbolHandle>   TSymbolsMap;
 
 			typedef std::unordered_map<std::string, TSymTableEntry*> TNamedScopesMap;
+
+			typedef std::vector<std::pair<bool, TSymbolDesc>>        TSymbolsArray;
 
 			/*!
 				\brief The TSymTableEntry structure
@@ -95,9 +99,10 @@ namespace gplc
 
 			virtual Result LeaveScope() = 0;
 
-			virtual Result AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc) = 0;
+			virtual TSymbolHandle AddVariable(const TSymbolDesc& typeDesc) = 0;
 
 			virtual const TSymbolDesc* LookUp(const std::string& variableName) const = 0;
+			virtual const TSymbolDesc* LookUp(TSymbolHandle symbolHandle) const = 0;
 
 			virtual bool IsLocked() const = 0;
 		protected:
@@ -124,9 +129,10 @@ namespace gplc
 
 			Result LeaveScope() override;
 
-			Result AddVariable(const std::string& variableName, const TSymbolDesc& typeDesc) override;
+			TSymbolHandle AddVariable(const TSymbolDesc& typeDesc) override;
 			
 			const TSymbolDesc* LookUp(const std::string& variableName) const override;
+			const TSymbolDesc* LookUp(TSymbolHandle symbolHandle) const override;
 
 			bool IsLocked() const override;
 		protected:
@@ -138,6 +144,8 @@ namespace gplc
 
 			void _removeScope(TSymTableEntry** scope);
 		protected:
+			TSymbolsArray   mSymbols; ///< All symbols in all scopes are stored here
+
 			TSymTableEntry* mpGlobalScopeEntry;
 
 			TSymTableEntry* mpCurrScopeEntry;

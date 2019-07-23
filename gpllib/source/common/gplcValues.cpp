@@ -120,8 +120,6 @@ namespace gplc
 	}
 
 
-	const std::string CPointerValue::mNullPointerValue { "nullptr" };
-
 	TLLVMIRData CPointerValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitNullLiteral(this);

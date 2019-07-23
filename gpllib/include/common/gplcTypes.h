@@ -173,6 +173,11 @@ namespace gplc
 		U32            mLine;			// vertical position
 
 	} TLexerErrorInfo;
+
+
+	typedef U32 TSymbolHandle;
+
+	constexpr TSymbolHandle InvalidSymbolHandle = 0;
 }
 
 #endif
