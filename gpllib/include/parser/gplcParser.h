@@ -38,6 +38,7 @@ namespace gplc
 	class CASTFuncDefinitionNode;
 	class CASTDeclarationNode;
 	class CASTEnumDeclNode;
+	class CASTStructDeclNode;
 
 
 	/*!
@@ -167,8 +168,6 @@ namespace gplc
 			*/
 
 			CASTNode* _parseIdentifiers(ILexer* pLexer, U32 attributes);
-
-			CASTNode* _parseStructDecl(ILexer* pLexer);
 
 			/*!
 				\brief Try to parse a type
@@ -368,6 +367,10 @@ namespace gplc
 			CASTEnumDeclNode* _parseEnumDeclaration(ILexer* pLexer);
 
 			bool _parseEnumValues(const std::string& enumName, ILexer* pLexer);
+
+			CASTStructDeclNode* _parseStructDeclaration(ILexer* pLexer);
+
+			CASTBlockNode* _parseStructFields(const std::string& structName, ILexer* pLexer);
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 		private:

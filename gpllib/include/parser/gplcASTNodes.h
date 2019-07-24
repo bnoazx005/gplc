@@ -69,6 +69,7 @@ namespace gplc
 		NT_DEFINITION,
 		NT_BLOCK,
 		NT_ENUM_DECL,
+		NT_STRUCT_DECL,
 	};
 
 	/*!
@@ -527,6 +528,27 @@ namespace gplc
 			CASTIdentifierNode* GetEnumName() const;
 		protected:
 			CASTEnumDeclNode(const CASTEnumDeclNode& node) = default;
+	};
+
+
+	class CASTStructDeclNode : public CASTTypeNode
+	{
+		public:
+			CASTStructDeclNode(CASTIdentifierNode* pStructName, CASTBlockNode* pStructFields);
+			virtual ~CASTStructDeclNode();
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+
+			// get values
+			CASTIdentifierNode* GetStructName() const;
+
+			CASTBlockNode* GetFieldsDeclarations() const;
+		protected:
+			CASTStructDeclNode(const CASTStructDeclNode& node) = default;
 	};
 }
 

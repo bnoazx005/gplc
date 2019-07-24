@@ -1040,4 +1040,51 @@ namespace gplc
 	{
 		return dynamic_cast<CASTIdentifierNode*>(mChildren[0]);
 	}
+
+
+	/*!
+		\brief CASTStructDeclNode's definition
+	*/
+
+	CASTStructDeclNode::CASTStructDeclNode(CASTIdentifierNode* pStructName, CASTBlockNode* pStructFields):
+		CASTTypeNode(NT_STRUCT_DECL)
+	{
+		AttachChild(pStructName);
+		AttachChild(pStructFields);
+	}
+
+	CASTStructDeclNode::~CASTStructDeclNode()
+	{
+	}
+
+	std::string CASTStructDeclNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	bool CASTStructDeclNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return false;
+	}
+
+	TLLVMIRData CASTStructDeclNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return {};
+	}
+
+	CType* CASTStructDeclNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	{
+		return nullptr;
+	}
+
+	// get values
+	CASTIdentifierNode* CASTStructDeclNode::GetStructName() const
+	{
+		return dynamic_cast<CASTIdentifierNode*>(mChildren[0]);
+	}
+
+	CASTBlockNode* CASTStructDeclNode::GetFieldsDeclarations() const
+	{
+		return dynamic_cast<CASTBlockNode*>(mChildren[1]);
+	}
 }

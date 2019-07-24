@@ -222,6 +222,13 @@ namespace gplc
 			return _parseEnumDeclaration(pLexer);
 		}
 
+		if (_match(pLexer->GetCurrToken(), TT_STRUCT_TYPE))
+		{
+			pLexer->GetNextToken();
+
+			return _parseStructDeclaration(pLexer);
+		}
+
 		// all statements should ends up with ';' delimiter
 		if (pStatementNode)
 		{
@@ -353,6 +360,8 @@ namespace gplc
 
 		const CToken* pCurrToken = nullptr;
 
+		std::string currIdentifier;
+
 		do
 		{
 			pCurrToken = pLexer->GetCurrToken();
@@ -367,7 +376,14 @@ namespace gplc
 				return pIdentifiersRoot;
 			}
 
-			pIdentifiersRoot->AttachChild(new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()));
+			currIdentifier = dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName();
+
+			if ((attributes & AV_STRUCT_FIELD_DECL) == AV_STRUCT_FIELD_DECL)
+			{
+				mpSymTable->AddVariable({ currIdentifier, nullptr, nullptr });
+			}
+
+			pIdentifiersRoot->AttachChild(new CASTIdentifierNode(currIdentifier));
 
 			// function argument doesn't allow multiple variable per declaration
 			/*if ((attributes & AV_FUNC_ARG_DECL) == AV_FUNC_ARG_DECL)
@@ -1036,6 +1052,70 @@ namespace gplc
 		mpSymTable->LeaveScope();
 
 		return true;
+	}
+
+	CASTStructDeclNode* CParser::_parseStructDeclaration(ILexer* pLexer)
+	{
+		if (!SUCCESS(_expect(TT_IDENTIFIER, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		CASTIdentifierNode* pStructIdentifier = new CASTIdentifierNode((dynamic_cast<const CIdentifierToken*>(pLexer->GetCurrToken()))->GetName());
+
+		pLexer->GetNextToken(); // take struct's name
+
+		if (!SUCCESS(_expect(TT_OPEN_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take {
+
+		// parse struct's fields
+		CASTBlockNode* pStructFields = nullptr;
+
+		if (!(pStructFields = _parseStructFields(pStructIdentifier->GetName(), pLexer)))
+		{
+			return nullptr;
+		}
+
+		if (!SUCCESS(_expect(TT_CLOSE_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take }
+
+		return new CASTStructDeclNode(pStructIdentifier, pStructFields);
+	}
+
+	CASTBlockNode* CParser::_parseStructFields(const std::string& structName, ILexer* pLexer)
+	{
+		if (!SUCCESS(mpSymTable->CreateNamedScope(structName)))
+		{
+			return nullptr;
+		}
+
+		CASTBlockNode* pStructFields = new CASTBlockNode();
+
+		CASTNode* pCurrField = nullptr;
+
+		while (!_match(pLexer->GetCurrToken(), TT_CLOSE_BRACE) && (pCurrField = _parseDeclaration(pLexer, AV_STRUCT_FIELD_DECL)))
+		{
+			pStructFields->AttachChild(pCurrField);
+
+			if (!SUCCESS(_expect(TT_SEMICOLON, pLexer->GetCurrToken())))
+			{
+				return pStructFields;
+			}
+
+			pLexer->GetNextToken(); // take ;
+		}
+
+		mpSymTable->LeaveScope();
+
+		return pStructFields;
 	}
 
 	bool CParser::_match(const CToken* pToken, E_TOKEN_TYPE type)

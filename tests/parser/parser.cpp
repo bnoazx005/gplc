@@ -299,6 +299,39 @@ TEST_CASE("Parser's tests")
 		delete pSymbolTable;
 	}
 
+	SECTION("TestParse_PassShortStructDeclaration_ReturnsCorrectAST")
+	{
+		gplc::ISymTable* pSymbolTable = new gplc::CSymTable();
+
+		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
+			{
+				/*!
+					the sequence below specifies the following declaration
+					struct NewType {
+						data : int32;						
+					}
+				*/
+				new gplc::CToken(gplc::TT_STRUCT_TYPE, 0),
+				new gplc::CIdentifierToken("NewType", 1),
+				new gplc::CToken(gplc::TT_OPEN_BRACE, 2),
+				new gplc::CIdentifierToken("data", 3),
+				new gplc::CToken(gplc::TT_COLON, 4),
+				new gplc::CToken(gplc::TT_INT32_TYPE, 5),
+				new gplc::CToken(gplc::TT_SEMICOLON, 6),
+				new gplc::CToken(gplc::TT_CLOSE_BRACE, 7),
+			}), pSymbolTable);
+
+		REQUIRE(pMain != nullptr);
+
+		pSymbolTable->VisitNamedScope("NewType");
+
+		REQUIRE(pSymbolTable->LookUp("data"));
+
+		pSymbolTable->LeaveScope();
+
+		delete pSymbolTable;
+	}
+
 	if (pErrorInfo != nullptr)
 	{
 		delete pErrorInfo;
