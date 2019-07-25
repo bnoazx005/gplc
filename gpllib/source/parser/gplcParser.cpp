@@ -96,6 +96,7 @@ namespace gplc
 		
 		errorInfo.mErrorCode = RV_UNEXPECTED_TOKEN;
 		errorInfo.mPos       = currValue->GetPos();
+		errorInfo.mLine      = currValue->GetLine();
 
 		OnErrorOutput.Invoke(errorInfo);
 
@@ -1026,6 +1027,10 @@ namespace gplc
 		{
 			if ((currFieldHandle = mpSymTable->AddVariable({ dynamic_cast<const CIdentifierToken*>(pCurrEnumField)->GetName(), nullptr, nullptr })) == InvalidSymbolHandle)
 			{
+				auto pCurrToken = pLexer->GetCurrToken();
+
+				OnErrorOutput.Invoke({ PE_INVALID_ENUMERATOR_NAME, "", pCurrToken->GetPos(), pCurrToken->GetLine() });
+
 				return false;
 			}
 
@@ -1033,7 +1038,24 @@ namespace gplc
 
 			if (_match(pLexer->GetCurrToken(), TT_ASSIGN_OP)) // field has an initializer
 			{
-				// \todo implement it later
+				pLexer->GetNextToken(); // take =
+
+				auto pCurrToken = pLexer->GetCurrToken();
+
+				// \note by default, the enumerator can be initialized with some basic literal's value, but all enumerators should have the same type of literals
+				
+				// \todo reimplement this to allow use of expressions too with literals
+				if (!SUCCESS(_expect(TT_LITERAL, pCurrToken)))
+				{
+
+					OnErrorOutput.Invoke({ PE_INVALID_ENUMERATOR_VALUE, "", pCurrToken->GetPos(), pCurrToken->GetLine() });
+
+					return false;
+				}
+
+				TSymbolDesc* pCurrEnumerator = mpSymTable->LookUp(currFieldHandle);
+
+				pCurrEnumerator->mpValue = dynamic_cast<const CLiteralToken*>(pCurrToken)->GetValue(); // \note type is resolved in semantic analyser's stage
 			}
 
 			if (_match(pLexer->GetCurrToken(), TT_CLOSE_BRACE))

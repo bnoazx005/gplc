@@ -215,7 +215,7 @@ namespace gplc
 		return _lookUp(mpCurrScopeEntry, identifier);
 	}
 
-	const TSymbolDesc* CSymTable::LookUp(TSymbolHandle symbolHandle) const
+	TSymbolDesc* CSymTable::LookUp(TSymbolHandle symbolHandle) const
 	{
 		if (symbolHandle == InvalidSymbolHandle || symbolHandle > mSymbols.size())
 		{
@@ -227,6 +227,42 @@ namespace gplc
 		return symbol.first /* is valid */ ? &symbol.second : nullptr;
 	}
 
+	CSymTable::TSymTableEntry* CSymTable::LookUpNamedScope(const std::string& scopeName)
+	{
+		const TSymTableEntry* pCurrEntry = mpCurrScopeEntry;
+
+		auto findScope = [](const TSymTableEntry* pCurrEntry, const std::string& scopeName) -> TSymTableEntry*
+		{
+			auto& currNamedScopes = pCurrEntry->mNamedScopes;
+
+			auto iter = currNamedScopes.cbegin();
+
+			if ((iter = currNamedScopes.find(scopeName)) != currNamedScopes.cend())
+			{
+				return iter->second;
+			}
+		};
+		
+		TSymTableEntry* pFoundResult = findScope(pCurrEntry, scopeName);
+
+		if (pFoundResult)
+		{
+			return pFoundResult;
+		}
+
+		while (pCurrEntry->mParentScope)
+		{
+			pCurrEntry = pCurrEntry->mParentScope;
+			
+			if (pFoundResult = findScope(pCurrEntry, scopeName))
+			{
+				return pFoundResult;
+			}
+		}
+
+		return nullptr;
+	}
+	
 	bool CSymTable::IsLocked() const
 	{
 		return mIsLocked;

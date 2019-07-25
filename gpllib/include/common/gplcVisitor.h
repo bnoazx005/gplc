@@ -34,6 +34,8 @@ namespace gplc
 	class CASTDefinitionNode;
 	class CASTFuncDefinitionNode;
 	class CASTBlockNode;
+	class CASTEnumDeclNode;
+	class CASTStructDeclNode;
 
 
 	template <typename T>
@@ -60,6 +62,8 @@ namespace gplc
 			virtual T VisitReturnStatement(CASTReturnStatementNode* pNode) = 0;
 			virtual T VisitDefinitionNode(CASTDefinitionNode* pNode) = 0;
 			virtual T VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) = 0;
+			virtual T VisitEnumDeclaration(CASTEnumDeclNode* pNode) = 0;
+			virtual T VisitStructDeclaration(CASTStructDeclNode* pNode) = 0;
 		protected:
 			IASTNodeVisitor() = default;
 			IASTNodeVisitor(const IASTNodeVisitor& visitor) = default;

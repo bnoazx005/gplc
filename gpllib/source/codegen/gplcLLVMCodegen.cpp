@@ -143,6 +143,16 @@ namespace gplc
 		return {};
 	}
 
+	TLLVMIRData CLLVMCodeGenerator::VisitEnumDeclaration(CASTEnumDeclNode* pNode)
+	{
+		return {};
+	}
+
+	TLLVMIRData CLLVMCodeGenerator::VisitStructDeclaration(CASTStructDeclNode* pNode)
+	{
+		return {};
+	}
+
 	llvm::Instruction::BinaryOps CLLVMCodeGenerator::_convertOpTypeToLLVM(E_TOKEN_TYPE opType, bool isFloatingPointOp) const
 	{
 		switch (opType)

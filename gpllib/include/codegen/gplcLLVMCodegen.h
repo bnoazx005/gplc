@@ -71,6 +71,10 @@ namespace gplc
 			TLLVMIRData VisitDefinitionNode(CASTDefinitionNode* pNode) override;
 
 			TLLVMIRData VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) override;
+
+			TLLVMIRData VisitEnumDeclaration(CASTEnumDeclNode* pNode) override;
+
+			TLLVMIRData VisitStructDeclaration(CASTStructDeclNode* pNode) override;
 		protected:
 			CLLVMCodeGenerator(const CLLVMCodeGenerator& codeGenerator) = default;
 

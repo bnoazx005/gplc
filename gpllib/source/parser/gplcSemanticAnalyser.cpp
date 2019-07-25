@@ -390,6 +390,24 @@ namespace gplc
 		return isLambdaBodyValid;
 	}
 
+	bool CSemanticAnalyser::VisitEnumDeclaration(CASTEnumDeclNode* pNode)
+	{
+		auto res = mpSymTable->LookUpNamedScope(pNode->GetEnumName()->GetName());
+
+		// \todo check types of values
+
+		return res;
+	}
+
+	bool CSemanticAnalyser::VisitStructDeclaration(CASTStructDeclNode* pNode)
+	{
+		auto res = mpSymTable->LookUpNamedScope(pNode->GetStructName()->GetName());
+
+		// \todo check types of fields
+
+		return res;
+	}
+
 	bool CSemanticAnalyser::_enterScope(CASTBlockNode* pNode, ISymTable* pSymTable)
 	{
 		pSymTable->CreateScope();

@@ -185,4 +185,14 @@ namespace gplc
 	{
 		return {};
 	}
+
+	std::string CASTLispyPrinter::VisitEnumDeclaration(CASTEnumDeclNode* pNode)
+	{
+		return {};
+	}
+
+	std::string CASTLispyPrinter::VisitStructDeclaration(CASTStructDeclNode* pNode)
+	{
+		return {};
+	}
 }

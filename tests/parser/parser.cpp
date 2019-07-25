@@ -248,7 +248,7 @@ TEST_CASE("Parser's tests")
 		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
 			{
 				/*!
-					the sequence below specifies the following declaration 
+					the sequence below specifies the following declaration
 					enum NewEnumType {
 						first,
 						second,
@@ -256,7 +256,8 @@ TEST_CASE("Parser's tests")
 					}
 
 					enum SecondEnum {
-						first, second
+						first = 0x2,
+						second		// second's value = first + 1
 					}
 				*/
 				new gplc::CToken(gplc::TT_ENUM_TYPE, 0),
@@ -274,6 +275,8 @@ TEST_CASE("Parser's tests")
 				new gplc::CIdentifierToken("SecondEnum", 1),
 				new gplc::CToken(gplc::TT_OPEN_BRACE, 2),
 				new gplc::CIdentifierToken("first", 3),
+				new gplc::CToken(gplc::TT_ASSIGN_OP, 4),
+				new gplc::CLiteralToken(new gplc::CIntValue(0x2), 5),
 				new gplc::CToken(gplc::TT_COMMA, 4),
 				new gplc::CIdentifierToken("second", 5),
 				new gplc::CToken(gplc::TT_CLOSE_BRACE, 9),

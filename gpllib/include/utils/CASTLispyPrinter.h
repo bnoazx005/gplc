@@ -63,6 +63,9 @@ namespace gplc
 
 			std::string VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) override;
 
+			std::string VisitEnumDeclaration(CASTEnumDeclNode* pNode) override;
+
+			std::string VisitStructDeclaration(CASTStructDeclNode* pNode) override;
 		protected:
 			CASTLispyPrinter(const CASTLispyPrinter& printer) = default;
 		protected:

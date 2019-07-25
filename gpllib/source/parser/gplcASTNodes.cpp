@@ -1017,17 +1017,17 @@ namespace gplc
 
 	std::string CASTEnumDeclNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitEnumDeclaration(this);
 	}
 
 	bool CASTEnumDeclNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitEnumDeclaration(this);
 	}
 
 	TLLVMIRData CASTEnumDeclNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitEnumDeclaration(this);
 	}
 
 	CType* CASTEnumDeclNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)

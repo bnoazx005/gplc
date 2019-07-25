@@ -95,12 +95,13 @@ namespace gplc
 
 	typedef struct TParserErrorInfo
 	{
-		Result            mErrorCode;
-		std::string       mMessage;
-		U32               mPos;
+		Result      mErrorCode;
 
-		TParserErrorInfo* mpPrevError;
-		TParserErrorInfo* mpNextError;
+		std::string mMessage;
+
+		U32         mPos;
+
+		U32         mLine;
 	} TParserErrorInfo;
 
 	#pragma pack(pop)
@@ -131,6 +132,13 @@ namespace gplc
 		CT_ENUM,
 		CT_ARRAY,
 		CT_LAST
+	};
+
+
+	enum E_PARSER_ERRORS : U16
+	{
+		PE_INVALID_ENUMERATOR_NAME,				/// Some enumerator with the enumeration have a name that is duplicate for the previous one
+		PE_INVALID_ENUMERATOR_VALUE,			/// Enumerators can be initialized only with basic literals: numbers, strings, chars, logic, etc
 	};
 
 

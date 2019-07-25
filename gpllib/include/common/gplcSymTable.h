@@ -33,19 +33,7 @@ namespace gplc
 		their usage. Unnamed scopes work in manner of C style scopes, in other words you 
 		should declare or define variable before its usage.
 	*/
-/*
-	class ISymbolInfo
-	{
-		public:
-			virtual ~ISymbolInfo() = default;
-
-
-		protected:
-			ISymbolInfo() = default;
-			ISymbolInfo(const ISymbolInfo& symbolInfo) = default;
-	};*/
-
-
+	   
 	struct TSymbolDesc
 	{
 		std::string   mName;
@@ -105,7 +93,9 @@ namespace gplc
 			virtual TSymbolHandle AddVariable(const TSymbolDesc& typeDesc) = 0;
 
 			virtual const TSymbolDesc* LookUp(const std::string& variableName) const = 0;
-			virtual const TSymbolDesc* LookUp(TSymbolHandle symbolHandle) const = 0;
+			virtual TSymbolDesc* LookUp(TSymbolHandle symbolHandle) const = 0;
+
+			virtual TSymTableEntry* LookUpNamedScope(const std::string& scopeName) = 0;
 
 			virtual bool IsLocked() const = 0;
 		protected:
@@ -138,7 +128,9 @@ namespace gplc
 			TSymbolHandle AddVariable(const TSymbolDesc& typeDesc) override;
 			
 			const TSymbolDesc* LookUp(const std::string& variableName) const override;
-			const TSymbolDesc* LookUp(TSymbolHandle symbolHandle) const override;
+			TSymbolDesc* LookUp(TSymbolHandle symbolHandle) const override;
+
+			TSymTableEntry* LookUpNamedScope(const std::string& scopeName) override;
 
 			bool IsLocked() const override;
 		protected:

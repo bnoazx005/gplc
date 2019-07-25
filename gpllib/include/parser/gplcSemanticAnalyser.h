@@ -99,6 +99,10 @@ namespace gplc
 			bool VisitDefinitionNode(CASTDefinitionNode* pNode) override;
 
 			bool VisitFunctionDefNode(CASTFuncDefinitionNode* pNode) override;
+
+			bool VisitEnumDeclaration(CASTEnumDeclNode* pNode) override;
+
+			bool VisitStructDeclaration(CASTStructDeclNode* pNode) override;
 		protected:
 			bool _enterScope(CASTBlockNode* pNode, ISymTable* pSymTable);
 		protected:

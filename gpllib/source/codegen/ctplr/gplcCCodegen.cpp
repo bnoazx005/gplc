@@ -334,4 +334,50 @@ namespace gplc
 		// random salt
 		return name.append("_").append(std::to_string(rand()));
 	}
+
+	TLLVMIRData CCCodeGenerator::VisitEnumDeclaration(CASTEnumDeclNode* pNode)
+	{
+		std::string enumName = pNode->GetEnumName()->GetName();
+
+		mGlobalDeclarationsContext
+							.append("enum ")
+							.append(enumName)
+							.append("\n{\n");
+							
+		auto enumValues = mpSymTable->LookUpNamedScope(enumName);
+
+		for (auto currEnumerator : enumValues->mVariables)
+		{
+			mGlobalDeclarationsContext.append(currEnumerator.first).append(",\n");
+
+		}
+
+		mGlobalDeclarationsContext.append("};\n");
+
+		return "\n";
+	}
+
+	TLLVMIRData CCCodeGenerator::VisitStructDeclaration(CASTStructDeclNode* pNode)
+	{
+		std::string structName = pNode->GetStructName()->GetName();
+
+		mGlobalDeclarationsContext
+			.append("struct ")
+			.append(structName)
+			.append(";\n");
+
+		// \todo
+/*
+		auto structFields = mpSymTable->LookUpNamedScope(structName);
+
+		for (auto currEnumerator : structFields->mVariables)
+		{
+			mGlobalDeclarationsContext.append(currEnumerator.first).append(",\n");
+
+		}
+
+		mGlobalDeclarationsContext.append("};\n");
+*/
+		return "\n";
+	}
 }

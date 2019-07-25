@@ -496,6 +496,26 @@ TEST_CASE("CSemanticAnalyser's tests")
 											pTypeResolver, new CSymTable()));
 	}
 
+	SECTION("TestAnalyze_PassCorrectShortEnumDeclaration_ReturnsTrue")
+	{
+		/*!
+			enum NewEnum {
+				first, second
+			}
+		*/
+
+		ISymTable* pSymTable = new CSymTable();
+
+		pSymTable->CreateNamedScope("NewEnum");
+		pSymTable->AddVariable({ "first", nullptr, nullptr });
+		pSymTable->AddVariable({ "second", nullptr, nullptr });
+		pSymTable->LeaveScope();
+
+		REQUIRE(pSemanticAnalyser->Analyze(new CASTEnumDeclNode(new CASTIdentifierNode("NewEnum")), pTypeResolver, pSymTable));
+
+		delete pSymTable;
+	}
+
 	delete pTypeResolver;
 	delete pSemanticAnalyser;
 }
