@@ -1059,22 +1059,22 @@ namespace gplc
 
 	std::string CASTStructDeclNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitStructDeclaration(this);
 	}
 
 	bool CASTStructDeclNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
-		return false;
+		return pVisitor->VisitStructDeclaration(this);
 	}
 
 	TLLVMIRData CASTStructDeclNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitStructDeclaration(this);
 	}
 
 	CType* CASTStructDeclNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
 	{
-		return nullptr;
+		return pResolver->VisitStructDeclaration(this);
 	}
 
 	// get values
@@ -1086,5 +1086,45 @@ namespace gplc
 	CASTBlockNode* CASTStructDeclNode::GetFieldsDeclarations() const
 	{
 		return dynamic_cast<CASTBlockNode*>(mChildren[1]);
+	}
+
+
+	/*!
+		\brief CASTNamedTypeNode's definition
+	*/
+
+	CASTNamedTypeNode::CASTNamedTypeNode(CASTIdentifierNode* pIdentifier):
+		CASTTypeNode(NT_DEPENDENT_TYPE)
+	{
+		AttachChild(pIdentifier);
+	}
+
+	CASTNamedTypeNode::~CASTNamedTypeNode()
+	{
+	}
+
+	std::string CASTNamedTypeNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	bool CASTNamedTypeNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return false;
+	}
+
+	TLLVMIRData CASTNamedTypeNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return {};
+	}
+
+	CType* CASTNamedTypeNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	{
+		return pResolver->VisitNamedType(this);
+	}
+	
+	CASTIdentifierNode* CASTNamedTypeNode::GetTypeInfo() const
+	{
+		return dynamic_cast<CASTIdentifierNode*>(mChildren[0]);
 	}
 }

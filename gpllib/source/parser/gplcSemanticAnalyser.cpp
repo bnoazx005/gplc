@@ -401,11 +401,21 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitStructDeclaration(CASTStructDeclNode* pNode)
 	{
-		auto res = mpSymTable->LookUpNamedScope(pNode->GetStructName()->GetName());
+		std::string structName = pNode->GetStructName()->GetName();
+
+		auto structTableEntry = mpSymTable->LookUpNamedScope(structName);
 
 		// \todo check types of fields
 
-		return res;
+		// resolve struct's type
+		if (!(structTableEntry->mpType = mpTypeResolver->Resolve(pNode, mpSymTable)))
+		{
+			return false;
+		}
+
+		structTableEntry->mpType->SetName(structName);
+
+		return structTableEntry;
 	}
 
 	bool CSemanticAnalyser::_enterScope(CASTBlockNode* pNode, ISymTable* pSymTable)

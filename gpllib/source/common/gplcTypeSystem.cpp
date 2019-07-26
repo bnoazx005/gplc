@@ -140,6 +140,36 @@ namespace gplc
 		return pFuncTypeInfo->GetReturnValueType();
 	}
 
+	CType* CTypeResolver::VisitStructDeclaration(CASTStructDeclNode* pNode)
+	{
+		CStructType::TFieldsArray fieldsTypes;
+
+		auto pStructBody = pNode->GetFieldsDeclarations();
+
+		CStructType* pStructType = new CStructType({}, 0x0);
+
+		CType* pFieldType = nullptr;
+
+		for (auto pCurrField : pStructBody->GetStatements())
+		{
+			pFieldType = Resolve(dynamic_cast<CASTTypeNode*>(pCurrField), mpSymTable);
+
+			auto identifiers = dynamic_cast<CASTDeclarationNode*>(pCurrField)->GetIdentifiers();
+
+			for (auto pCurrIdentifier : identifiers->GetChildren())
+			{
+				pStructType->AddField(dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName(), pFieldType);
+			}
+		}
+
+		return pStructType;
+	}
+
+	CType* CTypeResolver::VisitNamedType(CASTNamedTypeNode* pNode)
+	{
+		return new CDependentNamedType(mpSymTable, pNode->GetTypeInfo()->GetName());
+	}
+
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type)
 	{
 		switch (type)
@@ -438,6 +468,11 @@ namespace gplc
 		CType(CT_STRUCT, BTS_POINTER, attributes)
 	{
 		std::copy(fieldsTypes.begin(), fieldsTypes.end(), std::back_inserter(mFieldsTypes));
+	}
+
+	void CStructType::AddField(const std::string& fieldName, CType* pFieldType)
+	{
+		mFieldsTypes.push_back({ fieldName, pFieldType });
 	}
 
 	TLLVMIRData CStructType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)

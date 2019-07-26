@@ -80,6 +80,8 @@ namespace gplc
 			virtual CType* VisitDeclaration(CASTDeclarationNode* pNode) = 0;
 			virtual CType* VisitFunctionDeclaration(CASTFunctionDeclNode* pNode) = 0;
 			virtual CType* VisitFunctionCall(CASTFunctionCallNode* pNode) = 0;
+			virtual CType* VisitStructDeclaration(CASTStructDeclNode* pNode) = 0;
+			virtual CType* VisitNamedType(CASTNamedTypeNode* pNode) = 0;
 	};
 
 
@@ -103,6 +105,8 @@ namespace gplc
 			CType* VisitDeclaration(CASTDeclarationNode* pNode) override;
 			CType* VisitFunctionDeclaration(CASTFunctionDeclNode* pNode) override;
 			CType* VisitFunctionCall(CASTFunctionCallNode* pNode) override;
+			CType* VisitStructDeclaration(CASTStructDeclNode* pNode) override; 
+			CType* VisitNamedType(CASTNamedTypeNode* pNode) override;
 		protected:
 			CType* _deduceBuiltinType(E_NODE_TYPE type);
 
@@ -207,6 +211,8 @@ namespace gplc
 		public:
 			CStructType(const TFieldsArray& fieldsTypes, U32 attributes = 0x0);
 			virtual ~CStructType() = default;
+
+			void AddField(const std::string& fieldName, CType* pFieldType);
 
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
 

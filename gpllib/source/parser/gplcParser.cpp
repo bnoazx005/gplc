@@ -413,11 +413,21 @@ namespace gplc
 
 	CASTNode* CParser::_parseType(ILexer* pLexer)
 	{
+		const CToken* pCurrToken = pLexer->GetCurrToken();
+
 		// function's declaration
-		if (_match(pLexer->GetCurrToken(), TT_OPEN_SQR_BRACE) || 
-			_match(pLexer->GetCurrToken(), TT_OPEN_BRACKET))
+		if (_match(pCurrToken, TT_OPEN_SQR_BRACE) || 
+			_match(pCurrToken, TT_OPEN_BRACKET))
 		{
 			return _parseFunctionDeclaration(pLexer);
+		}
+
+		// named type
+		if (_match(pCurrToken, TT_IDENTIFIER))
+		{
+			pLexer->GetNextToken(); // take the identifier
+
+			return new CASTNamedTypeNode(new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()));
 		}
 
 		return _parseBuiltInType(pLexer);

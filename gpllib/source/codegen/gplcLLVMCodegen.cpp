@@ -25,6 +25,21 @@ namespace gplc
 
 		llvm::Module* pSourceUnitModule = new llvm::Module("top", llvmContext);
 
+		///>============================================
+		/// demo code
+		auto fn = llvm::Function::Create(llvm::FunctionType::get(llvm::Type::getVoidTy(llvmContext), false), llvm::Function::ExternalLinkage, "main", *pSourceUnitModule);
+		auto entry = llvm::BasicBlock::Create(llvmContext, "entry", fn);
+
+		llvm::IRBuilder<> builder(entry);
+		int v = 42;
+		llvm::AllocaInst* pInst = builder.CreateAlloca(llvm::Type::getInt32Ty(llvmContext), nullptr, "x");
+		builder.CreateStore(builder.CreateBinOp(llvm::Instruction::Add, builder.CreateLoad(pInst, "x"), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvmContext), 42), "tmp"), pInst);
+		builder.CreateRet(pInst);
+				
+		pSourceUnitModule->dump();
+		// end of demo code
+		//<==============================================
+		\
 		pNode->Accept(this);
 		
 		delete mpBuilder;

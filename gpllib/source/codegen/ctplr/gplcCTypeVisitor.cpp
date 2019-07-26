@@ -78,11 +78,24 @@ namespace gplc
 
 	TLLVMIRData CCTypeVisitor::VisitStructType(const CStructType* pStructType)
 	{
-		return {};
+		std::string structBody;
+
+		auto structFields = pStructType->GetFieldsTypes();
+
+		for (U32 i = 0; i < structFields.size(); ++i)
+		{
+			structBody.append(std::get<std::string>(structFields[i].second->Accept(this))).append(" ").append(structFields[i].first).append(";\n");
+		}
+
+		return std::string("struct ")
+					.append(pStructType->GetName())
+					.append(" {\n")
+					.append(structBody)
+					.append("};\n");
 	}
 
 	TLLVMIRData CCTypeVisitor::VisitNamedType(const CDependentNamedType* pNamedType)
 	{
-		return {};
+		return pNamedType->GetName();
 	}
 }

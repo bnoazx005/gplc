@@ -70,6 +70,7 @@ namespace gplc
 		NT_BLOCK,
 		NT_ENUM_DECL,
 		NT_STRUCT_DECL,
+		NT_DEPENDENT_TYPE,
 	};
 
 	/*!
@@ -549,6 +550,25 @@ namespace gplc
 			CASTBlockNode* GetFieldsDeclarations() const;
 		protected:
 			CASTStructDeclNode(const CASTStructDeclNode& node) = default;
+	};
+
+
+	class CASTNamedTypeNode : public CASTTypeNode
+	{
+		public:
+			CASTNamedTypeNode(CASTIdentifierNode* pIdentifier);
+			virtual ~CASTNamedTypeNode();
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+
+			CASTIdentifierNode* GetTypeInfo() const;
+		protected:
+			CASTNamedTypeNode() = default;
+			CASTNamedTypeNode(const CASTNamedTypeNode& node) = default;
 	};
 }
 

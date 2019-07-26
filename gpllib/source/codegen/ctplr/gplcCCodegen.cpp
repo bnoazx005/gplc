@@ -370,18 +370,8 @@ namespace gplc
 			.append(structName)
 			.append(";\n");
 
-		// \todo
-/*
-		auto structFields = mpSymTable->LookUpNamedScope(structName);
+		auto structSymbolEntry = mpSymTable->LookUpNamedScope(structName);
 
-		for (auto currEnumerator : structFields->mVariables)
-		{
-			mGlobalDeclarationsContext.append(currEnumerator.first).append(",\n");
-
-		}
-
-		mGlobalDeclarationsContext.append("};\n");
-*/
-		return "\n";
+		return structSymbolEntry->mpType->Accept(mpTypeVisitor);
 	}
 }
