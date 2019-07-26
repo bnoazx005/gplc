@@ -428,6 +428,81 @@ namespace gplc
 
 		return nullptr; ///< unknown type
 	}
+
+
+	/*!
+		CStructType's definition
+	*/
+
+	CStructType::CStructType(const TFieldsArray& fieldsTypes, U32 attributes):
+		CType(CT_STRUCT, BTS_POINTER, attributes)
+	{
+		std::copy(fieldsTypes.begin(), fieldsTypes.end(), std::back_inserter(mFieldsTypes));
+	}
+
+	TLLVMIRData CStructType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitStructType(this);
+	}
+
+	void CStructType::SetName(const std::string& name)
+	{
+		mName = name;
+	}
+
+	void CStructType::SetAttributes(U32 attributes)
+	{
+		mAttributes = attributes;
+	}
+
+	const CStructType::TFieldsArray& CStructType::GetFieldsTypes() const
+	{
+		return mFieldsTypes;
+	}
+
+	CBaseValue* CStructType::GetDefaultValue() const
+	{
+		return new CPointerValue();
+	}
+
+	const std::string& CStructType::GetName() const
+	{
+		return mName;
+	}
+
+	bool CStructType::AreSame(const CType* pType) const
+	{
+		if (!pType || pType->GetType() != CT_STRUCT)
+		{
+			return false;
+		}
+
+		const CStructType* pStructType = dynamic_cast<const CStructType*>(pType);
+
+		auto& thisFields  = mFieldsTypes;
+		auto& otherFields = pStructType->mFieldsTypes;
+
+		if (thisFields.size() != otherFields.size())
+		{
+			return false;
+		}
+
+		for (U32 i = 0; i < thisFields.size(); ++i)
+		{
+			if (!thisFields[i].second->AreSame(otherFields[i].second))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	std::string CStructType::ToShortAliasString() const
+	{
+		return "struct";
+	}
+
 	
 	/*!
 		CFunctionType's definition

@@ -31,5 +31,20 @@ TEST_CASE("CLLVMTypeVisitor tests")
 		auto result = pTypeVisitor->VisitFunctionType(new CFunctionType({ { "x", new CType(CT_INT32, BTS_INT32, 0x0)}, { "y", new CType(CT_INT32, BTS_INT32, 0x0)} }, new CType(CT_INT32, BTS_INT32, 0x0), 0x0));
 	}
 
+	SECTION("TestVisitStructType_PassStructDeclaration_ReturnsCorrectLLVMIRType")
+	{
+		auto pStructTypeDecl = new CStructType(
+			{
+				{ "data", new CType(CT_INT32, BTS_INT32, 0x0) },
+				{ "next", new CStructType({ { "member", new CType(CT_DOUBLE, BTS_DOUBLE, 0x0) } }) }
+			});
+
+		pStructTypeDecl->SetName("Foo");
+
+		std::get<llvm::Type*>(pStructTypeDecl->Accept(pTypeVisitor))->dump();
+
+		delete pStructTypeDecl;
+	}
+
 	delete pTypeVisitor;
 }

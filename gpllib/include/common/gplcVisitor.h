@@ -116,6 +116,7 @@ namespace gplc
 
 	class CType;
 	class CFunctionType;
+	class CStructType;
 
 
 	template <typename T>
@@ -127,6 +128,7 @@ namespace gplc
 
 			virtual T VisitBasicType(const CType* pType) = 0;
 			virtual T VisitFunctionType(const CFunctionType* pFuncType) = 0;
+			virtual T VisitStructType(const CStructType* pStructType) = 0;
 		protected:
 			ITypeVisitor(const ITypeVisitor& visitor) = default;
 	};

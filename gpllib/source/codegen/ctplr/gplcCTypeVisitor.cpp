@@ -75,4 +75,9 @@ namespace gplc
 
 		return result;
 	}
+
+	TLLVMIRData CCTypeVisitor::VisitStructType(const CStructType* pStructType)
+	{
+		return {};
+	}
 }

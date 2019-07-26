@@ -198,6 +198,39 @@ namespace gplc
 		\brief CStructureType class
 	*/
 
+
+	class CStructType : public CType
+	{
+		public:
+			typedef std::vector<std::pair<std::string, CType*>> TFieldsArray;
+		public:
+			CStructType(const TFieldsArray& fieldsTypes, U32 attributes = 0x0);
+			virtual ~CStructType() = default;
+
+			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
+
+			void SetName(const std::string& name) override;
+
+			void SetAttributes(U32 attributes);
+
+			const TFieldsArray& GetFieldsTypes() const;
+
+			CBaseValue* GetDefaultValue() const override;
+
+			const std::string& GetName() const;
+
+			bool AreSame(const CType* pType) const override;
+
+			std::string ToShortAliasString() const override;
+		protected:
+			CStructType() = default;
+			CStructType(const CStructType& structure) = default;
+		protected:
+			std::string  mName;
+
+			TFieldsArray mFieldsTypes;
+	};
+
 	
 	/*!
 		\brief CFunctionType's definition

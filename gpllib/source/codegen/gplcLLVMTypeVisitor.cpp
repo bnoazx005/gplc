@@ -55,7 +55,21 @@ namespace gplc
 		{
 			args.push_back(std::get<llvm::Type*>(pCurrArgType.second->Accept(this)));
 		}
-
+		
 		return llvm::FunctionType::get(std::get<llvm::Type*>(pFuncType->GetReturnValueType()->Accept(this)), args, false);
+	}
+
+	TLLVMIRData CLLVMTypeVisitor::VisitStructType(const CStructType* pStructType)
+	{
+		std::vector<llvm::Type*> structFields;
+
+		auto fields = pStructType->GetFieldsTypes();
+
+		for (auto currField : fields)
+		{
+			structFields.push_back(std::get<llvm::Type*>(currField.second->Accept(this)));
+		}
+		
+		return llvm::StructType::create(structFields, pStructType->GetName());
 	}
 }

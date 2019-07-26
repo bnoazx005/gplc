@@ -25,7 +25,8 @@ namespace gplc
 			virtual ~CCTypeVisitor() = default;
 
 			TLLVMIRData VisitBasicType(const CType* pType) override;
-			TLLVMIRData VisitFunctionType(const CFunctionType* pFuncType) override;
+			TLLVMIRData VisitFunctionType(const CFunctionType* pFuncType) override; 
+			TLLVMIRData VisitStructType(const CStructType* pStructType) override;
 		protected:
 			CCTypeVisitor(const CCTypeVisitor& visitor) = default;
 	};
