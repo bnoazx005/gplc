@@ -72,4 +72,15 @@ namespace gplc
 		
 		return llvm::StructType::create(structFields, pStructType->GetName());
 	}
+
+	TLLVMIRData CLLVMTypeVisitor::VisitNamedType(const CDependentNamedType* pNamedType)
+	{
+		switch (pNamedType->GetType())
+		{
+			case CT_STRUCT:
+				return llvm::StructType::create(*mpContext, pNamedType->GetName());
+		}
+
+		return {};
+	}
 }

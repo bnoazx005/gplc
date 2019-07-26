@@ -72,6 +72,8 @@ namespace gplc
 				TSymbolsMap                  mVariables;
 
 				TNamedScopesMap              mNamedScopes;
+
+				CType*                       mpType;	///< A type of a named scope, equals to nullptr for unnamed scopes
 			};
 
 		public:
@@ -95,7 +97,7 @@ namespace gplc
 			virtual const TSymbolDesc* LookUp(const std::string& variableName) const = 0;
 			virtual TSymbolDesc* LookUp(TSymbolHandle symbolHandle) const = 0;
 
-			virtual TSymTableEntry* LookUpNamedScope(const std::string& scopeName) = 0;
+			virtual TSymTableEntry* LookUpNamedScope(const std::string& scopeName) const = 0;
 
 			virtual bool IsLocked() const = 0;
 		protected:
@@ -130,7 +132,7 @@ namespace gplc
 			const TSymbolDesc* LookUp(const std::string& variableName) const override;
 			TSymbolDesc* LookUp(TSymbolHandle symbolHandle) const override;
 
-			TSymTableEntry* LookUpNamedScope(const std::string& scopeName) override;
+			TSymTableEntry* LookUpNamedScope(const std::string& scopeName) const override;
 
 			bool IsLocked() const override;
 		protected:

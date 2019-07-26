@@ -131,6 +131,7 @@ namespace gplc
 		CT_FUNCTION,
 		CT_ENUM,
 		CT_ARRAY,
+		CT_ALIAS,
 		CT_LAST
 	};
 

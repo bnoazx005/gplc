@@ -227,7 +227,7 @@ namespace gplc
 		return symbol.first /* is valid */ ? &symbol.second : nullptr;
 	}
 
-	CSymTable::TSymTableEntry* CSymTable::LookUpNamedScope(const std::string& scopeName)
+	CSymTable::TSymTableEntry* CSymTable::LookUpNamedScope(const std::string& scopeName) const
 	{
 		const TSymTableEntry* pCurrEntry = mpCurrScopeEntry;
 

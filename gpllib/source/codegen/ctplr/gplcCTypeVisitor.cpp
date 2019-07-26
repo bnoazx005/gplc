@@ -80,4 +80,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CCTypeVisitor::VisitNamedType(const CDependentNamedType* pNamedType)
+	{
+		return {};
+	}
 }

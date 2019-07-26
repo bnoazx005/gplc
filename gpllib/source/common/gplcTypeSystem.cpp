@@ -628,4 +628,64 @@ namespace gplc
 	{
 		return "enum";
 	}
+
+
+	/*!
+		\brief CDependentNamedType's definition
+	*/
+
+	CDependentNamedType::CDependentNamedType(const ISymTable* pSymTable, const std::string& typeIdentifier):
+		CType(CT_ALIAS, BTS_UNKNOWN, 0x0), mpSymTable(pSymTable), mName(typeIdentifier), mpDependentType(nullptr)
+	{
+	}
+
+	TLLVMIRData CDependentNamedType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitNamedType(this);
+	}
+
+	void CDependentNamedType::SetName(const std::string& name)
+	{
+		mName = name;
+	}
+
+	CBaseValue* CDependentNamedType::GetDefaultValue() const
+	{
+		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
+
+		return pDependentType->GetDefaultValue();
+	}
+
+	const std::string& CDependentNamedType::GetName() const
+	{
+		return mName;
+	}
+
+	bool CDependentNamedType::AreSame(const CType* pType) const
+	{
+		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
+
+		return pDependentType->AreSame(pType);
+	}
+
+	std::string CDependentNamedType::ToShortAliasString() const
+	{
+		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
+
+		return pDependentType->ToShortAliasString();
+	}
+
+	E_COMPILER_TYPES CDependentNamedType::GetType() const
+	{
+		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
+
+		return pDependentType->GetType();
+	}
+
+	U32 CDependentNamedType::GetSize() const
+	{
+		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
+
+		return pDependentType->GetSize();
+	}
 }

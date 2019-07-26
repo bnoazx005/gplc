@@ -84,6 +84,12 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitAssignment(CASTAssignmentNode* pNode)
 	{
+		// generate l-value's part
+		auto leftIRCode = pNode->GetLeft()->Accept(this);
+
+		// generate r-value's part
+		auto rightIRCode = pNode->GetRight()->Accept(this);
+
 		return {};
 	}
 
@@ -130,7 +136,7 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitReturnStatement(CASTReturnStatementNode* pNode)
 	{
-		return {};
+		return mpBuilder->CreateRet(std::get<llvm::Value*>(pNode->GetExpr()->Accept(this)));
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitDefinitionNode(CASTDefinitionNode* pNode)

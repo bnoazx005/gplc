@@ -51,6 +51,7 @@ namespace gplc
 		BTS_VOID    = 4,
 		BTS_BOOL    = 1,
 		BTS_POINTER = 4,
+		BTS_UNKNOWN,
 	};
 
 
@@ -131,11 +132,11 @@ namespace gplc
 
 			const std::vector<const CType*> GetChildTypes() const;
 
-			E_COMPILER_TYPES GetType() const;
+			virtual E_COMPILER_TYPES GetType() const;
 
 			U32 GetChildTypesCount() const;
 
-			U32 GetSize() const;
+			virtual U32 GetSize() const;
 
 			U32 GetAttributes() const;
 
@@ -298,6 +299,45 @@ namespace gplc
 			CEnumType(const CEnumType& enumType) = default;
 		protected:
 			std::string mName;
+	};
+
+
+	/*!
+		\brief CDependentNamedType class
+	*/
+
+	class CDependentNamedType : public CType
+	{
+		public:
+			CDependentNamedType(const ISymTable* pSymTable, const std::string& typeIdentifier);
+			virtual ~CDependentNamedType() = default;
+
+			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
+
+			void SetName(const std::string& name) override;
+
+			CBaseValue* GetDefaultValue() const override;
+
+			const std::string& GetName() const;
+
+			bool AreSame(const CType* pType) const override;
+
+			std::string ToShortAliasString() const override;
+
+			E_COMPILER_TYPES GetType() const override;
+			
+			U32 GetSize() const override;
+		protected:
+			CDependentNamedType() = default;
+			CDependentNamedType(const CDependentNamedType& type) = default;
+
+			const CType* _getDependentType();
+		protected:
+			const ISymTable* mpSymTable;
+
+			std::string      mName;
+
+			const CType*     mpDependentType;
 	};
 }
 

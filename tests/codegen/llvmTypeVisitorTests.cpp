@@ -33,17 +33,26 @@ TEST_CASE("CLLVMTypeVisitor tests")
 
 	SECTION("TestVisitStructType_PassStructDeclaration_ReturnsCorrectLLVMIRType")
 	{
-		auto pStructTypeDecl = new CStructType(
+		ISymTable* pSymTable = new CSymTable();
+
+		pSymTable->CreateNamedScope("Foo");
+		pSymTable->LeaveScope();
+
+		auto pFooTypeEntry = pSymTable->LookUpNamedScope("Foo");
+
+		pFooTypeEntry->mpType = new CStructType(
 			{
 				{ "data", new CType(CT_INT32, BTS_INT32, 0x0) },
-				{ "next", new CStructType({ { "member", new CType(CT_DOUBLE, BTS_DOUBLE, 0x0) } }) }
+				{ "next", new CDependentNamedType(pSymTable, "Foo") }
 			});
 
-		pStructTypeDecl->SetName("Foo");
+		pFooTypeEntry->mpType->SetName("Foo");
 
-		std::get<llvm::Type*>(pStructTypeDecl->Accept(pTypeVisitor))->dump();
+		auto result = std::get<llvm::Type*>(pFooTypeEntry->mpType->Accept(pTypeVisitor));
 
-		delete pStructTypeDecl;
+		result->dump();
+
+		delete pSymTable;
 	}
 
 	delete pTypeVisitor;
