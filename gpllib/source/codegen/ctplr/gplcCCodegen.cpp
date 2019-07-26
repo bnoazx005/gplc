@@ -19,8 +19,8 @@ namespace gplc
 
 		mpSymTable = pSymTable;
 
-		mGlobalDeclarationsContext = std::string();
-		mGlobalDefinitionsContext  = std::string();
+		mGlobalDeclarationsContext = "#include <stdio.h>\n\n";
+		mGlobalDefinitionsContext = {};
 
 		mpTypeVisitor    = new CCTypeVisitor();
 		mpLiteralVisitor = new CCLiteralVisitor();
@@ -239,9 +239,13 @@ namespace gplc
 	TLLVMIRData CCCodeGenerator::VisitFunctionCall(CASTFunctionCallNode* pNode)
 	{
 		// \todo 
-		std::string result = std::string("(*")
-										.append(std::get<std::string>(pNode->GetIdentifier()->Accept(this)))
-										.append(")(");
+		std::string funcName = std::get<std::string>(pNode->GetIdentifier()->Accept(this));
+
+		CFunctionType* pFuncType = dynamic_cast<CFunctionType*>(mpSymTable->LookUp(funcName)->mpType);
+
+		std::string result = (pFuncType->GetAttributes() & AV_NATIVE_FUNC) ? funcName : std::string("(*").append(funcName).append(")");
+
+		result.append("(");
 
 		auto pArgs = pNode->GetArgs()->GetChildren();
 
@@ -250,7 +254,7 @@ namespace gplc
 			result.append(std::get<std::string>(pArgs[i]->Accept(this))).append(i < pArgs.size() - 1 ? ", " : "");
 		}
 
-		return result.append(")");
+		return result.append(");\n");
 	}
 
 	TLLVMIRData CCCodeGenerator::VisitReturnStatement(CASTReturnStatementNode* pNode)

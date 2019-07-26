@@ -27,12 +27,12 @@ namespace gplc
 
 	TLLVMIRData CCLiteralVisitor::VititCharLiteral(const CCharValue* pLiteral)
 	{
-		return pLiteral->GetValue();
+		return "\'" + pLiteral->GetValue() + "\'";
 	}
 
 	TLLVMIRData CCLiteralVisitor::VisitStringLiteral(const CStringValue* pLiteral)
 	{
-		return pLiteral->GetValue();
+		return "\"" + pLiteral->GetValue() + "\"";
 	}
 
 	TLLVMIRData CCLiteralVisitor::VisitBoolLiteral(const CBoolValue* pLiteral)

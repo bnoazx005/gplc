@@ -9,13 +9,13 @@ using namespace gplc;
 
 void OnLexerError(const TLexerErrorInfo& errorInfo)
 {
-	std::cout << errorInfo.mPos << std::endl;
+	std::cout << "(" << errorInfo.mPos << ";" << errorInfo.mLine << ") "<< errorInfo.mPos << std::endl;
 }
 
 
 void OnParserError(const TParserErrorInfo& errorInfo)
 {
-	std::cout << errorInfo.mMessage << std::endl;
+	std::cout << "(" << errorInfo.mPos << ";" << errorInfo.mLine << ") " << errorInfo.mMessage << std::endl;
 }
 
 
@@ -25,6 +25,9 @@ int main(int argc, const char** argv)
 	ILexer* pLexer = new CLexer();
 	IParser* pParser = new CParser();
 	ISymTable* pSymTable = new CSymTable();
+
+	pSymTable->AddVariable({ "printf", nullptr, new CFunctionType({ { "str", new CType(CT_STRING, BTS_POINTER, 0x0) } }, new CType(CT_INT32, BTS_INT32, 0x0), AV_NATIVE_FUNC ) });
+
 	ISemanticAnalyser* pSemanticAnalyser = new CSemanticAnalyser();
 
 	pLexer->OnErrorOutput += OnLexerError;
@@ -57,6 +60,8 @@ int main(int argc, const char** argv)
 	out << transformedSource;
 
 	out.close();
+
+	system("clang main.c -o main.exe");
 
 	delete pInputStream;
 	delete pCodeGenerator;

@@ -1,5 +1,6 @@
 #include "common/gplcValues.h"
 #include "common/gplcTypeSystem.h"
+#include <cassert>
 
 
 namespace gplc
@@ -76,7 +77,7 @@ namespace gplc
 
 	TLLVMIRData CStringValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitStringLiteral(this);
 	}
 
 	std::string CStringValue::ToString() const
@@ -91,6 +92,7 @@ namespace gplc
 
 	TLLVMIRData CCharValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
 	{
+		assert(false); // \todo implement the method
 		return {};
 	}
 

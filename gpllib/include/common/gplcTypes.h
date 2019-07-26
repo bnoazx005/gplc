@@ -164,6 +164,7 @@ namespace gplc
 		AV_FUNC_ARG_DECL     = 0x2,
 		AV_ENTRY_POINT       = 0x4,
 		AV_STRUCT_FIELD_DECL = 0x8,
+		AV_NATIVE_FUNC		 = 0x10,
 	};
 
 
