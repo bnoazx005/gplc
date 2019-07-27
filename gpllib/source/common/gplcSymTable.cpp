@@ -212,7 +212,9 @@ namespace gplc
 			identifier = "_lang_entry_main";
 		}
 
-		return _lookUp(mpCurrScopeEntry, identifier);
+		TSymbolHandle handle = _lookUp(mpCurrScopeEntry, identifier);
+
+		return handle != InvalidSymbolHandle ? (&mSymbols[handle].second) : nullptr;
 	}
 
 	TSymbolDesc* CSymTable::LookUp(TSymbolHandle symbolHandle) const
@@ -268,7 +270,12 @@ namespace gplc
 		return mIsLocked;
 	}
 
-	const TSymbolDesc* CSymTable::_lookUp(TSymTableEntry* entry, const std::string& variableName) const
+	TSymbolHandle CSymTable::GetSymbolHandleByName(const std::string& variable) const
+	{
+		return _lookUp(mpCurrScopeEntry, variable);
+	}
+
+	TSymbolHandle CSymTable::_lookUp(TSymTableEntry* entry, const std::string& variableName) const
 	{
 		const TSymbolsMap& table = entry->mVariables;
 				
@@ -276,13 +283,13 @@ namespace gplc
 
 		if ((iter = table.find(variableName)) != table.cend())
 		{
-			return &mSymbols[iter->second - 1].second;
+			return iter->second - 1;
 		}
 
 		//search in outter scopes
 		TSymTableEntry* pCurrSymTable = entry->mParentScope;
 
-		const TSymbolDesc* pCurrDesc = nullptr;
+		TSymbolHandle currSymbolHandle = InvalidSymbolHandle;
 
 		while (pCurrSymTable)
 		{
@@ -290,16 +297,16 @@ namespace gplc
 
 			for (auto& currVariable : currTable)
 			{
-				if (pCurrDesc = _lookUp(pCurrSymTable, variableName))
+				if (currSymbolHandle = _lookUp(pCurrSymTable, variableName))
 				{
-					return pCurrDesc;
+					return currSymbolHandle;
 				}
 			}
 
 			pCurrSymTable = pCurrSymTable->mParentScope;
 		}
 
-		return nullptr;
+		return InvalidSymbolHandle;
 	}
 
 	bool CSymTable::_internalLookUp(TSymTableEntry* entry, const std::string& variableName) const

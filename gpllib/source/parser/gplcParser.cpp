@@ -578,14 +578,14 @@ namespace gplc
 		return pBuiltinType;
 	}
 
-	CASTExpressionNode* CParser::_parseExpression(ILexer* pLexer)
+	CASTExpressionNode* CParser::_parseExpression(ILexer* pLexer, U32 attributes)
 	{
-		return _parseEqualityExpr(pLexer);
+		return _parseEqualityExpr(pLexer, attributes);
 	}
 
-	CASTExpressionNode* CParser::_parseHighPrecedenceExpr(ILexer* pLexer)
+	CASTExpressionNode* CParser::_parseHighPrecedenceExpr(ILexer* pLexer, U32 attributes)
 	{
-		CASTExpressionNode* pLeft = _parseLowPrecedenceExpr(pLexer);
+		CASTExpressionNode* pLeft = _parseLowPrecedenceExpr(pLexer, attributes);
 
 		CASTExpressionNode* pRight = nullptr;
 
@@ -598,7 +598,7 @@ namespace gplc
 
 			pLexer->GetNextToken();
 
-			pRight = _parseLowPrecedenceExpr(pLexer);
+			pRight = _parseLowPrecedenceExpr(pLexer, attributes);
 
 			pLeft = new CASTBinaryExpressionNode(pLeft, opType, pRight);
 		}
@@ -606,9 +606,9 @@ namespace gplc
 		return pLeft;
 	}
 
-	CASTExpressionNode* CParser::_parseLowPrecedenceExpr(ILexer* pLexer)
+	CASTExpressionNode* CParser::_parseLowPrecedenceExpr(ILexer* pLexer, U32 attributes)
 	{
-		CASTExpressionNode* pLeft = _parseUnaryExpression(pLexer);
+		CASTExpressionNode* pLeft = _parseUnaryExpression(pLexer, attributes);
 
 		CASTExpressionNode* pRight = nullptr;
 
@@ -621,7 +621,7 @@ namespace gplc
 
 			pLexer->GetNextToken();
 
-			pRight = _parseUnaryExpression(pLexer);
+			pRight = _parseUnaryExpression(pLexer, attributes);
 
 			pLeft = new CASTBinaryExpressionNode(pLeft, opType, pRight);
 		}
@@ -629,9 +629,9 @@ namespace gplc
 		return pLeft;
 	}
 
-	CASTExpressionNode* CParser::_parseEqualityExpr(ILexer* pLexer)
+	CASTExpressionNode* CParser::_parseEqualityExpr(ILexer* pLexer, U32 attributes)
 	{
-		CASTExpressionNode* pLeft = _parseComparisonExpr(pLexer);
+		CASTExpressionNode* pLeft = _parseComparisonExpr(pLexer, attributes);
 
 		CASTExpressionNode* pRight = nullptr;
 
@@ -644,7 +644,7 @@ namespace gplc
 
 			pLexer->GetNextToken();
 
-			pRight = _parseComparisonExpr(pLexer);
+			pRight = _parseComparisonExpr(pLexer, attributes);
 
 			pLeft = new CASTBinaryExpressionNode(pLeft, opType, pRight);
 		}
@@ -652,9 +652,9 @@ namespace gplc
 		return pLeft;
 	}
 
-	CASTExpressionNode* CParser::_parseComparisonExpr(ILexer* pLexer)
+	CASTExpressionNode* CParser::_parseComparisonExpr(ILexer* pLexer, U32 attributes)
 	{
-		CASTExpressionNode* pLeft = _parseHighPrecedenceExpr(pLexer);
+		CASTExpressionNode* pLeft = _parseHighPrecedenceExpr(pLexer, attributes);
 
 		CASTExpressionNode* pRight = nullptr;
 
@@ -669,7 +669,7 @@ namespace gplc
 
 			pLexer->GetNextToken();
 
-			pRight = _parseHighPrecedenceExpr(pLexer);
+			pRight = _parseHighPrecedenceExpr(pLexer, attributes);
 
 			pLeft = new CASTBinaryExpressionNode(pLeft, opType, pRight);
 		}
@@ -677,7 +677,7 @@ namespace gplc
 		return pLeft;
 	}
 
-	CASTUnaryExpressionNode* CParser::_parseUnaryExpression(ILexer* pLexer)
+	CASTUnaryExpressionNode* CParser::_parseUnaryExpression(ILexer* pLexer, U32 attributes)
 	{
 		const CToken* pCurrToken = pLexer->GetCurrToken();
 
@@ -695,7 +695,7 @@ namespace gplc
 			return new CASTUnaryExpressionNode(TT_NOT, _parsePrimaryExpression(pLexer));
 		}
 
-		CASTUnaryExpressionNode* pPrimaryNode = new CASTUnaryExpressionNode(TT_DEFAULT, _parsePrimaryExpression(pLexer));
+		CASTUnaryExpressionNode* pPrimaryNode = new CASTUnaryExpressionNode(TT_DEFAULT, _parsePrimaryExpression(pLexer, attributes));
 
 		// function's call
 		if (_match(pLexer->GetCurrToken(), TT_OPEN_BRACKET))
@@ -706,7 +706,7 @@ namespace gplc
 		return pPrimaryNode;
 	}
 
-	CASTNode* CParser::_parsePrimaryExpression(ILexer* pLexer)
+	CASTNode* CParser::_parsePrimaryExpression(ILexer* pLexer, U32 attributes)
 	{
 		const CToken* pCurrToken = pLexer->GetCurrToken();
 
@@ -715,7 +715,7 @@ namespace gplc
 		switch (pCurrToken->GetType())
 		{
 			case TT_IDENTIFIER:
-				pNode = new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName());
+				pNode = new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName(), attributes);
 				break;
 			case TT_LITERAL:
 				pNode = new CASTLiteralNode(dynamic_cast<const CLiteralToken*>(pCurrToken)->GetValue());
@@ -735,14 +735,14 @@ namespace gplc
 
 		pLexer->GetNextToken();
 
-		CASTExpressionNode* pRightNode = _parseExpression(pLexer);
+		CASTExpressionNode* pRightNode = _parseExpression(pLexer, AV_RVALUE);
 
 		return new CASTAssignmentNode(pLeftNode, pRightNode);
 	}
 
 	CASTIfStatementNode* CParser::_parseIfStatement(ILexer* pLexer)
 	{
-		CASTExpressionNode* pCondition = _parseExpression(pLexer);
+		CASTExpressionNode* pCondition = _parseExpression(pLexer, AV_RVALUE);
 
 		if (!SUCCESS(_expect(TT_OPEN_BRACE, pLexer->GetCurrToken())))
 		{
@@ -788,7 +788,7 @@ namespace gplc
 	   
 	CASTWhileLoopStatementNode* CParser::_parseWhileLoopStatement(ILexer* pLexer)
 	{
-		CASTExpressionNode* pCondition = _parseExpression(pLexer);
+		CASTExpressionNode* pCondition = _parseExpression(pLexer, AV_RVALUE);
 
 		if (!SUCCESS(_expect(TT_OPEN_BRACE, pLexer->GetCurrToken())))
 		{

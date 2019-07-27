@@ -3,6 +3,7 @@
 #include "codegen/gplcLLVMLiteralVisitor.h"
 #include "parser/gplcASTNodes.h"
 #include "common/gplcValues.h"
+#include <cassert>
 
 
 namespace gplc
@@ -76,6 +77,15 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitIdentifier(CASTIdentifierNode* pNode)
 	{
+		if (pNode->GetAttributes() & AV_RVALUE)
+		{
+			auto pValueInstruction = _getIdentifierValue(pNode->GetName());
+
+			return mpBuilder->CreateLoad(pValueInstruction, pNode->GetName());
+		}
+
+
+
 		return {};
 	}
 
@@ -192,5 +202,19 @@ namespace gplc
 		}
 
 		return {};
+	}
+
+	llvm::Value* CLLVMCodeGenerator::_getIdentifierValue(const std::string& identifier) const
+	{
+		TSymbolHandle symbolHandle = mpSymTable->GetSymbolHandleByName(identifier);
+
+		assert(symbolHandle != InvalidSymbolHandle);
+
+		return mVariablesTable.at(symbolHandle);
+	}
+
+	void CLLVMCodeGenerator::_pushIdentifierValue(const std::string& identifier, llvm::Value* pValue)
+	{
+
 	}
 }

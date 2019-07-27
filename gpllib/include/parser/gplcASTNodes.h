@@ -214,7 +214,7 @@ namespace gplc
 	class CASTIdentifierNode : public CASTTypeNode
 	{
 		public:
-			CASTIdentifierNode(const std::string& name);
+			CASTIdentifierNode(const std::string& name, U32 attributes = 0x0);
 			virtual ~CASTIdentifierNode();
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
@@ -224,11 +224,15 @@ namespace gplc
 			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
 
 			const std::string& GetName() const;
+
+			U32 GetAttributes() const;
 		protected:
 			CASTIdentifierNode() = default;
 			CASTIdentifierNode(const CASTIdentifierNode& node) = default;
 		protected:
 			std::string mName;
+
+			U32         mAttributes;
 	};
 
 

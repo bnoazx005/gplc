@@ -100,6 +100,8 @@ namespace gplc
 			virtual TSymTableEntry* LookUpNamedScope(const std::string& scopeName) const = 0;
 
 			virtual bool IsLocked() const = 0;
+
+			virtual TSymbolHandle GetSymbolHandleByName(const std::string& variable) const = 0;
 		protected:
 			ISymTable(const ISymTable& table);
 	};
@@ -135,12 +137,14 @@ namespace gplc
 			TSymTableEntry* LookUpNamedScope(const std::string& scopeName) const override;
 
 			bool IsLocked() const override;
+
+			TSymbolHandle GetSymbolHandleByName(const std::string& variable) const override;
 		protected:
 			CSymTable(const CSymTable& table);
 
 			bool _internalLookUp(TSymTableEntry* entry, const std::string& variableName) const;
 
-			const TSymbolDesc* _lookUp(TSymTableEntry* entry, const std::string& variableName) const;
+			TSymbolHandle _lookUp(TSymTableEntry* entry, const std::string& variableName) const;
 
 			void _removeScope(TSymTableEntry** scope);
 		protected:

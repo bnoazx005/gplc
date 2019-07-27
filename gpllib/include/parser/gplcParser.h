@@ -212,7 +212,7 @@ namespace gplc
 				<expression> ::= <equality>
 			*/
 
-			CASTExpressionNode* _parseExpression(ILexer* pLexer);
+			CASTExpressionNode* _parseExpression(ILexer* pLexer, U32 attributes = AV_RVALUE);
 
 			/*!
 				\brief The method tries to parse high precedence expression
@@ -222,7 +222,7 @@ namespace gplc
 							<expression> '/' <expression> 
 			*/
 
-			CASTExpressionNode* _parseHighPrecedenceExpr(ILexer* pLexer);
+			CASTExpressionNode* _parseHighPrecedenceExpr(ILexer* pLexer, U32 attributes = 0x0);
 
 			/*!
 				\brief The method tries to parse low precedence expression
@@ -232,7 +232,7 @@ namespace gplc
 							<expression> '-' <expression>
 			*/
 
-			CASTExpressionNode* _parseLowPrecedenceExpr(ILexer* pLexer);
+			CASTExpressionNode* _parseLowPrecedenceExpr(ILexer* pLexer, U32 attributes = 0x0);
 
 			/*!
 				\brief The method tries to parse low precedence expression
@@ -242,7 +242,7 @@ namespace gplc
 							   <expression> '!=' <expression>
 			*/
 
-			CASTExpressionNode* _parseEqualityExpr(ILexer* pLexer);
+			CASTExpressionNode* _parseEqualityExpr(ILexer* pLexer, U32 attributes = 0x0);
 			
 			/*!
 				\brief The method tries to parse low precedence expression
@@ -254,7 +254,7 @@ namespace gplc
 							   <expression> '>=' <expression> 
 			*/
 
-			CASTExpressionNode* _parseComparisonExpr(ILexer* pLexer);
+			CASTExpressionNode* _parseComparisonExpr(ILexer* pLexer, U32 attributes = 0x0);
 
 			/*!
 				\brief The method tries to parse an unary expression
@@ -262,7 +262,7 @@ namespace gplc
 				<unary_expr> ::= <identifier> | <value> | <function-call> 
 			*/
 
-			CASTUnaryExpressionNode* _parseUnaryExpression(ILexer* pLexer);
+			CASTUnaryExpressionNode* _parseUnaryExpression(ILexer* pLexer, U32 attributes = 0x0);
 
 			/*!
 				\brief The method tries to parse primary expression
@@ -270,7 +270,7 @@ namespace gplc
 				<value> ::= 
 			*/
 
-			CASTNode* _parsePrimaryExpression(ILexer* pLexer);
+			CASTNode* _parsePrimaryExpression(ILexer* pLexer, U32 attributes = 0x0);
 
 			/*!
 				\brief The method tries to parse an assigment operator

@@ -377,8 +377,8 @@ namespace gplc
 		CASTIdentifierNode definition
 	*/
 	
-	CASTIdentifierNode::CASTIdentifierNode(const std::string& name) :
-		CASTTypeNode(NT_IDENTIFIER), mName(name)
+	CASTIdentifierNode::CASTIdentifierNode(const std::string& name, U32 attributes) :
+		CASTTypeNode(NT_IDENTIFIER), mName(name), mAttributes(attributes)
 	{
 	}
 
@@ -409,6 +409,11 @@ namespace gplc
 	const std::string& CASTIdentifierNode::GetName() const
 	{
 		return mName;
+	}
+
+	U32 CASTIdentifierNode::GetAttributes() const
+	{
+		return mAttributes;
 	}
 
 

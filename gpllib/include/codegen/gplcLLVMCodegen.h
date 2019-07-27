@@ -19,6 +19,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instructions.h"
 #include <variant>
+#include <unordered_map>
 
 
 namespace gplc
@@ -29,7 +30,9 @@ namespace gplc
 	class CLLVMCodeGenerator : public ICodeGenerator
 	{
 		protected:
-			typedef ILiteralVisitor<TLLVMIRData> TLLVMLiteralVisitor;
+			typedef ILiteralVisitor<TLLVMIRData>                    TLLVMLiteralVisitor;
+
+			typedef std::unordered_map<TSymbolHandle, llvm::Value*> TValuesTable;
 		public:
 			CLLVMCodeGenerator() = default;
 			virtual ~CLLVMCodeGenerator() = default;
@@ -79,6 +82,10 @@ namespace gplc
 			CLLVMCodeGenerator(const CLLVMCodeGenerator& codeGenerator) = default;
 
 			llvm::Instruction::BinaryOps _convertOpTypeToLLVM(E_TOKEN_TYPE opType, bool isFloatingPointOp = false) const;
+
+			llvm::Value* _getIdentifierValue(const std::string& identifier) const;
+
+			void _pushIdentifierValue(const std::string& identifier, llvm::Value* pValue);
 		protected:
 			TLLVMLiteralVisitor* mpLiteralIRGenerator;
 
@@ -87,6 +94,8 @@ namespace gplc
 			ISymTable*           mpSymTable;
 
 			llvm::IRBuilder<>*   mpBuilder;
+
+			TValuesTable         mVariablesTable;
 	};
 }
 
