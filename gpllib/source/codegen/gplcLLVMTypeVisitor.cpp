@@ -56,7 +56,14 @@ namespace gplc
 			args.push_back(std::get<llvm::Type*>(pCurrArgType.second->Accept(this)));
 		}
 		
-		return llvm::FunctionType::get(std::get<llvm::Type*>(pFuncType->GetReturnValueType()->Accept(this)), args, false);
+		auto pFunctionType = llvm::FunctionType::get(std::get<llvm::Type*>(pFuncType->GetReturnValueType()->Accept(this)), args, false);
+
+		if (pFuncType->GetAttributes() & AV_STATIC)
+		{
+			return pFunctionType;
+		}
+
+		return llvm::PointerType::get(pFunctionType, 0); // \todo return a function poitner
 	}
 
 	TLLVMIRData CLLVMTypeVisitor::VisitStructType(const CStructType* pStructType)

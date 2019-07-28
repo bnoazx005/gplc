@@ -168,14 +168,10 @@ namespace gplc
 			return InvalidSymbolHandle;
 		}
 
-		std::string identifier { typeDesc.mName };
+		std::string identifier = RenameReservedIdentifier(typeDesc.mName);
 
-		// rename "main into "_lang_entry_main"
-		// \todo TEMP code, replace this with proper solution later
-		if (identifier == "main")
+		if (identifier == "_lang_entry_main")
 		{
-			identifier = "_lang_entry_main";
-
 			CFunctionType* pMainFuncType = dynamic_cast<CFunctionType*>(typeDesc.mpType);
 
 			pMainFuncType->SetAttributes(pMainFuncType->GetAttributes() | AV_ENTRY_POINT);
@@ -203,18 +199,9 @@ namespace gplc
 
 	const TSymbolDesc* CSymTable::LookUp(const std::string& variableName) const
 	{
-		std::string identifier{ variableName };
+		TSymbolHandle handle = _lookUp(mpCurrScopeEntry, RenameReservedIdentifier(variableName));
 
-		// rename "main into "_lang_entry_main"
-		// \todo TEMP code, replace this with proper solution later
-		if (variableName == "main")
-		{
-			identifier = "_lang_entry_main";
-		}
-
-		TSymbolHandle handle = _lookUp(mpCurrScopeEntry, identifier);
-
-		return handle != InvalidSymbolHandle ? (&mSymbols[handle].second) : nullptr;
+		return handle != InvalidSymbolHandle ? (&mSymbols[handle - 1].second) : nullptr;
 	}
 
 	TSymbolDesc* CSymTable::LookUp(TSymbolHandle symbolHandle) const
@@ -275,6 +262,16 @@ namespace gplc
 		return _lookUp(mpCurrScopeEntry, variable);
 	}
 
+	std::string CSymTable::RenameReservedIdentifier(const std::string& identifier) const
+	{
+		if (identifier == "main")
+		{
+			return "_lang_entry_main";
+		}
+
+		return identifier;
+	}
+
 	TSymbolHandle CSymTable::_lookUp(TSymTableEntry* entry, const std::string& variableName) const
 	{
 		const TSymbolsMap& table = entry->mVariables;
@@ -283,7 +280,7 @@ namespace gplc
 
 		if ((iter = table.find(variableName)) != table.cend())
 		{
-			return iter->second - 1;
+			return iter->second;
 		}
 
 		//search in outter scopes

@@ -723,4 +723,18 @@ namespace gplc
 
 		return pDependentType->GetSize();
 	}
+
+
+	std::string CreateAnonymousLambdaName(const CFunctionType* pLambdaType)
+	{
+		std::string name = std::string("lambda").append(pLambdaType->GetReturnValueType()->ToShortAliasString());
+
+		for (auto pCurrArgType : pLambdaType->GetArgsTypes())
+		{
+			name.append(pCurrArgType.second->ToShortAliasString());
+		}
+
+		// random salt
+		return name.append("_").append(std::to_string(rand()));
+	}
 }

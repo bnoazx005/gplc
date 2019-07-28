@@ -20,11 +20,12 @@
 #include "llvm/IR/Instructions.h"
 #include <variant>
 #include <unordered_map>
+#include <stack>
 
 
 namespace gplc
 {
-	class CLLVMLiteralVisitor;
+	class ITypeResolver;
 
 
 	class CLLVMCodeGenerator : public ICodeGenerator
@@ -32,7 +33,11 @@ namespace gplc
 		protected:
 			typedef ILiteralVisitor<TLLVMIRData>                    TLLVMLiteralVisitor;
 
+			typedef ITypeVisitor<TLLVMIRData>                       TLLVMTypeVisitor;
+
 			typedef std::unordered_map<TSymbolHandle, llvm::Value*> TValuesTable;
+
+			typedef std::stack<llvm::IRBuilder<>>                   TIRBuidlersStack;
 		public:
 			CLLVMCodeGenerator() = default;
 			virtual ~CLLVMCodeGenerator() = default;
@@ -85,17 +90,35 @@ namespace gplc
 
 			llvm::Value* _getIdentifierValue(const std::string& identifier) const;
 
-			void _pushIdentifierValue(const std::string& identifier, llvm::Value* pValue);
+			llvm::Value* _allocateVariableOnStack(const std::string& identifier);
+
+			void _defineInitModuleGlobalsFunction();
+
+			void _defineEntryPoint();
 		protected:
 			TLLVMLiteralVisitor* mpLiteralIRGenerator;
 
+			TLLVMTypeVisitor*    mpTypeGenerator;
+
+			ITypeResolver*       mpTypeResolver;
+
 			llvm::LLVMContext*   mpContext;
+
+			llvm::Module*        mpModule;
+
+			llvm::Function*      mpCurrActiveFunction;
 
 			ISymTable*           mpSymTable;
 
-			llvm::IRBuilder<>*   mpBuilder;
+			TIRBuidlersStack     mIRBuildersStack;
+
+			llvm::IRBuilder<>*   mpGlobalIRBuilder;
 
 			TValuesTable         mVariablesTable;
+
+			llvm::Function*      mpInitModuleGlobalsFunction;
+
+			llvm::IRBuilder<>*   mpInitModuleGlobalsIRBuilder;
 	};
 }
 

@@ -102,6 +102,8 @@ namespace gplc
 			virtual bool IsLocked() const = 0;
 
 			virtual TSymbolHandle GetSymbolHandleByName(const std::string& variable) const = 0;
+
+			virtual std::string RenameReservedIdentifier(const std::string& identifier) const = 0;
 		protected:
 			ISymTable(const ISymTable& table);
 	};
@@ -139,6 +141,8 @@ namespace gplc
 			bool IsLocked() const override;
 
 			TSymbolHandle GetSymbolHandleByName(const std::string& variable) const override;
+
+			std::string RenameReservedIdentifier(const std::string& identifier) const override;
 		protected:
 			CSymTable(const CSymTable& table);
 

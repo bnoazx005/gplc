@@ -75,8 +75,6 @@ namespace gplc
 			TLLVMIRData VisitStructDeclaration(CASTStructDeclNode* pNode) override;
 		protected:
 			CCCodeGenerator(const CCCodeGenerator& codeGenerator) = default;
-
-			std::string _generateAnonymousLambdaName(const CFunctionType* pLambdaType) const;
 		protected:
 			ITypeResolver*    mpTypeResolver;
 

@@ -297,7 +297,7 @@ namespace gplc
 	{
 		CFunctionType* pLambdaType = dynamic_cast<CFunctionType*>(mpTypeResolver->Resolve(pNode->GetLambdaTypeInfo(), mpSymTable));
 
-		std::string lambdaName = _generateAnonymousLambdaName(pLambdaType);
+		std::string lambdaName = CreateAnonymousLambdaName(pLambdaType);
 
 		pLambdaType->SetAttributes(AV_STATIC);
 		pLambdaType->SetName(lambdaName);
@@ -324,19 +324,6 @@ namespace gplc
 		}
 
 		return result;
-	}
-
-	std::string CCCodeGenerator::_generateAnonymousLambdaName(const CFunctionType* pLambdaType) const
-	{
-		std::string name = std::string("lambda").append(pLambdaType->GetReturnValueType()->ToShortAliasString());
-
-		for (auto pCurrArgType : pLambdaType->GetArgsTypes())
-		{
-			name.append(pCurrArgType.second->ToShortAliasString());
-		}
-
-		// random salt
-		return name.append("_").append(std::to_string(rand()));
 	}
 
 	TLLVMIRData CCCodeGenerator::VisitEnumDeclaration(CASTEnumDeclNode* pNode)

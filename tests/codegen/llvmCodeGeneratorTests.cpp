@@ -13,18 +13,30 @@ TEST_CASE("CLLVMCodeGenerator tests")
 	{
 		pCodeGenerator->Generate(new CASTSourceUnitNode(), new CSymTable());
 	}
-
+/*
 	SECTION("TestGenerate_PassBinaryExpression_ReturnsBytecode")
 	{
 		CASTSourceUnitNode* pProgram = new CASTSourceUnitNode();
 
-		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-																		new CASTBinaryExpressionNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(2))),
-																									 TT_PLUS,
-																									 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(3))))));
+		ISymTable* pSymTable = new CSymTable();
 
-		pCodeGenerator->Generate(pProgram, new CSymTable());
+		pSymTable->CreateScope();
+		pSymTable->AddVariable({ "x", nullptr, new CType(CT_INT32, BTS_INT32, 0x0) });
+		pSymTable->LeaveScope();
+
+		auto pBlock = new CASTBlockNode();
+
+		pBlock->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
+													new CASTBinaryExpressionNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(2))),
+														TT_PLUS,
+														new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(3))))));
+
+		pProgram->AttachChild(pBlock);
+
+		pCodeGenerator->Generate(pProgram, pSymTable);
+
+		delete pSymTable;
 	}
-
+*/
 	delete pCodeGenerator;
 }

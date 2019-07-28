@@ -51,15 +51,16 @@ int main(int argc, const char** argv)
 
 	bool result = pSemanticAnalyser->Analyze(pSourceAST, pTypeResolver, pSymTable);
 
-	ICodeGenerator* pCodeGenerator = new CCCodeGenerator();
+	ICodeGenerator* pCodeGenerator = new CLLVMCodeGenerator();//new CCCodeGenerator();
 
-	std::string transformedSource = std::get<std::string>(pCodeGenerator->Generate(pSourceAST, pSymTable));
+	pCodeGenerator->Generate(pSourceAST, pSymTable);
+	//std::string transformedSource = std::get<std::string>(pCodeGenerator->Generate(pSourceAST, pSymTable));
 
-	std::ofstream out("main.c");
+	//std::ofstream out("main.c");
 
-	out << transformedSource;
+	//out << transformedSource;
 
-	out.close();
+	//out.close();
 
 	system("clang main.c -o main.exe");
 

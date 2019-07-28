@@ -345,6 +345,9 @@ namespace gplc
 
 			const CType*     mpDependentType;
 	};
+
+
+	std::string CreateAnonymousLambdaName(const CFunctionType* pLambdaType);
 }
 
 #endif
