@@ -118,7 +118,11 @@ namespace gplc
 		{
 			pCurrArgDecl = dynamic_cast<CASTIdentifierNode*>((dynamic_cast<CASTDeclarationNode*>(pCurrArgNode))->GetIdentifiers()->GetChildren()[0]);
 			
-			argsTypes.push_back({ pCurrArgDecl->GetName(), Resolve(dynamic_cast<CASTTypeNode*>(pCurrArgNode), mpSymTable) });
+			auto pCurrArgType = Resolve(dynamic_cast<CASTTypeNode*>(pCurrArgNode), mpSymTable);
+
+			pCurrArgType->SetAttribute(pCurrArgDecl->GetAttributes());
+
+			argsTypes.push_back({ pCurrArgDecl->GetName(), pCurrArgType });
 		}
 
 		return new CFunctionType(argsTypes, Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetReturnValueType()), mpSymTable), 0x0);
@@ -287,6 +291,10 @@ namespace gplc
 		return mChildren.empty();
 	}
 
+	void CType::SetAttribute(U32 attribute)
+	{
+		mAttributes |= attribute;
+	}
 
 	void CType::SetName(const std::string& name)
 	{

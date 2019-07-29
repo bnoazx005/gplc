@@ -384,7 +384,7 @@ namespace gplc
 				mpSymTable->AddVariable({ currIdentifier, nullptr, nullptr });
 			}
 
-			pIdentifiersRoot->AttachChild(new CASTIdentifierNode(currIdentifier));
+			pIdentifiersRoot->AttachChild(new CASTIdentifierNode(currIdentifier, attributes));
 
 			// function argument doesn't allow multiple variable per declaration
 			/*if ((attributes & AV_FUNC_ARG_DECL) == AV_FUNC_ARG_DECL)

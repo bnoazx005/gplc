@@ -88,7 +88,14 @@ namespace gplc
 	{
 		const std::string& name = pNode->GetName();
 
-		if (pNode->GetAttributes() & AV_RVALUE)
+		U32 attributes = mpSymTable->LookUp(name)->mpType->GetAttributes();
+
+		if (attributes & AV_FUNC_ARG_DECL)
+		{
+			return _getIdentifierValue(name);
+		}
+
+		if (attributes & AV_RVALUE)
 		{
 			auto pValueInstruction = _getIdentifierValue(name);
 
@@ -133,7 +140,7 @@ namespace gplc
 	
 		for (auto& currArg : mpCurrActiveFunction->args())
 		{
-			_allocateVariableOnStack(currArg.getName());
+			_allocateVariableOnStack(currArg.getName(), true);
 		}
 
 		auto pBlock = llvm::BasicBlock::Create(*mpContext, "entry", mpCurrActiveFunction);
@@ -260,8 +267,6 @@ namespace gplc
 			currArg.setName(funcArgsTypes[currArgId++].first);
 		}
 
-		mpCurrActiveFunction->dump();
-
 		auto pFuncIdentifierNode = dynamic_cast<CASTIdentifierNode*>(pNode->GetDeclaration()->GetIdentifiers()->GetChildren()[0]);
 
 		const std::string lValueIdentifier = mpSymTable->RenameReservedIdentifier(dynamic_cast<CASTIdentifierNode*>(pFuncIdentifierNode)->GetName());
@@ -338,7 +343,11 @@ namespace gplc
 		return mVariablesTable.at(symbolHandle);
 	}
 
-	llvm::Value* CLLVMCodeGenerator::_allocateVariableOnStack(const std::string& identifier)
+	/*!
+		\todo For function's arguments the method should return them instead of allocation of a new variable on stack
+	*/
+
+	llvm::Value* CLLVMCodeGenerator::_allocateVariableOnStack(const std::string& identifier, bool isFuncArg)
 	{
 		TSymbolHandle symbolHandle = mpSymTable->GetSymbolHandleByName(identifier);
 
@@ -346,6 +355,25 @@ namespace gplc
 
 		// extract identifier's info
 		auto symbolDesc = mpSymTable->LookUp(symbolHandle);
+
+		if (isFuncArg)
+		{
+			llvm::Argument* pCurrActiveArgument = nullptr;
+
+			for (auto& currArg : mpCurrActiveFunction->args())
+			{
+				if (currArg.getName() == identifier)
+				{
+					pCurrActiveArgument = &currArg;
+
+					break;
+				}
+			}
+
+			mVariablesTable[symbolHandle] = pCurrActiveArgument;
+
+			return pCurrActiveArgument;
+		}
 
 		// resolve type into LLVM IR
 		llvm::Type* pIdentifierType = std::get<llvm::Type*>(symbolDesc->mpType->Accept(mpTypeGenerator));

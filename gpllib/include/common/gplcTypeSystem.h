@@ -132,6 +132,8 @@ namespace gplc
 
 			bool IsBuiltIn() const;
 
+			void SetAttribute(U32 attribute);
+
 			virtual void SetName(const std::string& name);
 
 			const std::vector<const CType*> GetChildTypes() const;

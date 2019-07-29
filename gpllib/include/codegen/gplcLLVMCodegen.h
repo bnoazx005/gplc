@@ -90,7 +90,7 @@ namespace gplc
 
 			llvm::Value* _getIdentifierValue(const std::string& identifier) const;
 
-			llvm::Value* _allocateVariableOnStack(const std::string& identifier);
+			llvm::Value* _allocateVariableOnStack(const std::string& identifier, bool isFuncArg = false);
 
 			void _defineInitModuleGlobalsFunction();
 
