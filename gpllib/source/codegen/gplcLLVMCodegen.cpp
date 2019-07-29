@@ -88,7 +88,7 @@ namespace gplc
 	{
 		const std::string& name = pNode->GetName();
 
-		U32 attributes = mpSymTable->LookUp(name)->mpType->GetAttributes();
+		U32 attributes = mpSymTable->LookUp(name)->mpType->GetAttributes() | pNode->GetAttributes();
 
 		if (attributes & AV_FUNC_ARG_DECL)
 		{
@@ -171,7 +171,6 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitWhileLoopStatement(CASTWhileLoopStatementNode* pNode)
 	{
-
 		return {};
 	}
 
@@ -192,7 +191,20 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitFunctionCall(CASTFunctionCallNode* pNode)
 	{
-		return {};
+		llvm::IRBuilder<>& currIRBuilder = mIRBuildersStack.top();
+
+		llvm::Value* pCallee = std::get<llvm::Value*>(pNode->GetIdentifier()->Accept(this));
+		
+		std::vector<llvm::Value*> args;
+
+		auto pNodeArgs = pNode->GetArgs();
+
+		for (auto pCurrArg : pNodeArgs->GetChildren())
+		{
+			args.push_back(std::get<llvm::Value*>(pCurrArg->Accept(this)));
+		}
+
+		return currIRBuilder.CreateCall(pCallee, args, "tmpfncall");
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitReturnStatement(CASTReturnStatementNode* pNode)

@@ -154,7 +154,7 @@ namespace gplc
 				\return A pointer to node with a declaration
 			*/
 
-			CASTNode* _parseDeclaration(ILexer* pLexer, U32 attributes = AV_FUNC_ARG_DECL);
+			CASTNode* _parseDeclaration(ILexer* pLexer, U32 attributes = 0x0);
 
 			/*!
 				\brief Try to parse an identifiers list

@@ -888,7 +888,7 @@ namespace gplc
 				pLexer->GetNextToken();
 			}
 
-			pArgsNode->AttachChild(_parseDeclaration(pLexer)); ///< \todo function's arguments can't have attributes before type's description
+			pArgsNode->AttachChild(_parseDeclaration(pLexer, AV_FUNC_ARG_DECL)); ///< \todo function's arguments can't have attributes before type's description
 		} while (_match(pLexer->GetCurrToken(), TT_COMMA));
 
 		if (!SUCCESS(_expect(TT_CLOSE_BRACKET, pLexer->GetCurrToken())))
