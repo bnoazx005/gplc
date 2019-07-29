@@ -15,6 +15,7 @@
 #include "common/gplcVisitor.h"
 #include "utils/Delegate.h"
 #include "common/gplcTypes.h"
+#include <functional>
 
 
 namespace gplc
@@ -105,10 +106,14 @@ namespace gplc
 			bool VisitStructDeclaration(CASTStructDeclNode* pNode) override;
 		protected:
 			bool _enterScope(CASTBlockNode* pNode, ISymTable* pSymTable);
+
+			void _lockSymbolTable(const std::function<void()>& action, bool lockSymTable);
 		protected:
 			ITypeResolver* mpTypeResolver;
 
 			ISymTable*     mpSymTable;
+
+			bool           mLockSymbolTable;
 	};
 }
 

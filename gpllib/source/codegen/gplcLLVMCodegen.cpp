@@ -42,6 +42,8 @@ namespace gplc
 
 		pNode->Accept(this);
 
+		mpInitModuleGlobalsIRBuilder->CreateRetVoid();
+
 		// \note FOR DEBUG PURPOSE ONLY
 		mpModule->dump();
 		//llvm::WriteBitcodeToFile(*mpModule, llvm::outs());
@@ -129,6 +131,11 @@ namespace gplc
 	{
 		mpSymTable->VisitScope();
 	
+		for (auto& currArg : mpCurrActiveFunction->args())
+		{
+			_allocateVariableOnStack(currArg.getName());
+		}
+
 		auto pBlock = llvm::BasicBlock::Create(*mpContext, "entry", mpCurrActiveFunction);
 
 		mIRBuildersStack.push(llvm::IRBuilder<>(pBlock));
@@ -243,6 +250,18 @@ namespace gplc
 
 		mpCurrActiveFunction = llvm::Function::Create(pLambdaFunctionType, llvm::Function::ExternalLinkage, lambdaName, mpModule);
 
+		// set names for function's arguments
+		auto funcArgsTypes = pInternalLambdaType->GetArgsTypes();
+
+		U32 currArgId = 0;
+
+		for (auto& currArg : mpCurrActiveFunction->args())
+		{
+			currArg.setName(funcArgsTypes[currArgId++].first);
+		}
+
+		mpCurrActiveFunction->dump();
+
 		auto pFuncIdentifierNode = dynamic_cast<CASTIdentifierNode*>(pNode->GetDeclaration()->GetIdentifiers()->GetChildren()[0]);
 
 		const std::string lValueIdentifier = mpSymTable->RenameReservedIdentifier(dynamic_cast<CASTIdentifierNode*>(pFuncIdentifierNode)->GetName());
@@ -255,13 +274,15 @@ namespace gplc
 		if (isGlobalScope)
 		{
 			pLValueFuncPointer = mpModule->getOrInsertGlobal(lValueIdentifier, pLValueFnType);
+
+			mpModule->getGlobalVariable(lValueIdentifier)->setInitializer(mpCurrActiveFunction);
 		}
 		else
 		{
 			pLValueFuncPointer = pCurrIRBuilder->CreateAlloca(pLValueFnType, nullptr, lValueIdentifier);
 		}
 
-		llvm::Value* pLValueAssignInstruction = pCurrIRBuilder->CreateStore(mpCurrActiveFunction, pLValueFuncPointer);
+		llvm::Value* pLValueAssignInstruction = pCurrIRBuilder->CreateStore(pCurrIRBuilder->CreateBitOrPointerCast(mpCurrActiveFunction, pLValueFnType), pLValueFuncPointer);
 
 		mVariablesTable[mpSymTable->GetSymbolHandleByName(pFuncIdentifierNode->GetName())] = pLValueFuncPointer;
 
@@ -370,7 +391,5 @@ namespace gplc
 		llvm::BasicBlock* pInitModuleGlobalsFuncBody = llvm::BasicBlock::Create(*mpContext, "entry", mpInitModuleGlobalsFunction);
 
 		mpInitModuleGlobalsIRBuilder = new llvm::IRBuilder<>(pInitModuleGlobalsFuncBody);
-
-		//mpInitModuleGlobalsIRBuilder->CreateRetVoid(); \todo implement this
 	}
 }

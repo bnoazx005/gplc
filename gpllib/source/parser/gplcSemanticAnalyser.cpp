@@ -16,6 +16,8 @@ namespace gplc
 		mpTypeResolver = pTypeResolver;
 		mpSymTable     = pSymTable;
 
+		mLockSymbolTable = false;
+
 		return pInput->Accept(this);
 	}
 
@@ -250,11 +252,10 @@ namespace gplc
 		
 		bool isCorrect = (pClosureDecl ? pClosureDecl->Accept(this) : true);
 		
-		mpSymTable->Lock();
-
-		isCorrect = isCorrect && pArgs->Accept(this);
-
-		mpSymTable->Unlock();
+		_lockSymbolTable([&isCorrect, this, &pArgs]()
+		{
+			isCorrect = isCorrect && pArgs->Accept(this);
+		}, mLockSymbolTable);
 
 		isCorrect = isCorrect && pReturnValueType->Accept(this);
 
@@ -356,6 +357,8 @@ namespace gplc
 			return false;
 		}
 
+		mLockSymbolTable = true;
+
 		// check left side
 		CType* pDeclFuncType = nullptr;
 
@@ -363,8 +366,10 @@ namespace gplc
 		{
 			return false;
 		}
-
+		
 		mpSymTable->CreateScope();
+
+		mLockSymbolTable = false;
 
 		// check lambda type
 		CType* pAssignedLambdaType = nullptr;
@@ -427,5 +432,20 @@ namespace gplc
 		pSymTable->LeaveScope();
 
 		return result;
+	}
+
+	void CSemanticAnalyser::_lockSymbolTable(const std::function<void()>& action, bool lockSymTable)
+	{
+		if (lockSymTable)
+		{
+			mpSymTable->Lock();
+		}
+
+		action();
+
+		if (lockSymTable)
+		{
+			mpSymTable->Unlock();
+		}
 	}
 }

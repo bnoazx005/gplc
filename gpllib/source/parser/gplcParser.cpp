@@ -379,7 +379,7 @@ namespace gplc
 
 			currIdentifier = dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName();
 
-			if ((attributes & AV_STRUCT_FIELD_DECL) == AV_STRUCT_FIELD_DECL)
+			if ((attributes & AV_STRUCT_FIELD_DECL))
 			{
 				mpSymTable->AddVariable({ currIdentifier, nullptr, nullptr });
 			}
