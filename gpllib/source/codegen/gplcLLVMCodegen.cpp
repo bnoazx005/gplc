@@ -166,7 +166,18 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitLoopStatement(CASTLoopStatementNode* pNode)
 	{
-		return {};
+		llvm::IRBuilder<>& currIRBuilder = mIRBuildersStack.top();
+
+		llvm::BasicBlock* pLoopBody = llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetBody()->Accept(this)));
+
+		// link loop with its parent block
+
+		currIRBuilder.CreateBr(pLoopBody);
+
+		llvm::IRBuilder<> loopIRBuilder { pLoopBody };
+		loopIRBuilder.CreateBr(pLoopBody);
+
+		return pLoopBody;
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitWhileLoopStatement(CASTWhileLoopStatementNode* pNode)
@@ -267,6 +278,8 @@ namespace gplc
 
 		auto pLambdaFunctionType = llvm::dyn_cast<llvm::FunctionType>(std::get<llvm::Type*>(pInternalLambdaType->Accept(mpTypeGenerator)));
 
+		llvm::Function* pPrevActiveFunction = mpCurrActiveFunction;
+
 		mpCurrActiveFunction = llvm::Function::Create(pLambdaFunctionType, llvm::Function::ExternalLinkage, lambdaName, mpModule);
 
 		// set names for function's arguments
@@ -305,6 +318,8 @@ namespace gplc
 
 		// generate its definition
 		auto pBlock = std::get<llvm::Value*>(pNode->GetValue()->Accept(this));
+
+		mpCurrActiveFunction = pPrevActiveFunction; // restore previous value
 
 		const TSymbolDesc* pFuncDesc = mpSymTable->LookUp(pFuncIdentifierNode->GetName());
 
