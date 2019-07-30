@@ -88,7 +88,11 @@ namespace gplc
 	{
 		const std::string& name = pNode->GetName();
 
-		U32 attributes = mpSymTable->LookUp(name)->mpType->GetAttributes() | pNode->GetAttributes();
+		const TSymbolDesc* pSymbolDesc = mpSymTable->LookUp(name);
+
+		assert(pSymbolDesc);
+
+		U32 attributes = pSymbolDesc->mpType->GetAttributes() | pNode->GetAttributes();
 
 		if (attributes & AV_FUNC_ARG_DECL)
 		{
@@ -187,7 +191,36 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitIfStatement(CASTIfStatementNode* pNode)
 	{
-		return {};
+		llvm::IRBuilder<>& currIRBuilder = mIRBuildersStack.top();
+
+		llvm::BasicBlock* pConditionBlock = llvm::BasicBlock::Create(*mpContext, "cond", mpCurrActiveFunction);
+
+		mIRBuildersStack.push(llvm::IRBuilder<>(pConditionBlock));
+		llvm::Value* pConditifon = std::get<llvm::Value*>(pNode->GetCondition()->Accept(this));
+		mIRBuildersStack.pop();
+
+		currIRBuilder.CreateBr(pConditionBlock);
+
+		llvm::BasicBlock* pEndBlock = llvm::BasicBlock::Create(*mpContext, "end", mpCurrActiveFunction);
+
+		llvm::BasicBlock* pThenBlock = llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetThenBlock()->Accept(this)));
+		
+		// add end point for then branch
+		llvm::IRBuilder<> thenBlockIRBuilder{ pThenBlock };
+		thenBlockIRBuilder.CreateBr(pEndBlock);
+
+		llvm::BasicBlock* pElseBlock = llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetElseBlock()->Accept(this)));
+
+		// add end point for else branch
+		llvm::IRBuilder<> elseBlockIRBuilder{ pElseBlock };
+		elseBlockIRBuilder.CreateBr(pEndBlock);
+
+		currIRBuilder.SetInsertPoint(pConditionBlock);
+		llvm::Value* pBRInstruction = currIRBuilder.CreateCondBr(pConditifon, pThenBlock, pElseBlock);
+
+		currIRBuilder.SetInsertPoint(pEndBlock);
+
+		return pBRInstruction;
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitLoopStatement(CASTLoopStatementNode* pNode)
@@ -437,10 +470,6 @@ namespace gplc
 
 		return mVariablesTable.at(symbolHandle);
 	}
-
-	/*!
-		\todo For function's arguments the method should return them instead of allocation of a new variable on stack
-	*/
 
 	llvm::Value* CLLVMCodeGenerator::_allocateVariableOnStack(const std::string& identifier, bool isFuncArg)
 	{

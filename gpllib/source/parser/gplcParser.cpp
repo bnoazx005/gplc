@@ -760,7 +760,28 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take }
 
-		CASTBlockNode* pElseBlock = _match(pLexer->GetCurrToken(), TT_ELSE_KEYWORD) ? _parseBlockStatements(pLexer) : nullptr;
+		CASTBlockNode* pElseBlock = nullptr;
+
+		if (_match(pLexer->GetCurrToken(), TT_ELSE_KEYWORD))
+		{
+			pLexer->GetNextToken(); //take 'else'
+
+			if (!SUCCESS(_expect(TT_OPEN_BRACE, pLexer->GetCurrToken())))
+			{
+				return nullptr;
+			}
+
+			pLexer->GetNextToken(); // take {
+
+			pElseBlock = _parseBlockStatements(pLexer);
+
+			if (!SUCCESS(_expect(TT_CLOSE_BRACE, pLexer->GetCurrToken())))
+			{
+				return nullptr;
+			}
+
+			pLexer->GetNextToken(); // take }
+		}
 
 		return new CASTIfStatementNode(pCondition, pThenBlock, pElseBlock);
 	}
