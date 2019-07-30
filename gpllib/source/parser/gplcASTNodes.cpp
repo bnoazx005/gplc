@@ -1115,7 +1115,7 @@ namespace gplc
 
 	bool CASTNamedTypeNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
-		return false;
+		return pVisitor->VisitIdentifier(GetTypeInfo());
 	}
 
 	TLLVMIRData CASTNamedTypeNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)

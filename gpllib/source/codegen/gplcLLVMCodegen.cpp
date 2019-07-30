@@ -81,6 +81,42 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitDeclaration(CASTDeclarationNode* pNode)
 	{
+		auto pIdentifiers = pNode->GetIdentifiers();
+		auto pTypeInfo    = pNode->GetTypeInfo();
+
+		assert(pIdentifiers && pTypeInfo);
+
+		llvm::Type* pIdentifiersType = nullptr;
+
+		const TSymbolDesc* pCurrSymbolDesc = nullptr;
+		
+		CType* pType = nullptr;
+
+		auto& currIRBuidler = mIRBuildersStack.top();
+
+		llvm::Value* pIdentifiersValue = nullptr;
+
+		for (auto pCurrIdentifier : pIdentifiers->GetChildren())
+		{
+			const std::string& identifier = dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName();
+			
+			pCurrSymbolDesc = mpSymTable->LookUp(identifier);
+
+			pType = pCurrSymbolDesc->mpType;
+
+			// compute only once, because all identifiers are the same type
+			pIdentifiersType = pIdentifiersType ? pIdentifiersType : std::get<llvm::Type*>(pType->Accept(mpTypeGenerator));
+
+			auto pCurrVariableAllocation = currIRBuidler.CreateAlloca(pIdentifiersType, nullptr, dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName());
+
+			// retrieve initial value 
+			pIdentifiersValue = pIdentifiersValue ? pIdentifiersValue : std::get<llvm::Value*>(pCurrSymbolDesc->mpValue->Accept(mpLiteralIRGenerator));
+
+			mVariablesTable[mpSymTable->GetSymbolHandleByName(identifier)] = pCurrVariableAllocation;
+
+			currIRBuidler.CreateStore(pIdentifiersValue, pCurrVariableAllocation);
+		}
+
 		return {};
 	}
 
@@ -422,7 +458,11 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitStructDeclaration(CASTStructDeclNode* pNode)
 	{
-		return {};
+		auto pStructSymbolDesc = mpSymTable->LookUpNamedScope(pNode->GetStructName()->GetName());
+		
+		assert(pStructSymbolDesc && pStructSymbolDesc->mpType);
+
+		return pStructSymbolDesc->mpType->Accept(mpTypeGenerator);
 	}
 
 	llvm::Instruction::BinaryOps CLLVMCodeGenerator::_convertOpTypeToLLVM(E_TOKEN_TYPE opType, bool isFloatingPointOp) const

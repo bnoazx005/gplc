@@ -183,7 +183,7 @@ namespace gplc
 		}
 
 		// this trick is used to assign a name for a function pointer, for other types it does nothing
-		if (typeDesc.mpType)
+		if (typeDesc.mpType && typeDesc.mpType->GetType() == CT_FUNCTION)
 		{
 			typeDesc.mpType->SetName(identifier);			
 		}
@@ -230,6 +230,8 @@ namespace gplc
 			{
 				return iter->second;
 			}
+
+			return nullptr;
 		};
 		
 		TSymTableEntry* pFoundResult = findScope(pCurrEntry, scopeName);
@@ -267,6 +269,11 @@ namespace gplc
 		if (identifier == "main")
 		{
 			return "_lang_entry_main";
+		}
+
+		if (identifier == "print")
+		{
+			return "puts";
 		}
 
 		return identifier;

@@ -83,8 +83,17 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitIdentifier(CASTIdentifierNode* pNode) 
 	{
-		if (!mpSymTable->LookUp(pNode->GetName()))
+		const std::string& identifier = pNode->GetName();
+
+		if (!mpSymTable->LookUp(identifier))
 		{
+			bool isTypeDefined = mpSymTable->LookUpNamedScope(identifier) != nullptr;
+
+			if (isTypeDefined)
+			{
+				return true;
+			}
+			
 			OnErrorOutput.Invoke(SAE_UNDECLARED_IDENTIFIER);
 
 			return false;

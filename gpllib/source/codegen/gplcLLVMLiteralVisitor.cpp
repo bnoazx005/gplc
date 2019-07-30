@@ -1,6 +1,7 @@
 #include "codegen/gplcLLVMLiteralVisitor.h"
 #include "common/gplcValues.h"
 #include "common/gplcTypeSystem.h"
+#include "common/gplcSymTable.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Module.h"
 
@@ -57,6 +58,6 @@ namespace gplc
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitNullLiteral(const CPointerValue* pLiteral)
 	{
-		return {};
+		return llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(*mpContext));
 	}
 }

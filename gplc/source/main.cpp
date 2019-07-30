@@ -19,6 +19,12 @@ void OnParserError(const TParserErrorInfo& errorInfo)
 }
 
 
+void OnSemanticAnalyserError(E_SEMANTIC_ANALYSER_ERRORS errorInfo)
+{
+	std::cout << errorInfo << std::endl;
+}
+
+
 int main(int argc, const char** argv)
 {
 	// \todo parse options
@@ -26,11 +32,12 @@ int main(int argc, const char** argv)
 	IParser* pParser = new CParser();
 	ISymTable* pSymTable = new CSymTable();
 
-	pSymTable->AddVariable({ "printf", nullptr, new CFunctionType({ { "str", new CType(CT_STRING, BTS_POINTER, 0x0) } }, new CType(CT_INT32, BTS_INT32, 0x0), AV_NATIVE_FUNC ) });
+	pSymTable->AddVariable({ "print", nullptr, new CFunctionType({ { "str", new CType(CT_STRING, BTS_POINTER, 0x0) } }, new CType(CT_INT32, BTS_INT32, 0x0), AV_NATIVE_FUNC ) });
 
 	ISemanticAnalyser* pSemanticAnalyser = new CSemanticAnalyser();
 
 	pLexer->OnErrorOutput += OnLexerError;
+	pSemanticAnalyser->OnErrorOutput += OnSemanticAnalyserError;
 
 	IInputStream* pInputStream = new CFileInputStream("test.gpls");
 
