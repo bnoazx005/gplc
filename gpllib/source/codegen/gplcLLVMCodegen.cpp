@@ -120,7 +120,33 @@ namespace gplc
 		llvm::Value* pLeftExprValue  = std::get<llvm::Value*>(pNode->GetLeft()->Accept(this));
 		llvm::Value* pRightExprValue = std::get<llvm::Value*>(pNode->GetRight()->Accept(this));
 
-		return mIRBuildersStack.top().CreateBinOp(_convertOpTypeToLLVM(pNode->GetOpType(), false), pLeftExprValue, pRightExprValue, "tmpexpr");
+		E_TOKEN_TYPE opType = pNode->GetOpType();
+
+		auto& currIRBuidler = mIRBuildersStack.top();
+
+		CType* pLeftExprType = mpTypeResolver->Resolve(pNode->GetLeft(), mpSymTable);
+
+		bool isFloatingPoint = pLeftExprType->GetType() == CT_FLOAT || pLeftExprType->GetType() == CT_DOUBLE;
+
+		// arithmetic operations
+		if (opType == TT_PLUS || opType == TT_MINUS || opType == TT_STAR || opType == TT_SLASH)
+		{
+			return currIRBuidler.CreateBinOp(_convertOpTypeToLLVM(opType, isFloatingPoint), pLeftExprValue, pRightExprValue, "tmpexpr");
+		}
+
+		// boolean operations
+		auto lopPredicate = _convertLogicOpTypeToLLVM(opType, isFloatingPoint);
+
+		if (isFloatingPoint)
+		{
+			return currIRBuidler.CreateFCmp(lopPredicate, pLeftExprValue, pRightExprValue, "tmplexpr");
+		}
+		else
+		{
+			return currIRBuidler.CreateICmp(lopPredicate, pLeftExprValue, pRightExprValue, "tmplexpr");
+		}
+
+		return { };
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitAssignment(CASTAssignmentNode* pNode)
@@ -182,7 +208,30 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitWhileLoopStatement(CASTWhileLoopStatementNode* pNode)
 	{
-		return {};
+		llvm::IRBuilder<>& currIRBuilder = mIRBuildersStack.top();
+
+		llvm::BasicBlock* pConditionBlock = llvm::BasicBlock::Create(*mpContext, "cond", mpCurrActiveFunction);
+
+		mIRBuildersStack.push(llvm::IRBuilder<>(pConditionBlock));
+		llvm::Value* pLoopCondition = std::get<llvm::Value*>(pNode->GetCondition()->Accept(this));
+		mIRBuildersStack.pop();
+
+		currIRBuilder.CreateBr(pConditionBlock);
+
+		llvm::BasicBlock* pLoopBody = llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetBody()->Accept(this)));
+
+		// create loop to condition's check up
+		llvm::IRBuilder<> loopIRBuilder { pLoopBody };
+		loopIRBuilder.CreateBr(pConditionBlock);
+
+		llvm::BasicBlock* pEndBlock = llvm::BasicBlock::Create(*mpContext, "end", mpCurrActiveFunction);
+
+		currIRBuilder.SetInsertPoint(pConditionBlock);
+		llvm::Value* pBRInstruction = currIRBuilder.CreateCondBr(pLoopCondition, pLoopBody, pEndBlock);
+
+		currIRBuilder.SetInsertPoint(pEndBlock);
+
+		return pBRInstruction;
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitFunctionDeclaration(CASTFunctionDeclNode* pNode)
@@ -354,11 +403,30 @@ namespace gplc
 				return isFloatingPointOp ? llvm::Instruction::FMul : llvm::Instruction::Mul;
 			case TT_SLASH:
 				return isFloatingPointOp ? llvm::Instruction::FDiv : llvm::Instruction::SDiv;
-			// logic ops
-			// \todo implement logic operators
 		}
 
 		return {};
+	}
+
+	llvm::CmpInst::Predicate CLLVMCodeGenerator::_convertLogicOpTypeToLLVM(E_TOKEN_TYPE opType, bool isFloatingPointOp) const
+	{
+		switch (opType)
+		{
+			case TT_LT:
+				return isFloatingPointOp ? llvm::CmpInst::Predicate::FCMP_OLT : llvm::CmpInst::Predicate::ICMP_SLT;
+			case TT_LE:
+				return isFloatingPointOp ? llvm::CmpInst::Predicate::FCMP_OLE : llvm::CmpInst::Predicate::ICMP_SLE;
+			case TT_GT:
+				return isFloatingPointOp ? llvm::CmpInst::Predicate::FCMP_OGT : llvm::CmpInst::Predicate::ICMP_SGT;
+			case TT_GE:
+				return isFloatingPointOp ? llvm::CmpInst::Predicate::FCMP_OGE : llvm::CmpInst::Predicate::ICMP_SGT;
+			case TT_NE:
+				return isFloatingPointOp ? llvm::CmpInst::Predicate::FCMP_ONE : llvm::CmpInst::Predicate::ICMP_NE;
+			case TT_EQ:
+				return isFloatingPointOp ? llvm::CmpInst::Predicate::FCMP_OEQ : llvm::CmpInst::Predicate::ICMP_EQ;
+		}
+
+		return llvm::CmpInst::Predicate::FCMP_FALSE;
 	}
 
 	llvm::Value* CLLVMCodeGenerator::_getIdentifierValue(const std::string& identifier) const

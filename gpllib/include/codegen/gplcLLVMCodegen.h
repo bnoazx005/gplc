@@ -88,6 +88,8 @@ namespace gplc
 
 			llvm::Instruction::BinaryOps _convertOpTypeToLLVM(E_TOKEN_TYPE opType, bool isFloatingPointOp = false) const;
 
+			llvm::CmpInst::Predicate _convertLogicOpTypeToLLVM(E_TOKEN_TYPE opType, bool isFloatingPointOp = false) const;
+
 			llvm::Value* _getIdentifierValue(const std::string& identifier) const;
 
 			llvm::Value* _allocateVariableOnStack(const std::string& identifier, bool isFuncArg = false);
