@@ -106,7 +106,7 @@ namespace gplc
 			return mIRBuildersStack.top().CreateLoad(pValueInstruction, name);
 		}
 
-		return _allocateVariableOnStack(name);
+		return (mVariablesTable.find(mpSymTable->GetSymbolHandleByName(name)) != mVariablesTable.cend()) ? _getIdentifierValue(name) : _allocateVariableOnStack(name);
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitLiteral(CASTLiteralNode* pNode)
@@ -156,12 +156,14 @@ namespace gplc
 	TLLVMIRData CLLVMCodeGenerator::VisitAssignment(CASTAssignmentNode* pNode)
 	{
 		// generate l-value's part
-		auto leftIRCode = pNode->GetLeft()->Accept(this);
+		auto leftIRCode = std::get<llvm::Value*>(pNode->GetLeft()->Accept(this));
 
 		// generate r-value's part
-		auto rightIRCode = pNode->GetRight()->Accept(this);
+		auto rightIRCode = std::get<llvm::Value*>(pNode->GetRight()->Accept(this));
 
-		return {};
+		auto& currIRBuilder = mIRBuildersStack.top();
+
+		return currIRBuilder.CreateStore(rightIRCode, leftIRCode, false);
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitStatementsBlock(CASTBlockNode* pNode)
