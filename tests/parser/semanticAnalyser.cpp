@@ -516,6 +516,25 @@ TEST_CASE("CSemanticAnalyser's tests")
 		delete pSymTable;
 	}
 
+	SECTION("TestAnalyze_CorrectPointerDeclaration_ReturnsTrue")
+	{
+		/*
+			x : double*;
+		*/
+		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+
+		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
+
+		auto pProgram = new CASTSourceUnitNode();
+
+		auto pPointerType = new CASTTypeNode(NT_POINTER);
+		pPointerType->AttachChild(new CASTTypeNode(NT_DOUBLE));
+
+		pProgram->AttachChild(new CASTDeclarationNode(pIdentifiersList, pPointerType));
+
+		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+	}
+
 	delete pTypeResolver;
 	delete pSemanticAnalyser;
 }

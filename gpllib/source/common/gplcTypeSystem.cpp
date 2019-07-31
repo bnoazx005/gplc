@@ -176,34 +176,36 @@ namespace gplc
 
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type)
 	{
+		U32 attributes = 0x0;
+
 		switch (type)
 		{
 			case NT_INT8:
-				return new CType(CT_INT8, BTS_INT8, 0x0);
+				return new CType(CT_INT8, BTS_INT8, attributes);
 			case NT_INT16:
-				return new CType(CT_INT16,  BTS_INT16,  0x0);
+				return new CType(CT_INT16,  BTS_INT16,  attributes);
 			case NT_INT32:
-				return new CType(CT_INT32, BTS_INT32, 0x0);
+				return new CType(CT_INT32, BTS_INT32, attributes);
 			case NT_INT64:
-				return new CType(CT_INT64, BTS_INT64, 0x0);
+				return new CType(CT_INT64, BTS_INT64, attributes);
 			case NT_UINT8:
-				return new CType(CT_UINT8, BTS_UINT8, 0x0);
+				return new CType(CT_UINT8, BTS_UINT8, attributes);
 			case NT_UINT16:
-				return new CType(CT_UINT16, BTS_UINT16, 0x0);
+				return new CType(CT_UINT16, BTS_UINT16, attributes);
 			case NT_UINT32:
-				return new CType(CT_UINT32, BTS_UINT32, 0x0);
+				return new CType(CT_UINT32, BTS_UINT32, attributes);
 			case NT_UINT64:
-				return new CType(CT_UINT64, BTS_UINT64, 0x0);
+				return new CType(CT_UINT64, BTS_UINT64, attributes);
 			case NT_FLOAT:
-				return new CType(CT_FLOAT, BTS_FLOAT, 0x0);
+				return new CType(CT_FLOAT, BTS_FLOAT, attributes);
 			case NT_DOUBLE:
-				return new CType(CT_DOUBLE, BTS_DOUBLE, 0x0);
+				return new CType(CT_DOUBLE, BTS_DOUBLE, attributes);
 			case NT_STRING:
-				return new CType(CT_STRING, BTS_POINTER, 0x0);
+				return new CType(CT_STRING, BTS_POINTER, attributes);
 			case NT_CHAR:
-				return new CType(CT_CHAR, BTS_CHAR, 0x0);
+				return new CType(CT_CHAR, BTS_CHAR, attributes);
 			case NT_BOOL:
-				return new CType(CT_BOOL, BTS_BOOL, 0x0);
+				return new CType(CT_BOOL, BTS_BOOL, attributes);
 		}
 
 		return nullptr;

@@ -168,6 +168,7 @@ namespace gplc
 		AV_STRUCT_FIELD_DECL = 0x8,
 		AV_NATIVE_FUNC		 = 0x10,
 		AV_RVALUE            = 0x20,
+		AV_POINTER           = 0x40,
 	};
 
 

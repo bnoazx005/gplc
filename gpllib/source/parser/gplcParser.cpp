@@ -457,122 +457,36 @@ namespace gplc
 		const CToken* pTypeName  = pLexer->GetCurrToken();
 		const CToken* pNextToken = pLexer->PeekNextToken(1);
 
-		CASTNode* pBuiltinType = nullptr;
+		CASTNode* pBuiltinType = _getBasicType(pTypeName->GetType());
 
-		switch (pNextToken->GetType())
+		pLexer->GetNextToken();
+
+		// pointer type
+		if (_match(pNextToken, TT_STAR))
 		{
-			case TT_STAR: // a pointer
+			pLexer->GetNextToken(); // take *
 
-				pBuiltinType = new CASTNode(NT_POINTER);
+			auto pPointerType = new CASTTypeNode(NT_POINTER);
 
-				switch (pTypeName->GetType())
-				{
-					case TT_INT8_TYPE:
-						pBuiltinType->AttachChild(new CASTNode(NT_INT8));
-						break;
+			pPointerType->AttachChild(pBuiltinType);
 
-					case TT_INT16_TYPE:
-						pBuiltinType->AttachChild(new CASTNode(NT_INT16));
-						break;
+			return pPointerType;
+		}
 
-					case TT_INT32_TYPE:
-						pBuiltinType->AttachChild(new CASTNode(NT_INT32));
-						break;
+		// an array
+		if (_match(pNextToken, TT_OPEN_SQR_BRACE))
+		{
+			pLexer->GetNextToken(); // take [
 
-					case TT_INT64_TYPE:
-						pBuiltinType->AttachChild(new CASTNode(NT_INT64));
-						break;
+			// \todo Implement retrieving a size of an array if it's static sized
+			assert(false);
 
-					case TT_UINT8_TYPE:
-						pBuiltinType->AttachChild(new CASTNode(NT_UINT8));
-						break;
+			if (!SUCCESS(_expect(TT_CLOSE_SQR_BRACE, pLexer->GetCurrToken())))
+			{
+				return nullptr;
+			}
 
-					case TT_UINT16_TYPE:
-						pBuiltinType->AttachChild(new CASTNode(NT_UINT16));
-						break;
-
-					case TT_UINT32_TYPE:
-						pBuiltinType->AttachChild(new CASTNode(NT_UINT32));
-						break;
-
-					case TT_UINT64_TYPE:
-						pBuiltinType->AttachChild(new CASTNode(NT_UINT64));
-						break;
-
-					case TT_CHAR_TYPE:
-						pBuiltinType->AttachChild(new CASTNode(NT_CHAR));
-						break;
-
-					case TT_STRING_TYPE:
-						pBuiltinType->AttachChild(new CASTNode(NT_STRING));
-						break;
-
-					case TT_BOOL_TYPE:
-						pBuiltinType->AttachChild(new CASTNode(NT_BOOL));
-						break;
-
-					case TT_VOID_TYPE:
-						pBuiltinType->AttachChild(new CASTNode(NT_VOID));
-						break;
-				}
-
-				break;
-
-			case TT_OPEN_SQR_BRACE: // an array
-
-
-
-				break;
-
-			default: //just a builtin type
-				pLexer->GetNextToken(); // move to ;
-
-				switch (pTypeName->GetType())
-				{
-					case TT_INT8_TYPE:
-						return new CASTTypeNode(NT_INT8);
-
-					case TT_INT16_TYPE:
-						return new CASTTypeNode(NT_INT16);
-
-					case TT_INT32_TYPE:
-						return new CASTTypeNode(NT_INT32);						
-
-					case TT_INT64_TYPE:
-						return new CASTTypeNode(NT_INT64);						
-
-					case TT_UINT8_TYPE:
-						return new CASTTypeNode(NT_UINT8);						
-
-					case TT_UINT16_TYPE:
-						return new CASTTypeNode(NT_UINT16);						
-
-					case TT_UINT32_TYPE:
-						return new CASTTypeNode(NT_UINT32);						
-
-					case TT_UINT64_TYPE:
-						return new CASTTypeNode(NT_UINT64);						
-
-					case TT_CHAR_TYPE:
-						return new CASTTypeNode(NT_CHAR);						
-
-					case TT_STRING_TYPE:
-						return new CASTTypeNode(NT_STRING);						
-
-					case TT_BOOL_TYPE:
-						return new CASTTypeNode(NT_BOOL);
-
-					case TT_VOID_TYPE:
-						return new CASTTypeNode(NT_VOID);
-
-					case TT_FLOAT_TYPE:
-						return new CASTTypeNode(NT_FLOAT);
-
-					case TT_DOUBLE_TYPE:
-						return new CASTTypeNode(NT_DOUBLE);
-				}
-
-				break;
+			pLexer->GetNextToken(); // take ]
 		}
 
 		return pBuiltinType;
@@ -1087,6 +1001,8 @@ namespace gplc
 				TSymbolDesc* pCurrEnumerator = mpSymTable->LookUp(currFieldHandle);
 
 				pCurrEnumerator->mpValue = dynamic_cast<const CLiteralToken*>(pCurrToken)->GetValue(); // \note type is resolved in semantic analyser's stage
+
+				pLexer->GetNextToken();
 			}
 
 			if (_match(pLexer->GetCurrToken(), TT_CLOSE_BRACE))
@@ -1174,5 +1090,57 @@ namespace gplc
 	bool CParser::_match(const CToken* pToken, E_TOKEN_TYPE type)
 	{
 		return pToken && pToken->GetType() == type;
+	}
+
+	CASTTypeNode* CParser::_getBasicType(E_TOKEN_TYPE typeToken) const
+	{
+		switch (typeToken)
+		{
+			case TT_INT8_TYPE:
+				return new CASTTypeNode(NT_INT8);
+
+			case TT_INT16_TYPE:
+				return new CASTTypeNode(NT_INT16);
+
+			case TT_INT32_TYPE:
+				return new CASTTypeNode(NT_INT32);
+
+			case TT_INT64_TYPE:
+				return new CASTTypeNode(NT_INT64);
+
+			case TT_UINT8_TYPE:
+				return new CASTTypeNode(NT_UINT8);
+
+			case TT_UINT16_TYPE:
+				return new CASTTypeNode(NT_UINT16);
+
+			case TT_UINT32_TYPE:
+				return new CASTTypeNode(NT_UINT32);
+
+			case TT_UINT64_TYPE:
+				return new CASTTypeNode(NT_UINT64);
+
+			case TT_CHAR_TYPE:
+				return new CASTTypeNode(NT_CHAR);
+
+			case TT_STRING_TYPE:
+				return new CASTTypeNode(NT_STRING);
+
+			case TT_BOOL_TYPE:
+				return new CASTTypeNode(NT_BOOL);
+
+			case TT_VOID_TYPE:
+				return new CASTTypeNode(NT_VOID);
+
+			case TT_FLOAT_TYPE:
+				return new CASTTypeNode(NT_FLOAT);
+
+			case TT_DOUBLE_TYPE:
+				return new CASTTypeNode(NT_DOUBLE);
+		}
+
+		assert(false); // unreachable code
+
+		return nullptr;
 	}
 }

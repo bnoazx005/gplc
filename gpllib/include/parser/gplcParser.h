@@ -39,6 +39,7 @@ namespace gplc
 	class CASTDeclarationNode;
 	class CASTEnumDeclNode;
 	class CASTStructDeclNode;
+	class CASTTypeNode;
 
 
 	/*!
@@ -373,6 +374,8 @@ namespace gplc
 			CASTBlockNode* _parseStructFields(const std::string& structName, ILexer* pLexer);
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
+
+			CASTTypeNode* _getBasicType(E_TOKEN_TYPE typeToken) const;
 		private:
 			ISymTable* mpSymTable;
 	};
