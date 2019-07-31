@@ -4,11 +4,14 @@
 #include "common/gplcSymTable.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Module.h"
+#include "llvm/IR/IRBuilder.h"
+#include "codegen/gplcLLVMCodegen.h"
 
 
 namespace gplc
 {
-	CLLVMLiteralVisitor::CLLVMLiteralVisitor(llvm::LLVMContext& context)
+	CLLVMLiteralVisitor::CLLVMLiteralVisitor(llvm::LLVMContext& context, CLLVMCodeGenerator* pCodeGenerator):
+		mpCodeGenerator(pCodeGenerator)
 	{
 		mpContext = &context;
 	}
@@ -47,8 +50,24 @@ namespace gplc
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitStringLiteral(const CStringValue* pLiteral)
 	{
-		// \todo implement string literal
-		return {};
+		llvm::IRBuilder<>* pCurrIRBuilder = mpCodeGenerator->GetCurrIRBuilder();
+
+		auto pStringLiteral = pCurrIRBuilder->CreateGlobalString(pLiteral->GetValue());
+
+		return llvm::ConstantExpr::getBitCast(pStringLiteral, llvm::Type::getInt8PtrTy(*mpContext));
+/*
+		llvm::ConstantInt* pInitialIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0);
+		auto  t = llvm::cast<llvm::PointerType>(pStringLiteral->getType()->getScalarType())->getElementType();
+		t->dump();
+		std::vector<llvm::Constant*> args
+		{
+			 pInitialIndex, 
+			 pInitialIndex
+		};
+
+		auto pExpr = llvm::ConstantExpr::getGetElementPtr(pStringLiteral->getInitializer()->getType(), pStringLiteral->getInitializer(), args);
+		pExpr->dump();
+		return {};*/
 	}
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitBoolLiteral(const CBoolValue* pLiteral)

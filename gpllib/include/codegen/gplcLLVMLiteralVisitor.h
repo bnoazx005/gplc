@@ -19,6 +19,9 @@
 
 namespace gplc
 {
+	class CLLVMCodeGenerator;
+
+
 	/*!
 		\brief The class implements a fucntionality of LLVM IR code generator
 		for all literals
@@ -27,7 +30,7 @@ namespace gplc
 	class CLLVMLiteralVisitor : public ILiteralVisitor<TLLVMIRData>
 	{
 		public:
-			CLLVMLiteralVisitor(llvm::LLVMContext& context);
+			CLLVMLiteralVisitor(llvm::LLVMContext& context, CLLVMCodeGenerator* pCodeGenerator);
 			virtual ~CLLVMLiteralVisitor();
 
 			TLLVMIRData VisitIntLiteral(const CIntValue* pLiteral) override;
@@ -42,7 +45,9 @@ namespace gplc
 			CLLVMLiteralVisitor() = default;
 			CLLVMLiteralVisitor(const CLLVMLiteralVisitor& visitor) = default;
 		protected:
-			llvm::LLVMContext* mpContext;
+			CLLVMCodeGenerator* mpCodeGenerator;
+
+			llvm::LLVMContext*  mpContext;
 	};
 }
 

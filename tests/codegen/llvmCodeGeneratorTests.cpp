@@ -11,7 +11,7 @@ TEST_CASE("CLLVMCodeGenerator tests")
 
 	SECTION("TestGenerate_PassEmptyProgram_ReturnsBytecode")
 	{
-		pCodeGenerator->Generate(new CASTSourceUnitNode(), new CSymTable());
+	//	pCodeGenerator->Generate(new CASTSourceUnitNode(), new CSymTable());
 	}
 /*
 	SECTION("TestGenerate_PassBinaryExpression_ReturnsBytecode")

@@ -25,6 +25,8 @@
 
 namespace gplc
 {
+	struct TSymbolDesc;
+
 	class ITypeResolver;
 
 
@@ -83,6 +85,8 @@ namespace gplc
 			TLLVMIRData VisitEnumDeclaration(CASTEnumDeclNode* pNode) override;
 
 			TLLVMIRData VisitStructDeclaration(CASTStructDeclNode* pNode) override;
+
+			llvm::IRBuilder<>* GetCurrIRBuilder();
 		protected:
 			CLLVMCodeGenerator(const CLLVMCodeGenerator& codeGenerator) = default;
 
@@ -97,6 +101,8 @@ namespace gplc
 			void _defineInitModuleGlobalsFunction();
 
 			void _defineEntryPoint();
+
+			llvm::Value* _declareNativeFunction(const TSymbolDesc* pFuncDesc);
 		protected:
 			TLLVMLiteralVisitor* mpLiteralIRGenerator;
 

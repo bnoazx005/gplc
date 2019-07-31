@@ -199,7 +199,7 @@ namespace gplc
 			case NT_DOUBLE:
 				return new CType(CT_DOUBLE, BTS_DOUBLE, 0x0);
 			case NT_STRING:
-				return new CType(CT_STRING, BTS_DOUBLE, 0x0);
+				return new CType(CT_STRING, BTS_POINTER, 0x0);
 			case NT_CHAR:
 				return new CType(CT_CHAR, BTS_CHAR, 0x0);
 			case NT_BOOL:
@@ -459,6 +459,9 @@ namespace gplc
 
 			case CT_CHAR:
 				return new CCharValue("\0");
+
+			case CT_STRING:
+				return new CStringValue("");
 
 			case CT_BOOL:
 				return new CBoolValue(true);

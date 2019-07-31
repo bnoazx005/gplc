@@ -32,7 +32,7 @@ int main(int argc, const char** argv)
 	IParser* pParser = new CParser();
 	ISymTable* pSymTable = new CSymTable();
 
-	pSymTable->AddVariable({ "print", nullptr, new CFunctionType({ { "str", new CType(CT_STRING, BTS_POINTER, 0x0) } }, new CType(CT_INT32, BTS_INT32, 0x0), AV_NATIVE_FUNC ) });
+	pSymTable->AddVariable({ "puts", nullptr, new CFunctionType({ { "str", new CType(CT_STRING, BTS_POINTER, 0x0) } }, new CType(CT_INT32, BTS_INT32, 0x0), AV_NATIVE_FUNC ) });
 
 	ISemanticAnalyser* pSemanticAnalyser = new CSemanticAnalyser();
 

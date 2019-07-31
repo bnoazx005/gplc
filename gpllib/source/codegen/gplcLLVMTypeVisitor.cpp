@@ -35,9 +35,9 @@ namespace gplc
 			case CT_DOUBLE:
 				return llvm::Type::getDoubleTy(*mpContext);
 			case CT_STRING:
-				return {};
+				return llvm::Type::getInt8PtrTy(*mpContext);
 			case CT_CHAR:
-				return {};
+				return llvm::Type::getInt8PtrTy(*mpContext);
 			case CT_BOOL:
 				return llvm::Type::getInt1Ty(*mpContext);
 		}
@@ -58,7 +58,9 @@ namespace gplc
 		
 		auto pFunctionType = llvm::FunctionType::get(std::get<llvm::Type*>(pFuncType->GetReturnValueType()->Accept(this)), args, false);
 
-		if (pFuncType->GetAttributes() & AV_STATIC)
+		U32 attributes = pFuncType->GetAttributes();
+
+		if (attributes & AV_STATIC || attributes & AV_NATIVE_FUNC)
 		{
 			return pFunctionType;
 		}

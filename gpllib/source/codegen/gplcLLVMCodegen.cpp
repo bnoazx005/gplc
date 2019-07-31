@@ -23,7 +23,7 @@ namespace gplc
 
 		llvm::LLVMContext llvmContext;
 
-		mpLiteralIRGenerator = new CLLVMLiteralVisitor(llvmContext);
+		mpLiteralIRGenerator = new CLLVMLiteralVisitor(llvmContext, this);
 
 		mpTypeGenerator = new CLLVMTypeVisitor(llvmContext);
 
@@ -140,6 +140,12 @@ namespace gplc
 			auto pValueInstruction = _getIdentifierValue(name);
 
 			return mIRBuildersStack.top().CreateLoad(pValueInstruction, name);
+		}
+
+		// \note if it's a function and its a native function we should apply CSymTable::RenameReservedIdentifiers
+		if (attributes & AV_NATIVE_FUNC)
+		{
+			return _declareNativeFunction(pSymbolDesc);
 		}
 
 		return (mVariablesTable.find(mpSymTable->GetSymbolHandleByName(name)) != mVariablesTable.cend()) ? _getIdentifierValue(name) : _allocateVariableOnStack(name);
@@ -465,6 +471,11 @@ namespace gplc
 		return pStructSymbolDesc->mpType->Accept(mpTypeGenerator);
 	}
 
+	llvm::IRBuilder<>* CLLVMCodeGenerator::GetCurrIRBuilder()
+	{
+		return &mIRBuildersStack.top();
+	}
+
 	llvm::Instruction::BinaryOps CLLVMCodeGenerator::_convertOpTypeToLLVM(E_TOKEN_TYPE opType, bool isFloatingPointOp) const
 	{
 		switch (opType)
@@ -585,5 +596,21 @@ namespace gplc
 		llvm::BasicBlock* pInitModuleGlobalsFuncBody = llvm::BasicBlock::Create(*mpContext, "entry", mpInitModuleGlobalsFunction);
 
 		mpInitModuleGlobalsIRBuilder = new llvm::IRBuilder<>(pInitModuleGlobalsFuncBody);
+	}
+
+	llvm::Value* CLLVMCodeGenerator:: _declareNativeFunction(const TSymbolDesc* pFuncDesc)
+	{
+		TSymbolHandle funcHandle = mpSymTable->GetSymbolHandleByName(pFuncDesc->mName);
+
+		if (mVariablesTable.find(funcHandle) != mVariablesTable.cend())
+		{
+			return mVariablesTable[funcHandle];
+		}
+
+		auto pFunctionType = llvm::dyn_cast<llvm::FunctionType>(std::get<llvm::Type*>(pFuncDesc->mpType->Accept(mpTypeGenerator)));
+
+		mVariablesTable[funcHandle] = llvm::Function::Create(pFunctionType, llvm::Function::ExternalLinkage, pFuncDesc->mName, *mpModule);
+
+		return mVariablesTable[funcHandle];
 	}
 }
