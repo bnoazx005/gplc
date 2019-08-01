@@ -68,7 +68,9 @@ namespace gplc
 
 	CType* CTypeResolver::VisitBaseNode(CASTTypeNode* pNode)
 	{
-		return _deduceBuiltinType(pNode->GetType());
+		E_NODE_TYPE basicType = (pNode->GetType() == NT_POINTER) ? pNode->GetChildren()[0]->GetType() : pNode->GetType();
+
+		return _deduceBuiltinType(basicType, (pNode->GetType() == NT_POINTER) ? AV_POINTER : 0x0);
 	}
 
 	CType* CTypeResolver::VisitIdentifier(CASTIdentifierNode* pNode)
@@ -174,10 +176,8 @@ namespace gplc
 		return new CDependentNamedType(mpSymTable, pNode->GetTypeInfo()->GetName());
 	}
 
-	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type)
+	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type, U32 attributes)
 	{
-		U32 attributes = 0x0;
-
 		switch (type)
 		{
 			case NT_INT8:
@@ -344,7 +344,7 @@ namespace gplc
 			return false;
 		}
 
-		return (mType == pType->mType) && (mSize == pType->mSize);
+		return (mType == pType->mType) && (mSize == pType->mSize) && (mAttributes == pType->mAttributes);
 	}
 
 	bool CType::AreConvertibleTo(const CType* pType) const

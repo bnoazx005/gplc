@@ -108,7 +108,7 @@ namespace gplc
 			CType* VisitStructDeclaration(CASTStructDeclNode* pNode) override; 
 			CType* VisitNamedType(CASTNamedTypeNode* pNode) override;
 		protected:
-			CType* _deduceBuiltinType(E_NODE_TYPE type);
+			CType* _deduceBuiltinType(E_NODE_TYPE type, U32 attributes = 0x0);
 
 			CType* _deduceExprType(E_TOKEN_TYPE opType, E_COMPILER_TYPES leftType, E_COMPILER_TYPES rightType);
 		protected:
@@ -150,8 +150,7 @@ namespace gplc
 
 			/*!
 				\brief The operator of equality checks up whether two
-				types are same or not. Type's attributes aren't considered
-				within the comparison. This implementation doesn't support
+				types are same or not. This implementation doesn't support
 				implicit type castings
 			*/
 
