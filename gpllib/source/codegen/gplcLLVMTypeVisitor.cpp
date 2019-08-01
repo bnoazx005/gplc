@@ -87,9 +87,20 @@ namespace gplc
 		switch (pNamedType->GetType())
 		{
 			case CT_STRUCT:
+			case CT_ENUM:
 				return llvm::StructType::create(*mpContext, pNamedType->GetName());
 		}
 
 		return {};
+	}
+
+	TLLVMIRData CLLVMTypeVisitor::VisitEnumType(const CEnumType* pEnumType)
+	{
+		/*!
+			\note Use the following type to imitate enumeration type in LLVM IR
+			%Enum = type { u32 }
+		*/
+
+		return llvm::StructType::create({ llvm::Type::getInt32Ty(*mpContext) }, pEnumType->GetName());
 	}
 }

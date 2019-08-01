@@ -260,7 +260,8 @@ namespace gplc
 
 		<operator> ::= <declaration> |
 					   <assignment> |
-					   <function-call>;
+					   <function-call> |
+					   <access-operator>;
 
 		\param[in] pLexer A pointer to pLexer's object
 
@@ -285,13 +286,15 @@ namespace gplc
 			}
 			else
 			{
-				CASTUnaryExpressionNode* pUnaryExpr = _parseUnaryExpression(pLexer); 
+				CASTUnaryExpressionNode* pUnaryExpr = dynamic_cast<CASTUnaryExpressionNode*>(_parseUnaryExpression(pLexer)); 
 
-				CASTNode* pFuncCallNode = pUnaryExpr->GetData();
+				CASTNode* pNestedExprNode = pUnaryExpr ? pUnaryExpr->GetData() : nullptr;
 
-				if (pFuncCallNode != nullptr && pFuncCallNode->GetType() == NT_FUNC_CALL) // return if the node is a function's call
+				if (pNestedExprNode != nullptr && 
+					(pNestedExprNode->GetType() == NT_FUNC_CALL || 
+					 pNestedExprNode->GetType() == NT_ACCESS_OPERATOR)) // return if the node is a function's call or an access operator
 				{
-					return pFuncCallNode;
+					return pNestedExprNode;
 				}
 			}
 		}
@@ -607,7 +610,7 @@ namespace gplc
 		return pLeft;
 	}
 
-	CASTUnaryExpressionNode* CParser::_parseUnaryExpression(ILexer* pLexer, U32 attributes)
+	CASTExpressionNode* CParser::_parseUnaryExpression(ILexer* pLexer, U32 attributes)
 	{
 		const CToken* pCurrToken = pLexer->GetCurrToken();
 
@@ -626,6 +629,14 @@ namespace gplc
 		}
 
 		CASTUnaryExpressionNode* pPrimaryNode = new CASTUnaryExpressionNode(TT_DEFAULT, _parsePrimaryExpression(pLexer, attributes));
+
+		// access to aggregate type's field
+		if (_match(pLexer->GetCurrToken(), TT_POINT))
+		{
+			pLexer->GetNextToken(); // take .
+
+			return _parseAccessOperator(pPrimaryNode, pLexer);
+		}
 
 		// function's call
 		if (_match(pLexer->GetCurrToken(), TT_OPEN_BRACKET))
@@ -659,7 +670,7 @@ namespace gplc
 
 	CASTNode* CParser::_parseAssignment(ILexer* pLexer)
 	{
-		CASTUnaryExpressionNode* pLeftNode = _parseUnaryExpression(pLexer);
+		CASTExpressionNode* pLeftNode = _parseUnaryExpression(pLexer);
 
 		_expect(TT_ASSIGN_OP, pLexer->GetCurrToken());
 
@@ -1036,6 +1047,11 @@ namespace gplc
 
 		mpSymTable->LeaveScope();
 
+		// add information about enum's type
+		auto pEnumDesc = mpSymTable->LookUpNamedScope(enumName);
+
+		pEnumDesc->mpType = new CEnumType(enumName);
+
 		return true;
 	}
 
@@ -1158,5 +1174,19 @@ namespace gplc
 		assert(false); // unreachable code
 
 		return nullptr;
+	}
+
+	CASTAccessOperatorNode* CParser::_parseAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer* pLexer)
+	{
+		const CToken* pCurrToken = pLexer->GetCurrToken();
+
+		if (!SUCCESS(_expect(TT_IDENTIFIER, pCurrToken)))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take an identifier
+
+		return new CASTAccessOperatorNode(pPrimaryExpr, new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName())));
 	}
 }

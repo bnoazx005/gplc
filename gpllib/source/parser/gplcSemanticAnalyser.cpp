@@ -447,6 +447,18 @@ namespace gplc
 		return _isLoopInterruptionAllowed();
 	}
 
+	bool CSemanticAnalyser::VisitAccessOperator(CASTAccessOperatorNode* pNode)
+	{
+		auto pPrimary   = pNode->GetExpression();
+		auto pFieldExpr = pNode->GetMemberName();
+
+		// check whether the following member exists
+
+
+		abort();
+		return false;
+	}
+
 	bool CSemanticAnalyser::_enterScope(CASTBlockNode* pNode, ISymTable* pSymTable)
 	{
 		pSymTable->CreateScope();

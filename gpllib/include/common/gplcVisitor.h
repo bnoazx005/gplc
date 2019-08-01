@@ -38,6 +38,7 @@ namespace gplc
 	class CASTStructDeclNode;
 	class CASTBreakOperatorNode;
 	class CASTContinueOperatorNode;
+	class CASTAccessOperatorNode;
 
 
 	template <typename T>
@@ -68,6 +69,7 @@ namespace gplc
 			virtual T VisitStructDeclaration(CASTStructDeclNode* pNode) = 0;
 			virtual T VisitBreakOperator(CASTBreakOperatorNode* pNode) = 0;
 			virtual T VisitContinueOperator(CASTContinueOperatorNode* pNode) = 0;
+			virtual T VisitAccessOperator(CASTAccessOperatorNode* pNode) = 0;
 		protected:
 			IASTNodeVisitor() = default;
 			IASTNodeVisitor(const IASTNodeVisitor& visitor) = default;
@@ -120,6 +122,7 @@ namespace gplc
 
 	class CType;
 	class CFunctionType;
+	class CEnumType;
 	class CStructType;
 	class CDependentNamedType;
 
@@ -135,6 +138,7 @@ namespace gplc
 			virtual T VisitFunctionType(const CFunctionType* pFuncType) = 0;
 			virtual T VisitStructType(const CStructType* pStructType) = 0;
 			virtual T VisitNamedType(const CDependentNamedType* pNamedType) = 0;
+			virtual T VisitEnumType(const CEnumType* pEnumType) = 0;
 		protected:
 			ITypeVisitor(const ITypeVisitor& visitor) = default;
 	};

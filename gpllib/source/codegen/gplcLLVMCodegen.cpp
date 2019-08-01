@@ -108,13 +108,22 @@ namespace gplc
 			pIdentifiersType = pIdentifiersType ? pIdentifiersType : std::get<llvm::Type*>(pType->Accept(mpTypeGenerator));
 
 			auto pCurrVariableAllocation = currIRBuidler.CreateAlloca(pIdentifiersType, nullptr, dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName());
-
+			
 			// retrieve initial value 
 			pIdentifiersValue = pIdentifiersValue ? pIdentifiersValue : std::get<llvm::Value*>(pCurrSymbolDesc->mpValue->Accept(mpLiteralIRGenerator));
 
 			mVariablesTable[mpSymTable->GetSymbolHandleByName(identifier)] = pCurrVariableAllocation;
 
-			currIRBuidler.CreateStore(pIdentifiersValue, pCurrVariableAllocation);
+			// \todo replace this with visitor which generates initializing code per type, something like ITypeInitializer
+			switch (pType->GetType())
+			{
+				case CT_ENUM:
+					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext)));
+					break;
+				default:
+					currIRBuidler.CreateStore(pIdentifiersValue, pCurrVariableAllocation); // for built-in types only
+					break;
+			}
 		}
 
 		return {};
@@ -473,7 +482,11 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitEnumDeclaration(CASTEnumDeclNode* pNode)
 	{
-		return {};
+		auto pEnumSymbolDesc = mpSymTable->LookUpNamedScope(pNode->GetEnumName()->GetName());
+
+		assert(pEnumSymbolDesc && pEnumSymbolDesc->mpType);
+
+		return pEnumSymbolDesc->mpType->Accept(mpTypeGenerator);
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitStructDeclaration(CASTStructDeclNode* pNode)
@@ -502,6 +515,11 @@ namespace gplc
 		auto& currIRBuilder = mIRBuildersStack.top();
 
 		return currIRBuilder.CreateBr(mpLoopConditionBlock);
+	}
+
+	TLLVMIRData CLLVMCodeGenerator::VisitAccessOperator(CASTAccessOperatorNode* pNode)
+	{
+		return {};
 	}
 
 	llvm::Instruction::BinaryOps CLLVMCodeGenerator::_convertOpTypeToLLVM(E_TOKEN_TYPE opType, bool isFloatingPointOp) const

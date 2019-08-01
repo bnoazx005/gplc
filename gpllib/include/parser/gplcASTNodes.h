@@ -73,6 +73,7 @@ namespace gplc
 		NT_DEPENDENT_TYPE,
 		NT_BREAK_OPERATOR,
 		NT_CONTINUE_OPERATOR,
+		NT_ACCESS_OPERATOR,
 	};
 
 	/*!
@@ -321,14 +322,14 @@ namespace gplc
 	class CASTAssignmentNode : public CASTNode
 	{
 		public:
-			CASTAssignmentNode(CASTUnaryExpressionNode* pLeft, CASTExpressionNode* pRight);
+			CASTAssignmentNode(CASTExpressionNode* pLeft, CASTExpressionNode* pRight);
 			virtual ~CASTAssignmentNode();
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			CASTUnaryExpressionNode* GetLeft() const;
+			CASTExpressionNode* GetLeft() const;
 
 			CASTExpressionNode* GetRight() const;
 		protected:
@@ -603,6 +604,25 @@ namespace gplc
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 		protected:
 			CASTContinueOperatorNode(const CASTContinueOperatorNode& node) = default;
+	};
+
+
+	class CASTAccessOperatorNode : public CASTExpressionNode
+	{
+		public:
+			CASTAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pMemberName);
+			virtual ~CASTAccessOperatorNode();
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			CASTExpressionNode* GetExpression() const;
+
+			CASTExpressionNode* GetMemberName() const;
+		protected:
+			CASTAccessOperatorNode() = default;
+			CASTAccessOperatorNode(const CASTAccessOperatorNode& node) = default;
 	};
 }
 

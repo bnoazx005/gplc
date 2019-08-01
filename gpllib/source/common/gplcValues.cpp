@@ -32,7 +32,7 @@ namespace gplc
 
 	TLLVMIRData CUIntValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitUIntLiteral(this);
 	}
 
 	std::string CUIntValue::ToString() const
@@ -47,7 +47,7 @@ namespace gplc
 
 	TLLVMIRData CFloatValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitFloatLiteral(this);
 	}
 
 	std::string CFloatValue::ToString() const
@@ -62,7 +62,7 @@ namespace gplc
 
 	TLLVMIRData CDoubleValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitDoubleLiteral(this);
 	}
 
 	std::string CDoubleValue::ToString() const
@@ -108,7 +108,7 @@ namespace gplc
 
 	TLLVMIRData CBoolValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitBoolLiteral(this);
 	}
 
 	std::string CBoolValue::ToString() const

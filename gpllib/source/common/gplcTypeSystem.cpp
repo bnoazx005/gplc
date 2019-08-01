@@ -643,11 +643,12 @@ namespace gplc
 	CEnumType::CEnumType(const std::string& enumName):
 		CType(CT_ENUM, BTS_INT32, 0x0)
 	{
+		mChildren.push_back(nullptr); // \note this is a trick to make IsBuiltin work correct for this type
 	}
 
 	TLLVMIRData CEnumType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitEnumType(this);
 	}
 
 	void CEnumType::SetName(const std::string& name)
@@ -657,7 +658,7 @@ namespace gplc
 
 	CBaseValue* CEnumType::GetDefaultValue() const
 	{
-		return nullptr;
+		return new CIntValue(0);
 	}
 
 	const std::string& CEnumType::GetName() const
@@ -690,6 +691,13 @@ namespace gplc
 	TLLVMIRData CDependentNamedType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitNamedType(this);
+	}
+
+	bool CDependentNamedType::IsBuiltIn() const
+	{
+		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
+
+		return pDependentType->IsBuiltIn();
 	}
 
 	void CDependentNamedType::SetName(const std::string& name)

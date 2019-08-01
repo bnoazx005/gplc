@@ -98,4 +98,9 @@ namespace gplc
 	{
 		return pNamedType->GetName();
 	}
+
+	TLLVMIRData CCTypeVisitor::VisitEnumType(const CEnumType* pEnumType)
+	{
+		return {};
+	}
 }

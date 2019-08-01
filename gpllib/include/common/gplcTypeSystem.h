@@ -130,7 +130,7 @@ namespace gplc
 
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
 
-			bool IsBuiltIn() const;
+			virtual bool IsBuiltIn() const;
 
 			void SetAttribute(U32 attribute);
 
@@ -320,6 +320,8 @@ namespace gplc
 			virtual ~CDependentNamedType() = default;
 
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
+
+			bool IsBuiltIn() const override;
 
 			void SetName(const std::string& name) override;
 

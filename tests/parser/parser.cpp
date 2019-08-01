@@ -1,10 +1,12 @@
 #include <catch2/catch.hpp>
 #include <gplc.h>
 #include "stubLexer.h"
-
+#include <iostream>
 
 void OnError(const gplc::TParserErrorInfo& errorInfo)
 {
+	std::cout << errorInfo.mMessage << std::endl;
+
 	REQUIRE(false);
 }
 
@@ -350,6 +352,42 @@ TEST_CASE("Parser's tests")
 				new gplc::CToken(gplc::TT_INT32_TYPE, 5),
 				new gplc::CToken(gplc::TT_STAR, 6),
 				new gplc::CToken(gplc::TT_SEMICOLON, 6),
+			}), pSymbolTable);
+
+		REQUIRE(pMain != nullptr);
+
+		delete pSymbolTable;
+	}
+
+	SECTION("TestParse_TryToGetAccessToMemberOfEnum_ReturnsCorrectAST")
+	{
+		gplc::ISymTable* pSymbolTable = new gplc::CSymTable();
+
+		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
+			{
+				/*!
+					the sequence below specifies the following declaration
+					enum Enum {
+						first, second
+					}
+
+					t : Enum = Enum.first;
+				*/
+				new gplc::CToken(gplc::TT_ENUM_TYPE, 0),
+				new gplc::CIdentifierToken("Enum", 1),
+				new gplc::CToken(gplc::TT_OPEN_BRACE, 2),
+				new gplc::CIdentifierToken("first", 3),
+				new gplc::CToken(gplc::TT_COMMA, 4),
+				new gplc::CIdentifierToken("second", 5),
+				new gplc::CToken(gplc::TT_CLOSE_BRACE, 6),
+				new gplc::CIdentifierToken("t", 7),
+				new gplc::CToken(gplc::TT_COLON, 8),
+				new gplc::CIdentifierToken("Enum", 9),
+				new gplc::CToken(gplc::TT_ASSIGN_OP, 10),
+				new gplc::CIdentifierToken("Enum", 11),
+				new gplc::CToken(gplc::TT_POINT, 12),
+				new gplc::CIdentifierToken("first", 13),
+				new gplc::CToken(gplc::TT_SEMICOLON, 14),
 			}), pSymbolTable);
 
 		REQUIRE(pMain != nullptr);

@@ -34,6 +34,7 @@ namespace gplc
 			TLLVMIRData VisitFunctionType(const CFunctionType* pFuncType) override;
 			TLLVMIRData VisitStructType(const CStructType* pStructType) override;
 			TLLVMIRData VisitNamedType(const CDependentNamedType* pNamedType) override;
+			TLLVMIRData VisitEnumType(const CEnumType* pEnumType) override;
 		protected:
 			CLLVMTypeVisitor() = default;
 			CLLVMTypeVisitor(const CLLVMTypeVisitor& visitor) = default;

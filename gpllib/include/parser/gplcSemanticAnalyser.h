@@ -108,6 +108,8 @@ namespace gplc
 			bool VisitBreakOperator(CASTBreakOperatorNode* pNode) override;
 
 			bool VisitContinueOperator(CASTContinueOperatorNode* pNode) override;
+
+			bool VisitAccessOperator(CASTAccessOperatorNode* pNode) override;
 		protected:
 			bool _enterScope(CASTBlockNode* pNode, ISymTable* pSymTable);
 

@@ -565,7 +565,7 @@ namespace gplc
 		\brief CASTAssignmentNode definition
 	*/
 
-	CASTAssignmentNode::CASTAssignmentNode(CASTUnaryExpressionNode* pLeft, CASTExpressionNode* pRight) :
+	CASTAssignmentNode::CASTAssignmentNode(CASTExpressionNode* pLeft, CASTExpressionNode* pRight) :
 		CASTNode(NT_ASSIGNMENT)
 	{
 		AttachChild(pLeft);
@@ -592,9 +592,9 @@ namespace gplc
 		return pVisitor->VisitAssignment(this);
 	}
 
-	CASTUnaryExpressionNode* CASTAssignmentNode::GetLeft() const
+	CASTExpressionNode* CASTAssignmentNode::GetLeft() const
 	{
-		return dynamic_cast<CASTUnaryExpressionNode*>(mChildren[0]);
+		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
 	}
 
 	CASTExpressionNode* CASTAssignmentNode::GetRight() const
@@ -1189,5 +1189,46 @@ namespace gplc
 	TLLVMIRData CASTContinueOperatorNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitContinueOperator(this);
+	}
+
+
+	/*!
+		\brief CASTAccessOperatorNode's definition
+	*/
+
+	CASTAccessOperatorNode::CASTAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pMemberName):
+		CASTExpressionNode(NT_ACCESS_OPERATOR)
+	{
+		AttachChild(pExpression);
+		AttachChild(pMemberName);
+	}
+
+	CASTAccessOperatorNode::~CASTAccessOperatorNode()
+	{
+	}
+
+	std::string CASTAccessOperatorNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitAccessOperator(this);
+	}
+
+	bool CASTAccessOperatorNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitAccessOperator(this);
+	}
+
+	TLLVMIRData CASTAccessOperatorNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitAccessOperator(this);
+	}
+
+	CASTExpressionNode* CASTAccessOperatorNode::GetExpression() const
+	{
+		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
+	}
+
+	CASTExpressionNode* CASTAccessOperatorNode::GetMemberName() const
+	{
+		return dynamic_cast<CASTExpressionNode*>(mChildren[1]);
 	}
 }

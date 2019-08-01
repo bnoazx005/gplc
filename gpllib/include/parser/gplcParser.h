@@ -42,6 +42,7 @@ namespace gplc
 	class CASTTypeNode;
 	class CASTBreakOperatorNode;
 	class CASTContinueOperatorNode;
+	class CASTAccessOperatorNode;
 
 
 	/*!
@@ -265,7 +266,7 @@ namespace gplc
 				<unary_expr> ::= <identifier> | <value> | <function-call> 
 			*/
 
-			CASTUnaryExpressionNode* _parseUnaryExpression(ILexer* pLexer, U32 attributes = 0x0);
+			CASTExpressionNode* _parseUnaryExpression(ILexer* pLexer, U32 attributes = 0x0);
 
 			/*!
 				\brief The method tries to parse primary expression
@@ -374,6 +375,14 @@ namespace gplc
 			CASTStructDeclNode* _parseStructDeclaration(ILexer* pLexer);
 
 			CASTBlockNode* _parseStructFields(const std::string& structName, ILexer* pLexer);
+
+			/*!
+				\brief 
+
+				<property-access> ::= <primary> '.' <identifier>
+			*/
+
+			CASTAccessOperatorNode* _parseAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer*pLexer);
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 

@@ -50,8 +50,6 @@ TEST_CASE("CLLVMTypeVisitor tests")
 
 		auto result = std::get<llvm::Type*>(pFooTypeEntry->mpType->Accept(pTypeVisitor));
 
-		result->dump();
-
 		delete pSymTable;
 	}
 
