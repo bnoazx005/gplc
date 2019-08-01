@@ -535,6 +535,33 @@ TEST_CASE("CSemanticAnalyser's tests")
 		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
 	}
 
+	SECTION("TestAnalyze_PassBreakOperatorOutsideOfLoop_ReturnsFalse")
+	{
+		/*
+			break;
+		*/
+
+		REQUIRE(!pSemanticAnalyser->Analyze(new CASTBreakOperatorNode(), pTypeResolver, new CSymTable()));
+	}
+
+	SECTION("TestAnalyze_PassBreakOperatorWithinOfLoop_ReturnsTrue")
+	{
+		/*
+			loop {
+				break;
+			}
+		*/
+
+		auto pProgram = new CASTSourceUnitNode();
+		
+		auto pLoopBody = new CASTBlockNode();
+		pLoopBody->AttachChild(new CASTBreakOperatorNode());
+
+		pProgram->AttachChild(new CASTLoopStatementNode(pLoopBody));
+
+		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+	}
+
 	delete pTypeResolver;
 	delete pSemanticAnalyser;
 }

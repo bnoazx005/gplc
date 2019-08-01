@@ -17,6 +17,7 @@ namespace gplc
 		mpSymTable     = pSymTable;
 
 		mLockSymbolTable = false;
+		mStayWithinLoop  = false;
 
 		return pInput->Accept(this);
 	}
@@ -224,7 +225,9 @@ namespace gplc
 			OnErrorOutput.Invoke(SAE_REDUNDANT_LOOP_STATEMENT);
 		}
 
-		return _enterScope(pNode->GetBody(), mpSymTable);
+		auto pLoopBody = pNode->GetBody();
+
+		return _containsBreak(pLoopBody) && _enterLoopScope(pLoopBody, mpSymTable);
 	}
 
 	bool CSemanticAnalyser::VisitWhileLoopStatement(CASTWhileLoopStatementNode* pNode) 
@@ -252,7 +255,7 @@ namespace gplc
 			return false;
 		}
 
-		return _enterScope(pLoopBody, mpSymTable);
+		return _enterLoopScope(pLoopBody, mpSymTable);
 	}
 
 	bool CSemanticAnalyser::VisitFunctionDeclaration(CASTFunctionDeclNode* pNode) 
@@ -433,6 +436,16 @@ namespace gplc
 
 		return structTableEntry;
 	}
+	
+	bool CSemanticAnalyser::VisitBreakOperator(CASTBreakOperatorNode* pNode)
+	{
+		return _isLoopInterruptionAllowed();
+	}
+
+	bool CSemanticAnalyser::VisitContinueOperator(CASTContinueOperatorNode* pNode)
+	{
+		return _isLoopInterruptionAllowed();
+	}
 
 	bool CSemanticAnalyser::_enterScope(CASTBlockNode* pNode, ISymTable* pSymTable)
 	{
@@ -458,5 +471,48 @@ namespace gplc
 		{
 			mpSymTable->Unlock();
 		}
+	}
+
+	bool CSemanticAnalyser::_enterLoopScope(CASTBlockNode* pNode, ISymTable* pSymTable)
+	{
+		mStayWithinLoop = true;
+
+		bool result = _enterScope(pNode, pSymTable);
+
+		mStayWithinLoop = false;
+
+		return result;
+	}
+
+	bool CSemanticAnalyser::_isLoopInterruptionAllowed() const
+	{
+		if (!mStayWithinLoop)
+		{
+			OnErrorOutput.Invoke(SAE_INTERRUPT_STATEMENT_OUTSIDE_LOOP_IS_NOT_ALLOWED);
+		}
+
+		return mStayWithinLoop;
+	}
+
+	bool CSemanticAnalyser::_containsBreak(CASTBlockNode* pLoopBody) const
+	{
+		bool containsBreak = false;
+
+		for (auto pCurrStatement : pLoopBody->GetStatements())
+		{
+			if (pCurrStatement->GetType() == NT_BREAK_OPERATOR)
+			{
+				containsBreak = true;
+
+				break;
+			}
+		}
+
+		if (!containsBreak)
+		{
+			OnErrorOutput.Invoke(SAE_BLOCKING_LOOP);
+		}
+
+		return true; // this rule is not an error just a warning for a user
 	}
 }

@@ -86,6 +86,10 @@ namespace gplc
 
 			TLLVMIRData VisitStructDeclaration(CASTStructDeclNode* pNode) override;
 
+			TLLVMIRData VisitBreakOperator(CASTBreakOperatorNode* pNode) override;
+
+			TLLVMIRData VisitContinueOperator(CASTContinueOperatorNode* pNode) override;
+
 			llvm::IRBuilder<>* GetCurrIRBuilder();
 		protected:
 			CLLVMCodeGenerator(const CLLVMCodeGenerator& codeGenerator) = default;
@@ -127,6 +131,10 @@ namespace gplc
 			llvm::Function*      mpInitModuleGlobalsFunction;
 
 			llvm::IRBuilder<>*   mpInitModuleGlobalsIRBuilder;
+
+			llvm::BasicBlock*    mpLoopConditionBlock;
+
+			llvm::BasicBlock*    mpLoopEndBlock;
 	};
 }
 

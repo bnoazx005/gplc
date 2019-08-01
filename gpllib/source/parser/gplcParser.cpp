@@ -271,7 +271,9 @@ namespace gplc
 	{
 		CASTNode* pOperator = nullptr;
 
-		if (_match(pLexer->GetCurrToken(), TT_IDENTIFIER))
+		const CToken* pCurrToken = pLexer->GetCurrToken();
+
+		if (_match(pCurrToken, TT_IDENTIFIER))
 		{
 			if (_match(pLexer->PeekNextToken(1), TT_COMMA) || _match(pLexer->PeekNextToken(1), TT_COLON))
 			{
@@ -291,6 +293,20 @@ namespace gplc
 				{
 					return pFuncCallNode;
 				}
+			}
+		}
+
+		if (_match(pCurrToken, TT_BREAK_KEYWORD) || _match(pCurrToken, TT_CONTINUE_KEYWORD))
+		{
+			pLexer->GetNextToken(); // take 'break' or 'continue'
+
+			if (pCurrToken->GetType() == TT_BREAK_KEYWORD)
+			{
+				return new CASTBreakOperatorNode();
+			}
+			else
+			{
+				return new CASTContinueOperatorNode();
 			}
 		}
 

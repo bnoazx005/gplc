@@ -271,6 +271,12 @@ namespace gplc
 	{
 		llvm::IRBuilder<>& currIRBuilder = mIRBuildersStack.top();
 
+		llvm::BasicBlock* pConditionBlock = llvm::BasicBlock::Create(*mpContext, "cond", mpCurrActiveFunction);
+		llvm::BasicBlock* pEndBlock       = llvm::BasicBlock::Create(*mpContext, "end", mpCurrActiveFunction);
+
+		mpLoopConditionBlock = pConditionBlock; // the member is used for break and continue operators
+		mpLoopEndBlock       = pEndBlock;
+
 		llvm::BasicBlock* pLoopBody = llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetBody()->Accept(this)));
 
 		// link loop with its parent block
@@ -279,6 +285,11 @@ namespace gplc
 
 		llvm::IRBuilder<> loopIRBuilder { pLoopBody };
 		loopIRBuilder.CreateBr(pLoopBody);
+
+		currIRBuilder.SetInsertPoint(pConditionBlock);
+		currIRBuilder.CreateBr(pLoopBody);
+
+		currIRBuilder.SetInsertPoint(pEndBlock);
 
 		return pLoopBody;
 	}
@@ -293,6 +304,11 @@ namespace gplc
 		llvm::Value* pLoopCondition = std::get<llvm::Value*>(pNode->GetCondition()->Accept(this));
 		mIRBuildersStack.pop();
 
+		llvm::BasicBlock* pEndBlock = llvm::BasicBlock::Create(*mpContext, "end", mpCurrActiveFunction);
+
+		mpLoopConditionBlock = pConditionBlock; // the member is used for break and continue operators
+		mpLoopEndBlock       = pEndBlock;
+
 		currIRBuilder.CreateBr(pConditionBlock);
 
 		llvm::BasicBlock* pLoopBody = llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetBody()->Accept(this)));
@@ -300,8 +316,6 @@ namespace gplc
 		// create loop to condition's check up
 		llvm::IRBuilder<> loopIRBuilder { pLoopBody };
 		loopIRBuilder.CreateBr(pConditionBlock);
-
-		llvm::BasicBlock* pEndBlock = llvm::BasicBlock::Create(*mpContext, "end", mpCurrActiveFunction);
 
 		currIRBuilder.SetInsertPoint(pConditionBlock);
 		llvm::Value* pBRInstruction = currIRBuilder.CreateCondBr(pLoopCondition, pLoopBody, pEndBlock);
@@ -474,6 +488,20 @@ namespace gplc
 	llvm::IRBuilder<>* CLLVMCodeGenerator::GetCurrIRBuilder()
 	{
 		return &mIRBuildersStack.top();
+	}
+
+	TLLVMIRData CLLVMCodeGenerator::VisitBreakOperator(CASTBreakOperatorNode* pNode)
+	{
+		auto& currIRBuilder = mIRBuildersStack.top();
+
+		return currIRBuilder.CreateBr(mpLoopEndBlock);
+	}
+
+	TLLVMIRData CLLVMCodeGenerator::VisitContinueOperator(CASTContinueOperatorNode* pNode)
+	{
+		auto& currIRBuilder = mIRBuildersStack.top();
+
+		return currIRBuilder.CreateBr(mpLoopConditionBlock);
 	}
 
 	llvm::Instruction::BinaryOps CLLVMCodeGenerator::_convertOpTypeToLLVM(E_TOKEN_TYPE opType, bool isFloatingPointOp) const

@@ -285,6 +285,23 @@ TEST_CASE("Lexer's tests")
 
 		delete pInputStream;
 	}
+
+
+	SECTION("TestGetNextToken_PassContinueBreak_ReturnsCorrectTokens")
+	{
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"continue break"
+			});
+
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
+
+		REQUIRE(pLexer->GetNextToken()->GetType() == TT_CONTINUE_KEYWORD);
+		REQUIRE(pLexer->GetNextToken()->GetType() == TT_BREAK_KEYWORD);
+		REQUIRE(!pLexer->GetNextToken());
+
+		delete pInputStream;
+	}
 	
 	delete pLexer;
 }

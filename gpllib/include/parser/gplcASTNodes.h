@@ -71,6 +71,8 @@ namespace gplc
 		NT_ENUM_DECL,
 		NT_STRUCT_DECL,
 		NT_DEPENDENT_TYPE,
+		NT_BREAK_OPERATOR,
+		NT_CONTINUE_OPERATOR,
 	};
 
 	/*!
@@ -573,6 +575,34 @@ namespace gplc
 		protected:
 			CASTNamedTypeNode() = default;
 			CASTNamedTypeNode(const CASTNamedTypeNode& node) = default;
+	};
+
+
+	class CASTBreakOperatorNode : public CASTNode
+	{
+		public:
+			CASTBreakOperatorNode();
+			virtual ~CASTBreakOperatorNode();
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+		protected:
+			CASTBreakOperatorNode(const CASTBreakOperatorNode& node) = default;
+	};
+
+
+	class CASTContinueOperatorNode : public CASTNode
+	{
+		public:
+			CASTContinueOperatorNode();
+			virtual ~CASTContinueOperatorNode();
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+		protected:
+			CASTContinueOperatorNode(const CASTContinueOperatorNode& node) = default;
 	};
 }
 

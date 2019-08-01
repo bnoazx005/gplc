@@ -1132,4 +1132,62 @@ namespace gplc
 	{
 		return dynamic_cast<CASTIdentifierNode*>(mChildren[0]);
 	}
+
+
+	/*!
+		\brief CASTBreakOperator's definition
+	*/
+	
+	CASTBreakOperatorNode::CASTBreakOperatorNode():
+		CASTNode(NT_BREAK_OPERATOR)
+	{
+	}
+
+	CASTBreakOperatorNode::~CASTBreakOperatorNode()
+	{
+	}
+
+	std::string CASTBreakOperatorNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitBreakOperator(this);
+	}
+
+	bool CASTBreakOperatorNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitBreakOperator(this);
+	}
+
+	TLLVMIRData CASTBreakOperatorNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitBreakOperator(this);
+	}
+
+
+	/*!
+		\brief CASTContinueOperator's definition
+	*/
+
+	CASTContinueOperatorNode::CASTContinueOperatorNode() :
+		CASTNode(NT_CONTINUE_OPERATOR)
+	{
+	}
+
+	CASTContinueOperatorNode::~CASTContinueOperatorNode()
+	{
+	}
+
+	std::string CASTContinueOperatorNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitContinueOperator(this);
+	}
+
+	bool CASTContinueOperatorNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitContinueOperator(this);
+	}
+
+	TLLVMIRData CASTContinueOperatorNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitContinueOperator(this);
+	}
 }

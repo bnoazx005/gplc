@@ -104,16 +104,28 @@ namespace gplc
 			bool VisitEnumDeclaration(CASTEnumDeclNode* pNode) override;
 
 			bool VisitStructDeclaration(CASTStructDeclNode* pNode) override;
+
+			bool VisitBreakOperator(CASTBreakOperatorNode* pNode) override;
+
+			bool VisitContinueOperator(CASTContinueOperatorNode* pNode) override;
 		protected:
 			bool _enterScope(CASTBlockNode* pNode, ISymTable* pSymTable);
 
 			void _lockSymbolTable(const std::function<void()>& action, bool lockSymTable);
+
+			bool _enterLoopScope(CASTBlockNode* pNode, ISymTable* pSymTable);
+
+			bool _isLoopInterruptionAllowed() const;
+
+			bool _containsBreak(CASTBlockNode* pLoopBody) const;
 		protected:
 			ITypeResolver* mpTypeResolver;
 
 			ISymTable*     mpSymTable;
 
 			bool           mLockSymbolTable;
+
+			bool           mStayWithinLoop;
 	};
 }
 

@@ -195,4 +195,14 @@ namespace gplc
 	{
 		return {};
 	}
+
+	std::string CASTLispyPrinter::VisitBreakOperator(CASTBreakOperatorNode* pNode)
+	{
+		return {};
+	}
+
+	std::string CASTLispyPrinter::VisitContinueOperator(CASTContinueOperatorNode* pNode)
+	{
+		return {};
+	}
 }

@@ -6,6 +6,7 @@
 #include "common/gplcTypeSystem.h"
 #include "codegen/ctplr/gplcCLiteralVisitor.h"
 #include <cmath>
+#include <cassert>
 
 
 namespace gplc
@@ -360,5 +361,17 @@ namespace gplc
 		auto structSymbolEntry = mpSymTable->LookUpNamedScope(structName);
 
 		return structSymbolEntry->mpType->Accept(mpTypeVisitor);
+	}
+
+	TLLVMIRData CCCodeGenerator::VisitBreakOperator(CASTBreakOperatorNode* pNode)
+	{
+		assert(false);
+		return {};
+	}
+
+	TLLVMIRData CCCodeGenerator::VisitContinueOperator(CASTContinueOperatorNode* pNode)
+	{
+		assert(false);
+		return {};
 	}
 }

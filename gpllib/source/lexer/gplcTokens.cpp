@@ -240,6 +240,12 @@ namespace gplc
 			case TT_LITERAL:
 				return "\'literal\'";
 
+			case TT_BREAK_KEYWORD:
+				return "\'break\'";
+
+			case TT_CONTINUE_KEYWORD:
+				return "\'continue\'";
+
 			case TT_DEFAULT:
 			default:
 				return "\'default\'";

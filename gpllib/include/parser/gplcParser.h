@@ -40,6 +40,8 @@ namespace gplc
 	class CASTEnumDeclNode;
 	class CASTStructDeclNode;
 	class CASTTypeNode;
+	class CASTBreakOperatorNode;
+	class CASTContinueOperatorNode;
 
 
 	/*!
