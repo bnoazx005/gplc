@@ -284,7 +284,7 @@ namespace gplc
 			{
 				pOperator = _parseAssignment(pLexer);
 			}
-			else
+			else if (_match(pLexer->PeekNextToken(1), TT_OPEN_BRACKET))
 			{
 				CASTUnaryExpressionNode* pUnaryExpr = dynamic_cast<CASTUnaryExpressionNode*>(_parseUnaryExpression(pLexer)); 
 

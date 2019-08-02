@@ -75,9 +75,12 @@ namespace gplc
 
 	CType* CTypeResolver::VisitIdentifier(CASTIdentifierNode* pNode)
 	{
-		const TSymbolDesc* pSymbolDesc = mpSymTable->LookUp(pNode->GetName());
+		const std::string& identifier = pNode->GetName();
 
-		return pSymbolDesc ? pSymbolDesc->mpType : nullptr;
+		const TSymbolDesc* pSymbolDesc = mpSymTable->LookUp(identifier);
+		auto pSymbolEntryDesc          = mpSymTable->LookUpNamedScope(identifier);
+
+		return pSymbolDesc ? pSymbolDesc->mpType : (pSymbolEntryDesc ? pSymbolEntryDesc->mpType : nullptr);
 	}
 
 	CType* CTypeResolver::VisitLiteral(CASTLiteralNode* pNode)
@@ -302,6 +305,11 @@ namespace gplc
 	{
 	}
 
+	const std::string& CType::GetName() const
+	{
+		return ToShortAliasString();
+	}
+
 	const std::vector<const CType*> CType::GetChildTypes() const
 	{
 		return mChildren;
@@ -352,6 +360,11 @@ namespace gplc
 		if (!pType)
 		{
 			return false;
+		}
+
+		if (IsBuiltIn() && pType->mType == CT_STRING)
+		{
+			return true; // \note each built-in type can be converted to a string literal automatically
 		}
 
 		return mCastMap[mType][pType->mType];
@@ -641,7 +654,7 @@ namespace gplc
 
 
 	CEnumType::CEnumType(const std::string& enumName):
-		CType(CT_ENUM, BTS_INT32, 0x0)
+		CType(CT_ENUM, BTS_INT32, 0x0), mName(enumName)
 	{
 		mChildren.push_back(nullptr); // \note this is a trick to make IsBuiltin work correct for this type
 	}

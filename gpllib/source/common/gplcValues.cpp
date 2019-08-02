@@ -25,6 +25,11 @@ namespace gplc
 		return std::to_string(mValue);
 	}
 
+	CStringValue* CIntValue::ToStringLiteral() const
+	{
+		return new CStringValue(ToString());
+	}
+
 	CType* CIntValue::GetTypeInfo() const
 	{
 		return new CType(CT_INT64, BTS_INT64, 0x0);
@@ -39,7 +44,12 @@ namespace gplc
 	{
 		return std::to_string(mValue);
 	}
-	
+
+	CStringValue* CUIntValue::ToStringLiteral() const
+	{
+		return new CStringValue(ToString());
+	}
+
 	CType* CUIntValue::GetTypeInfo() const
 	{
 		return new CType(CT_UINT64, BTS_UINT64, 0x0);
@@ -53,6 +63,11 @@ namespace gplc
 	std::string CFloatValue::ToString() const
 	{
 		return std::to_string(mValue);
+	}
+
+	CStringValue* CFloatValue::ToStringLiteral() const
+	{
+		return new CStringValue(ToString());
 	}
 
 	CType* CFloatValue::GetTypeInfo() const
@@ -70,6 +85,11 @@ namespace gplc
 		return std::to_string(mValue);
 	}
 
+	CStringValue* CDoubleValue::ToStringLiteral() const
+	{
+		return new CStringValue(ToString());
+	}
+
 	CType* CDoubleValue::GetTypeInfo() const
 	{
 		return new CType(CT_DOUBLE, BTS_DOUBLE, 0x0);
@@ -83,6 +103,11 @@ namespace gplc
 	std::string CStringValue::ToString() const
 	{
 		return std::string("\"").append(mValue).append("\"");
+	}
+
+	CStringValue* CStringValue::ToStringLiteral() const
+	{
+		return new CStringValue(ToString());
 	}
 
 	CType* CStringValue::GetTypeInfo() const
@@ -101,6 +126,11 @@ namespace gplc
 		return std::string("\'").append(mValue).append("\'");
 	}
 
+	CStringValue* CCharValue::ToStringLiteral() const
+	{
+		return new CStringValue(ToString());
+	}
+
 	CType* CCharValue::GetTypeInfo() const
 	{
 		return new CType(CT_CHAR, BTS_CHAR, 0x0);
@@ -114,6 +144,11 @@ namespace gplc
 	std::string CBoolValue::ToString() const
 	{
 		return std::to_string(mValue);
+	}
+
+	CStringValue* CBoolValue::ToStringLiteral() const
+	{
+		return new CStringValue(ToString());
 	}
 
 	CType* CBoolValue::GetTypeInfo() const
@@ -130,6 +165,11 @@ namespace gplc
 	std::string CPointerValue::ToString() const
 	{
 		return "null";
+	}
+
+	CStringValue* CPointerValue::ToStringLiteral() const
+	{
+		return new CStringValue(ToString());
 	}
 
 	CType* CPointerValue::GetTypeInfo() const

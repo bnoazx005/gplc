@@ -146,6 +146,8 @@ namespace gplc
 
 			U32 GetAttributes() const;
 
+			virtual const std::string& GetName() const;
+
 			virtual CBaseValue* GetDefaultValue() const;
 
 			/*!
@@ -176,6 +178,8 @@ namespace gplc
 			U32                 mSize;
 
 			U32                 mAttributes;
+
+			std::string         mName;
 
 			std::vector<const CType*> mChildren;
 	};
@@ -234,8 +238,6 @@ namespace gplc
 			CStructType() = default;
 			CStructType(const CStructType& structure) = default;
 		protected:
-			std::string  mName;
-
 			TFieldsArray mFieldsTypes;
 	};
 
@@ -285,7 +287,7 @@ namespace gplc
 	*/
 
 	class CEnumType : public CType
-	{
+	{		
 		public:
 			CEnumType(const std::string& enumName);
 			virtual ~CEnumType() = default;

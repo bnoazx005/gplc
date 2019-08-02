@@ -519,6 +519,41 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitAccessOperator(CASTAccessOperatorNode* pNode)
 	{
+		auto pPrimary   = pNode->GetExpression();
+		auto pFieldExpr = pNode->GetMemberName();
+
+		//// resolve the expression
+		//CType* pType = nullptr;
+
+		//if (!pPrimary->Accept(this) || !(pType = mpTypeResolver->Resolve(pPrimary, mpSymTable)))
+		//{
+		//	return false;
+		//}
+
+		//// check whether the given field exist for the object of the specified type
+		//auto pSymbolDesc = mpSymTable->LookUpNamedScope(pType->GetName());
+
+		//if (!pSymbolDesc || !pSymbolDesc->mpType)
+		//{
+		//	OnErrorOutput.Invoke(SAE_UNDEFINED_TYPE);
+
+		//	return false;
+		//}
+
+		//CASTIdentifierNode* pIdentifier = dynamic_cast<CASTIdentifierNode*>(dynamic_cast<CASTUnaryExpressionNode*>(pFieldExpr)->GetData());
+
+		//if (pIdentifier)
+		//{
+		//	if (pSymbolDesc->mVariables.find(pIdentifier->GetName()) == pSymbolDesc->mVariables.cend())
+		//	{
+		//		OnErrorOutput.Invoke(SAE_TRY_TO_ACCESS_UNDEFINED_FIELD);
+
+		//		return false;
+		//	}
+
+		//	return true;
+		//}
+
 		return {};
 	}
 

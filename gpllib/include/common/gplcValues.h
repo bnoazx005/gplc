@@ -20,6 +20,7 @@
 namespace gplc
 {
 	class CType;
+	class CStringValue;
 
 
 	enum E_LITERAL_TYPE
@@ -46,6 +47,8 @@ namespace gplc
 			E_LITERAL_TYPE GetType() const;
 
 			virtual std::string ToString() const = 0;
+
+			virtual CStringValue* ToStringLiteral() const = 0;
 
 			virtual CType* GetTypeInfo() const = 0;
 		protected:
@@ -92,6 +95,8 @@ namespace gplc
 			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
 
 			std::string ToString() const override;
+
+			CStringValue* ToStringLiteral() const override;
 			
 			CType* GetTypeInfo() const override;
 	};
@@ -108,6 +113,8 @@ namespace gplc
 			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
 
 			std::string ToString() const override;
+			
+			CStringValue* ToStringLiteral() const override;
 
 			CType* GetTypeInfo() const override;
 	};
@@ -124,6 +131,8 @@ namespace gplc
 			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
 
 			std::string ToString() const override;
+			
+			CStringValue* ToStringLiteral() const override;
 
 			CType* GetTypeInfo() const override;
 	};
@@ -141,6 +150,8 @@ namespace gplc
 
 			std::string ToString() const override;
 
+			CStringValue* ToStringLiteral() const override;
+
 			CType* GetTypeInfo() const override;
 	};
 
@@ -156,6 +167,8 @@ namespace gplc
 			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
 
 			std::string ToString() const override;
+
+			CStringValue* ToStringLiteral() const override;
 
 			CType* GetTypeInfo() const override;
 	};
@@ -173,6 +186,8 @@ namespace gplc
 
 			std::string ToString() const override;
 
+			CStringValue* ToStringLiteral() const override;
+
 			CType* GetTypeInfo() const override;
 	};
 
@@ -189,6 +204,8 @@ namespace gplc
 
 			std::string ToString() const override;
 
+			CStringValue* ToStringLiteral() const override;
+
 			CType* GetTypeInfo() const override;
 	};
 
@@ -204,6 +221,8 @@ namespace gplc
 			TLLVMIRData Accept(ILiteralVisitor<TLLVMIRData>* pVisitor) override;
 
 			std::string ToString() const override;
+
+			CStringValue* ToStringLiteral() const override;
 
 			CType* GetTypeInfo() const override;
 	};

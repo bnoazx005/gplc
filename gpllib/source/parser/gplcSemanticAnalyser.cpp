@@ -313,6 +313,8 @@ namespace gplc
 			return false;
 		}
 		
+		// \todo implement checks up of arguments with signatures
+
 		auto pChildren = pNode->GetArgs()->GetChildren();
 
 		for (auto pCurrChild : pChildren)
@@ -452,11 +454,39 @@ namespace gplc
 		auto pPrimary   = pNode->GetExpression();
 		auto pFieldExpr = pNode->GetMemberName();
 
-		// check whether the following member exists
+		// resolve the expression
+		CType* pType = nullptr;
 
+		if (!pPrimary->Accept(this) || !(pType = mpTypeResolver->Resolve(pPrimary, mpSymTable)))
+		{
+			return false;
+		}
 
-		abort();
-		return false;
+		// check whether the given field exist for the object of the specified type
+		auto pSymbolDesc = mpSymTable->LookUpNamedScope(pType->GetName());
+
+		if (!pSymbolDesc || !pSymbolDesc->mpType)
+		{
+			OnErrorOutput.Invoke(SAE_UNDEFINED_TYPE);
+
+			return false;
+		}
+
+		CASTIdentifierNode* pIdentifier = dynamic_cast<CASTIdentifierNode*>(dynamic_cast<CASTUnaryExpressionNode*>(pFieldExpr)->GetData());
+
+		if (pIdentifier)
+		{
+			if (pSymbolDesc->mVariables.find(pIdentifier->GetName()) == pSymbolDesc->mVariables.cend())
+			{
+				OnErrorOutput.Invoke(SAE_TRY_TO_ACCESS_UNDEFINED_FIELD);
+
+				return false;
+			}
+
+			return true;
+		}
+
+		return true;
 	}
 
 	bool CSemanticAnalyser::_enterScope(CASTBlockNode* pNode, ISymTable* pSymTable)
