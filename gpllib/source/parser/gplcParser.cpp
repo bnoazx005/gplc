@@ -37,7 +37,7 @@ namespace gplc
 
 	CASTNode* CParser::Parse(ILexer* pLexer, ISymTable* pSymTable)
 	{
-		if (pLexer == nullptr || pSymTable == nullptr)
+		if (!pLexer || !pSymTable)
 		{
 			TParserErrorInfo errorInfo;
 
@@ -497,8 +497,12 @@ namespace gplc
 		{
 			pLexer->GetNextToken(); // take [
 
-			// \todo Implement retrieving a size of an array if it's static sized
-			assert(false);
+			CASTExpressionNode* pSizeExpr = nullptr;
+
+			if (!_match(pLexer->GetCurrToken(), TT_CLOSE_SQR_BRACE))
+			{
+				pSizeExpr = _parseExpression(pLexer, 0x0);
+			}
 
 			if (!SUCCESS(_expect(TT_CLOSE_SQR_BRACE, pLexer->GetCurrToken())))
 			{
@@ -506,6 +510,8 @@ namespace gplc
 			}
 
 			pLexer->GetNextToken(); // take ]
+
+			return new CASTArrayTypeNode(pSizeExpr);
 		}
 
 		return pBuiltinType;

@@ -268,7 +268,7 @@ namespace gplc
 	};
 
 	CType::CType() :
-		mType(CT_INT32), mSize(4), mAttributes(0x0)
+		mType(CT_INT32), mSize(4), mAttributes(0x0), mName(ToShortAliasString())
 	{
 	}
 
@@ -303,11 +303,12 @@ namespace gplc
 
 	void CType::SetName(const std::string& name)
 	{
+		mName = name;
 	}
 
 	const std::string& CType::GetName() const
 	{
-		return ToShortAliasString();
+		return mName;
 	}
 
 	const std::vector<const CType*> CType::GetChildTypes() const
@@ -506,11 +507,6 @@ namespace gplc
 		return pVisitor->VisitStructType(this);
 	}
 
-	void CStructType::SetName(const std::string& name)
-	{
-		mName = name;
-	}
-
 	void CStructType::SetAttributes(U32 attributes)
 	{
 		mAttributes = attributes;
@@ -524,11 +520,6 @@ namespace gplc
 	CBaseValue* CStructType::GetDefaultValue() const
 	{
 		return new CPointerValue();
-	}
-
-	const std::string& CStructType::GetName() const
-	{
-		return mName;
 	}
 
 	bool CStructType::AreSame(const CType* pType) const
@@ -580,11 +571,6 @@ namespace gplc
 		return pVisitor->VisitFunctionType(this);
 	}
 
-	void CFunctionType::SetName(const std::string& name)
-	{
-		mName = name;
-	}
-
 	void CFunctionType::SetAttributes(U32 attributes)
 	{
 		mAttributes = attributes;
@@ -603,11 +589,6 @@ namespace gplc
 	CBaseValue* CFunctionType::GetDefaultValue() const
 	{
 		return new CPointerValue();
-	}
-
-	const std::string& CFunctionType::GetName() const
-	{
-		return mName;
 	}
 
 	bool CFunctionType::AreSame(const CType* pType) const
@@ -664,21 +645,11 @@ namespace gplc
 		return pVisitor->VisitEnumType(this);
 	}
 
-	void CEnumType::SetName(const std::string& name)
-	{
-		mName = name;
-	}
-
 	CBaseValue* CEnumType::GetDefaultValue() const
 	{
 		return new CIntValue(0);
 	}
-
-	const std::string& CEnumType::GetName() const
-	{
-		return mName;
-	}
-
+	
 	bool CEnumType::AreSame(const CType* pType) const
 	{
 		const CEnumType* pEnumType = dynamic_cast<const CEnumType*>(pType);
@@ -713,21 +684,11 @@ namespace gplc
 		return pDependentType->IsBuiltIn();
 	}
 
-	void CDependentNamedType::SetName(const std::string& name)
-	{
-		mName = name;
-	}
-
 	CBaseValue* CDependentNamedType::GetDefaultValue() const
 	{
 		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
 
 		return pDependentType->GetDefaultValue();
-	}
-
-	const std::string& CDependentNamedType::GetName() const
-	{
-		return mName;
 	}
 
 	bool CDependentNamedType::AreSame(const CType* pType) const
@@ -756,6 +717,52 @@ namespace gplc
 		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
 
 		return pDependentType->GetSize();
+	}
+
+	
+	/*!
+		\brief CArrayType's definition
+	*/
+
+	CArrayType::CArrayType(CType* pBaseType, U32 elementsCount, U32 attribute):
+		CType(CT_ARRAY, BTS_POINTER, attribute), mElementsCount(elementsCount)
+	{
+	}
+
+	CArrayType::~CArrayType()
+	{
+	}
+
+	TLLVMIRData CArrayType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return {};
+	}
+	
+	void CArrayType::SetAttributes(U32 attributes)
+	{
+		mAttributes = attributes;
+	}
+
+	CBaseValue* CArrayType::GetDefaultValue() const
+	{
+		return nullptr;
+	}
+
+	bool CArrayType::AreSame(const CType* pType) const
+	{
+		const CArrayType* pArrayType = dynamic_cast<const CArrayType*>(pType);
+
+		return pArrayType && mType == pArrayType->mType;
+	}
+
+	std::string CArrayType::ToShortAliasString() const
+	{
+		return "array";
+	}
+
+	U32 CArrayType::GetElementsCount() const
+	{
+		return mElementsCount;
 	}
 
 

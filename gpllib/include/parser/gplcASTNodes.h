@@ -74,6 +74,7 @@ namespace gplc
 		NT_BREAK_OPERATOR,
 		NT_CONTINUE_OPERATOR,
 		NT_ACCESS_OPERATOR,
+		NT_ARRAY,
 	};
 
 	/*!
@@ -623,6 +624,24 @@ namespace gplc
 		protected:
 			CASTAccessOperatorNode() = default;
 			CASTAccessOperatorNode(const CASTAccessOperatorNode& node) = default;
+	};
+
+
+	class CASTArrayTypeNode : public CASTTypeNode
+	{
+		public:
+			CASTArrayTypeNode(CASTExpressionNode* pSizeExpr);
+			virtual ~CASTArrayTypeNode();
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			virtual CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable);
+
+			CASTExpressionNode* GetSizeExpr() const;
+		protected:
+			CASTArrayTypeNode(const CASTArrayTypeNode& node) = default;
 	};
 }
 

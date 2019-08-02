@@ -21,6 +21,7 @@
 #include "common/gplcTypeSystem.h"
 #include "common/gplcValues.h"
 #include "common/gplcVisitor.h"
+#include "common/gplcConstExprInterpreter.h"
 
 /// Parser's files group
 #include "parser/gplcParser.h"

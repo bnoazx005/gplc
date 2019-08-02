@@ -199,10 +199,6 @@ namespace gplc
 			CPointerType(const CPointerType& type);
 	};
 	
-	/*!
-		\brief CArrayType class
-	*/
-
 	
 	/*!
 		\brief CStructureType class
@@ -221,15 +217,11 @@ namespace gplc
 
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
 
-			void SetName(const std::string& name) override;
-
 			void SetAttributes(U32 attributes);
 
 			const TFieldsArray& GetFieldsTypes() const;
 
 			CBaseValue* GetDefaultValue() const override;
-
-			const std::string& GetName() const;
 
 			bool AreSame(const CType* pType) const override;
 
@@ -256,8 +248,6 @@ namespace gplc
 
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
 
-			void SetName(const std::string& name) override;
-
 			void SetAttributes(U32 attributes);
 
 			const TArgsArray& GetArgsTypes() const;
@@ -265,8 +255,6 @@ namespace gplc
 			CType* GetReturnValueType() const;
 
 			CBaseValue* GetDefaultValue() const override;
-
-			const std::string& GetName() const;
 
 			bool AreSame(const CType* pType) const override;
 
@@ -294,11 +282,7 @@ namespace gplc
 			
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
 
-			void SetName(const std::string& name) override;
-
 			CBaseValue* GetDefaultValue() const override;
-
-			const std::string& GetName() const;
 
 			bool AreSame(const CType* pType) const override;
 
@@ -325,11 +309,7 @@ namespace gplc
 
 			bool IsBuiltIn() const override;
 
-			void SetName(const std::string& name) override;
-
 			CBaseValue* GetDefaultValue() const override;
-
-			const std::string& GetName() const;
 
 			bool AreSame(const CType* pType) const override;
 
@@ -349,6 +329,35 @@ namespace gplc
 			std::string      mName;
 
 			const CType*     mpDependentType;
+	};
+
+
+	/*!
+		\brief CArrayType class
+	*/
+
+	class CArrayType : public CType
+	{
+		public:
+			CArrayType(CType* pBaseType, U32 elementsCount, U32 attribute = 0x0);
+			virtual ~CArrayType();
+
+			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
+
+			void SetAttributes(U32 attributes);
+
+			CBaseValue* GetDefaultValue() const override;
+
+			bool AreSame(const CType* pType) const override;
+
+			std::string ToShortAliasString() const override;
+
+			U32 GetElementsCount() const;
+		protected:
+			CArrayType() = default;
+			CArrayType(const CArrayType& arrayType) = default;
+		protected:
+			U32 mElementsCount;
 	};
 
 

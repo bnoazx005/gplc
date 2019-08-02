@@ -160,7 +160,7 @@ namespace gplc
 	};
 
 
-	typedef std::variant<llvm::Module*, llvm::Value*, llvm::Function*, llvm::Type*, std::string> TLLVMIRData;
+	typedef std::variant<llvm::Module*, llvm::Value*, llvm::Function*, llvm::Type*, std::string, U32> TLLVMIRData;
 
 
 	enum E_ATTRIBUTES_VALUES : U32

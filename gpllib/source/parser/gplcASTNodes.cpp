@@ -1231,4 +1231,44 @@ namespace gplc
 	{
 		return dynamic_cast<CASTExpressionNode*>(mChildren[1]);
 	}
+
+
+	/*!
+		\brief CASTArrayTypeNode's definition
+	*/
+
+	CASTArrayTypeNode::CASTArrayTypeNode(CASTExpressionNode* pSizeExpr):
+		CASTTypeNode(NT_ARRAY)
+	{
+		AttachChild(pSizeExpr);
+	}
+
+	CASTArrayTypeNode::~CASTArrayTypeNode()
+	{
+	}
+
+	std::string CASTArrayTypeNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return {};
+	}
+
+	bool CASTArrayTypeNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return false;
+	}
+
+	TLLVMIRData CASTArrayTypeNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return {};
+	}
+
+	CType* CASTArrayTypeNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	{
+		return nullptr;
+	}
+
+	CASTExpressionNode* CASTArrayTypeNode::GetSizeExpr() const
+	{
+		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
+	}
 }
