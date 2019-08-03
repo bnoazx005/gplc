@@ -215,4 +215,10 @@ namespace gplc
 	{
 		return {};
 	}
+
+	std::string CASTLispyPrinter::VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode)
+	{
+		return {};
+	}
+
 }

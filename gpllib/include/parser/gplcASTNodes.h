@@ -75,6 +75,7 @@ namespace gplc
 		NT_CONTINUE_OPERATOR,
 		NT_ACCESS_OPERATOR,
 		NT_ARRAY,
+		NT_INDEXED_ACCESS_OPERATOR,
 	};
 
 	/*!
@@ -644,6 +645,31 @@ namespace gplc
 			CASTExpressionNode* GetSizeExpr() const;
 		protected:
 			CASTArrayTypeNode(const CASTArrayTypeNode& node) = default;
+	};
+
+	
+	class CASTIndexedAccessOperatorNode : public CASTExpressionNode
+	{
+		public:
+			CASTIndexedAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pIndexExpr, U32 attributes);
+			virtual ~CASTIndexedAccessOperatorNode();
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			CType* Resolve(ITypeResolver* pResolver) override;
+
+			CASTExpressionNode* GetExpression() const;
+
+			CASTExpressionNode* GetIndexExpression() const;
+
+			U32 GetAttributes() const;
+		protected:
+			CASTIndexedAccessOperatorNode() = default;
+			CASTIndexedAccessOperatorNode(const CASTIndexedAccessOperatorNode& node) = default;
+		protected:
+			U32 mAttributes;
 	};
 }
 

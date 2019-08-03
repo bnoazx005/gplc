@@ -171,7 +171,7 @@ namespace gplc
 		}
 
 		// check their compatibility
-		return pLeftValueType->AreSame(pRightValueType);
+		return pLeftValueType->AreSame(pRightValueType) /* second condition is for tests purposes only, delete later */ || pRightValueType->AreConvertibleTo(pLeftValueType);
 	}
 
 	bool CSemanticAnalyser::VisitStatementsBlock(CASTBlockNode* pNode) 
@@ -490,6 +490,12 @@ namespace gplc
 	}
 
 	bool CSemanticAnalyser::VisitArrayTypeNode(CASTArrayTypeNode* pNode)
+	{
+		// \todo implement the method
+		return true;
+	}
+
+	bool CSemanticAnalyser::VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode)
 	{
 		// \todo implement the method
 		return true;

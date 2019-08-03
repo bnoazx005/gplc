@@ -85,6 +85,8 @@ namespace gplc
 			TLLVMIRData VisitAccessOperator(CASTAccessOperatorNode* pNode) override;
 
 			TLLVMIRData VisitArrayTypeNode(CASTArrayTypeNode* pNode) override;
+
+			TLLVMIRData VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) override;
 		protected:
 			ISymTable* mpSymTable;
 	};

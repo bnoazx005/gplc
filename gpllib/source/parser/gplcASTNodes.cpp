@@ -1277,4 +1277,55 @@ namespace gplc
 	{
 		return dynamic_cast<CASTExpressionNode*>(mChildren[1]);
 	}
+
+
+	/*!
+		\brief CASTIndexedAccessOperatorNode's definition
+	*/
+
+	CASTIndexedAccessOperatorNode::CASTIndexedAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pIndexExpr, U32 attributes) :
+		CASTExpressionNode(NT_INDEXED_ACCESS_OPERATOR), mAttributes(attributes)
+	{
+		AttachChild(pExpression);
+		AttachChild(pIndexExpr);
+	}
+
+	CASTIndexedAccessOperatorNode::~CASTIndexedAccessOperatorNode()
+	{
+	}
+
+	std::string CASTIndexedAccessOperatorNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitIndexedAccessOperator(this);
+	}
+
+	bool CASTIndexedAccessOperatorNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitIndexedAccessOperator(this);
+	}
+
+	TLLVMIRData CASTIndexedAccessOperatorNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitIndexedAccessOperator(this);
+	}
+
+	CType* CASTIndexedAccessOperatorNode::Resolve(ITypeResolver* pResolver)
+	{
+		return pResolver->VisitIndexedAccessOperator(this);
+	}
+
+	CASTExpressionNode* CASTIndexedAccessOperatorNode::GetExpression() const
+	{
+		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
+	}
+
+	CASTExpressionNode* CASTIndexedAccessOperatorNode::GetIndexExpression() const
+	{
+		return dynamic_cast<CASTExpressionNode*>(mChildren[1]);
+	}
+
+	U32 CASTIndexedAccessOperatorNode::GetAttributes() const
+	{
+		return mAttributes;
+	}
 }

@@ -201,7 +201,21 @@ namespace gplc
 			return nullptr;
 		}
 
-		return new CArrayType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())), evaluatedArraySize.Get(), 0x0);
+		return new CArrayType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())), evaluatedArraySize.Get(), AV_AGGREGATE_TYPE);
+	}
+
+	CType* CTypeResolver::VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode)
+	{
+		CType* pExprType = pNode->GetExpression()->Resolve(this);
+
+		if (!pExprType)
+		{
+			return nullptr;
+		}
+
+		CArrayType* pArrayType = dynamic_cast<CArrayType*>(pExprType);
+
+		return pArrayType->GetBaseType();
 	}
 
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type, U32 attributes)

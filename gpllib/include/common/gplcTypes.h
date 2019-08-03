@@ -172,6 +172,7 @@ namespace gplc
 		AV_NATIVE_FUNC		 = 0x10,
 		AV_RVALUE            = 0x20,
 		AV_POINTER           = 0x40,
+		AV_AGGREGATE_TYPE    = 0x80,
 	};
 
 

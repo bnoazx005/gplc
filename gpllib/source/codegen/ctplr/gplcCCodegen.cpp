@@ -384,4 +384,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CCCodeGenerator::VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode)
+	{
+		return {};
+	}
 }

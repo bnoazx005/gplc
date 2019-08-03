@@ -43,6 +43,8 @@ namespace gplc
 	class CASTBreakOperatorNode;
 	class CASTContinueOperatorNode;
 	class CASTAccessOperatorNode;
+	class CASTArrayTypeNode;
+	class CASTIndexedAccessOperatorNode;
 
 
 	/*!
@@ -383,6 +385,14 @@ namespace gplc
 			*/
 
 			CASTAccessOperatorNode* _parseAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer*pLexer);
+
+			/*!
+				\brief
+
+				<indexed-access> ::= <expr> '[' <expr> ']'
+			*/
+
+			CASTIndexedAccessOperatorNode* _parseIndexedAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer*pLexer, U32 attributes = 0x0);
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 

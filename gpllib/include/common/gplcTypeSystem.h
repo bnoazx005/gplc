@@ -86,6 +86,7 @@ namespace gplc
 			virtual CType* VisitStructDeclaration(CASTStructDeclNode* pNode) = 0;
 			virtual CType* VisitNamedType(CASTNamedTypeNode* pNode) = 0;
 			virtual CType* VisitArrayType(CASTArrayTypeNode* pNode) = 0;
+			virtual CType* VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) = 0;
 	};
 
 
@@ -114,6 +115,7 @@ namespace gplc
 			CType* VisitStructDeclaration(CASTStructDeclNode* pNode) override; 
 			CType* VisitNamedType(CASTNamedTypeNode* pNode) override;
 			CType* VisitArrayType(CASTArrayTypeNode* pNode) override;
+			CType* VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) override;
 		protected:
 			CType* _deduceBuiltinType(E_NODE_TYPE type, U32 attributes = 0x0);
 

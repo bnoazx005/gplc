@@ -190,4 +190,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CConstExprInterpreter::VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode)
+	{
+		return {};
+	}
 }

@@ -205,17 +205,6 @@ namespace gplc
 			return _parseWhileLoopStatement(pLexer);
 		}
 		
-		if (_match(pLexer->GetCurrToken(), TT_RETURN_KEYWORD))
-		{
-			pLexer->GetNextToken();
-
-			pStatementNode = _parseReturnStatement(pLexer);
-		}
-		else
-		{
-			pStatementNode = _parseOperator(pLexer);
-		}
-
 		if (_match(pLexer->GetCurrToken(), TT_ENUM_TYPE))
 		{
 			pLexer->GetNextToken();
@@ -228,6 +217,17 @@ namespace gplc
 			pLexer->GetNextToken();
 
 			return _parseStructDeclaration(pLexer);
+		}
+		
+		if (_match(pLexer->GetCurrToken(), TT_RETURN_KEYWORD))
+		{
+			pLexer->GetNextToken();
+
+			pStatementNode = _parseReturnStatement(pLexer);
+		}
+		else
+		{
+			pStatementNode = _parseOperator(pLexer);
 		}
 
 		// all statements should ends up with ';' delimiter
@@ -311,6 +311,11 @@ namespace gplc
 			{
 				return new CASTContinueOperatorNode();
 			}
+		}
+
+		if (!pOperator)
+		{
+			return _parseAssignment(pLexer);
 		}
 
 		return pOperator;
@@ -634,7 +639,14 @@ namespace gplc
 			return new CASTUnaryExpressionNode(TT_NOT, _parsePrimaryExpression(pLexer));
 		}
 
-		CASTUnaryExpressionNode* pPrimaryNode = new CASTUnaryExpressionNode(TT_DEFAULT, _parsePrimaryExpression(pLexer, attributes));
+		auto pPrimaryExpr = _parsePrimaryExpression(pLexer, attributes);
+
+		if (!pPrimaryExpr)
+		{
+			return nullptr;
+		}
+
+		CASTUnaryExpressionNode* pPrimaryNode = new CASTUnaryExpressionNode(TT_DEFAULT, pPrimaryExpr);
 
 		// access to aggregate type's field
 		if (_match(pLexer->GetCurrToken(), TT_POINT))
@@ -650,12 +662,23 @@ namespace gplc
 			return new CASTUnaryExpressionNode(TT_DEFAULT, _parseFunctionCall(pPrimaryNode, pLexer));
 		}
 
+		// indexed access to an aggregate type
+		if (_match(pLexer->GetCurrToken(), TT_OPEN_SQR_BRACE))
+		{
+			return _parseIndexedAccessOperator(pPrimaryNode, pLexer, attributes);
+		}
+
 		return pPrimaryNode;
 	}
 
 	CASTNode* CParser::_parsePrimaryExpression(ILexer* pLexer, U32 attributes)
 	{
 		const CToken* pCurrToken = pLexer->GetCurrToken();
+
+		if (!pCurrToken)
+		{
+			return nullptr;
+		}
 
 		CASTNode* pNode = nullptr;
 
@@ -669,7 +692,10 @@ namespace gplc
 				break;
 		}
 
-		pLexer->GetNextToken();
+		if (pNode)
+		{
+			pLexer->GetNextToken();
+		}
 
 		return pNode;
 	}
@@ -677,6 +703,11 @@ namespace gplc
 	CASTNode* CParser::_parseAssignment(ILexer* pLexer)
 	{
 		CASTExpressionNode* pLeftNode = _parseUnaryExpression(pLexer);
+
+		if (!pLeftNode)
+		{
+			return nullptr;
+		}
 
 		_expect(TT_ASSIGN_OP, pLexer->GetCurrToken());
 
@@ -1194,5 +1225,21 @@ namespace gplc
 		pLexer->GetNextToken(); // take an identifier
 
 		return new CASTAccessOperatorNode(pPrimaryExpr, new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName())));
+	}
+
+	CASTIndexedAccessOperatorNode* CParser::_parseIndexedAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer*pLexer, U32 attributes)
+	{
+		pLexer->GetNextToken(); // take '['
+
+		auto pIndexedExpression = _parseExpression(pLexer, AV_RVALUE);
+
+		if (!SUCCESS(_expect(TT_CLOSE_SQR_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take ']'
+
+		return new CASTIndexedAccessOperatorNode(pPrimaryExpr, pIndexedExpression, attributes);
 	}
 }

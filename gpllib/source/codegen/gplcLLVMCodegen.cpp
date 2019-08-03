@@ -150,6 +150,12 @@ namespace gplc
 		{
 			auto pValueInstruction = _getIdentifierValue(name);
 
+			// this means that an access to the type is more sophisticated than just load it into a register
+			if (attributes & AV_AGGREGATE_TYPE)
+			{
+				return pValueInstruction; 
+			}
+
 			return mIRBuildersStack.top().CreateLoad(pValueInstruction, name);
 		}
 
@@ -393,6 +399,8 @@ namespace gplc
 			const std::string& currIdentifierName = dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName();
 
 			pCurrSymbolDesc = mpSymTable->LookUp(currIdentifierName);
+			
+			assert(pCurrSymbolDesc && pCurrSymbolDesc->mpType);
 
 			pType = pCurrSymbolDesc->mpType;
 
@@ -562,6 +570,25 @@ namespace gplc
 	TLLVMIRData CLLVMCodeGenerator::VisitArrayTypeNode(CASTArrayTypeNode* pNode)
 	{
 		return {};
+	}
+
+	TLLVMIRData CLLVMCodeGenerator::VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode)
+	{
+		llvm::Value* pPrimaryExprCode = std::get<llvm::Value*>(pNode->GetExpression()->Accept(this));
+		llvm::Value* pIndexExprCode   = std::get<llvm::Value*>(pNode->GetIndexExpression()->Accept(this));
+
+		auto& currIRBuilder = mIRBuildersStack.top();
+
+		U32 attributes = pNode->GetAttributes();
+
+		auto pAccessInstruction = currIRBuilder.CreateGEP(pPrimaryExprCode, { llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0), pIndexExprCode }, "arr_access");
+
+		if (attributes & AV_RVALUE)
+		{
+			return currIRBuilder.CreateLoad(pAccessInstruction, "get_arr_elem");
+		}
+
+		return pAccessInstruction;
 	}
 
 	llvm::Instruction::BinaryOps CLLVMCodeGenerator::_convertOpTypeToLLVM(E_TOKEN_TYPE opType, bool isFloatingPointOp) const

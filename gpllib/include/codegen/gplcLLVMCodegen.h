@@ -94,6 +94,8 @@ namespace gplc
 			
 			TLLVMIRData VisitArrayTypeNode(CASTArrayTypeNode* pNode) override;
 
+			TLLVMIRData VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) override;
+
 			llvm::IRBuilder<>* GetCurrIRBuilder();
 		protected:
 			CLLVMCodeGenerator(const CLLVMCodeGenerator& codeGenerator) = default;
