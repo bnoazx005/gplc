@@ -39,6 +39,7 @@ namespace gplc
 	class CASTBreakOperatorNode;
 	class CASTContinueOperatorNode;
 	class CASTAccessOperatorNode;
+	class CASTArrayTypeNode;
 
 
 	template <typename T>
@@ -70,6 +71,7 @@ namespace gplc
 			virtual T VisitBreakOperator(CASTBreakOperatorNode* pNode) = 0;
 			virtual T VisitContinueOperator(CASTContinueOperatorNode* pNode) = 0;
 			virtual T VisitAccessOperator(CASTAccessOperatorNode* pNode) = 0;
+			virtual T VisitArrayTypeNode(CASTArrayTypeNode* pNode) = 0;
 		protected:
 			IASTNodeVisitor() = default;
 			IASTNodeVisitor(const IASTNodeVisitor& visitor) = default;

@@ -110,6 +110,8 @@ namespace gplc
 			bool VisitContinueOperator(CASTContinueOperatorNode* pNode) override;
 
 			bool VisitAccessOperator(CASTAccessOperatorNode* pNode) override;
+
+			bool VisitArrayTypeNode(CASTArrayTypeNode* pNode) override;
 		protected:
 			bool _enterScope(CASTBlockNode* pNode, ISymTable* pSymTable);
 
@@ -124,7 +126,7 @@ namespace gplc
 			ITypeResolver* mpTypeResolver;
 
 			ISymTable*     mpSymTable;
-
+			
 			bool           mLockSymbolTable;
 
 			bool           mStayWithinLoop;

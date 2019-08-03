@@ -26,6 +26,7 @@ namespace gplc
 	class ISymTable;
 	class CType;
 	class CBaseValue;
+	class IConstExprInterpreter;
 
 
 	E_COMPILER_TYPES NodeToCompilerType(E_NODE_TYPE nodeType);
@@ -70,7 +71,7 @@ namespace gplc
 				\brief The method deduces type based on information's taken from pTypeNode and pSymTable
 			*/
 
-			virtual CType* Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable) = 0;
+			virtual CType* Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable, IConstExprInterpreter* pInterpreter = nullptr) = 0;
 
 			virtual CType* VisitBaseNode(CASTTypeNode* pNode) = 0;
 			virtual CType* VisitIdentifier(CASTIdentifierNode* pNode) = 0;
@@ -82,6 +83,7 @@ namespace gplc
 			virtual CType* VisitFunctionCall(CASTFunctionCallNode* pNode) = 0;
 			virtual CType* VisitStructDeclaration(CASTStructDeclNode* pNode) = 0;
 			virtual CType* VisitNamedType(CASTNamedTypeNode* pNode) = 0;
+			virtual CType* VisitArrayType(CASTArrayTypeNode* pNode) = 0;
 	};
 
 
@@ -95,7 +97,7 @@ namespace gplc
 				\brief The method deduces type based on information's taken from pTypeNode and pSymTable
 			*/
 
-			CType* Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable) override;
+			CType* Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable, IConstExprInterpreter* pInterpreter = nullptr) override;
 
 			CType* VisitBaseNode(CASTTypeNode* pNode) override;
 			CType* VisitIdentifier(CASTIdentifierNode* pNode) override;
@@ -107,12 +109,15 @@ namespace gplc
 			CType* VisitFunctionCall(CASTFunctionCallNode* pNode) override;
 			CType* VisitStructDeclaration(CASTStructDeclNode* pNode) override; 
 			CType* VisitNamedType(CASTNamedTypeNode* pNode) override;
+			CType* VisitArrayType(CASTArrayTypeNode* pNode) override;
 		protected:
 			CType* _deduceBuiltinType(E_NODE_TYPE type, U32 attributes = 0x0);
 
 			CType* _deduceExprType(E_TOKEN_TYPE opType, E_COMPILER_TYPES leftType, E_COMPILER_TYPES rightType);
 		protected:
-			ISymTable* mpSymTable;
+			ISymTable*             mpSymTable;
+
+			IConstExprInterpreter* mpInterpreter;
 	};
 
 

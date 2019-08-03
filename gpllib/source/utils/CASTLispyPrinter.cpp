@@ -210,4 +210,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	std::string CASTLispyPrinter::VisitArrayTypeNode(CASTArrayTypeNode* pNode)
+	{
+		return {};
+	}
 }

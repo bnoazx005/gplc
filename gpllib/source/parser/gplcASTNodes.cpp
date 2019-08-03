@@ -1237,9 +1237,10 @@ namespace gplc
 		\brief CASTArrayTypeNode's definition
 	*/
 
-	CASTArrayTypeNode::CASTArrayTypeNode(CASTExpressionNode* pSizeExpr):
+	CASTArrayTypeNode::CASTArrayTypeNode(CASTNode* pTypeInfo, CASTExpressionNode* pSizeExpr):
 		CASTTypeNode(NT_ARRAY)
 	{
+		AttachChild(pTypeInfo);
 		AttachChild(pSizeExpr);
 	}
 
@@ -1249,26 +1250,31 @@ namespace gplc
 
 	std::string CASTArrayTypeNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitArrayTypeNode(this);
 	}
 
 	bool CASTArrayTypeNode::Accept(IASTNodeVisitor<bool>* pVisitor)
 	{
-		return false;
+		return pVisitor->VisitArrayTypeNode(this);
 	}
 
 	TLLVMIRData CASTArrayTypeNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitArrayTypeNode(this);
 	}
 
 	CType* CASTArrayTypeNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
 	{
-		return nullptr;
+		return pResolver->VisitArrayType(this);
+	}
+
+	CASTNode* CASTArrayTypeNode::GetTypeInfo() const
+	{
+		return mChildren[0];
 	}
 
 	CASTExpressionNode* CASTArrayTypeNode::GetSizeExpr() const
 	{
-		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
+		return dynamic_cast<CASTExpressionNode*>(mChildren[1]);
 	}
 }

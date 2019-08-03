@@ -630,7 +630,7 @@ namespace gplc
 	class CASTArrayTypeNode : public CASTTypeNode
 	{
 		public:
-			CASTArrayTypeNode(CASTExpressionNode* pSizeExpr);
+			CASTArrayTypeNode(CASTNode* pTypeInfo, CASTExpressionNode* pSizeExpr);
 			virtual ~CASTArrayTypeNode();
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
@@ -638,6 +638,8 @@ namespace gplc
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			virtual CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable);
+
+			CASTNode* GetTypeInfo() const;
 
 			CASTExpressionNode* GetSizeExpr() const;
 		protected:

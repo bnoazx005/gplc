@@ -511,7 +511,7 @@ namespace gplc
 
 			pLexer->GetNextToken(); // take ]
 
-			return new CASTArrayTypeNode(pSizeExpr);
+			return new CASTArrayTypeNode(pBuiltinType, pSizeExpr);
 		}
 
 		return pBuiltinType;

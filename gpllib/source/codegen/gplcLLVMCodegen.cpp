@@ -557,6 +557,11 @@ namespace gplc
 		return {};
 	}
 
+	TLLVMIRData CLLVMCodeGenerator::VisitArrayTypeNode(CASTArrayTypeNode* pNode)
+	{
+		return {};
+	}
+
 	llvm::Instruction::BinaryOps CLLVMCodeGenerator::_convertOpTypeToLLVM(E_TOKEN_TYPE opType, bool isFloatingPointOp) const
 	{
 		switch (opType)

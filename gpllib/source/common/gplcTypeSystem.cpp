@@ -8,10 +8,12 @@
 	\todo
 */
 
-#include "common\gplcTypeSystem.h"
+#include "common/gplcTypeSystem.h"
 #include "parser/gplcASTNodes.h"
 #include "common/gplcValues.h"
 #include "common/gplcSymTable.h"
+#include "common/gplcConstExprInterpreter.h"
+#include "utils/CResult.h"
 #include <algorithm>
 
 
@@ -54,14 +56,15 @@ namespace gplc
 		\brief CTypeResolver's definition
 	*/
 
-	CType* CTypeResolver::Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable)
+	CType* CTypeResolver::Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable, IConstExprInterpreter* pInterpreter)
 	{
 		if (!pSymTable)
 		{
 			return nullptr;
 		}
 
-		mpSymTable = pSymTable;
+		mpSymTable    = pSymTable;
+		mpInterpreter = pInterpreter;
 
 		return pTypeNode->Resolve(this, pSymTable);
 	}
@@ -177,6 +180,23 @@ namespace gplc
 	CType* CTypeResolver::VisitNamedType(CASTNamedTypeNode* pNode)
 	{
 		return new CDependentNamedType(mpSymTable, pNode->GetTypeInfo()->GetName());
+	}
+
+	CType* CTypeResolver::VisitArrayType(CASTArrayTypeNode* pNode)
+	{
+		if (!mpInterpreter)
+		{
+			return nullptr;
+		}
+
+		TResult<U32> evaluatedArraySize = mpInterpreter->Eval(pNode->GetSizeExpr(), mpSymTable);
+
+		if (evaluatedArraySize.HasError())
+		{
+			return nullptr;
+		}
+
+		return new CArrayType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo()), mpSymTable), evaluatedArraySize.Get(), 0x0);
 	}
 
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type, U32 attributes)

@@ -489,6 +489,12 @@ namespace gplc
 		return true;
 	}
 
+	bool CSemanticAnalyser::VisitArrayTypeNode(CASTArrayTypeNode* pNode)
+	{
+		// \todo implement the method
+		return true;
+	}
+
 	bool CSemanticAnalyser::_enterScope(CASTBlockNode* pNode, ISymTable* pSymTable)
 	{
 		pSymTable->CreateScope();
