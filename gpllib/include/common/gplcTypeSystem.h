@@ -361,12 +361,16 @@ namespace gplc
 
 			std::string ToShortAliasString() const override;
 
+			CType* GetBaseType() const;
+
 			U32 GetElementsCount() const;
 		protected:
 			CArrayType() = default;
 			CArrayType(const CArrayType& arrayType) = default;
 		protected:
-			U32 mElementsCount;
+			CType* mpBaseType;
+
+			U32    mElementsCount;
 	};
 
 

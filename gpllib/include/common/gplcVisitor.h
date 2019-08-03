@@ -127,6 +127,7 @@ namespace gplc
 	class CEnumType;
 	class CStructType;
 	class CDependentNamedType;
+	class CArrayType;
 
 
 	template <typename T>
@@ -141,6 +142,7 @@ namespace gplc
 			virtual T VisitStructType(const CStructType* pStructType) = 0;
 			virtual T VisitNamedType(const CDependentNamedType* pNamedType) = 0;
 			virtual T VisitEnumType(const CEnumType* pEnumType) = 0;
+			virtual T VisitStaticSizedArray(const CArrayType* pArrayType) = 0;
 		protected:
 			ITypeVisitor(const ITypeVisitor& visitor) = default;
 	};

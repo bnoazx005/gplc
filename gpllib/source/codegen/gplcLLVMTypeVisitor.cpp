@@ -103,4 +103,18 @@ namespace gplc
 
 		return llvm::StructType::create({ llvm::Type::getInt32Ty(*mpContext) }, pEnumType->GetName());
 	}
+
+	TLLVMIRData CLLVMTypeVisitor::VisitStaticSizedArray(const CArrayType* pArrayType)
+	{
+		auto pLLVMArrayType = llvm::ArrayType::get(std::get<llvm::Type*>(pArrayType->GetBaseType()->Accept(this)), pArrayType->GetElementsCount());
+
+		/*
+			\note Statically sized array is represented with following structure
+			struct StaticallySizedArray {
+				const int  mLength;
+				T[mLength] mElements;
+			}
+		*/
+		return llvm::StructType::get(llvm::Type::getInt32Ty(*mpContext), pLLVMArrayType);
+	}
 }

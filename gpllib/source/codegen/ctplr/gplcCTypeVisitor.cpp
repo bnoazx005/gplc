@@ -103,4 +103,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CCTypeVisitor::VisitStaticSizedArray(const CArrayType* pArrayType)
+	{
+		return {};
+	}
 }

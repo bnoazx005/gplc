@@ -750,7 +750,7 @@ namespace gplc
 	*/
 
 	CArrayType::CArrayType(CType* pBaseType, U32 elementsCount, U32 attribute):
-		CType(CT_ARRAY, BTS_POINTER, attribute), mElementsCount(elementsCount)
+		CType(CT_ARRAY, BTS_POINTER, attribute), mElementsCount(elementsCount), mpBaseType(pBaseType)
 	{
 	}
 
@@ -760,7 +760,7 @@ namespace gplc
 
 	TLLVMIRData CArrayType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)
 	{
-		return {};
+		return pVisitor->VisitStaticSizedArray(this);
 	}
 	
 	void CArrayType::SetAttributes(U32 attributes)
@@ -770,7 +770,7 @@ namespace gplc
 
 	CBaseValue* CArrayType::GetDefaultValue() const
 	{
-		return nullptr;
+		return new CIntValue(0);
 	}
 
 	bool CArrayType::AreSame(const CType* pType) const
@@ -783,6 +783,11 @@ namespace gplc
 	std::string CArrayType::ToShortAliasString() const
 	{
 		return "array";
+	}
+
+	CType* CArrayType::GetBaseType() const
+	{
+		return mpBaseType;
 	}
 
 	U32 CArrayType::GetElementsCount() const

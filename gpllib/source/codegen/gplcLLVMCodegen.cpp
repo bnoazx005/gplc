@@ -113,10 +113,34 @@ namespace gplc
 			mVariablesTable[mpSymTable->GetSymbolHandleByName(identifier)] = pCurrVariableAllocation;
 
 			// \todo replace this with visitor which generates initializing code per type, something like ITypeInitializer
+			llvm::Value* pPtrToElements = nullptr;
+			llvm::Value* pPtrToLength   = nullptr;
+
 			switch (pType->GetType())
 			{
 				case CT_ENUM:
 					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext)));
+					break;
+				case CT_ARRAY:
+					// \todo invalid initialization, but it's enough for current tests, REIMPLEMENT THIS LATER
+
+					// save array's length as first field of the type
+					pPtrToLength = currIRBuidler.CreateGEP(pIdentifiersType, pCurrVariableAllocation, 
+															{
+																llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0),
+																llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0),
+															});
+
+					currIRBuidler.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), dynamic_cast<CArrayType*>(pType)->GetElementsCount()),
+											  currIRBuidler.CreateBitCast(pPtrToLength, llvm::Type::getInt32PtrTy(*mpContext)));
+
+					// extract a pointer to elements 
+					pPtrToElements = currIRBuidler.CreateGEP(pIdentifiersType, pCurrVariableAllocation,
+															{
+																llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0),
+																llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 1),
+															});
+					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pPtrToElements, llvm::Type::getInt32PtrTy(*mpContext)));
 					break;
 				default:
 					currIRBuidler.CreateStore(pIdentifiersValue, pCurrVariableAllocation); // for built-in types only
