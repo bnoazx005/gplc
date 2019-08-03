@@ -56,6 +56,13 @@ int main(int argc, const char** argv)
 
 	ITypeResolver* pTypeResolver = new CTypeResolver();
 
+	IConstExprInterpreter* pInterpreter = new CConstExprInterpreter();
+
+	if (!SUCCESS(pTypeResolver->Init(pSymTable, pInterpreter)))
+	{
+		return -1;
+	}
+
 	bool result = pSemanticAnalyser->Analyze(pSourceAST, pTypeResolver, pSymTable);
 
 	ICodeGenerator* pCodeGenerator = new CLLVMCodeGenerator();//new CCCodeGenerator();
@@ -71,6 +78,7 @@ int main(int argc, const char** argv)
 
 	system("clang main.c -o main.exe");
 
+	delete pInterpreter;
 	delete pInputStream;
 	delete pCodeGenerator;
 	delete pTypeResolver;

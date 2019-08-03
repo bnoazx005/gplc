@@ -179,7 +179,7 @@ namespace gplc
 
 		auto& currIRBuidler = mIRBuildersStack.top();
 
-		CType* pLeftExprType = mpTypeResolver->Resolve(pNode->GetLeft(), mpSymTable);
+		CType* pLeftExprType = mpTypeResolver->Resolve(pNode->GetLeft());
 
 		bool isFloatingPoint = pLeftExprType->GetType() == CT_FLOAT || pLeftExprType->GetType() == CT_DOUBLE;
 
@@ -415,7 +415,7 @@ namespace gplc
 
 		// mark left part, which is an anonymus lambda, as static global function
 		// generate name for it
-		CFunctionType* pInternalLambdaType = dynamic_cast<CFunctionType*>(mpTypeResolver->Resolve(pNode->GetLambdaTypeInfo(), mpSymTable));
+		CFunctionType* pInternalLambdaType = dynamic_cast<CFunctionType*>(mpTypeResolver->Resolve(pNode->GetLambdaTypeInfo()));
 		
 		// generate function pointer type for the left part
 		auto pLValueFnType = llvm::dyn_cast<llvm::PointerType>(std::get<llvm::Type*>(pInternalLambdaType->Accept(mpTypeGenerator)));
@@ -525,7 +525,7 @@ namespace gplc
 		//// resolve the expression
 		//CType* pType = nullptr;
 
-		//if (!pPrimary->Accept(this) || !(pType = mpTypeResolver->Resolve(pPrimary, mpSymTable)))
+		//if (!pPrimary->Accept(this) || !(pType = mpTypeResolver->Resolve(pPrimary)))
 		//{
 		//	return false;
 		//}

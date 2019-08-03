@@ -185,4 +185,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CConstExprInterpreter::VisitArrayTypeNode(CASTArrayTypeNode* pNode)
+	{
+		return {};
+	}
 }

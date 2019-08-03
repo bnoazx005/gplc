@@ -241,7 +241,7 @@ namespace gplc
 		return {};
 	}
 
-	CType* CASTVariableDeclNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	CType* CASTVariableDeclNode::Resolve(ITypeResolver* pResolver)
 	{
 		return nullptr;
 	}
@@ -283,7 +283,7 @@ namespace gplc
 		return pVisitor->VisitDeclaration(this);
 	}
 
-	CType* CASTDeclarationNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	CType* CASTDeclarationNode::Resolve(ITypeResolver* pResolver)
 	{
 		return pResolver->VisitDeclaration(this);
 	}
@@ -367,7 +367,7 @@ namespace gplc
 		return {};
 	}
 
-	CType* CASTTypeNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	CType* CASTTypeNode::Resolve(ITypeResolver* pResolver)
 	{
 		return pResolver->VisitBaseNode(this);
 	}
@@ -401,7 +401,7 @@ namespace gplc
 		return pVisitor->VisitIdentifier(this);
 	}
 
-	CType* CASTIdentifierNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	CType* CASTIdentifierNode::Resolve(ITypeResolver* pResolver)
 	{
 		return pResolver->VisitIdentifier(this);
 	}
@@ -446,7 +446,7 @@ namespace gplc
 		return pVisitor->VisitLiteral(this);
 	}
 
-	CType* CASTLiteralNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	CType* CASTLiteralNode::Resolve(ITypeResolver* pResolver)
 	{
 		return pResolver->VisitLiteral(this);
 	}
@@ -493,7 +493,7 @@ namespace gplc
 		return pVisitor->VisitUnaryExpression(this);
 	}
 
-	CType* CASTUnaryExpressionNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	CType* CASTUnaryExpressionNode::Resolve(ITypeResolver* pResolver)
 	{
 		return pResolver->VisitUnaryExpression(this);
 	}
@@ -540,7 +540,7 @@ namespace gplc
 		return pVisitor->VisitBinaryExpression(this);
 	}
 
-	CType* CASTBinaryExpressionNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	CType* CASTBinaryExpressionNode::Resolve(ITypeResolver* pResolver)
 	{
 		return pResolver->VisitBinaryExpression(this);
 	}
@@ -763,7 +763,7 @@ namespace gplc
 		return pVisitor->VisitFunctionDeclaration(this);
 	}
 
-	CType* CASTFunctionDeclNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	CType* CASTFunctionDeclNode::Resolve(ITypeResolver* pResolver)
 	{
 		return pResolver->VisitFunctionDeclaration(this);
 	}
@@ -879,7 +879,7 @@ namespace gplc
 		return pVisitor->VisitFunctionCall(this);
 	}
 
-	CType* CASTFunctionCallNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	CType* CASTFunctionCallNode::Resolve(ITypeResolver* pResolver)
 	{
 		return pResolver->VisitFunctionCall(this);
 	}
@@ -1035,7 +1035,7 @@ namespace gplc
 		return pVisitor->VisitEnumDeclaration(this);
 	}
 
-	CType* CASTEnumDeclNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	CType* CASTEnumDeclNode::Resolve(ITypeResolver* pResolver)
 	{
 		return {};
 	}
@@ -1077,7 +1077,7 @@ namespace gplc
 		return pVisitor->VisitStructDeclaration(this);
 	}
 
-	CType* CASTStructDeclNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	CType* CASTStructDeclNode::Resolve(ITypeResolver* pResolver)
 	{
 		return pResolver->VisitStructDeclaration(this);
 	}
@@ -1123,7 +1123,7 @@ namespace gplc
 		return {};
 	}
 
-	CType* CASTNamedTypeNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	CType* CASTNamedTypeNode::Resolve(ITypeResolver* pResolver)
 	{
 		return pResolver->VisitNamedType(this);
 	}
@@ -1263,7 +1263,7 @@ namespace gplc
 		return pVisitor->VisitArrayTypeNode(this);
 	}
 
-	CType* CASTArrayTypeNode::Resolve(ITypeResolver* pResolver, ISymTable* pSymTable)
+	CType* CASTArrayTypeNode::Resolve(ITypeResolver* pResolver)
 	{
 		return pResolver->VisitArrayType(this);
 	}

@@ -141,7 +141,7 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			virtual CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable);
+			virtual CType* Resolve(ITypeResolver* pResolver);
 		protected:
 			CASTTypeNode(const CASTTypeNode& node) = default;
 	};
@@ -157,7 +157,7 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+			CType* Resolve(ITypeResolver* pResolver) override;
 
 			CASTIdentifierNode* GetIdentifier() const;
 
@@ -178,7 +178,7 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+			CType* Resolve(ITypeResolver* pResolver) override;
 
 			void SetTypeInfo(CASTNode* pTypeInfo);
 
@@ -225,7 +225,7 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+			CType* Resolve(ITypeResolver* pResolver) override;
 
 			const std::string& GetName() const;
 
@@ -250,7 +250,7 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+			CType* Resolve(ITypeResolver* pResolver) override;
 
 			CBaseValue* GetValue() const;
 		protected:
@@ -282,7 +282,7 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+			CType* Resolve(ITypeResolver* pResolver) override;
 
 			E_TOKEN_TYPE GetOpType() const;
 
@@ -305,7 +305,7 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+			CType* Resolve(ITypeResolver* pResolver) override;
 
 			CASTExpressionNode* GetLeft() const;
 
@@ -434,7 +434,7 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+			CType* Resolve(ITypeResolver* pResolver) override;
 
 			CASTFunctionClosureNode* GetClosure() const;
 
@@ -457,7 +457,7 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+			CType* Resolve(ITypeResolver* pResolver) override;
 
 			CASTUnaryExpressionNode* GetIdentifier() const;
 
@@ -531,7 +531,7 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+			CType* Resolve(ITypeResolver* pResolver) override;
 
 			// get values
 			CASTIdentifierNode* GetEnumName() const;
@@ -550,7 +550,7 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+			CType* Resolve(ITypeResolver* pResolver) override;
 
 			// get values
 			CASTIdentifierNode* GetStructName() const;
@@ -571,7 +571,7 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable) override;
+			CType* Resolve(ITypeResolver* pResolver) override;
 
 			CASTIdentifierNode* GetTypeInfo() const;
 		protected:
@@ -637,7 +637,7 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
-			virtual CType* Resolve(ITypeResolver* pResolver, ISymTable* pSymTable);
+			virtual CType* Resolve(ITypeResolver* pResolver);
 
 			CASTNode* GetTypeInfo() const;
 

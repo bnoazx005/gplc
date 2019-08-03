@@ -56,7 +56,7 @@ namespace gplc
 
 		CType* pTypeInfo = nullptr;
 		
-		if (!pNode->GetTypeInfo()->Accept(this) || !(pTypeInfo = mpTypeResolver->Resolve(pNode->GetTypeInfo(), mpSymTable))) // visit node and deduce the type's info
+		if (!pNode->GetTypeInfo()->Accept(this) || !(pTypeInfo = mpTypeResolver->Resolve(pNode->GetTypeInfo()))) // visit node and deduce the type's info
 		{
 			return false;
 		}
@@ -122,7 +122,7 @@ namespace gplc
 		CType* pLeftValueType = nullptr;
 
 		if (!pLeftExpr->Accept(this) ||
-			!(pLeftValueType = pLeftExpr->Resolve(mpTypeResolver, mpSymTable)))
+			!(pLeftValueType = pLeftExpr->Resolve(mpTypeResolver)))
 		{
 			OnErrorOutput.Invoke(SAE_INCOMPATIBLE_TYPES_INSIDE_EXPR);
 
@@ -133,7 +133,7 @@ namespace gplc
 		CType* pRightValueType = nullptr;
 
 		if (!pRightExpr->Accept(this) ||
-			!(pRightValueType = pRightExpr->Resolve(mpTypeResolver, mpSymTable)))
+			!(pRightValueType = pRightExpr->Resolve(mpTypeResolver)))
 		{
 			OnErrorOutput.Invoke(SAE_INCOMPATIBLE_TYPES_INSIDE_EXPR);
 
@@ -154,7 +154,7 @@ namespace gplc
 		CType* pLeftValueType = nullptr;
 
 		if (!pLeftExpr->Accept(this) ||
-			!(pLeftValueType = pLeftExpr->Resolve(mpTypeResolver, mpSymTable)))
+			!(pLeftValueType = pLeftExpr->Resolve(mpTypeResolver)))
 		{
 			return false;
 		}
@@ -163,7 +163,7 @@ namespace gplc
 		CType* pRightValueType = nullptr;
 
 		if (!pRightExpr->Accept(this) ||
-			!(pRightValueType = pRightExpr->Resolve(mpTypeResolver, mpSymTable)))
+			!(pRightValueType = pRightExpr->Resolve(mpTypeResolver)))
 		{
 			OnErrorOutput.Invoke(SAE_INCOMPATIBLE_TYPES_INSIDE_EXPR);
 
@@ -198,7 +198,7 @@ namespace gplc
 		// check condition
 		CType* pConditionType = nullptr;
 
-		if (!pCondition->Accept(this) || !(pConditionType = pCondition->Resolve(mpTypeResolver, mpSymTable)))
+		if (!pCondition->Accept(this) || !(pConditionType = pCondition->Resolve(mpTypeResolver)))
 		{
 			return false;
 		}
@@ -243,7 +243,7 @@ namespace gplc
 		// check condition
 		CType* pConditionType = nullptr;
 
-		if (!pCondition->Accept(this) || !(pConditionType = pCondition->Resolve(mpTypeResolver, mpSymTable)))
+		if (!pCondition->Accept(this) || !(pConditionType = pCondition->Resolve(mpTypeResolver)))
 		{
 			return false;
 		}
@@ -341,7 +341,7 @@ namespace gplc
 		// check a declaration
 		CType* pDeclType = nullptr;
 
-		if (!pDeclNode->Accept(this) || !(pDeclType = pDeclNode->Resolve(mpTypeResolver, mpSymTable)))
+		if (!pDeclNode->Accept(this) || !(pDeclType = pDeclNode->Resolve(mpTypeResolver)))
 		{
 			return false;
 		}
@@ -349,7 +349,7 @@ namespace gplc
 		// check value
 		CType* pValueType = nullptr;
 
-		if (!pValueNode->Accept(this) || !(pValueType = pValueNode->Resolve(mpTypeResolver, mpSymTable)))
+		if (!pValueNode->Accept(this) || !(pValueType = pValueNode->Resolve(mpTypeResolver)))
 		{
 			return false;
 		}
@@ -378,7 +378,7 @@ namespace gplc
 		// check left side
 		CType* pDeclFuncType = nullptr;
 
-		if (!pDeclaration->Accept(this) || !(pDeclFuncType = mpTypeResolver->Resolve(pDeclaration->GetTypeInfo(), mpSymTable)))
+		if (!pDeclaration->Accept(this) || !(pDeclFuncType = mpTypeResolver->Resolve(pDeclaration->GetTypeInfo())))
 		{
 			return false;
 		}
@@ -390,7 +390,7 @@ namespace gplc
 		// check lambda type
 		CType* pAssignedLambdaType = nullptr;
 
-		if (!pLambdaType->Accept(this) || !(pAssignedLambdaType = mpTypeResolver->Resolve(pLambdaType, mpSymTable)))
+		if (!pLambdaType->Accept(this) || !(pAssignedLambdaType = mpTypeResolver->Resolve(pLambdaType)))
 		{
 			return false;
 		}
@@ -429,7 +429,7 @@ namespace gplc
 		// \todo check types of fields
 
 		// resolve struct's type
-		if (!(structTableEntry->mpType = mpTypeResolver->Resolve(pNode, mpSymTable)))
+		if (!(structTableEntry->mpType = mpTypeResolver->Resolve(pNode)))
 		{
 			return false;
 		}
@@ -457,7 +457,7 @@ namespace gplc
 		// resolve the expression
 		CType* pType = nullptr;
 
-		if (!pPrimary->Accept(this) || !(pType = mpTypeResolver->Resolve(pPrimary, mpSymTable)))
+		if (!pPrimary->Accept(this) || !(pType = mpTypeResolver->Resolve(pPrimary)))
 		{
 			return false;
 		}

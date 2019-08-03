@@ -55,18 +55,23 @@ namespace gplc
 	/*!
 		\brief CTypeResolver's definition
 	*/
-
-	CType* CTypeResolver::Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable, IConstExprInterpreter* pInterpreter)
+	
+	Result CTypeResolver::Init(ISymTable* pSymTable, IConstExprInterpreter* pInterpreter)
 	{
-		if (!pSymTable)
+		if (!pSymTable || !pInterpreter)
 		{
-			return nullptr;
+			return RV_FAIL;
 		}
 
 		mpSymTable    = pSymTable;
 		mpInterpreter = pInterpreter;
 
-		return pTypeNode->Resolve(this, pSymTable);
+		return RV_SUCCESS;
+	}
+
+	CType* CTypeResolver::Resolve(CASTTypeNode* pTypeNode)
+	{
+		return pTypeNode->Resolve(this);
 	}
 
 	CType* CTypeResolver::VisitBaseNode(CASTTypeNode* pNode)
@@ -95,7 +100,7 @@ namespace gplc
 	{
 		auto pOperandNode = pNode->GetData();
 
-		return pOperandNode ? dynamic_cast<CASTTypeNode*>(pOperandNode)->Resolve(this, mpSymTable) : nullptr;
+		return pOperandNode ? dynamic_cast<CASTTypeNode*>(pOperandNode)->Resolve(this) : nullptr;
 	}
 	
 	CType* CTypeResolver::VisitBinaryExpression(CASTBinaryExpressionNode* pNode)
@@ -103,15 +108,15 @@ namespace gplc
 		auto pLeftExprNode  = pNode->GetLeft();
 		auto pRightExprNode = pNode->GetRight();
 
-		CType* pLeftExprTypeInfo  = pLeftExprNode->Resolve(this, mpSymTable);
-		CType* pRightExprTypeInfo = pRightExprNode->Resolve(this, mpSymTable);
+		CType* pLeftExprTypeInfo  = pLeftExprNode->Resolve(this);
+		CType* pRightExprTypeInfo = pRightExprNode->Resolve(this);
 
 		return _deduceExprType(pNode->GetOpType(), pLeftExprTypeInfo->GetType(), pRightExprTypeInfo->GetType());
 	}
 
 	CType* CTypeResolver::VisitDeclaration(CASTDeclarationNode* pNode)
 	{
-		return pNode->GetTypeInfo()->Resolve(this, mpSymTable);
+		return pNode->GetTypeInfo()->Resolve(this);
 	}
 
 	CType* CTypeResolver::VisitFunctionDeclaration(CASTFunctionDeclNode* pNode)
@@ -126,14 +131,14 @@ namespace gplc
 		{
 			pCurrArgDecl = dynamic_cast<CASTIdentifierNode*>((dynamic_cast<CASTDeclarationNode*>(pCurrArgNode))->GetIdentifiers()->GetChildren()[0]);
 			
-			auto pCurrArgType = Resolve(dynamic_cast<CASTTypeNode*>(pCurrArgNode), mpSymTable);
+			auto pCurrArgType = Resolve(dynamic_cast<CASTTypeNode*>(pCurrArgNode));
 
 			pCurrArgType->SetAttribute(pCurrArgDecl->GetAttributes());
 
 			argsTypes.push_back({ pCurrArgDecl->GetName(), pCurrArgType });
 		}
 
-		return new CFunctionType(argsTypes, Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetReturnValueType()), mpSymTable), 0x0);
+		return new CFunctionType(argsTypes, Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetReturnValueType())), 0x0);
 	}
 
 	CType* CTypeResolver::VisitFunctionCall(CASTFunctionCallNode* pNode)
@@ -164,7 +169,7 @@ namespace gplc
 
 		for (auto pCurrField : pStructBody->GetStatements())
 		{
-			pFieldType = Resolve(dynamic_cast<CASTTypeNode*>(pCurrField), mpSymTable);
+			pFieldType = Resolve(dynamic_cast<CASTTypeNode*>(pCurrField));
 
 			auto identifiers = dynamic_cast<CASTDeclarationNode*>(pCurrField)->GetIdentifiers();
 
@@ -196,7 +201,7 @@ namespace gplc
 			return nullptr;
 		}
 
-		return new CArrayType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo()), mpSymTable), evaluatedArraySize.Get(), 0x0);
+		return new CArrayType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())), evaluatedArraySize.Get(), 0x0);
 	}
 
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type, U32 attributes)

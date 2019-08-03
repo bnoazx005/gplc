@@ -67,11 +67,13 @@ namespace gplc
 			ITypeResolver() = default;
 			virtual ~ITypeResolver() = default;
 
+			virtual Result Init(ISymTable* pSymTable, IConstExprInterpreter* pInterpreter) = 0;
+
 			/*!
 				\brief The method deduces type based on information's taken from pTypeNode and pSymTable
 			*/
 
-			virtual CType* Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable, IConstExprInterpreter* pInterpreter = nullptr) = 0;
+			virtual CType* Resolve(CASTTypeNode* pTypeNode) = 0;
 
 			virtual CType* VisitBaseNode(CASTTypeNode* pNode) = 0;
 			virtual CType* VisitIdentifier(CASTIdentifierNode* pNode) = 0;
@@ -93,11 +95,13 @@ namespace gplc
 			CTypeResolver() = default;
 			virtual ~CTypeResolver() = default;
 
+			Result Init(ISymTable* pSymTable, IConstExprInterpreter* pInterpreter) override;
+
 			/*!
 				\brief The method deduces type based on information's taken from pTypeNode and pSymTable
 			*/
 
-			CType* Resolve(CASTTypeNode* pTypeNode, ISymTable* pSymTable, IConstExprInterpreter* pInterpreter = nullptr) override;
+			CType* Resolve(CASTTypeNode* pTypeNode) override;
 
 			CType* VisitBaseNode(CASTTypeNode* pNode) override;
 			CType* VisitIdentifier(CASTIdentifierNode* pNode) override;
