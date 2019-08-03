@@ -11,7 +11,7 @@
 
 namespace gplc
 {
-	TLLVMIRData CCCodeGenerator::Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable)
+	TLLVMIRData CCCodeGenerator::Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver)
 	{
 		if (!pSymTable)
 		{

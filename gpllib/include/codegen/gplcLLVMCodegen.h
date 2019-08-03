@@ -44,7 +44,7 @@ namespace gplc
 			CLLVMCodeGenerator() = default;
 			virtual ~CLLVMCodeGenerator() = default;
 
-			TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable) override;
+			TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver) override;
 
 			TLLVMIRData VisitProgramUnit(CASTSourceUnitNode* pProgramNode) override;
 

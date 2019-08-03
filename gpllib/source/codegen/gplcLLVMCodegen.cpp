@@ -12,7 +12,7 @@
 
 namespace gplc
 {
-	TLLVMIRData CLLVMCodeGenerator::Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable)
+	TLLVMIRData CLLVMCodeGenerator::Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver)
 	{
 		if (!pSymTable)
 		{
@@ -27,7 +27,7 @@ namespace gplc
 
 		mpTypeGenerator = new CLLVMTypeVisitor(llvmContext);
 
-		mpTypeResolver = new CTypeResolver();
+		mpTypeResolver = pTypeResolver;
 
 		mpContext  = &llvmContext;
 		mpSymTable = pSymTable;
@@ -48,8 +48,6 @@ namespace gplc
 		mpModule->dump();
 		//llvm::WriteBitcodeToFile(*mpModule, llvm::outs());
 		
-		delete mpTypeResolver;
-
 		delete mpLiteralIRGenerator;
 
 		delete mpTypeGenerator;

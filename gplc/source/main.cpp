@@ -67,7 +67,7 @@ int main(int argc, const char** argv)
 
 	ICodeGenerator* pCodeGenerator = new CLLVMCodeGenerator();//new CCCodeGenerator();
 
-	pCodeGenerator->Generate(pSourceAST, pSymTable);
+	pCodeGenerator->Generate(pSourceAST, pSymTable, pTypeResolver);
 	//std::string transformedSource = std::get<std::string>(pCodeGenerator->Generate(pSourceAST, pSymTable));
 
 	//std::ofstream out("main.c");
