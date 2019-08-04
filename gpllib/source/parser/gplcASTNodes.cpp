@@ -1222,6 +1222,11 @@ namespace gplc
 		return pVisitor->VisitAccessOperator(this);
 	}
 
+	CType* CASTAccessOperatorNode::Resolve(ITypeResolver* pResolver)
+	{
+		return pResolver->VisitAccessOperator(this);
+	}
+
 	CASTExpressionNode* CASTAccessOperatorNode::GetExpression() const
 	{
 		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);

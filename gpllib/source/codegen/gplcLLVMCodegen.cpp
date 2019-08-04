@@ -529,40 +529,40 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitAccessOperator(CASTAccessOperatorNode* pNode)
 	{
-		auto pPrimary   = pNode->GetExpression();
-		auto pFieldExpr = pNode->GetMemberName();
+		CType* pExprType = pNode->GetExpression()->Resolve(mpTypeResolver);
+		
+		// \note for now we suppose that right part after '.' is an identifier
+		const std::string& identifierName = dynamic_cast<CASTIdentifierNode*>(dynamic_cast<CASTUnaryExpressionNode*>(pNode->GetMemberName())->GetData())->GetName();
 
-		//// resolve the expression
-		//CType* pType = nullptr;
+		auto& currIRBuilder = mIRBuildersStack.top();
 
-		//if (!pPrimary->Accept(this) || !(pType = mpTypeResolver->Resolve(pPrimary)))
-		//{
-		//	return false;
-		//}
+		// get type's description
+		auto pTypeDesc = mpSymTable->LookUpNamedScope(pExprType->GetName());
 
-		//// check whether the given field exist for the object of the specified type
-		//auto pSymbolDesc = mpSymTable->LookUpNamedScope(pType->GetName());
+		assert(pTypeDesc && pTypeDesc->mpType && (pTypeDesc->mVariables.find(identifierName) != pTypeDesc->mVariables.cend()));
 
-		//if (!pSymbolDesc || !pSymbolDesc->mpType)
-		//{
-		//	OnErrorOutput.Invoke(SAE_UNDEFINED_TYPE);
+		TSymbolHandle firstFieldId = pTypeDesc->mVariables.begin()->second;
+		TSymbolHandle currFieldId  = 0x0;
 
-		//	return false;
-		//}
+		switch (pTypeDesc->mpType->GetType())
+		{
+			case CT_ENUM:
+				// retrieve value of the field
+				currFieldId = pTypeDesc->mVariables[identifierName];
 
-		//CASTIdentifierNode* pIdentifier = dynamic_cast<CASTIdentifierNode*>(dynamic_cast<CASTUnaryExpressionNode*>(pFieldExpr)->GetData());
+				TSymbolDesc* pFieldValue = mpSymTable->LookUp(currFieldId);
+			   
+				auto val = (pFieldValue->mpValue->GetType() == LT_INT) ?
+											dynamic_cast<CIntValue*>(pFieldValue->mpValue)->GetValue() :
+											dynamic_cast<CUIntValue*>(pFieldValue->mpValue)->GetValue();
 
-		//if (pIdentifier)
-		//{
-		//	if (pSymbolDesc->mVariables.find(pIdentifier->GetName()) == pSymbolDesc->mVariables.cend())
-		//	{
-		//		OnErrorOutput.Invoke(SAE_TRY_TO_ACCESS_UNDEFINED_FIELD);
+				if (mVariablesTable.find(currFieldId) == mVariablesTable.cend())
+				{
+					mVariablesTable[currFieldId] = llvm::ConstantInt::get(std::get<llvm::Type*>(pTypeDesc->mpType->Accept(mpTypeGenerator)), val);
+				}
 
-		//		return false;
-		//	}
-
-		//	return true;
-		//}
+				return mVariablesTable[currFieldId];
+		}
 
 		return {};
 	}

@@ -204,16 +204,16 @@ namespace gplc
 		return handle != InvalidSymbolHandle ? (&mSymbols[handle - 1].second) : nullptr;
 	}
 
-	TSymbolDesc* CSymTable::LookUp(TSymbolHandle symbolHandle) const
+	TSymbolDesc* CSymTable::LookUp(TSymbolHandle symbolHandle)
 	{
 		if (symbolHandle == InvalidSymbolHandle || symbolHandle > mSymbols.size())
 		{
 			return nullptr;
 		}
 
-		auto symbol = mSymbols[symbolHandle - 1];
+		TSymbolsArray::value_type& value = mSymbols[symbolHandle - 1];
 
-		return symbol.first /* is valid */ ? &symbol.second : nullptr;
+		return value.first /* is valid */ ? &value.second : nullptr;
 	}
 
 	CSymTable::TSymTableEntry* CSymTable::LookUpNamedScope(const std::string& scopeName) const

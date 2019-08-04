@@ -204,6 +204,24 @@ namespace gplc
 		return new CArrayType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())), evaluatedArraySize.Get(), AV_AGGREGATE_TYPE);
 	}
 
+	CType* CTypeResolver::VisitAccessOperator(CASTAccessOperatorNode* pNode)
+	{
+		CType* pExprType = pNode->GetExpression()->Resolve(this);
+
+		if (!pExprType)
+		{
+			return nullptr;
+		}
+
+		switch (pExprType->GetType())
+		{
+			case CT_ENUM:
+				return pExprType;
+		}
+
+		return nullptr;
+	}
+
 	CType* CTypeResolver::VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode)
 	{
 		CType* pExprType = pNode->GetExpression()->Resolve(this);
@@ -316,8 +334,8 @@ namespace gplc
 	{
 	}
 
-	CType::CType(E_COMPILER_TYPES type, U32 size, U32 attributes):
-		mType(type), mSize(size), mAttributes(attributes)
+	CType::CType(E_COMPILER_TYPES type, U32 size, U32 attributes, const std::string& name):
+		mType(type), mSize(size), mAttributes(attributes), mName(name)
 	{
 	}
 
@@ -600,7 +618,7 @@ namespace gplc
 	*/
 
 	CFunctionType::CFunctionType(const TArgsArray& argsTypes, CType* pReturnValueType, U32 attributes):
-		mName(), CType(CT_FUNCTION, CT_POINTER, attributes), mpReturnValueType(pReturnValueType)
+		CType(CT_FUNCTION, CT_POINTER, attributes), mpReturnValueType(pReturnValueType)
 	{
 		std::copy(argsTypes.begin(), argsTypes.end(), std::back_inserter(mArgsTypes));
 	}
@@ -674,7 +692,7 @@ namespace gplc
 
 
 	CEnumType::CEnumType(const std::string& enumName):
-		CType(CT_ENUM, BTS_INT32, 0x0), mName(enumName)
+		CType(CT_ENUM, BTS_INT32, 0x0, enumName)
 	{
 		mChildren.push_back(nullptr); // \note this is a trick to make IsBuiltin work correct for this type
 	}
@@ -707,7 +725,7 @@ namespace gplc
 	*/
 
 	CDependentNamedType::CDependentNamedType(const ISymTable* pSymTable, const std::string& typeIdentifier):
-		CType(CT_ALIAS, BTS_UNKNOWN, 0x0), mpSymTable(pSymTable), mName(typeIdentifier), mpDependentType(nullptr)
+		CType(CT_ALIAS, BTS_UNKNOWN, 0x0, typeIdentifier), mpSymTable(pSymTable), mpDependentType(nullptr)
 	{
 	}
 
@@ -732,6 +750,12 @@ namespace gplc
 
 	bool CDependentNamedType::AreSame(const CType* pType) const
 	{
+		// \note the simple case when dependent type can be same with another one is same names of both of them
+		if (mName == pType->GetName())
+		{
+			return true;
+		}
+
 		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
 
 		return pDependentType->AreSame(pType);

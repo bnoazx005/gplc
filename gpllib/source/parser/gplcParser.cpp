@@ -13,6 +13,7 @@
 #include "lexer\gplcLexer.h"
 #include "common\gplcTypeSystem.h"
 #include "common/gplcSymTable.h"
+#include "common/gplcValues.h"
 
 
 namespace gplc
@@ -1028,13 +1029,24 @@ namespace gplc
 			return false;
 		}
 
+		// add information about enum's type
+		auto pEnumDesc = mpSymTable->LookUpNamedScope(enumName);
+
+		pEnumDesc->mpType = new CEnumType(enumName);
+
 		const CToken* pCurrEnumField = nullptr;
 
 		TSymbolHandle currFieldHandle = InvalidSymbolHandle;
 
+		std::string currEnumeratorName;
+
+		I32 currEnumeratorDefaultValue = 0x0;
+
 		while (_match(pCurrEnumField = pLexer->GetCurrToken(), TT_IDENTIFIER))
 		{
-			if ((currFieldHandle = mpSymTable->AddVariable({ dynamic_cast<const CIdentifierToken*>(pCurrEnumField)->GetName(), nullptr, nullptr })) == InvalidSymbolHandle)
+			currEnumeratorName = dynamic_cast<const CIdentifierToken*>(pCurrEnumField)->GetName();
+
+			if ((currFieldHandle = mpSymTable->AddVariable({ currEnumeratorName, nullptr, nullptr })) == InvalidSymbolHandle)
 			{
 				auto pCurrToken = pLexer->GetCurrToken();
 
@@ -1042,6 +1054,11 @@ namespace gplc
 
 				return false;
 			}
+
+			// assign values into enumerator's description
+			TSymbolDesc* pCurrEnumerator = mpSymTable->LookUp(currFieldHandle);
+
+			pCurrEnumerator->mpType = new CType(CT_INT32, BTS_INT32, 0x0);
 
 			pLexer->GetNextToken(); // take identifier
 
@@ -1062,11 +1079,15 @@ namespace gplc
 					return false;
 				}
 
-				TSymbolDesc* pCurrEnumerator = mpSymTable->LookUp(currFieldHandle);
-
 				pCurrEnumerator->mpValue = dynamic_cast<const CLiteralToken*>(pCurrToken)->GetValue(); // \note type is resolved in semantic analyser's stage
 
 				pLexer->GetNextToken();
+			}
+
+			// \note assign default value if it wasn't assigned by a user
+			if (!pCurrEnumerator->mpValue)
+			{
+				pCurrEnumerator->mpValue = new CIntValue(currEnumeratorDefaultValue++);
 			}
 
 			if (_match(pLexer->GetCurrToken(), TT_CLOSE_BRACE))
@@ -1083,12 +1104,7 @@ namespace gplc
 		}
 
 		mpSymTable->LeaveScope();
-
-		// add information about enum's type
-		auto pEnumDesc = mpSymTable->LookUpNamedScope(enumName);
-
-		pEnumDesc->mpType = new CEnumType(enumName);
-
+		
 		return true;
 	}
 

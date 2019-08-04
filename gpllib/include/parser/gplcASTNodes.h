@@ -619,6 +619,8 @@ namespace gplc
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
+			CType* Resolve(ITypeResolver* pResolver) override;
+
 			CASTExpressionNode* GetExpression() const;
 
 			CASTExpressionNode* GetMemberName() const;

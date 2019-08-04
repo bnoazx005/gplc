@@ -88,7 +88,8 @@ namespace gplc
 		{
 			case CT_STRUCT:
 			case CT_ENUM:
-				return llvm::StructType::create(*mpContext, pNamedType->GetName());
+				return llvm::Type::getInt32Ty(*mpContext);
+				//.return llvm::StructType::create(*mpContext, pNamedType->GetName());
 		}
 
 		return {};
@@ -97,11 +98,10 @@ namespace gplc
 	TLLVMIRData CLLVMTypeVisitor::VisitEnumType(const CEnumType* pEnumType)
 	{
 		/*!
-			\note Use the following type to imitate enumeration type in LLVM IR
-			%Enum = type { u32 }
+			\note an enumeration is converted into integer value
 		*/
 
-		return llvm::StructType::create({ llvm::Type::getInt32Ty(*mpContext) }, pEnumType->GetName());
+		return llvm::Type::getInt32Ty(*mpContext);// llvm::StructType::create({ llvm::Type::getInt32Ty(*mpContext) }, pEnumType->GetName());
 	}
 
 	TLLVMIRData CLLVMTypeVisitor::VisitStaticSizedArray(const CArrayType* pArrayType)
