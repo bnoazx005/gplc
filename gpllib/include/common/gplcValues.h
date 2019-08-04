@@ -87,8 +87,8 @@ namespace gplc
 	class CIntValue : public CGenericBaseValue<I64>
 	{
 		public:
-			CIntValue(I64 value) :
-				CGenericBaseValue(LT_INT, value)
+			CIntValue(I64 value, bool isLong = false) :
+				CGenericBaseValue(LT_INT, value), mIsLong(isLong)
 			{
 			}
 
@@ -99,14 +99,18 @@ namespace gplc
 			CStringValue* ToStringLiteral() const override;
 			
 			CType* GetTypeInfo() const override;
+
+			bool IsLong() const;
+		protected:
+			bool mIsLong;
 	};
 
 
 	class CUIntValue : public CGenericBaseValue<U64>
 	{
 		public:
-			CUIntValue(U64 value) :
-				CGenericBaseValue(LT_UINT, value)
+			CUIntValue(U64 value, bool isLong = false) :
+				CGenericBaseValue(LT_UINT, value), mIsLong(isLong)
 			{
 			}
 
@@ -117,6 +121,10 @@ namespace gplc
 			CStringValue* ToStringLiteral() const override;
 
 			CType* GetTypeInfo() const override;
+
+			bool IsLong() const;
+		protected:
+			bool mIsLong;
 	};
 
 

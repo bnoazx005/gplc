@@ -60,10 +60,19 @@ int main(int argc, const char** argv)
 
 	if (!SUCCESS(pTypeResolver->Init(pSymTable, pInterpreter)))
 	{
+		system("pause");
+
 		return -1;
 	}
 
 	bool result = pSemanticAnalyser->Analyze(pSourceAST, pTypeResolver, pSymTable);
+
+	if (!result)
+	{
+		system("pause");
+
+		return -1;
+	}
 
 	ICodeGenerator* pCodeGenerator = new CLLVMCodeGenerator();//new CCCodeGenerator();
 

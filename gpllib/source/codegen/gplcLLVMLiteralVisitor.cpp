@@ -22,14 +22,18 @@ namespace gplc
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitIntLiteral(const CIntValue* pLiteral)
 	{
+		llvm::Type* pType = pLiteral->IsLong() ? llvm::Type::getInt64Ty(*mpContext) : llvm::Type::getInt32Ty(*mpContext);
+
 		// \todo replace first argument with deduced one
-		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), pLiteral->GetValue(), true);
+		return llvm::ConstantInt::get(pType, pLiteral->GetValue(), true);
 	}
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitUIntLiteral(const CUIntValue* pLiteral)
 	{
+		llvm::Type* pType = pLiteral->IsLong() ? llvm::Type::getInt64Ty(*mpContext) : llvm::Type::getInt32Ty(*mpContext);
+
 		// \todo replace first argument with deduced one
-		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), pLiteral->GetValue(), false);
+		return llvm::ConstantInt::get(pType, pLiteral->GetValue(), false);
 	}
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitFloatLiteral(const CFloatValue* pLiteral)

@@ -32,7 +32,12 @@ namespace gplc
 
 	CType* CIntValue::GetTypeInfo() const
 	{
-		return new CType(CT_INT64, BTS_INT64, 0x0);
+		return new CType(mIsLong ? CT_INT64 : CT_INT32, mIsLong ? BTS_INT64 : BTS_INT32, 0x0);
+	}
+
+	bool CIntValue::IsLong() const
+	{
+		return mIsLong;
 	}
 
 	TLLVMIRData CUIntValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
@@ -52,7 +57,12 @@ namespace gplc
 
 	CType* CUIntValue::GetTypeInfo() const
 	{
-		return new CType(CT_UINT64, BTS_UINT64, 0x0);
+		return new CType(mIsLong ? CT_UINT64 : CT_UINT32, mIsLong ? BTS_UINT64 : BTS_UINT32, 0x0);
+	}
+
+	bool CUIntValue::IsLong() const
+	{
+		return mIsLong;
 	}
 
 	TLLVMIRData CFloatValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)

@@ -630,6 +630,8 @@ namespace gplc
 		// token's construction
 		U32 numSysBasis = (numberType & NB_HEX) | (numberType & NB_OCT) | ((numberType & NB_BIN) >> 1);
 				
+		bool isLong = numberType & NB_LONG;
+
 		switch (numberType & NB_FLOAT)
 		{
 			case 0: // integer
@@ -637,9 +639,9 @@ namespace gplc
 				switch (numberType & NB_SIGNED) //Is it signed? If bit is turn on then it's signed value
 				{
 					case 0: //unsigned
-						return new CLiteralToken(new CUIntValue(strtoul(numberLiteral.c_str(), nullptr, numSysBasis)), x, y);
+						return new CLiteralToken(new CUIntValue(strtoul(numberLiteral.c_str(), nullptr, numSysBasis), isLong), x, y);
 					default:
-						return new CLiteralToken(new CIntValue(strtol(numberLiteral.c_str(), nullptr, numSysBasis)), x, y);
+						return new CLiteralToken(new CIntValue(strtol(numberLiteral.c_str(), nullptr, numSysBasis), isLong), x, y);
 				}
 
 				break;
