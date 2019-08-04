@@ -327,6 +327,8 @@ namespace gplc
 			E_COMPILER_TYPES GetType() const override;
 			
 			U32 GetSize() const override;
+
+			CType* GetDependentType() const;
 		protected:
 			CDependentNamedType() = default;
 			CDependentNamedType(const CDependentNamedType& type) = default;

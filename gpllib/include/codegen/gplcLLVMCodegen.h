@@ -39,6 +39,8 @@ namespace gplc
 
 			typedef std::unordered_map<TSymbolHandle, llvm::Value*> TValuesTable;
 
+			typedef std::unordered_map<std::string, llvm::Type*>    TTypesTable;
+
 			typedef std::stack<llvm::IRBuilder<>>                   TIRBuidlersStack;
 		public:
 			CLLVMCodeGenerator() = default;
@@ -141,6 +143,8 @@ namespace gplc
 			llvm::BasicBlock*    mpLoopConditionBlock;
 
 			llvm::BasicBlock*    mpLoopEndBlock;
+
+			TTypesTable          mTypesTable;
 	};
 }
 

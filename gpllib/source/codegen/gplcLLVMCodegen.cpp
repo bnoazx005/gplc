@@ -103,7 +103,11 @@ namespace gplc
 			pType = pCurrSymbolDesc->mpType;
 
 			// compute only once, because all identifiers are the same type
-			pIdentifiersType = pIdentifiersType ? pIdentifiersType : std::get<llvm::Type*>(pType->Accept(mpTypeGenerator));
+			if (!pIdentifiersType)
+			{
+				// if some type was already defined we use it, in other cases we infer it again based on pType's description
+				pIdentifiersType = (mTypesTable.find(pType->GetName()) != mTypesTable.cend()) ? mTypesTable[pType->GetName()] : std::get<llvm::Type*>(pType->Accept(mpTypeGenerator));
+			}
 
 			auto pCurrVariableAllocation = currIRBuidler.CreateAlloca(pIdentifiersType, nullptr, dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName());
 			
@@ -120,6 +124,9 @@ namespace gplc
 					break;
 				case CT_ARRAY:
 					// \todo invalid initialization, but it's enough for current tests, REIMPLEMENT THIS LATER
+					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext)));
+					break;
+				case CT_STRUCT:
 					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext)));
 					break;
 				default:
@@ -235,7 +242,7 @@ namespace gplc
 		}
 
 		auto pBlock = llvm::BasicBlock::Create(*mpContext, "entry", mpCurrActiveFunction);
-
+		
 		mIRBuildersStack.push(llvm::IRBuilder<>(pBlock));
 
 		for (auto pCurrStatement : pNode->GetStatements())
@@ -501,11 +508,20 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitStructDeclaration(CASTStructDeclNode* pNode)
 	{
-		auto pStructSymbolDesc = mpSymTable->LookUpNamedScope(pNode->GetStructName()->GetName());
+		std::string name = pNode->GetStructName()->GetName();
+
+		auto pStructSymbolDesc = mpSymTable->LookUpNamedScope(name);
 		
 		assert(pStructSymbolDesc && pStructSymbolDesc->mpType);
+		
+		llvm::Type* pStructType = std::get<llvm::Type*>(pStructSymbolDesc->mpType->Accept(mpTypeGenerator));
 
-		return pStructSymbolDesc->mpType->Accept(mpTypeGenerator);
+		if (mTypesTable.find(name) == mTypesTable.cend())
+		{
+			mTypesTable.insert({ name, pStructType });
+		}
+
+		return pStructType;
 	}
 
 	llvm::IRBuilder<>* CLLVMCodeGenerator::GetCurrIRBuilder()
@@ -713,7 +729,7 @@ namespace gplc
 		mpInitModuleGlobalsIRBuilder = new llvm::IRBuilder<>(pInitModuleGlobalsFuncBody);
 	}
 
-	llvm::Value* CLLVMCodeGenerator:: _declareNativeFunction(const TSymbolDesc* pFuncDesc)
+	llvm::Value* CLLVMCodeGenerator::_declareNativeFunction(const TSymbolDesc* pFuncDesc)
 	{
 		TSymbolHandle funcHandle = mpSymTable->GetSymbolHandleByName(pFuncDesc->mName);
 

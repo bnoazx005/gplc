@@ -576,7 +576,7 @@ namespace gplc
 
 	CBaseValue* CStructType::GetDefaultValue() const
 	{
-		return new CPointerValue();
+		return new CIntValue(0);
 	}
 
 	bool CStructType::AreSame(const CType* pType) const
@@ -780,6 +780,11 @@ namespace gplc
 		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
 
 		return pDependentType->GetSize();
+	}
+
+	CType* CDependentNamedType::GetDependentType() const
+	{
+		return mpSymTable->LookUpNamedScope(mName)->mpType;
 	}
 
 	

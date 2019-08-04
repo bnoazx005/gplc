@@ -78,21 +78,24 @@ namespace gplc
 		{
 			structFields.push_back(std::get<llvm::Type*>(currField.second->Accept(this)));
 		}
-		
+
 		return llvm::StructType::create(structFields, pStructType->GetName());
 	}
 
 	TLLVMIRData CLLVMTypeVisitor::VisitNamedType(const CDependentNamedType* pNamedType)
 	{
-		switch (pNamedType->GetType())
-		{
-			case CT_STRUCT:
-			case CT_ENUM:
-				return llvm::Type::getInt32Ty(*mpContext);
-				//.return llvm::StructType::create(*mpContext, pNamedType->GetName());
-		}
+		//switch (pNamedType->GetType())
+		//{
+		//	case CT_STRUCT:
+		//		return pNamedType->Get;
+		//	case CT_ENUM:
+		//		return llvm::Type::getInt32Ty(*mpContext);
+		//		//.return llvm::StructType::create(*mpContext, pNamedType->GetName());
+		//}
 
-		return {};
+		assert(pNamedType && pNamedType->GetDependentType());
+
+		return pNamedType->GetDependentType()->Accept(this);
 	}
 
 	TLLVMIRData CLLVMTypeVisitor::VisitEnumType(const CEnumType* pEnumType)
