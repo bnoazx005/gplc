@@ -546,9 +546,11 @@ namespace gplc
 	TLLVMIRData CLLVMCodeGenerator::VisitAccessOperator(CASTAccessOperatorNode* pNode)
 	{
 		CType* pExprType = pNode->GetExpression()->Resolve(mpTypeResolver);
-		
+
+		CASTIdentifierNode* pFieldNode = dynamic_cast<CASTIdentifierNode*>(dynamic_cast<CASTUnaryExpressionNode*>(pNode->GetMemberName())->GetData());
+
 		// \note for now we suppose that right part after '.' is an identifier
-		const std::string& identifierName = dynamic_cast<CASTIdentifierNode*>(dynamic_cast<CASTUnaryExpressionNode*>(pNode->GetMemberName())->GetData())->GetName();
+		const std::string& identifierName = pFieldNode->GetName();
 
 		auto& currIRBuilder = mIRBuildersStack.top();
 
@@ -560,24 +562,59 @@ namespace gplc
 		TSymbolHandle firstFieldId = pTypeDesc->mVariables.begin()->second;
 		TSymbolHandle currFieldId  = 0x0;
 
+		TSymbolDesc* pFieldValue = nullptr;
+
+		llvm::Value* pCurrValue = nullptr;
+
 		switch (pTypeDesc->mpType->GetType())
 		{
 			case CT_ENUM:
+				{
+					// retrieve value of the field
+					currFieldId = pTypeDesc->mVariables[identifierName];
+
+					pFieldValue = mpSymTable->LookUp(currFieldId);
+
+					auto val = (pFieldValue->mpValue->GetType() == LT_INT) ?
+										dynamic_cast<CIntValue*>(pFieldValue->mpValue)->GetValue() :
+										dynamic_cast<CUIntValue*>(pFieldValue->mpValue)->GetValue();
+
+					if (mVariablesTable.find(currFieldId) == mVariablesTable.cend())
+					{
+						mVariablesTable[currFieldId] = llvm::ConstantInt::get(std::get<llvm::Type*>(pTypeDesc->mpType->Accept(mpTypeGenerator)), val);
+					}
+
+					return mVariablesTable[currFieldId];
+				}
+			case CT_STRUCT:
 				// retrieve value of the field
 				currFieldId = pTypeDesc->mVariables[identifierName];
 
-				TSymbolDesc* pFieldValue = mpSymTable->LookUp(currFieldId);
-			   
-				auto val = (pFieldValue->mpValue->GetType() == LT_INT) ?
-											dynamic_cast<CIntValue*>(pFieldValue->mpValue)->GetValue() :
-											dynamic_cast<CUIntValue*>(pFieldValue->mpValue)->GetValue();
+				pFieldValue = mpSymTable->LookUp(currFieldId);
 
-				if (mVariablesTable.find(currFieldId) == mVariablesTable.cend())
+				pCurrValue = currIRBuilder.CreateGEP(std::get<llvm::Value*>(pNode->GetExpression()->Accept(this)),
+												{
+													llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0),
+													llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), currFieldId - firstFieldId)
+												});
+
+				if (pFieldNode->GetAttributes() & AV_RVALUE)
 				{
-					mVariablesTable[currFieldId] = llvm::ConstantInt::get(std::get<llvm::Type*>(pTypeDesc->mpType->Accept(mpTypeGenerator)), val);
+					return currIRBuilder.CreateLoad(pCurrValue);
 				}
 
-				return mVariablesTable[currFieldId];
+				return pCurrValue;
+
+				/*if (mVariablesTable.find(currFieldId) == mVariablesTable.cend())
+				{
+					mVariablesTable[currFieldId] = currIRBuilder.CreateGEP(std::get<llvm::Value*>(pNode->GetExpression()->Accept(this)),
+																			{
+																				llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0),
+																				llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), currFieldId - firstFieldId)
+																			});
+				}
+				
+				return mVariablesTable[currFieldId];*/
 		}
 
 		return {};

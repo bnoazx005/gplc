@@ -370,6 +370,15 @@ namespace gplc
 			return false;
 		}
 
+		//// assign values to struct's fields
+		//if (pDeclNode->GetAttributes() & AV_STRUCT_FIELD_DECL)
+		//{
+		//	for (auto pCurrIdentifier : pDeclNode->GetIdentifiers()->GetChildren())
+		//	{
+		//		
+		//	}
+		//}
+
 		// check their compatibility
 
 		return pDeclType->AreSame(pValueType) || pValueType->AreConvertibleTo(pDeclType);

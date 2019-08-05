@@ -23,39 +23,39 @@ namespace gplc
 	{
 		switch (nodeType)
 		{
-			case CT_INT8:
-				return NT_INT8;
-			case CT_INT16:
-				return NT_INT16;
-			case CT_INT32:
-				return NT_INT32;
-			case CT_INT64:
-				return NT_INT64;
-			case CT_UINT8:
-				return NT_UINT8;
-			case CT_UINT16:
-				return NT_UINT16;
-			case CT_UINT32:
-				return NT_UINT32;
-			case CT_UINT64:
-				return NT_UINT64;
-			case CT_FLOAT:
-				return NT_FLOAT;
-			case CT_DOUBLE:
-				return NT_DOUBLE;
-			case CT_STRING:
-				return NT_STRING;
-			case CT_CHAR:
-				return NT_CHAR;
-			case CT_BOOL:
-				return NT_BOOL;
+		case CT_INT8:
+			return NT_INT8;
+		case CT_INT16:
+			return NT_INT16;
+		case CT_INT32:
+			return NT_INT32;
+		case CT_INT64:
+			return NT_INT64;
+		case CT_UINT8:
+			return NT_UINT8;
+		case CT_UINT16:
+			return NT_UINT16;
+		case CT_UINT32:
+			return NT_UINT32;
+		case CT_UINT64:
+			return NT_UINT64;
+		case CT_FLOAT:
+			return NT_FLOAT;
+		case CT_DOUBLE:
+			return NT_DOUBLE;
+		case CT_STRING:
+			return NT_STRING;
+		case CT_CHAR:
+			return NT_CHAR;
+		case CT_BOOL:
+			return NT_BOOL;
 		}
 	}
 
 	/*!
 		\brief CTypeResolver's definition
 	*/
-	
+
 	Result CTypeResolver::Init(ISymTable* pSymTable, IConstExprInterpreter* pInterpreter)
 	{
 		if (!pSymTable || !pInterpreter)
@@ -63,7 +63,7 @@ namespace gplc
 			return RV_FAIL;
 		}
 
-		mpSymTable    = pSymTable;
+		mpSymTable = pSymTable;
 		mpInterpreter = pInterpreter;
 
 		return RV_SUCCESS;
@@ -86,7 +86,7 @@ namespace gplc
 		const std::string& identifier = pNode->GetName();
 
 		const TSymbolDesc* pSymbolDesc = mpSymTable->LookUp(identifier);
-		auto pSymbolEntryDesc          = mpSymTable->LookUpNamedScope(identifier);
+		auto pSymbolEntryDesc = mpSymTable->LookUpNamedScope(identifier);
 
 		return pSymbolDesc ? pSymbolDesc->mpType : (pSymbolEntryDesc ? pSymbolEntryDesc->mpType : nullptr);
 	}
@@ -102,13 +102,13 @@ namespace gplc
 
 		return pOperandNode ? dynamic_cast<CASTTypeNode*>(pOperandNode)->Resolve(this) : nullptr;
 	}
-	
+
 	CType* CTypeResolver::VisitBinaryExpression(CASTBinaryExpressionNode* pNode)
 	{
-		auto pLeftExprNode  = pNode->GetLeft();
+		auto pLeftExprNode = pNode->GetLeft();
 		auto pRightExprNode = pNode->GetRight();
 
-		CType* pLeftExprTypeInfo  = pLeftExprNode->Resolve(this);
+		CType* pLeftExprTypeInfo = pLeftExprNode->Resolve(this);
 		CType* pRightExprTypeInfo = pRightExprNode->Resolve(this);
 
 		return _deduceExprType(pNode->GetOpType(), pLeftExprTypeInfo->GetType(), pRightExprTypeInfo->GetType());
@@ -117,6 +117,11 @@ namespace gplc
 	CType* CTypeResolver::VisitDeclaration(CASTDeclarationNode* pNode)
 	{
 		return pNode->GetTypeInfo()->Resolve(this);
+	}
+	
+	CType* CTypeResolver::VisitDefinition(CASTDefinitionNode* pNode)
+	{
+		return pNode->GetDeclaration()->Resolve(this);
 	}
 
 	CType* CTypeResolver::VisitFunctionDeclaration(CASTFunctionDeclNode* pNode)
@@ -163,17 +168,21 @@ namespace gplc
 
 		auto pStructBody = pNode->GetFieldsDeclarations();
 
-		CStructType* pStructType = new CStructType({}, 0x0);
+		CStructType* pStructType = new CStructType({}, AV_AGGREGATE_TYPE);
 
 		CType* pFieldType = nullptr;
+
+		CASTNode* pIdentifiers = nullptr;
 
 		for (auto pCurrField : pStructBody->GetStatements())
 		{
 			pFieldType = Resolve(dynamic_cast<CASTTypeNode*>(pCurrField));
+			
+			pIdentifiers = (pCurrField->GetType() == NT_DECL) ? 
+										dynamic_cast<CASTDeclarationNode*>(pCurrField)->GetIdentifiers() :
+										dynamic_cast<CASTDefinitionNode*>(pCurrField)->GetDeclaration()->GetIdentifiers();
 
-			auto identifiers = dynamic_cast<CASTDeclarationNode*>(pCurrField)->GetIdentifiers();
-
-			for (auto pCurrIdentifier : identifiers->GetChildren())
+			for (auto pCurrIdentifier : pIdentifiers->GetChildren())
 			{
 				pStructType->AddField(dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName(), pFieldType);
 			}
@@ -415,7 +424,10 @@ namespace gplc
 			return false;
 		}
 
-		return (mType == pType->mType) && (mSize == pType->mSize) && (mAttributes == pType->mAttributes);
+		U32 lattr = mAttributes & SignificantAttributesMask;
+		U32 rattr = pType->mAttributes & SignificantAttributesMask;
+
+		return (mType == pType->mType) && (mSize == pType->mSize) && (lattr == rattr);
 	}
 
 	bool CType::AreConvertibleTo(const CType* pType) const
@@ -792,6 +804,12 @@ namespace gplc
 		return mpSymTable->LookUpNamedScope(mName)->mpType;
 	}
 
+	U32 CDependentNamedType::GetAttributes() const
+	{
+		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
+
+		return pDependentType->GetAttributes();
+	}
 	
 	/*!
 		\brief CArrayType's definition

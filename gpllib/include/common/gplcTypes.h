@@ -176,6 +176,9 @@ namespace gplc
 	};
 
 
+	constexpr U32 SignificantAttributesMask = AV_STATIC | AV_RVALUE | AV_POINTER | AV_AGGREGATE_TYPE;
+
+
 	enum E_LEXER_ERRORS : U32
 	{
 		LE_INVALID_END_OF_MULTILINE_COMMENT,

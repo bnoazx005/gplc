@@ -486,7 +486,7 @@ namespace gplc
 	};
 
 
-	class CASTDefinitionNode : public CASTNode
+	class CASTDefinitionNode : public CASTTypeNode
 	{
 		public:
 			CASTDefinitionNode(CASTDeclarationNode* pDecl, CASTNode* pValue);
@@ -495,6 +495,8 @@ namespace gplc
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			CType* Resolve(ITypeResolver* pResolver) override;
 
 			CASTDeclarationNode* GetDeclaration() const;
 

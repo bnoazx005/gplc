@@ -384,7 +384,7 @@ namespace gplc
 				<property-access> ::= <primary> '.' <identifier>
 			*/
 
-			CASTAccessOperatorNode* _parseAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer*pLexer);
+			CASTAccessOperatorNode* _parseAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer*pLexer, U32 attributes = 0x0);
 
 			/*!
 				\brief

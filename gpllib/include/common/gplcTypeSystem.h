@@ -81,6 +81,7 @@ namespace gplc
 			virtual CType* VisitUnaryExpression(CASTUnaryExpressionNode* pNode) = 0;
 			virtual CType* VisitBinaryExpression(CASTBinaryExpressionNode* pNode) = 0;
 			virtual CType* VisitDeclaration(CASTDeclarationNode* pNode) = 0;
+			virtual CType* VisitDefinition(CASTDefinitionNode* pNode) = 0;
 			virtual CType* VisitFunctionDeclaration(CASTFunctionDeclNode* pNode) = 0;
 			virtual CType* VisitFunctionCall(CASTFunctionCallNode* pNode) = 0;
 			virtual CType* VisitStructDeclaration(CASTStructDeclNode* pNode) = 0;
@@ -111,6 +112,7 @@ namespace gplc
 			CType* VisitUnaryExpression(CASTUnaryExpressionNode* pNode) override;
 			CType* VisitBinaryExpression(CASTBinaryExpressionNode* pNode) override;
 			CType* VisitDeclaration(CASTDeclarationNode* pNode) override;
+			CType* VisitDefinition(CASTDefinitionNode* pNode) override;
 			CType* VisitFunctionDeclaration(CASTFunctionDeclNode* pNode) override;
 			CType* VisitFunctionCall(CASTFunctionCallNode* pNode) override;
 			CType* VisitStructDeclaration(CASTStructDeclNode* pNode) override; 
@@ -157,7 +159,7 @@ namespace gplc
 
 			virtual U32 GetSize() const;
 
-			U32 GetAttributes() const;
+			virtual U32 GetAttributes() const;
 
 			virtual const std::string& GetName() const;
 
@@ -329,6 +331,8 @@ namespace gplc
 			U32 GetSize() const override;
 
 			CType* GetDependentType() const;
+
+			U32 GetAttributes() const override;
 		protected:
 			CDependentNamedType() = default;
 			CDependentNamedType(const CDependentNamedType& type) = default;

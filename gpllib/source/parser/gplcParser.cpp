@@ -654,7 +654,7 @@ namespace gplc
 		{
 			pLexer->GetNextToken(); // take .
 
-			return _parseAccessOperator(pPrimaryNode, pLexer);
+			return _parseAccessOperator(pPrimaryNode, pLexer, attributes);
 		}
 
 		// function's call
@@ -1229,7 +1229,7 @@ namespace gplc
 		return nullptr;
 	}
 
-	CASTAccessOperatorNode* CParser::_parseAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer* pLexer)
+	CASTAccessOperatorNode* CParser::_parseAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer* pLexer, U32 attributes)
 	{
 		const CToken* pCurrToken = pLexer->GetCurrToken();
 
@@ -1240,7 +1240,7 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take an identifier
 
-		return new CASTAccessOperatorNode(pPrimaryExpr, new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName())));
+		return new CASTAccessOperatorNode(pPrimaryExpr, new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName(), attributes)));
 	}
 
 	CASTIndexedAccessOperatorNode* CParser::_parseIndexedAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer*pLexer, U32 attributes)

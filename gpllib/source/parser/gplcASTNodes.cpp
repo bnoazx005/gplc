@@ -935,7 +935,7 @@ namespace gplc
 	*/
 
 	CASTDefinitionNode::CASTDefinitionNode(CASTDeclarationNode* pDecl, CASTNode* pValue) :
-		CASTNode(NT_DEFINITION)
+		CASTTypeNode(NT_DEFINITION)
 	{
 		AttachChild(pDecl);
 		AttachChild(pValue);
@@ -958,6 +958,11 @@ namespace gplc
 	TLLVMIRData CASTDefinitionNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitDefinitionNode(this);
+	}
+
+	CType* CASTDefinitionNode::Resolve(ITypeResolver* pResolver)
+	{
+		return pResolver->VisitDefinition(this);
 	}
 
 	CASTDeclarationNode* CASTDefinitionNode::GetDeclaration() const
