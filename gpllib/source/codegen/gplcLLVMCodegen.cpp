@@ -5,6 +5,7 @@
 #include "parser/gplcASTNodes.h"
 #include "common/gplcValues.h"
 #include "common/gplcTypeSystem.h"
+#include "common/gplcConstExprInterpreter.h"
 #include "llvm/Bitcode/BitcodeWriter.h"
 #include "llvm/Support/raw_ostream.h"
 #include <cassert>
@@ -12,9 +13,9 @@
 
 namespace gplc
 {
-	TLLVMIRData CLLVMCodeGenerator::Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver)
+	TLLVMIRData CLLVMCodeGenerator::Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter)
 	{
-		if (!pSymTable)
+		if (!pSymTable || !pTypeResolver || !pInterpreter)
 		{
 			return {};
 		}
@@ -28,6 +29,8 @@ namespace gplc
 		mpTypeGenerator = new CLLVMTypeVisitor(llvmContext);
 
 		mpTypeResolver = pTypeResolver;
+
+		mpInterpreter = pInterpreter;
 
 		mpContext  = &llvmContext;
 		mpSymTable = pSymTable;
@@ -112,7 +115,7 @@ namespace gplc
 			auto pCurrVariableAllocation = currIRBuidler.CreateAlloca(pIdentifiersType, nullptr, dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName());
 			
 			// retrieve initial value 
-			pIdentifiersValue = pIdentifiersValue ? pIdentifiersValue : std::get<llvm::Value*>(pCurrSymbolDesc->mpValue->Accept(mpLiteralIRGenerator));
+			pIdentifiersValue = pIdentifiersValue ? pIdentifiersValue : std::get<llvm::Value*>(pCurrSymbolDesc->mpValue->Accept(this));
 
 			mVariablesTable[mpSymTable->GetSymbolHandleByName(identifier)] = pCurrVariableAllocation;
 
@@ -575,15 +578,19 @@ namespace gplc
 
 					pFieldValue = mpSymTable->LookUp(currFieldId);
 
-					auto val = (pFieldValue->mpValue->GetType() == LT_INT) ?
-										dynamic_cast<CIntValue*>(pFieldValue->mpValue)->GetValue() :
-										dynamic_cast<CUIntValue*>(pFieldValue->mpValue)->GetValue();
+					auto enumeratorValue = mpInterpreter->Eval(pFieldValue->mpValue, mpSymTable);
+
+					if (enumeratorValue.HasError())
+					{
+						assert(false);
+						return {};
+					}
 
 					if (mVariablesTable.find(currFieldId) == mVariablesTable.cend())
 					{
-						mVariablesTable[currFieldId] = llvm::ConstantInt::get(std::get<llvm::Type*>(pTypeDesc->mpType->Accept(mpTypeGenerator)), val);
+						mVariablesTable[currFieldId] = llvm::ConstantInt::get(std::get<llvm::Type*>(pTypeDesc->mpType->Accept(mpTypeGenerator)), enumeratorValue.Get());
 					}
-
+					
 					return mVariablesTable[currFieldId];
 				}
 			case CT_STRUCT:

@@ -46,7 +46,7 @@ namespace gplc
 			CLLVMCodeGenerator() = default;
 			virtual ~CLLVMCodeGenerator() = default;
 
-			TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver) override;
+			TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter) override;
 
 			TLLVMIRData VisitProgramUnit(CASTSourceUnitNode* pProgramNode) override;
 
@@ -116,35 +116,37 @@ namespace gplc
 
 			llvm::Value* _declareNativeFunction(const TSymbolDesc* pFuncDesc);
 		protected:
-			TLLVMLiteralVisitor* mpLiteralIRGenerator;
+			TLLVMLiteralVisitor*   mpLiteralIRGenerator;
 
-			TLLVMTypeVisitor*    mpTypeGenerator;
+			TLLVMTypeVisitor*      mpTypeGenerator;
 
-			ITypeResolver*       mpTypeResolver;
+			ITypeResolver*         mpTypeResolver;
 
-			llvm::LLVMContext*   mpContext;
+			llvm::LLVMContext*     mpContext;
 
-			llvm::Module*        mpModule;
+			llvm::Module*          mpModule;
 
-			llvm::Function*      mpCurrActiveFunction;
+			llvm::Function*        mpCurrActiveFunction;
 
-			ISymTable*           mpSymTable;
+			ISymTable*             mpSymTable;
 
-			TIRBuidlersStack     mIRBuildersStack;
+			TIRBuidlersStack       mIRBuildersStack;
 
-			llvm::IRBuilder<>*   mpGlobalIRBuilder;
+			llvm::IRBuilder<>*     mpGlobalIRBuilder;
 
-			TValuesTable         mVariablesTable;
+			TValuesTable           mVariablesTable;
 
-			llvm::Function*      mpInitModuleGlobalsFunction;
+			llvm::Function*        mpInitModuleGlobalsFunction;
 
-			llvm::IRBuilder<>*   mpInitModuleGlobalsIRBuilder;
+			llvm::IRBuilder<>*     mpInitModuleGlobalsIRBuilder;
 
-			llvm::BasicBlock*    mpLoopConditionBlock;
+			llvm::BasicBlock*      mpLoopConditionBlock;
 
-			llvm::BasicBlock*    mpLoopEndBlock;
+			llvm::BasicBlock*      mpLoopEndBlock;
 
-			TTypesTable          mTypesTable;
+			TTypesTable            mTypesTable;
+
+			IConstExprInterpreter* mpInterpreter;
 	};
 }
 

@@ -21,6 +21,7 @@ namespace gplc
 {
 	class ISymTable;
 	class ITypeResolver;
+	class IConstExprInterpreter;
 
 
 	class ICodeGenerator: public IASTNodeVisitor<TLLVMIRData>
@@ -29,7 +30,7 @@ namespace gplc
 			ICodeGenerator() = default;
 			virtual ~ICodeGenerator() = default;
 
-			virtual TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver) = 0;
+			virtual TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter) = 0;
 		protected:
 			ICodeGenerator(const ICodeGenerator& codeGenerator) = default;
 	};

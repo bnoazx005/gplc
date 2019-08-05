@@ -77,6 +77,8 @@ namespace gplc
 
 			pTypeInfo->SetAttribute(currAttributes);
 
+			auto pDefaultValueExpr = new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(pTypeInfo->GetDefaultValue()));
+
 			// do not register variable if it belongs to some structure, because it's already there
 			if (currAttributes & AV_STRUCT_FIELD_DECL)
 			{
@@ -84,10 +86,10 @@ namespace gplc
 
 				// we just need to resolve its type and value
 				pCurrSymbolDesc->mpType  = pTypeInfo;
-				pCurrSymbolDesc->mpValue = pTypeInfo->GetDefaultValue();
+				pCurrSymbolDesc->mpValue = pDefaultValueExpr;
 			}
 			else if (!mpSymTable->IsLocked() && 
-					 mpSymTable->AddVariable({ currIdentifier, pTypeInfo->GetDefaultValue(), pTypeInfo }) == InvalidSymbolHandle)
+					 mpSymTable->AddVariable({ currIdentifier, pDefaultValueExpr, pTypeInfo }) == InvalidSymbolHandle)
 			{
 				OnErrorOutput.Invoke(SAE_IDENTIFIER_ALREADY_DECLARED);
 
@@ -370,14 +372,22 @@ namespace gplc
 			return false;
 		}
 
-		//// assign values to struct's fields
-		//if (pDeclNode->GetAttributes() & AV_STRUCT_FIELD_DECL)
-		//{
-		//	for (auto pCurrIdentifier : pDeclNode->GetIdentifiers()->GetChildren())
-		//	{
-		//		
-		//	}
-		//}
+		// assign values to struct's fields
+		CASTIdentifierNode* pCurrField = nullptr;
+
+		TSymbolDesc* pCurrSymbolDesc = nullptr;
+
+		if (pDeclNode->GetAttributes() & AV_STRUCT_FIELD_DECL)
+		{
+			for (auto pCurrIdentifier : pDeclNode->GetIdentifiers()->GetChildren())
+			{
+				pCurrField = dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier);
+
+				pCurrSymbolDesc = mpSymTable->LookUp(mpSymTable->GetSymbolHandleByName(pCurrField->GetName()));
+
+				pCurrSymbolDesc->mpValue = pValueNode;
+			}
+		}
 
 		// check their compatibility
 

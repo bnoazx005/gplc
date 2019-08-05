@@ -32,7 +32,7 @@ namespace gplc
 			CCCodeGenerator() = default;
 			virtual ~CCCodeGenerator() = default;
 
-			TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver) override;
+			TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter) override;
 
 			TLLVMIRData VisitProgramUnit(CASTSourceUnitNode* pProgramNode) override;
 

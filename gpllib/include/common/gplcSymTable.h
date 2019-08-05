@@ -19,7 +19,7 @@
 
 namespace gplc
 {
-	class CBaseValue;
+	class CASTExpressionNode;
 	class CType;
 
 
@@ -36,11 +36,11 @@ namespace gplc
 	   
 	struct TSymbolDesc
 	{
-		std::string   mName;
+		std::string         mName;
 
-		CBaseValue*   mpValue;
+		CASTExpressionNode* mpValue;
 
-		CType*        mpType;
+		CType*              mpType;
 	};
 
 

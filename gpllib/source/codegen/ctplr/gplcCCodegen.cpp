@@ -11,7 +11,7 @@
 
 namespace gplc
 {
-	TLLVMIRData CCCodeGenerator::Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver)
+	TLLVMIRData CCCodeGenerator::Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter)
 	{
 		if (!pSymTable)
 		{
@@ -82,7 +82,7 @@ namespace gplc
 			if ((pNode->GetAttributes() & AV_FUNC_ARG_DECL) != AV_FUNC_ARG_DECL)
 			{
 				result.append(" = ")
-					.append(std::get<std::string>(pCurrSymbolDesc->mpValue->Accept(mpLiteralVisitor)))
+					.append(std::get<std::string>(pCurrSymbolDesc->mpValue->Accept(this)))
 					.append(";\n");
 			}
 		}
@@ -287,7 +287,7 @@ namespace gplc
 			}
 
 			result.append(" = ")
-				.append(std::get<std::string>(pCurrSymbolDesc->mpValue->Accept(mpLiteralVisitor)))
+				.append(std::get<std::string>(pCurrSymbolDesc->mpValue->Accept(this)))
 				.append(";\n");
 		}
 

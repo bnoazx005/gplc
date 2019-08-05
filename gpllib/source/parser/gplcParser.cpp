@@ -1042,6 +1042,8 @@ namespace gplc
 
 		I32 currEnumeratorDefaultValue = 0x0;
 
+		CASTExpressionNode* pPrevEnumeratorValue = nullptr;
+
 		while (_match(pCurrEnumField = pLexer->GetCurrToken(), TT_IDENTIFIER))
 		{
 			currEnumeratorName = dynamic_cast<const CIdentifierToken*>(pCurrEnumField)->GetName();
@@ -1079,7 +1081,9 @@ namespace gplc
 					return false;
 				}
 
-				pCurrEnumerator->mpValue = dynamic_cast<const CLiteralToken*>(pCurrToken)->GetValue(); // \note type is resolved in semantic analyser's stage
+				pPrevEnumeratorValue = _parseExpression(pLexer); // \note type is resolved in semantic analyser's stage
+
+				pCurrEnumerator->mpValue = pPrevEnumeratorValue;
 
 				pLexer->GetNextToken();
 			}
@@ -1087,7 +1091,16 @@ namespace gplc
 			// \note assign default value if it wasn't assigned by a user
 			if (!pCurrEnumerator->mpValue)
 			{
-				pCurrEnumerator->mpValue = new CIntValue(currEnumeratorDefaultValue++);
+				if (pPrevEnumeratorValue)
+				{
+					pPrevEnumeratorValue = new CASTBinaryExpressionNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(1))), TT_PLUS, pPrevEnumeratorValue);
+				}
+				else
+				{
+					pPrevEnumeratorValue = new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(0)));
+				}
+
+				pCurrEnumerator->mpValue = pPrevEnumeratorValue;
 			}
 
 			if (_match(pLexer->GetCurrToken(), TT_CLOSE_BRACE))

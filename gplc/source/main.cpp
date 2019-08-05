@@ -76,7 +76,7 @@ int main(int argc, const char** argv)
 
 	ICodeGenerator* pCodeGenerator = new CLLVMCodeGenerator();//new CCCodeGenerator();
 
-	pCodeGenerator->Generate(pSourceAST, pSymTable, pTypeResolver);
+	pCodeGenerator->Generate(pSourceAST, pSymTable, pTypeResolver, pInterpreter);
 	//std::string transformedSource = std::get<std::string>(pCodeGenerator->Generate(pSourceAST, pSymTable));
 
 	//std::ofstream out("main.c");
@@ -85,7 +85,8 @@ int main(int argc, const char** argv)
 
 	//out.close();
 
-	system("clang main.c -o main.exe");
+	while (true);
+	//system("clang main.c -o main.exe");
 
 	delete pInterpreter;
 	delete pInputStream;

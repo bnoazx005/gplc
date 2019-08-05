@@ -39,19 +39,7 @@ namespace gplc
 	{
 		auto pSymbolDesc = mpSymTable->LookUp(pNode->GetName());
 		
-		CBaseValue* pValue = pSymbolDesc->mpValue;
-
-		if (pValue->GetType() == LT_INT)
-		{
-			return dynamic_cast<CIntValue*>(pValue)->GetValue();
-		}
-
-		if (pValue->GetType() == LT_UINT)
-		{
-			return dynamic_cast<CUIntValue*>(pValue)->GetValue();
-		}
-
-		return std::numeric_limits<U32>::max();
+		return pSymbolDesc->mpValue->Accept(this);
 	}
 
 	TLLVMIRData CConstExprInterpreter::VisitLiteral(CASTLiteralNode* pNode) 

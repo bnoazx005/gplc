@@ -18,7 +18,7 @@ TEST_CASE("ConstExprInterpreter Tests")
 	SECTION("TestEval_PassSingleIdentifier_ReturnsValue")
 	{
 		ISymTable* pSymTable = new CSymTable();
-		pSymTable->AddVariable({ "a", new CIntValue(42), new CType(CT_INT32, BTS_INT32, 0x0) });
+		pSymTable->AddVariable({ "a", new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(42))), new CType(CT_INT32, BTS_INT32, 0x0) });
 
 		REQUIRE(pInterpreter->Eval(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("a", 0x0)), pSymTable).Get() == 42);
 
