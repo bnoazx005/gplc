@@ -86,6 +86,14 @@ namespace gplc
 	{
 		assert(pNamedType && pNamedType->GetDependentType());
 
+		switch (pNamedType->GetType())
+		{
+			case CT_STRUCT:
+				return llvm::StructType::create(*mpContext, pNamedType->GetName());
+			case CT_ENUM:
+				return llvm::Type::getInt32Ty(*mpContext);
+		}
+
 		return pNamedType->GetDependentType()->Accept(this);
 	}
 

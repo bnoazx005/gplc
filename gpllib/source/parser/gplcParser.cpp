@@ -1087,7 +1087,7 @@ namespace gplc
 
 				pLexer->GetNextToken();
 			}
-
+			
 			// \note assign default value if it wasn't assigned by a user
 			if (!pCurrEnumerator->mpValue)
 			{

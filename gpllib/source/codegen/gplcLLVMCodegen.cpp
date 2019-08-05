@@ -611,17 +611,6 @@ namespace gplc
 				}
 
 				return pCurrValue;
-
-				/*if (mVariablesTable.find(currFieldId) == mVariablesTable.cend())
-				{
-					mVariablesTable[currFieldId] = currIRBuilder.CreateGEP(std::get<llvm::Value*>(pNode->GetExpression()->Accept(this)),
-																			{
-																				llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0),
-																				llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), currFieldId - firstFieldId)
-																			});
-				}
-				
-				return mVariablesTable[currFieldId];*/
 		}
 
 		return {};
