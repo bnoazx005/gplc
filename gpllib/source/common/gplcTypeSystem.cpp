@@ -213,10 +213,15 @@ namespace gplc
 			return nullptr;
 		}
 
+		// \note for now we suppose that right part after '.' is an identifier
+		const std::string& identifierName = dynamic_cast<CASTIdentifierNode*>(dynamic_cast<CASTUnaryExpressionNode*>(pNode->GetMemberName())->GetData())->GetName();
+
 		switch (pExprType->GetType())
 		{
 			case CT_ENUM:
 				return pExprType;
+			case CT_STRUCT:
+				return mpSymTable->LookUp(mpSymTable->LookUpNamedScope(pExprType->GetName())->mVariables[identifierName])->mpType;
 		}
 
 		return nullptr;

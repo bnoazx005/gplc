@@ -63,15 +63,31 @@ namespace gplc
 
 		CASTIdentifierNode* pCurrIdentifierNode = nullptr;
 		
+		U32 currAttributes = 0x0;
+
+		TSymbolDesc* pCurrSymbolDesc = nullptr;
+
 		for (CASTNode* pCurrChild : pIdentifiersList->GetChildren())
 		{
 			pCurrIdentifierNode = dynamic_cast<CASTIdentifierNode*>(pCurrChild);
 			
 			const std::string& currIdentifier = pCurrIdentifierNode->GetName();
 
-			pTypeInfo->SetAttribute(pCurrIdentifierNode->GetAttributes());
+			currAttributes = pCurrIdentifierNode->GetAttributes();
 
-			if (!mpSymTable->IsLocked() && mpSymTable->AddVariable({ currIdentifier, pTypeInfo->GetDefaultValue(), pTypeInfo }) == InvalidSymbolHandle)
+			pTypeInfo->SetAttribute(currAttributes);
+
+			// do not register variable if it belongs to some structure, because it's already there
+			if (currAttributes & AV_STRUCT_FIELD_DECL)
+			{
+				pCurrSymbolDesc = mpSymTable->LookUp(mpSymTable->GetSymbolHandleByName(currIdentifier));
+
+				// we just need to resolve its type and value
+				pCurrSymbolDesc->mpType  = pTypeInfo;
+				pCurrSymbolDesc->mpValue = pTypeInfo->GetDefaultValue();
+			}
+			else if (!mpSymTable->IsLocked() && 
+					 mpSymTable->AddVariable({ currIdentifier, pTypeInfo->GetDefaultValue(), pTypeInfo }) == InvalidSymbolHandle)
 			{
 				OnErrorOutput.Invoke(SAE_IDENTIFIER_ALREADY_DECLARED);
 
@@ -426,8 +442,6 @@ namespace gplc
 
 		auto structTableEntry = mpSymTable->LookUpNamedScope(structName);
 
-		// \todo check types of fields
-
 		// resolve struct's type
 		if (!(structTableEntry->mpType = mpTypeResolver->Resolve(pNode)))
 		{
@@ -435,6 +449,16 @@ namespace gplc
 		}
 
 		structTableEntry->mpType->SetName(structName);
+
+		// resolve types of struct's fields
+		mpSymTable->VisitNamedScope(structName);
+
+		if (!pNode->GetFieldsDeclarations()->Accept(this))
+		{
+			return false;
+		}
+
+		mpSymTable->LeaveScope();
 
 		return structTableEntry;
 	}

@@ -84,15 +84,6 @@ namespace gplc
 
 	TLLVMIRData CLLVMTypeVisitor::VisitNamedType(const CDependentNamedType* pNamedType)
 	{
-		//switch (pNamedType->GetType())
-		//{
-		//	case CT_STRUCT:
-		//		return pNamedType->Get;
-		//	case CT_ENUM:
-		//		return llvm::Type::getInt32Ty(*mpContext);
-		//		//.return llvm::StructType::create(*mpContext, pNamedType->GetName());
-		//}
-
 		assert(pNamedType && pNamedType->GetDependentType());
 
 		return pNamedType->GetDependentType()->Accept(this);

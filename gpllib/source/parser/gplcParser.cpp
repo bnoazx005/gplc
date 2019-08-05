@@ -1171,7 +1171,7 @@ namespace gplc
 
 		return pStructFields;
 	}
-
+	
 	bool CParser::_match(const CToken* pToken, E_TOKEN_TYPE type)
 	{
 		return pToken && pToken->GetType() == type;
