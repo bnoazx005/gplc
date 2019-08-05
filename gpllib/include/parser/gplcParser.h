@@ -45,6 +45,7 @@ namespace gplc
 	class CASTAccessOperatorNode;
 	class CASTArrayTypeNode;
 	class CASTIndexedAccessOperatorNode;
+	class IASTNodesFactory;
 
 
 	/*!
@@ -59,7 +60,7 @@ namespace gplc
 			IParser() {}
 			virtual ~IParser() {}
 
-			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable) = 0;
+			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory) = 0;
 		public:
 			CDelegate<void, const TParserErrorInfo&> OnErrorOutput;
 		protected:
@@ -79,7 +80,7 @@ namespace gplc
 			CParser();
 			virtual ~CParser();
 
-			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable);
+			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory);
 		private:
 			CParser(const CParser& parser);
 
@@ -398,7 +399,9 @@ namespace gplc
 
 			CASTTypeNode* _getBasicType(E_TOKEN_TYPE typeToken) const;
 		private:
-			ISymTable* mpSymTable;
+			ISymTable*        mpSymTable;
+
+			IASTNodesFactory* mpNodesFactory;
 	};
 }
 

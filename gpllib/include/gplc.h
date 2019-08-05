@@ -27,6 +27,7 @@
 #include "parser/gplcParser.h"
 #include "parser/gplcASTNodes.h"
 #include "parser/gplcSemanticAnalyser.h"
+#include "parser/gplcASTNodesFactory.h"
 
 #include "utils/CASTLispyPrinter.h"
 #include "utils/CResult.h"

@@ -87,7 +87,7 @@ namespace gplc
 	{
 		public:
 			CASTNode(E_NODE_TYPE type);
-			virtual ~CASTNode(); 
+			virtual ~CASTNode() = default;
 			
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -120,7 +120,7 @@ namespace gplc
 	{
 		public:
 			CASTSourceUnitNode();
-			virtual ~CASTSourceUnitNode();
+			virtual ~CASTSourceUnitNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -136,7 +136,7 @@ namespace gplc
 	{
 		public:
 			CASTTypeNode(E_NODE_TYPE type);
-			virtual ~CASTTypeNode();
+			virtual ~CASTTypeNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -148,32 +148,11 @@ namespace gplc
 	};
 
 
-	class CASTVariableDeclNode : public CASTTypeNode
-	{
-		public:
-			CASTVariableDeclNode(CASTIdentifierNode* pIdentifier, CASTNode* pTypeInfo);
-			virtual ~CASTVariableDeclNode();
-
-			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
-			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
-			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
-
-			CType* Resolve(ITypeResolver* pResolver) override;
-
-			CASTIdentifierNode* GetIdentifier() const;
-
-			CASTTypeNode* GetTypeInfo() const;
-		protected:
-			CASTVariableDeclNode() = default;
-			CASTVariableDeclNode(const CASTVariableDeclNode& node) = default;
-	};
-
-
 	class CASTDeclarationNode : public CASTTypeNode
 	{
 		public:
 			CASTDeclarationNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo, U32 attributes = 0x0);
-			virtual ~CASTDeclarationNode();
+			virtual ~CASTDeclarationNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -200,7 +179,7 @@ namespace gplc
 	{
 		public:
 			CASTBlockNode();
-			virtual ~CASTBlockNode();
+			virtual ~CASTBlockNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -220,7 +199,7 @@ namespace gplc
 	{
 		public:
 			CASTIdentifierNode(const std::string& name, U32 attributes = 0x0);
-			virtual ~CASTIdentifierNode();
+			virtual ~CASTIdentifierNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -245,7 +224,7 @@ namespace gplc
 	{
 		public:
 			CASTLiteralNode(CBaseValue* pValue);
-			virtual ~CASTLiteralNode();
+			virtual ~CASTLiteralNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -277,7 +256,7 @@ namespace gplc
 	{
 		public:
 			CASTUnaryExpressionNode(E_TOKEN_TYPE opType, CASTNode* pNode);
-			virtual ~CASTUnaryExpressionNode();
+			virtual ~CASTUnaryExpressionNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -300,7 +279,7 @@ namespace gplc
 	{
 		public:
 			CASTBinaryExpressionNode(CASTExpressionNode* pLeft, E_TOKEN_TYPE opType, CASTExpressionNode* pRight);
-			virtual ~CASTBinaryExpressionNode();
+			virtual ~CASTBinaryExpressionNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -325,7 +304,7 @@ namespace gplc
 	{
 		public:
 			CASTAssignmentNode(CASTExpressionNode* pLeft, CASTExpressionNode* pRight);
-			virtual ~CASTAssignmentNode();
+			virtual ~CASTAssignmentNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -344,7 +323,7 @@ namespace gplc
 	{
 		public:
 			CASTIfStatementNode(CASTExpressionNode* pCondition, CASTBlockNode* pThenBlock, CASTBlockNode* pElseBlock);
-			virtual ~CASTIfStatementNode();
+			virtual ~CASTIfStatementNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -365,7 +344,7 @@ namespace gplc
 	{
 		public:
 			CASTLoopStatementNode(CASTBlockNode* pBody);
-			virtual ~CASTLoopStatementNode();
+			virtual ~CASTLoopStatementNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -382,7 +361,7 @@ namespace gplc
 	{
 		public:
 			CASTWhileLoopStatementNode(CASTExpressionNode* pCondition, CASTBlockNode* pBody);
-			virtual ~CASTWhileLoopStatementNode();
+			virtual ~CASTWhileLoopStatementNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -401,7 +380,7 @@ namespace gplc
 	{
 		public:
 			CASTFunctionClosureNode();
-			virtual ~CASTFunctionClosureNode();
+			virtual ~CASTFunctionClosureNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -415,7 +394,7 @@ namespace gplc
 	{
 		public:
 			CASTFunctionArgsNode();
-			virtual ~CASTFunctionArgsNode();
+			virtual ~CASTFunctionArgsNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -429,7 +408,7 @@ namespace gplc
 	{
 		public:
 			CASTFunctionDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue);
-			virtual ~CASTFunctionDeclNode();
+			virtual ~CASTFunctionDeclNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -452,7 +431,7 @@ namespace gplc
 	{
 		public:
 			CASTFunctionCallNode(CASTUnaryExpressionNode* pIdentifier, CASTNode* pArgsList);
-			virtual ~CASTFunctionCallNode();
+			virtual ~CASTFunctionCallNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -473,7 +452,7 @@ namespace gplc
 	{
 		public:
 			CASTReturnStatementNode(CASTExpressionNode* pExpression);
-			virtual ~CASTReturnStatementNode();
+			virtual ~CASTReturnStatementNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -490,7 +469,7 @@ namespace gplc
 	{
 		public:
 			CASTDefinitionNode(CASTDeclarationNode* pDecl, CASTNode* pValue);
-			virtual ~CASTDefinitionNode();
+			virtual ~CASTDefinitionNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -511,7 +490,7 @@ namespace gplc
 	{
 		public:
 			CASTFuncDefinitionNode(CASTDeclarationNode* pDecl, CASTFunctionDeclNode* pLambdaType, CASTNode* pBody);
-			virtual ~CASTFuncDefinitionNode();
+			virtual ~CASTFuncDefinitionNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -528,7 +507,7 @@ namespace gplc
 	{
 		public:
 			CASTEnumDeclNode(CASTIdentifierNode* pEnumName);
-			virtual ~CASTEnumDeclNode();
+			virtual ~CASTEnumDeclNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -547,7 +526,7 @@ namespace gplc
 	{
 		public:
 			CASTStructDeclNode(CASTIdentifierNode* pStructName, CASTBlockNode* pStructFields);
-			virtual ~CASTStructDeclNode();
+			virtual ~CASTStructDeclNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -568,7 +547,7 @@ namespace gplc
 	{
 		public:
 			CASTNamedTypeNode(CASTIdentifierNode* pIdentifier);
-			virtual ~CASTNamedTypeNode();
+			virtual ~CASTNamedTypeNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -587,7 +566,7 @@ namespace gplc
 	{
 		public:
 			CASTBreakOperatorNode();
-			virtual ~CASTBreakOperatorNode();
+			virtual ~CASTBreakOperatorNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -601,7 +580,7 @@ namespace gplc
 	{
 		public:
 			CASTContinueOperatorNode();
-			virtual ~CASTContinueOperatorNode();
+			virtual ~CASTContinueOperatorNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -615,7 +594,7 @@ namespace gplc
 	{
 		public:
 			CASTAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pMemberName);
-			virtual ~CASTAccessOperatorNode();
+			virtual ~CASTAccessOperatorNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -636,7 +615,7 @@ namespace gplc
 	{
 		public:
 			CASTArrayTypeNode(CASTNode* pTypeInfo, CASTExpressionNode* pSizeExpr);
-			virtual ~CASTArrayTypeNode();
+			virtual ~CASTArrayTypeNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
@@ -656,7 +635,7 @@ namespace gplc
 	{
 		public:
 			CASTIndexedAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pIndexExpr, U32 attributes);
-			virtual ~CASTIndexedAccessOperatorNode();
+			virtual ~CASTIndexedAccessOperatorNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;

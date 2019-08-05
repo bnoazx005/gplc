@@ -33,39 +33,7 @@ namespace gplc
 	CASTNode::CASTNode(const CASTNode& node)
 	{
 	}
-
-	CASTNode::~CASTNode()
-	{
-		U32 childrenCount = mChildren.size();
-
-		if (childrenCount >= 1)
-		{
-			std::stack<const CASTNode*> nodesInStack;
-
-			nodesInStack.push(mChildren[0]);
-
-			const CASTNode* pCurrNode = nullptr;
-
-			while (!nodesInStack.empty())
-			{
-				pCurrNode = nodesInStack.top();
-
-				nodesInStack.pop();
-
-				childrenCount = pCurrNode->mChildren.size();
-
-				for (U32 i = 0; i < childrenCount; i++)
-				{
-					nodesInStack.push(pCurrNode->mChildren[i]);
-				}
-
-				delete pCurrNode;
-
-				pCurrNode = nullptr;
-			}
-		}
-	}
-	
+		
 	std::string CASTNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return std::string();
@@ -192,10 +160,6 @@ namespace gplc
 	{
 	}
 
-	CASTSourceUnitNode::~CASTSourceUnitNode()
-	{
-	}
-
 	std::string CASTSourceUnitNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitProgramUnit(this);
@@ -217,55 +181,11 @@ namespace gplc
 	}
 
 
-	CASTVariableDeclNode::CASTVariableDeclNode(CASTIdentifierNode* pIdentifier, CASTNode* pTypeInfo):
-		CASTTypeNode(NT_DECL)
-	{
-	}
-
-	CASTVariableDeclNode::~CASTVariableDeclNode()
-	{
-	}
-
-	std::string CASTVariableDeclNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
-	{
-		return {};
-	}
-
-	bool CASTVariableDeclNode::Accept(IASTNodeVisitor<bool>* pVisitor)
-	{
-		return false;
-	}
-
-	TLLVMIRData CASTVariableDeclNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
-	{
-		return {};
-	}
-
-	CType* CASTVariableDeclNode::Resolve(ITypeResolver* pResolver)
-	{
-		return nullptr;
-	}
-
-	CASTIdentifierNode* CASTVariableDeclNode::GetIdentifier() const
-	{
-		return dynamic_cast<CASTIdentifierNode*>(mChildren[0]);
-	}
-
-	CASTTypeNode* CASTVariableDeclNode::GetTypeInfo() const
-	{
-		return dynamic_cast<CASTTypeNode*>(mChildren[1]);
-	}
-
-
 	CASTDeclarationNode::CASTDeclarationNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo, U32 attributes):
 		CASTTypeNode(NT_DECL), mAttributes(attributes)
 	{
 		AttachChild(pIdentifiers);
 		AttachChild(pTypeInfo);
-	}
-
-	CASTDeclarationNode::~CASTDeclarationNode()
-	{
 	}
 
 	std::string CASTDeclarationNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
@@ -314,10 +234,6 @@ namespace gplc
 	{
 	}
 
-	CASTBlockNode::~CASTBlockNode()
-	{
-	}
-
 	std::string CASTBlockNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitStatementsBlock(this);
@@ -348,10 +264,6 @@ namespace gplc
 	{
 	}
 
-	CASTTypeNode::~CASTTypeNode()
-	{
-	}
-
 	std::string CASTTypeNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return {};
@@ -379,10 +291,6 @@ namespace gplc
 	
 	CASTIdentifierNode::CASTIdentifierNode(const std::string& name, U32 attributes) :
 		CASTTypeNode(NT_IDENTIFIER), mName(name), mAttributes(attributes)
-	{
-	}
-
-	CASTIdentifierNode::~CASTIdentifierNode()
 	{
 	}
 
@@ -424,11 +332,6 @@ namespace gplc
 	CASTLiteralNode::CASTLiteralNode(CBaseValue* pValue):
 		CASTTypeNode(NT_LITERAL), mpValue(pValue)
 	{
-	}
-
-	CASTLiteralNode::~CASTLiteralNode()
-	{
-
 	}
 
 	std::string CASTLiteralNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
@@ -473,11 +376,6 @@ namespace gplc
 		AttachChild(pNode);
 	}
 
-	CASTUnaryExpressionNode:: ~CASTUnaryExpressionNode()
-	{
-		// \todo add implementation of the destructor
-	}
-
 	std::string CASTUnaryExpressionNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitUnaryExpression(this);
@@ -518,11 +416,6 @@ namespace gplc
 	{
 		AttachChild(pLeft);
 		AttachChild(pRight);
-	}
-
-	CASTBinaryExpressionNode::~CASTBinaryExpressionNode()
-	{
-		// \todo add implementation of the destructor
 	}
 
 	std::string CASTBinaryExpressionNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
@@ -572,11 +465,6 @@ namespace gplc
 		AttachChild(pRight);
 	}
 
-	CASTAssignmentNode::~CASTAssignmentNode()
-	{
-		// \todo add implementation of the destructor
-	}
-
 	std::string CASTAssignmentNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitAssignment(this);
@@ -613,10 +501,6 @@ namespace gplc
 		AttachChild(pCondition);
 		AttachChild(pThenBlock);
 		AttachChild(pElseBlock);
-	}
-
-	CASTIfStatementNode::~CASTIfStatementNode()
-	{
 	}
 
 	std::string CASTIfStatementNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
@@ -665,10 +549,6 @@ namespace gplc
 		AttachChild(pBody);
 	}
 
-	CASTLoopStatementNode::~CASTLoopStatementNode()
-	{
-	}
-
 	std::string CASTLoopStatementNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitLoopStatement(this);
@@ -699,10 +579,6 @@ namespace gplc
 	{
 		AttachChild(pCondition);
 		AttachChild(pBody);
-	}
-
-	CASTWhileLoopStatementNode::~CASTWhileLoopStatementNode()
-	{
 	}
 
 	std::string CASTWhileLoopStatementNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
@@ -742,10 +618,6 @@ namespace gplc
 		AttachChild(pArgs);
 		AttachChild(pReturnValue);
 		AttachChild(pClosure);
-	}
-
-	CASTFunctionDeclNode::~CASTFunctionDeclNode()
-	{
 	}
 
 	std::string CASTFunctionDeclNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
@@ -799,10 +671,6 @@ namespace gplc
 	{
 	}
 
-	CASTFunctionClosureNode::~CASTFunctionClosureNode() 
-	{
-	}
-
 	std::string CASTFunctionClosureNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitFunctionClosure(this);
@@ -826,10 +694,6 @@ namespace gplc
 
 	CASTFunctionArgsNode::CASTFunctionArgsNode() :
 		CASTNode(NT_FUNC_ARGS)
-	{
-	}
-
-	CASTFunctionArgsNode::~CASTFunctionArgsNode()
 	{
 	}
 
@@ -858,10 +722,6 @@ namespace gplc
 	{
 		AttachChild(pIdentifier);
 		AttachChild(pArgsList);
-	}
-
-	CASTFunctionCallNode::~CASTFunctionCallNode()
-	{
 	}
 
 	std::string CASTFunctionCallNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
@@ -905,10 +765,6 @@ namespace gplc
 		AttachChild(pExpression);
 	}
 
-	CASTReturnStatementNode::~CASTReturnStatementNode()
-	{
-	}
-
 	std::string CASTReturnStatementNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitReturnStatement(this);
@@ -939,10 +795,6 @@ namespace gplc
 	{
 		AttachChild(pDecl);
 		AttachChild(pValue);
-	}
-
-	CASTDefinitionNode::~CASTDefinitionNode()
-	{
 	}
 
 	std::string CASTDefinitionNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
@@ -986,10 +838,6 @@ namespace gplc
 		AttachChild(pLambdaType);
 	}
 
-	CASTFuncDefinitionNode::~CASTFuncDefinitionNode()
-	{
-	}
-
 	std::string CASTFuncDefinitionNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitFunctionDefNode(this);
@@ -1019,10 +867,6 @@ namespace gplc
 		CASTTypeNode(NT_ENUM_DECL)
 	{
 		AttachChild(pEnumName);
-	}
-
-	CASTEnumDeclNode::~CASTEnumDeclNode()
-	{
 	}
 
 	std::string CASTEnumDeclNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
@@ -1061,10 +905,6 @@ namespace gplc
 	{
 		AttachChild(pStructName);
 		AttachChild(pStructFields);
-	}
-
-	CASTStructDeclNode::~CASTStructDeclNode()
-	{
 	}
 
 	std::string CASTStructDeclNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
@@ -1109,10 +949,6 @@ namespace gplc
 		AttachChild(pIdentifier);
 	}
 
-	CASTNamedTypeNode::~CASTNamedTypeNode()
-	{
-	}
-
 	std::string CASTNamedTypeNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return {};
@@ -1148,10 +984,6 @@ namespace gplc
 	{
 	}
 
-	CASTBreakOperatorNode::~CASTBreakOperatorNode()
-	{
-	}
-
 	std::string CASTBreakOperatorNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitBreakOperator(this);
@@ -1174,10 +1006,6 @@ namespace gplc
 
 	CASTContinueOperatorNode::CASTContinueOperatorNode() :
 		CASTNode(NT_CONTINUE_OPERATOR)
-	{
-	}
-
-	CASTContinueOperatorNode::~CASTContinueOperatorNode()
 	{
 	}
 
@@ -1206,10 +1034,6 @@ namespace gplc
 	{
 		AttachChild(pExpression);
 		AttachChild(pMemberName);
-	}
-
-	CASTAccessOperatorNode::~CASTAccessOperatorNode()
-	{
 	}
 
 	std::string CASTAccessOperatorNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
@@ -1254,10 +1078,6 @@ namespace gplc
 		AttachChild(pSizeExpr);
 	}
 
-	CASTArrayTypeNode::~CASTArrayTypeNode()
-	{
-	}
-
 	std::string CASTArrayTypeNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
 	{
 		return pVisitor->VisitArrayTypeNode(this);
@@ -1298,10 +1118,6 @@ namespace gplc
 	{
 		AttachChild(pExpression);
 		AttachChild(pIndexExpr);
-	}
-
-	CASTIndexedAccessOperatorNode::~CASTIndexedAccessOperatorNode()
-	{
 	}
 
 	std::string CASTIndexedAccessOperatorNode::Accept(IASTNodeVisitor<std::string>* pVisitor)

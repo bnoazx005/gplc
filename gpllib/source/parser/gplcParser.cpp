@@ -14,6 +14,7 @@
 #include "common\gplcTypeSystem.h"
 #include "common/gplcSymTable.h"
 #include "common/gplcValues.h"
+#include "parser/gplcASTNodesFactory.h"
 
 
 namespace gplc
@@ -36,9 +37,9 @@ namespace gplc
 	{
 	}
 
-	CASTNode* CParser::Parse(ILexer* pLexer, ISymTable* pSymTable)
+	CASTNode* CParser::Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory)
 	{
-		if (!pLexer || !pSymTable)
+		if (!pLexer || !pSymTable || !pNodesFactory)
 		{
 			TParserErrorInfo errorInfo;
 
@@ -54,9 +55,11 @@ namespace gplc
 		
 		mpSymTable = pSymTable;
 
-		if (pLexer->GetCurrToken() == nullptr) //returns just an empty program unit
+		mpNodesFactory = pNodesFactory;
+
+		if (!pLexer->GetCurrToken()) //returns just an empty program unit
 		{
-			return new CASTNode(NT_PROGRAM_UNIT);
+			return mpNodesFactory->CreateSourceUnitNode();
 		}
 
 		return _parseProgramUnit(pLexer);
@@ -116,7 +119,7 @@ namespace gplc
 
 	CASTNode* CParser::_parseProgramUnit(ILexer* pLexer)
 	{
-		CASTNode* pProgramUnit = new CASTSourceUnitNode();
+		CASTNode* pProgramUnit = mpNodesFactory->CreateSourceUnitNode();
 
 		CASTNode* pStatements = _parseStatementsList(pLexer);
 		
@@ -141,7 +144,7 @@ namespace gplc
 
 	CASTNode* CParser::_parseStatementsList(ILexer* pLexer)
 	{
-		CASTNode* pStatementsList = new CASTNode(NT_STATEMENTS);
+		CASTNode* pStatementsList = mpNodesFactory->CreateNode(NT_STATEMENTS);
 		CASTNode* pCurrStatement  = nullptr;
 
 		while (pCurrStatement = _parseStatement(pLexer))
@@ -244,7 +247,7 @@ namespace gplc
 
 	CASTBlockNode* CParser::_parseBlockStatements(ILexer* pLexer)
 	{
-		CASTBlockNode* pBlockNode = new CASTBlockNode();
+		CASTBlockNode* pBlockNode = mpNodesFactory->CreateBlockNode();
 
 		CASTNode* pStatements = _parseStatementsList(pLexer);
 
@@ -306,11 +309,11 @@ namespace gplc
 
 			if (pCurrToken->GetType() == TT_BREAK_KEYWORD)
 			{
-				return new CASTBreakOperatorNode();
+				return mpNodesFactory->CreateBreakNode();
 			}
 			else
 			{
-				return new CASTContinueOperatorNode();
+				return mpNodesFactory->CreateContinueNode();
 			}
 		}
 
@@ -351,12 +354,12 @@ namespace gplc
 		{
 			pLexer->GetNextToken();
 
-			return _parseDefinition(new CASTDeclarationNode(pIdentifiers, nullptr, attributes), pLexer);
+			return _parseDefinition(mpNodesFactory->CreateDeclNode(pIdentifiers, nullptr, attributes), pLexer);
 		}
 
 		pTypeInfo = _parseType(pLexer);
 
-		CASTDeclarationNode* pDeclaration = new CASTDeclarationNode(pIdentifiers, pTypeInfo, attributes);
+		CASTDeclarationNode* pDeclaration = mpNodesFactory->CreateDeclNode(pIdentifiers, pTypeInfo, attributes);
 
 		// parse definition not declaration, full def : type = <value>
 		if (_match(pLexer->GetCurrToken(), TT_ASSIGN_OP))
@@ -382,7 +385,7 @@ namespace gplc
 
 	CASTNode* CParser::_parseIdentifiers(ILexer* pLexer, U32 attributes)
 	{
-		CASTNode* pIdentifiersRoot = new CASTNode(NT_IDENTIFIERS_LIST);
+		CASTNode* pIdentifiersRoot = mpNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
 		const CToken* pCurrToken = nullptr;
 
@@ -409,7 +412,7 @@ namespace gplc
 				mpSymTable->AddVariable({ currIdentifier, nullptr, nullptr });
 			}
 
-			pIdentifiersRoot->AttachChild(new CASTIdentifierNode(currIdentifier, attributes));
+			pIdentifiersRoot->AttachChild(mpNodesFactory->CreateIdNode(currIdentifier, attributes));
 
 			// function argument doesn't allow multiple variable per declaration
 			/*if ((attributes & AV_FUNC_ARG_DECL) == AV_FUNC_ARG_DECL)
@@ -452,7 +455,7 @@ namespace gplc
 		{
 			pLexer->GetNextToken(); // take the identifier
 
-			return new CASTNamedTypeNode(new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()));
+			return mpNodesFactory->CreateNamedTypeNode(mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()));
 		}
 
 		return _parseBuiltInType(pLexer);
@@ -491,7 +494,7 @@ namespace gplc
 		{
 			pLexer->GetNextToken(); // take *
 
-			auto pPointerType = new CASTTypeNode(NT_POINTER);
+			auto pPointerType = mpNodesFactory->CreateTypeNode(NT_POINTER);
 
 			pPointerType->AttachChild(pBuiltinType);
 
@@ -517,7 +520,7 @@ namespace gplc
 
 			pLexer->GetNextToken(); // take ]
 
-			return new CASTArrayTypeNode(pBuiltinType, pSizeExpr);
+			return mpNodesFactory->CreateArrayTypeNode(pBuiltinType, pSizeExpr);
 		}
 
 		return pBuiltinType;
@@ -545,7 +548,7 @@ namespace gplc
 
 			pRight = _parseLowPrecedenceExpr(pLexer, attributes);
 
-			pLeft = new CASTBinaryExpressionNode(pLeft, opType, pRight);
+			pLeft = mpNodesFactory->CreateBinaryExpr(pLeft, opType, pRight);
 		}
 
 		return pLeft;
@@ -568,7 +571,7 @@ namespace gplc
 
 			pRight = _parseUnaryExpression(pLexer, attributes);
 
-			pLeft = new CASTBinaryExpressionNode(pLeft, opType, pRight);
+			pLeft = mpNodesFactory->CreateBinaryExpr(pLeft, opType, pRight);
 		}
 
 		return pLeft;
@@ -591,7 +594,7 @@ namespace gplc
 
 			pRight = _parseComparisonExpr(pLexer, attributes);
 
-			pLeft = new CASTBinaryExpressionNode(pLeft, opType, pRight);
+			pLeft = mpNodesFactory->CreateBinaryExpr(pLeft, opType, pRight);
 		}
 
 		return pLeft;
@@ -616,7 +619,7 @@ namespace gplc
 
 			pRight = _parseHighPrecedenceExpr(pLexer, attributes);
 
-			pLeft = new CASTBinaryExpressionNode(pLeft, opType, pRight);
+			pLeft = mpNodesFactory->CreateBinaryExpr(pLeft, opType, pRight);
 		}
 
 		return pLeft;
@@ -630,14 +633,14 @@ namespace gplc
 		{
 			pLexer->GetNextToken();
 
-			return new CASTUnaryExpressionNode(TT_MINUS, _parsePrimaryExpression(pLexer));
+			return mpNodesFactory->CreateUnaryExpr(TT_MINUS, _parsePrimaryExpression(pLexer));
 		}
 
 		if (_match(pCurrToken, TT_NOT))
 		{
 			pLexer->GetNextToken();
 
-			return new CASTUnaryExpressionNode(TT_NOT, _parsePrimaryExpression(pLexer));
+			return mpNodesFactory->CreateUnaryExpr(TT_NOT, _parsePrimaryExpression(pLexer));
 		}
 
 		auto pPrimaryExpr = _parsePrimaryExpression(pLexer, attributes);
@@ -647,7 +650,7 @@ namespace gplc
 			return nullptr;
 		}
 
-		CASTUnaryExpressionNode* pPrimaryNode = new CASTUnaryExpressionNode(TT_DEFAULT, pPrimaryExpr);
+		CASTUnaryExpressionNode* pPrimaryNode = mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, pPrimaryExpr);
 
 		// access to aggregate type's field
 		if (_match(pLexer->GetCurrToken(), TT_POINT))
@@ -660,7 +663,7 @@ namespace gplc
 		// function's call
 		if (_match(pLexer->GetCurrToken(), TT_OPEN_BRACKET))
 		{
-			return new CASTUnaryExpressionNode(TT_DEFAULT, _parseFunctionCall(pPrimaryNode, pLexer));
+			return mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, _parseFunctionCall(pPrimaryNode, pLexer));
 		}
 
 		// indexed access to an aggregate type
@@ -686,10 +689,10 @@ namespace gplc
 		switch (pCurrToken->GetType())
 		{
 			case TT_IDENTIFIER:
-				pNode = new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName(), attributes);
+				pNode = mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName(), attributes);
 				break;
 			case TT_LITERAL:
-				pNode = new CASTLiteralNode(dynamic_cast<const CLiteralToken*>(pCurrToken)->GetValue());
+				pNode = mpNodesFactory->CreateLiteralNode(dynamic_cast<const CLiteralToken*>(pCurrToken)->GetValue());
 				break;
 		}
 
@@ -762,7 +765,7 @@ namespace gplc
 			pLexer->GetNextToken(); // take }
 		}
 
-		return new CASTIfStatementNode(pCondition, pThenBlock, pElseBlock);
+		return mpNodesFactory->CreateIfStmtNode(pCondition, pThenBlock, pElseBlock);
 	}
 	
 	CASTLoopStatementNode* CParser::_parseLoopStatement(ILexer* pLexer)
@@ -783,7 +786,7 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take }
 
-		return new CASTLoopStatementNode(pBodyBlock);
+		return mpNodesFactory->CreateLoopStmtNode(pBodyBlock);
 	}
 	   
 	CASTWhileLoopStatementNode* CParser::_parseWhileLoopStatement(ILexer* pLexer)
@@ -806,7 +809,7 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take }
 
-		return new CASTWhileLoopStatementNode(pCondition, pBodyBlock);
+		return mpNodesFactory->CreateWhileStmtNode(pCondition, pBodyBlock);
 	}
 
 	CASTFunctionDeclNode* CParser::_parseFunctionDeclaration(ILexer* pLexer, bool allowCapture)
@@ -827,7 +830,7 @@ namespace gplc
 		// parse return value's type
 		CASTNode* pReturnType = _parseType(pLexer);
 
-		return new CASTFunctionDeclNode(pClosureDecl, pArgsList, pReturnType);
+		return mpNodesFactory->CreateFuncDeclNode(pClosureDecl, pArgsList, pReturnType);
 	}
 	
 	CASTFunctionClosureNode* CParser::_parseFunctionClosure(ILexer* pLexer)
@@ -839,7 +842,7 @@ namespace gplc
 		
 		pLexer->GetNextToken(); // take [
 
-		CASTFunctionClosureNode* pClosureDecl = new CASTFunctionClosureNode();
+		CASTFunctionClosureNode* pClosureDecl = mpNodesFactory->CreateFuncClosureNode();
 
 		do
 		{
@@ -871,7 +874,7 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take (
 
-		CASTFunctionArgsNode* pArgsNode = new CASTFunctionArgsNode();
+		CASTFunctionArgsNode* pArgsNode = mpNodesFactory->CreateFuncArgsNode();
 
 		// return empty arguments list
 		if (_match(pLexer->GetCurrToken(), TT_CLOSE_BRACKET))
@@ -910,7 +913,7 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take (
 
-		CASTNode* pArgsNode = new CASTNode(NT_FUNC_ARGS);
+		CASTNode* pArgsNode = mpNodesFactory->CreateNode(NT_FUNC_ARGS);
 
 		do
 		{
@@ -929,12 +932,12 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take )
 
-		return new CASTFunctionCallNode(pPrimaryExpr, pArgsNode);
+		return mpNodesFactory->CreateFuncCallNode(pPrimaryExpr, pArgsNode);
 	}
 
 	CASTReturnStatementNode* CParser::_parseReturnStatement(ILexer* pLexer)
 	{
-		return new CASTReturnStatementNode(_parseExpression(pLexer));
+		return mpNodesFactory->CreateReturnStmtNode(_parseExpression(pLexer));
 	}
 
 	CASTDefinitionNode* CParser::_parseDefinition(CASTDeclarationNode* pDecl, ILexer* pLexer)
@@ -960,7 +963,7 @@ namespace gplc
 			return _parseFunctionDefinition(pDecl, pLexer);
 		}
 
-		return new CASTDefinitionNode(pDecl, _parseExpression(pLexer));
+		return mpNodesFactory->CreateDefNode(pDecl, _parseExpression(pLexer));
 	}
 
 	CASTFuncDefinitionNode* CParser::_parseFunctionDefinition(CASTDeclarationNode* pDecl, ILexer* pLexer)
@@ -983,7 +986,7 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take }
 
-		return new CASTFuncDefinitionNode(pDecl, pLambdaDefType, pLambdaBody);
+		return mpNodesFactory->CreateFuncDefNode(pDecl, pLambdaDefType, pLambdaBody);
 	}
 	
 	CASTEnumDeclNode* CParser::_parseEnumDeclaration(ILexer* pLexer)
@@ -993,7 +996,7 @@ namespace gplc
 			return nullptr;
 		}
 
-		CASTIdentifierNode* pEnumIdentifier = new CASTIdentifierNode((dynamic_cast<const CIdentifierToken*>(pLexer->GetCurrToken()))->GetName());
+		CASTIdentifierNode* pEnumIdentifier = mpNodesFactory->CreateIdNode((dynamic_cast<const CIdentifierToken*>(pLexer->GetCurrToken()))->GetName());
 
 		pLexer->GetNextToken(); // take enum's name
 
@@ -1017,7 +1020,7 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take }
 
-		CASTEnumDeclNode* pEnumDeclNode = new CASTEnumDeclNode(pEnumIdentifier);
+		CASTEnumDeclNode* pEnumDeclNode = mpNodesFactory->CreateEnumDeclNode(pEnumIdentifier);
 
 		return pEnumDeclNode;
 	}
@@ -1093,11 +1096,12 @@ namespace gplc
 			{
 				if (pPrevEnumeratorValue)
 				{
-					pPrevEnumeratorValue = new CASTBinaryExpressionNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(1))), TT_PLUS, pPrevEnumeratorValue);
+					pPrevEnumeratorValue = mpNodesFactory->CreateBinaryExpr(mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, mpNodesFactory->CreateLiteralNode(new CIntValue(1))), 
+																			TT_PLUS, pPrevEnumeratorValue);
 				}
 				else
 				{
-					pPrevEnumeratorValue = new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(0)));
+					pPrevEnumeratorValue = mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, mpNodesFactory->CreateLiteralNode(new CIntValue(0)));
 				}
 
 				pCurrEnumerator->mpValue = pPrevEnumeratorValue;
@@ -1128,7 +1132,7 @@ namespace gplc
 			return nullptr;
 		}
 
-		CASTIdentifierNode* pStructIdentifier = new CASTIdentifierNode((dynamic_cast<const CIdentifierToken*>(pLexer->GetCurrToken()))->GetName());
+		CASTIdentifierNode* pStructIdentifier = mpNodesFactory->CreateIdNode((dynamic_cast<const CIdentifierToken*>(pLexer->GetCurrToken()))->GetName());
 
 		pLexer->GetNextToken(); // take struct's name
 
@@ -1154,7 +1158,7 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take }
 
-		return new CASTStructDeclNode(pStructIdentifier, pStructFields);
+		return mpNodesFactory->CreateStructDeclNode(pStructIdentifier, pStructFields);
 	}
 
 	CASTBlockNode* CParser::_parseStructFields(const std::string& structName, ILexer* pLexer)
@@ -1164,7 +1168,7 @@ namespace gplc
 			return nullptr;
 		}
 
-		CASTBlockNode* pStructFields = new CASTBlockNode();
+		CASTBlockNode* pStructFields = mpNodesFactory->CreateBlockNode();
 
 		CASTNode* pCurrField = nullptr;
 
@@ -1195,46 +1199,46 @@ namespace gplc
 		switch (typeToken)
 		{
 			case TT_INT8_TYPE:
-				return new CASTTypeNode(NT_INT8);
+				return mpNodesFactory->CreateTypeNode(NT_INT8);
 
 			case TT_INT16_TYPE:
-				return new CASTTypeNode(NT_INT16);
+				return mpNodesFactory->CreateTypeNode(NT_INT16);
 
 			case TT_INT32_TYPE:
-				return new CASTTypeNode(NT_INT32);
+				return mpNodesFactory->CreateTypeNode(NT_INT32);
 
 			case TT_INT64_TYPE:
-				return new CASTTypeNode(NT_INT64);
+				return mpNodesFactory->CreateTypeNode(NT_INT64);
 
 			case TT_UINT8_TYPE:
-				return new CASTTypeNode(NT_UINT8);
+				return mpNodesFactory->CreateTypeNode(NT_UINT8);
 
 			case TT_UINT16_TYPE:
-				return new CASTTypeNode(NT_UINT16);
+				return mpNodesFactory->CreateTypeNode(NT_UINT16);
 
 			case TT_UINT32_TYPE:
-				return new CASTTypeNode(NT_UINT32);
+				return mpNodesFactory->CreateTypeNode(NT_UINT32);
 
 			case TT_UINT64_TYPE:
-				return new CASTTypeNode(NT_UINT64);
+				return mpNodesFactory->CreateTypeNode(NT_UINT64);
 
 			case TT_CHAR_TYPE:
-				return new CASTTypeNode(NT_CHAR);
+				return mpNodesFactory->CreateTypeNode(NT_CHAR);
 
 			case TT_STRING_TYPE:
-				return new CASTTypeNode(NT_STRING);
+				return mpNodesFactory->CreateTypeNode(NT_STRING);
 
 			case TT_BOOL_TYPE:
-				return new CASTTypeNode(NT_BOOL);
+				return mpNodesFactory->CreateTypeNode(NT_BOOL);
 
 			case TT_VOID_TYPE:
-				return new CASTTypeNode(NT_VOID);
+				return mpNodesFactory->CreateTypeNode(NT_VOID);
 
 			case TT_FLOAT_TYPE:
-				return new CASTTypeNode(NT_FLOAT);
+				return mpNodesFactory->CreateTypeNode(NT_FLOAT);
 
 			case TT_DOUBLE_TYPE:
-				return new CASTTypeNode(NT_DOUBLE);
+				return mpNodesFactory->CreateTypeNode(NT_DOUBLE);
 		}
 
 		assert(false); // unreachable code
@@ -1253,7 +1257,10 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take an identifier
 
-		return new CASTAccessOperatorNode(pPrimaryExpr, new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName(), attributes)));
+		return mpNodesFactory->CreateAccessOperatorNode(pPrimaryExpr,	
+														mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, 
+																						mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName(), 
+																						attributes)));
 	}
 
 	CASTIndexedAccessOperatorNode* CParser::_parseIndexedAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer*pLexer, U32 attributes)
@@ -1269,6 +1276,6 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take ']'
 
-		return new CASTIndexedAccessOperatorNode(pPrimaryExpr, pIndexedExpression, attributes);
+		return mpNodesFactory->CreateIndexedAccessOperatorNode(pPrimaryExpr, pIndexedExpression, attributes);
 	}
 }

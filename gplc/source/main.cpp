@@ -52,7 +52,9 @@ int main(int argc, const char** argv)
 
 	pParser->OnErrorOutput += OnParserError;
 
-	CASTSourceUnitNode* pSourceAST = dynamic_cast<CASTSourceUnitNode*>(pParser->Parse(pLexer, pSymTable));
+	IASTNodesFactory* pASTNodesFactory = new CASTNodesFactory();
+
+	CASTSourceUnitNode* pSourceAST = dynamic_cast<CASTSourceUnitNode*>(pParser->Parse(pLexer, pSymTable, pASTNodesFactory));
 
 	ITypeResolver* pTypeResolver = new CTypeResolver();
 
@@ -96,6 +98,7 @@ int main(int argc, const char** argv)
 	delete pSymTable;
 	delete pParser;
 	delete pLexer;
+	delete pASTNodesFactory;
 
 	return 0;
 }
