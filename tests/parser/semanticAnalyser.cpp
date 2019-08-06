@@ -9,33 +9,41 @@ TEST_CASE("CSemanticAnalyser's tests")
 {
 	ISemanticAnalyser* pSemanticAnalyser = new CSemanticAnalyser();
 
+	gplc::IASTNodesFactory* pNodesFactory = new gplc::CASTNodesFactory();
+
 	ITypeResolver* pTypeResolver = new CTypeResolver();
 
+	IConstExprInterpreter* pInterpreter = new CConstExprInterpreter();
+
+	ISymTable* pSymTable = new CSymTable();
+
+	pTypeResolver->Init(pSymTable, pInterpreter);
+		
 	REQUIRE(pSemanticAnalyser != nullptr);
 
 	SECTION("TestAnalyze_PassNullptr_ReturnsFalse")
 	{
-		REQUIRE(!pSemanticAnalyser->Analyze(nullptr, nullptr, new CSymTable()));
-		REQUIRE(!pSemanticAnalyser->Analyze(new CASTBlockNode(), nullptr, nullptr));
-		REQUIRE(!pSemanticAnalyser->Analyze(nullptr, new CTypeResolver(), nullptr));
+		REQUIRE(!pSemanticAnalyser->Analyze(nullptr, nullptr, pSymTable, pNodesFactory));
+		REQUIRE(!pSemanticAnalyser->Analyze(pNodesFactory->CreateBlockNode(), nullptr, nullptr, pNodesFactory));
+		REQUIRE(!pSemanticAnalyser->Analyze(nullptr, pTypeResolver, nullptr, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassDoubledInitializedVariable_ReturnsFalse")
 	{
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("x"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("x"));
 
-		REQUIRE(!pSemanticAnalyser->Analyze(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_INT32)), pTypeResolver, new CSymTable()));
+		REQUIRE(!pSemanticAnalyser->Analyze(pNodesFactory->CreateDeclNode(pIdentifiersList, pNodesFactory->CreateTypeNode(NT_INT32)), pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyse_UsageOfUndeclaredVariable_ReturnsFalse")
 	{
-		auto pExprNode = new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5))));
+		auto pExprNode = pNodesFactory->CreateAssignNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("x")),
+														 pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(-0.5))));
 
-		REQUIRE(!pSemanticAnalyser->Analyze(pExprNode, pTypeResolver, new CSymTable()));
+		REQUIRE(!pSemanticAnalyser->Analyze(pExprNode, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_CorrectTypesOfLValueAndRValueInSimpleStatement_ReturnsTrue")
@@ -45,17 +53,17 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 			x = -0.5;
 		*/
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("x"));
 
-		auto pProgram = new CASTSourceUnitNode();
+		auto pProgram = pNodesFactory->CreateSourceUnitNode();
 
-		pProgram->AttachChild(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)));
-		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5)))));
+		pProgram->AttachChild(pNodesFactory->CreateDeclNode(pIdentifiersList, pNodesFactory->CreateTypeNode(NT_DOUBLE)));
+		pProgram->AttachChild(pNodesFactory->CreateAssignNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("x")),
+															  pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(-0.5)))));
 
-		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_IncompatibleTypesOfLValueAndRValueInSimpleStatement_ReturnsFalse")
@@ -63,19 +71,20 @@ TEST_CASE("CSemanticAnalyser's tests")
 		/* 
 			x : double;
 
-			x = -0.5;
+			x = 42;
 		*/
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		auto pProgram = new CASTSourceUnitNode();
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("x"));
 
-		pProgram->AttachChild(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)));
-		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(42)))));
+		auto pProgram = pNodesFactory->CreateSourceUnitNode();
 
-		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+		pProgram->AttachChild(pNodesFactory->CreateDeclNode(pIdentifiersList, pNodesFactory->CreateTypeNode(NT_DOUBLE)));
+		pProgram->AttachChild(pNodesFactory->CreateAssignNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("x")),
+															  pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(42)))));
+
+		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassComplexExpressionWithCorrectTypes_ReturnTrue")
@@ -87,26 +96,26 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 			x = -0.5 * y + 1.0;
 		*/
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("y"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("x"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("y"));
 
-		auto pProgram = new CASTSourceUnitNode();
+		auto pProgram = pNodesFactory->CreateSourceUnitNode();
 
-		pProgram->AttachChild(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)));
-		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("y")),
-													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(1.0f)))));
-		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-													 new CASTBinaryExpressionNode(
-														 new CASTBinaryExpressionNode(
-																new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5))),
-															    TT_STAR,
-																new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("y"))),
-														 TT_PLUS,
-														 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(1.0f))))));
+		pProgram->AttachChild(pNodesFactory->CreateDeclNode(pIdentifiersList, pNodesFactory->CreateTypeNode(NT_DOUBLE)));
+		pProgram->AttachChild(pNodesFactory->CreateAssignNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("y")),
+															  pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(1.0f)))));
+		pProgram->AttachChild(pNodesFactory->CreateAssignNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("x")),
+															  pNodesFactory->CreateBinaryExpr(
+																				pNodesFactory->CreateBinaryExpr(
+																						pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(-0.5))),
+																						TT_STAR,
+																						pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("y"))),
+																				TT_PLUS,
+																				pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(1.0f))))));
 
-		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassComplexExpressionWithIncompatibleTypes_ReturnsFalse")
@@ -116,49 +125,49 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 			y = 2.0;
 
-			x = -0.5 * y + 1.0;
+			x = -0.5 * y + 1;
 		*/
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("y"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("x"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("y"));
 
-		auto pProgram = new CASTSourceUnitNode();
+		auto pProgram = pNodesFactory->CreateSourceUnitNode();
 
-		pProgram->AttachChild(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)));
-		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("y")),
-			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(1.0f)))));
-		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-			new CASTBinaryExpressionNode(
-				new CASTBinaryExpressionNode(
-					new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5))),
-					TT_STAR,
-					new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("y"))),
-				TT_PLUS,
-				new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(1))))));
+		pProgram->AttachChild(pNodesFactory->CreateDeclNode(pIdentifiersList, pNodesFactory->CreateTypeNode(NT_DOUBLE)));
+		pProgram->AttachChild(pNodesFactory->CreateAssignNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("y")),
+															  pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(1.0f)))));
+		pProgram->AttachChild(pNodesFactory->CreateAssignNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("x")),
+															  pNodesFactory->CreateBinaryExpr(
+																	pNodesFactory->CreateBinaryExpr(
+																		pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(-0.5))),
+																		TT_STAR,
+																		pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("y"))),
+																	TT_PLUS,
+																	pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(1))))));
 
-		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassDefinitionOfBuiltinTypeWithCorrectValue_ReturnsTrue")
 	{
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("x"));
 
 		/*
 			x : double = -0.5;
 		*/
-		REQUIRE(pSemanticAnalyser->Analyze(new CASTDefinitionNode(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)),
-																  new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5)))), 
-										   pTypeResolver, new CSymTable()));
+		REQUIRE(pSemanticAnalyser->Analyze(pNodesFactory->CreateDefNode(pNodesFactory->CreateDeclNode(pIdentifiersList, pNodesFactory->CreateTypeNode(NT_DOUBLE)),
+																		pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(-0.5)))), 
+										   pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassIfStatementWithIncorrectCondition_ReturnsFalse")
 	{
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("x"));
 
 		/*
 			x : double = -0.5;
@@ -167,26 +176,26 @@ TEST_CASE("CSemanticAnalyser's tests")
 				x = 1.0;
 			}
 		*/
-		auto pProgram = new CASTSourceUnitNode();
+		auto pProgram = pNodesFactory->CreateSourceUnitNode();
 
-		pProgram->AttachChild(new CASTDefinitionNode(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)),
-													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5)))));
+		pProgram->AttachChild(pNodesFactory->CreateDefNode(pNodesFactory->CreateDeclNode(pIdentifiersList, pNodesFactory->CreateTypeNode(NT_DOUBLE)),
+														   pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(-0.5)))));
 
-		auto pThenBlock = new CASTBlockNode();
+		auto pThenBlock = pNodesFactory->CreateBlockNode();
 
-		pThenBlock->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-													   new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(1.0f)))));
+		pThenBlock->AttachChild(pNodesFactory->CreateAssignNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("x")),
+																pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(1.0f)))));
 
-		pProgram->AttachChild(new CASTIfStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")), pThenBlock, nullptr));
+		pProgram->AttachChild(pNodesFactory->CreateIfStmtNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("x")), pThenBlock, nullptr));
 
-		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassIfStatementWithBooleanCondition_ReturnsTrue")
 	{
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("x"));
 
 		/*
 			x : double = -0.5;
@@ -195,23 +204,23 @@ TEST_CASE("CSemanticAnalyser's tests")
 				x = 1.0;
 			}
 		*/
-		auto pProgram = new CASTSourceUnitNode();
+		auto pProgram = pNodesFactory->CreateSourceUnitNode();
 
-		pProgram->AttachChild(new CASTDefinitionNode(new CASTDeclarationNode(pIdentifiersList, new CASTTypeNode(NT_DOUBLE)),
-			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(-0.5)))));
+		pProgram->AttachChild(pNodesFactory->CreateDefNode(pNodesFactory->CreateDeclNode(pIdentifiersList, pNodesFactory->CreateTypeNode(NT_DOUBLE)),
+			pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(-0.5)))));
 
-		auto pThenBlock = new CASTBlockNode();
+		auto pThenBlock = pNodesFactory->CreateBlockNode();
 
-		pThenBlock->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(1.0f)))));
+		pThenBlock->AttachChild(pNodesFactory->CreateAssignNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("x")),
+			pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(1.0f)))));
 
-		pProgram->AttachChild(new CASTIfStatementNode(new CASTBinaryExpressionNode(
-																	new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")), 
+		pProgram->AttachChild(pNodesFactory->CreateIfStmtNode(pNodesFactory->CreateBinaryExpr(
+																	pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("x")), 
 																	TT_LE,
-																	new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(0.0)))),
+																	pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(0.0)))),
 													  pThenBlock, nullptr));
 
-		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassCorectFunctionDeclaration_ReturnsTrue")
@@ -220,22 +229,22 @@ TEST_CASE("CSemanticAnalyser's tests")
 			f: (x: int32) -> int32;
 		*/
 
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
-		auto pArgIdentifier   = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
+		auto pArgIdentifier   = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("f"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("f"));
 
-		CASTFunctionArgsNode* pFuncArgs = new CASTFunctionArgsNode();
+		auto pFuncArgs = pNodesFactory->CreateFuncArgsNode();
 
-		pArgIdentifier->AttachChild(new CASTIdentifierNode("x"));
+		pArgIdentifier->AttachChild(pNodesFactory->CreateIdNode("x"));
 
-		pFuncArgs->AttachChild(new CASTDeclarationNode(pArgIdentifier, new CASTTypeNode(NT_INT32)));
+		pFuncArgs->AttachChild(pNodesFactory->CreateDeclNode(pArgIdentifier, pNodesFactory->CreateTypeNode(NT_INT32)));
 
-		REQUIRE(pSemanticAnalyser->Analyze(new CASTDeclarationNode(pIdentifiersList, new CASTFunctionDeclNode(
+		REQUIRE(pSemanticAnalyser->Analyze(pNodesFactory->CreateDeclNode(pIdentifiersList, pNodesFactory->CreateFuncDeclNode(
 																								nullptr,
 																								pFuncArgs,
-																								new CASTTypeNode(NT_INT32))), 
-										   pTypeResolver, new CSymTable()));
+																								pNodesFactory->CreateTypeNode(NT_INT32))), 
+										   pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassCorectFunctionArgs_ReturnsTrue")
@@ -243,32 +252,30 @@ TEST_CASE("CSemanticAnalyser's tests")
 		/*
 			(x: int32);
 		*/
-		auto pArgIdentifier   = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pArgIdentifier = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
+		pArgIdentifier->AttachChild(pNodesFactory->CreateIdNode("x"));
 
-		CASTFunctionArgsNode* pFuncArgs = new CASTFunctionArgsNode();
+		auto pFuncArgs = pNodesFactory->CreateFuncArgsNode();
+		pFuncArgs->AttachChild(pNodesFactory->CreateDeclNode(pArgIdentifier, pNodesFactory->CreateTypeNode(NT_INT32)));
 
-		pArgIdentifier->AttachChild(new CASTIdentifierNode("x"));
-
-		pFuncArgs->AttachChild(new CASTDeclarationNode(pArgIdentifier, new CASTTypeNode(NT_INT32)));
-
-		REQUIRE(pSemanticAnalyser->Analyze(pFuncArgs, pTypeResolver, new CSymTable()));
+		REQUIRE(pSemanticAnalyser->Analyze(pFuncArgs, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
-	//SECTION("TestAnalyze_PassFunctionArgsWithUndefinedType_ReturnsFalse")
-	//{
-	//	/*
-	//		(x: Type);
-	//	*/
-	//	auto pArgIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
+	SECTION("TestAnalyze_PassFunctionArgsWithUndefinedType_ReturnsFalse")
+	{
+		/*
+			(x: Type);
+		*/
+		auto pArgIdentifier = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-	//	CASTFunctionArgsNode* pFuncArgs = new CASTFunctionArgsNode();
+		CASTFunctionArgsNode* pFuncArgs = pNodesFactory->CreateFuncArgsNode();
 
-	//	pArgIdentifier->AttachChild(new CASTIdentifierNode("x"));
+		pArgIdentifier->AttachChild(pNodesFactory->CreateIdNode("x"));
 
-	//	pFuncArgs->AttachChild(new CASTDeclarationNode(pArgIdentifier, new CASTIdentifierNode("TType")));
+		pFuncArgs->AttachChild(pNodesFactory->CreateDeclNode(pArgIdentifier, pNodesFactory->CreateIdNode("TType")));
 
-	//	REQUIRE(!pSemanticAnalyser->Analyze(pFuncArgs, pTypeResolver, new CSymTable()));
-	//}
+		REQUIRE(!pSemanticAnalyser->Analyze(pFuncArgs, pTypeResolver, new CSymTable(), pNodesFactory));
+	}
 
 	SECTION("TestAnalyze_PassCorrectFunctionDefinition_ReturnsTrue")
 	{
@@ -278,25 +285,25 @@ TEST_CASE("CSemanticAnalyser's tests")
 			};
 		*/
 
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
-		auto pArgIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
+		auto pArgIdentifier = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("f"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("f"));
 
-		CASTFunctionArgsNode* pFuncArgs = new CASTFunctionArgsNode();
+		auto pFuncArgs = pNodesFactory->CreateFuncArgsNode();
 
-		pArgIdentifier->AttachChild(new CASTIdentifierNode("x"));
+		pArgIdentifier->AttachChild(pNodesFactory->CreateIdNode("x"));
 
-		pFuncArgs->AttachChild(new CASTDeclarationNode(pArgIdentifier, new CASTTypeNode(NT_INT32)));
+		pFuncArgs->AttachChild(pNodesFactory->CreateDeclNode(pArgIdentifier, pNodesFactory->CreateTypeNode(NT_INT32)));
 
-		auto pFuncDeclaration = new CASTFunctionDeclNode(nullptr, pFuncArgs, new CASTTypeNode(NT_INT32));;
+		auto pFuncDeclaration = pNodesFactory->CreateFuncDeclNode(nullptr, pFuncArgs, pNodesFactory->CreateTypeNode(NT_INT32));;
 
-		auto pFuncBody = new CASTBlockNode();
+		auto pFuncBody = pNodesFactory->CreateBlockNode();
 
-		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(42)))));
+		pFuncBody->AttachChild(pNodesFactory->CreateReturnStmtNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(42)))));
 
-		REQUIRE(pSemanticAnalyser->Analyze(new CASTFuncDefinitionNode(new CASTDeclarationNode(pIdentifiersList, pFuncDeclaration), pFuncDeclaration, pFuncBody),
-										   pTypeResolver, new CSymTable()));
+		REQUIRE(pSemanticAnalyser->Analyze(pNodesFactory->CreateFuncDefNode(pNodesFactory->CreateDeclNode(pIdentifiersList, pFuncDeclaration), pFuncDeclaration, pFuncBody),
+										   pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassIncompatibleFunctionDefinition_ReturnsFalse")
@@ -307,27 +314,27 @@ TEST_CASE("CSemanticAnalyser's tests")
 			};
 		*/
 
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
-		auto pArgIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
+		auto pArgIdentifier = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("f"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("f"));
 
-		CASTFunctionArgsNode* pFuncArgs = new CASTFunctionArgsNode();
+		auto pFuncArgs = pNodesFactory->CreateFuncArgsNode();
 
-		pArgIdentifier->AttachChild(new CASTIdentifierNode("x"));
+		pArgIdentifier->AttachChild(pNodesFactory->CreateIdNode("x"));
 
-		pFuncArgs->AttachChild(new CASTDeclarationNode(pArgIdentifier, new CASTTypeNode(NT_INT32)));
+		pFuncArgs->AttachChild(pNodesFactory->CreateDeclNode(pArgIdentifier, pNodesFactory->CreateTypeNode(NT_INT32)));
 
-		auto pFuncDeclaration = new CASTFunctionDeclNode(nullptr, pFuncArgs, new CASTTypeNode(NT_INT32));;
+		auto pFuncDeclaration = pNodesFactory->CreateFuncDeclNode(nullptr, pFuncArgs, pNodesFactory->CreateTypeNode(NT_INT32));;
 
-		auto pFuncBody = new CASTBlockNode();
+		auto pFuncBody = pNodesFactory->CreateBlockNode();
 
-		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(42)))));
+		pFuncBody->AttachChild(pNodesFactory->CreateReturnStmtNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(42)))));
 
-		REQUIRE(!pSemanticAnalyser->Analyze(new CASTFuncDefinitionNode(new CASTDeclarationNode(pIdentifiersList, pFuncDeclaration), 
-																	   new CASTFunctionDeclNode(nullptr, new CASTFunctionArgsNode(), new CASTTypeNode(NT_INT32)),
+		REQUIRE(!pSemanticAnalyser->Analyze(pNodesFactory->CreateFuncDefNode(pNodesFactory->CreateDeclNode(pIdentifiersList, pFuncDeclaration), 
+																	   pNodesFactory->CreateFuncDeclNode(nullptr, pNodesFactory->CreateFuncArgsNode(), pNodesFactory->CreateTypeNode(NT_INT32)),
 																	   pFuncBody),
-										    pTypeResolver, new CSymTable()));
+										    pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassFunctionCallIncompatibleWithExpression_ReturnsFalse")
@@ -342,48 +349,42 @@ TEST_CASE("CSemanticAnalyser's tests")
 			x = x + f(0);
 		*/
 
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
-		auto pArgIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
+		auto pArgIdentifier = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("f"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("f"));
 
-		CASTFunctionArgsNode* pFuncArgs = new CASTFunctionArgsNode();
+		auto pFuncArgs = pNodesFactory->CreateFuncArgsNode();
 
-		pArgIdentifier->AttachChild(new CASTIdentifierNode("x"));
+		pArgIdentifier->AttachChild(pNodesFactory->CreateIdNode("x"));
 
-		pFuncArgs->AttachChild(new CASTDeclarationNode(pArgIdentifier, new CASTTypeNode(NT_INT32)));
+		pFuncArgs->AttachChild(pNodesFactory->CreateDeclNode(pArgIdentifier, pNodesFactory->CreateTypeNode(NT_INT32)));
 
-		auto pFuncDeclaration = new CASTFunctionDeclNode(nullptr, pFuncArgs, new CASTTypeNode(NT_INT32));;
+		auto pFuncDeclaration = pNodesFactory->CreateFuncDeclNode(nullptr, pFuncArgs, pNodesFactory->CreateTypeNode(NT_INT32));;
 
-		auto pFuncBody = new CASTBlockNode();
+		auto pFuncBody = pNodesFactory->CreateBlockNode();
 
-		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(42)))));
+		pFuncBody->AttachChild(pNodesFactory->CreateReturnStmtNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(42)))));
 
-		auto pXIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
-		pXIdentifier->AttachChild(new CASTIdentifierNode("x"));
+		auto pXIdentifier = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
+		pXIdentifier->AttachChild(pNodesFactory->CreateIdNode("x"));
 
-		auto pProgram = new CASTSourceUnitNode();
+		auto pProgram = pNodesFactory->CreateSourceUnitNode();
 
-		auto pCallArgs = new CASTNode(NT_FUNC_ARGS);
-		pCallArgs->AttachChild(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(0))));
+		auto pCallArgs = pNodesFactory->CreateNode(NT_FUNC_ARGS);
+		pCallArgs->AttachChild(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(0))));
 
-		pProgram->AttachChild(new CASTFuncDefinitionNode(new CASTDeclarationNode(pIdentifiersList, pFuncDeclaration), pFuncDeclaration, pFuncBody));
-		pProgram->AttachChild(new CASTDefinitionNode(new CASTDeclarationNode(pXIdentifier, new CASTTypeNode(NT_DOUBLE)), 
-													 new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CDoubleValue(0.0)))));
-		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-													 new CASTBinaryExpressionNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
+		pProgram->AttachChild(pNodesFactory->CreateFuncDefNode(pNodesFactory->CreateDeclNode(pIdentifiersList, pFuncDeclaration), pFuncDeclaration, pFuncBody));
+		pProgram->AttachChild(pNodesFactory->CreateDefNode(pNodesFactory->CreateDeclNode(pXIdentifier, pNodesFactory->CreateTypeNode(NT_DOUBLE)), 
+													 pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CDoubleValue(0.0)))));
+		pProgram->AttachChild(pNodesFactory->CreateAssignNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("x")),
+													 pNodesFactory->CreateBinaryExpr(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("x")),
 																				  TT_PLUS,
-																				  new CASTUnaryExpressionNode(TT_DEFAULT, 
-																						new CASTFunctionCallNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("f")),
+																				  pNodesFactory->CreateUnaryExpr(TT_DEFAULT, 
+																						pNodesFactory->CreateFuncCallNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("f")),
 																										         pCallArgs)))));
-
 		
-
-		auto pSymTable = new CSymTable();
-		
-		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable));
-
-		delete pSymTable;
+		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassFunctionCallWithExpression_ReturnsTrue")
@@ -398,39 +399,39 @@ TEST_CASE("CSemanticAnalyser's tests")
 			x = x + f(0);
 		*/
 
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
-		auto pArgIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
+		auto pArgIdentifier   = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("f"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("f"));
 
-		CASTFunctionArgsNode* pFuncArgs = new CASTFunctionArgsNode();
+		auto pFuncArgs = pNodesFactory->CreateFuncArgsNode();
 
-		pArgIdentifier->AttachChild(new CASTIdentifierNode("x"));
+		pArgIdentifier->AttachChild(pNodesFactory->CreateIdNode("x"));
 
-		pFuncArgs->AttachChild(new CASTDeclarationNode(pArgIdentifier, new CASTTypeNode(NT_INT32), AV_FUNC_ARG_DECL));
+		pFuncArgs->AttachChild(pNodesFactory->CreateDeclNode(pArgIdentifier, pNodesFactory->CreateTypeNode(NT_INT32), AV_FUNC_ARG_DECL));
 
-		auto pFuncDeclaration = new CASTFunctionDeclNode(nullptr, pFuncArgs, new CASTTypeNode(NT_INT32));;
+		auto pFuncDeclaration = pNodesFactory->CreateFuncDeclNode(nullptr, pFuncArgs, pNodesFactory->CreateTypeNode(NT_INT32));;
 
-		auto pFuncBody = new CASTBlockNode();
+		auto pFuncBody = pNodesFactory->CreateBlockNode();
 
-		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(42)))));
+		pFuncBody->AttachChild(pNodesFactory->CreateReturnStmtNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(42)))));
 
-		auto pXIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
-		pXIdentifier->AttachChild(new CASTIdentifierNode("x"));
+		auto pXIdentifier = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
+		pXIdentifier->AttachChild(pNodesFactory->CreateIdNode("x"));
 
-		auto pProgram = new CASTSourceUnitNode();
+		auto pProgram = pNodesFactory->CreateSourceUnitNode();
 
-		auto pCallArgs = new CASTNode(NT_FUNC_ARGS);
-		pCallArgs->AttachChild(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(0))));
+		auto pCallArgs = pNodesFactory->CreateNode(NT_FUNC_ARGS);
+		pCallArgs->AttachChild(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(0))));
 
-		pProgram->AttachChild(new CASTFuncDefinitionNode(new CASTDeclarationNode(pIdentifiersList, pFuncDeclaration), pFuncDeclaration, pFuncBody));
-		pProgram->AttachChild(new CASTDefinitionNode(new CASTDeclarationNode(pXIdentifier, new CASTTypeNode(NT_INT32)),
-			new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(0)))));
-		pProgram->AttachChild(new CASTAssignmentNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
-													new CASTBinaryExpressionNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("x")),
+		pProgram->AttachChild(pNodesFactory->CreateFuncDefNode(pNodesFactory->CreateDeclNode(pIdentifiersList, pFuncDeclaration), pFuncDeclaration, pFuncBody));
+		pProgram->AttachChild(pNodesFactory->CreateDefNode(pNodesFactory->CreateDeclNode(pXIdentifier, pNodesFactory->CreateTypeNode(NT_INT32)),
+			pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(0)))));
+		pProgram->AttachChild(pNodesFactory->CreateAssignNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("x")),
+													pNodesFactory->CreateBinaryExpr(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("x")),
 														TT_PLUS,
-														new CASTUnaryExpressionNode(TT_DEFAULT,
-															new CASTFunctionCallNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTIdentifierNode("f")),
+														pNodesFactory->CreateUnaryExpr(TT_DEFAULT,
+															pNodesFactory->CreateFuncCallNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("f")),
 																pCallArgs)))));
 		
 		pSemanticAnalyser->OnErrorOutput += [](E_SEMANTIC_ANALYSER_ERRORS err)
@@ -438,7 +439,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 			REQUIRE(false);
 		};
 
-		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_DefineTwoVariablesWithSameFunctionDefinition_ReturnsFalse")
@@ -449,26 +450,25 @@ TEST_CASE("CSemanticAnalyser's tests")
 			};
 		*/
 
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
-		auto pArgIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
+		auto pArgIdentifier   = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("f"));
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("g"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("f"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("g"));
 
-		CASTFunctionArgsNode* pFuncArgs = new CASTFunctionArgsNode();
+		auto pFuncArgs = pNodesFactory->CreateFuncArgsNode();
 
-		pArgIdentifier->AttachChild(new CASTIdentifierNode("x"));
+		pArgIdentifier->AttachChild(pNodesFactory->CreateIdNode("x"));
 
-		pFuncArgs->AttachChild(new CASTDeclarationNode(pArgIdentifier, new CASTTypeNode(NT_INT32)));
+		pFuncArgs->AttachChild(pNodesFactory->CreateDeclNode(pArgIdentifier, pNodesFactory->CreateTypeNode(NT_INT32)));
 
-		auto pFuncDeclaration = new CASTFunctionDeclNode(nullptr, pFuncArgs, new CASTTypeNode(NT_INT32));;
+		auto pFuncDeclaration = pNodesFactory->CreateFuncDeclNode(nullptr, pFuncArgs, pNodesFactory->CreateTypeNode(NT_INT32));;
 
-		auto pFuncBody = new CASTBlockNode();
+		auto pFuncBody = pNodesFactory->CreateBlockNode();
+		pFuncBody->AttachChild(pNodesFactory->CreateReturnStmtNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(42)))));
 
-		pFuncBody->AttachChild(new CASTReturnStatementNode(new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(new CIntValue(42)))));
-
-		REQUIRE(!pSemanticAnalyser->Analyze(new CASTFuncDefinitionNode(new CASTDeclarationNode(pIdentifiersList, pFuncDeclaration), pFuncDeclaration, pFuncBody),
-											pTypeResolver, new CSymTable()));
+		REQUIRE(!pSemanticAnalyser->Analyze(pNodesFactory->CreateFuncDefNode(pNodesFactory->CreateDeclNode(pIdentifiersList, pFuncDeclaration), pFuncDeclaration, pFuncBody),
+											pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassInvalidFunctionDeclaration_ReturnsFalse")
@@ -477,23 +477,22 @@ TEST_CASE("CSemanticAnalyser's tests")
 			f: (x, y: int32) -> int32;
 		*/
 
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
-		auto pArgIdentifier = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
+		auto pArgIdentifier   = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("f"));
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("f"));
 
-		CASTFunctionArgsNode* pFuncArgs = new CASTFunctionArgsNode();
+		pArgIdentifier->AttachChild(pNodesFactory->CreateIdNode("x"));
+		pArgIdentifier->AttachChild(pNodesFactory->CreateIdNode("y"));
 
-		pArgIdentifier->AttachChild(new CASTIdentifierNode("x"));
-		pArgIdentifier->AttachChild(new CASTIdentifierNode("y"));
+		CASTFunctionArgsNode* pFuncArgs = pNodesFactory->CreateFuncArgsNode();
+		pFuncArgs->AttachChild(pNodesFactory->CreateDeclNode(pArgIdentifier, pNodesFactory->CreateTypeNode(NT_INT32), AV_FUNC_ARG_DECL));
 
-		pFuncArgs->AttachChild(new CASTDeclarationNode(pArgIdentifier, new CASTTypeNode(NT_INT32), AV_FUNC_ARG_DECL));
-
-		REQUIRE(!pSemanticAnalyser->Analyze(new CASTDeclarationNode(pIdentifiersList, new CASTFunctionDeclNode(
+		REQUIRE(!pSemanticAnalyser->Analyze(pNodesFactory->CreateDeclNode(pIdentifiersList, pNodesFactory->CreateFuncDeclNode(
 											nullptr,
 											pFuncArgs,
-											new CASTTypeNode(NT_INT32))),
-											pTypeResolver, new CSymTable()));
+											pNodesFactory->CreateTypeNode(NT_INT32))),
+											pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassCorrectShortEnumDeclaration_ReturnsTrue")
@@ -503,17 +502,12 @@ TEST_CASE("CSemanticAnalyser's tests")
 				first, second
 			}
 		*/
-
-		ISymTable* pSymTable = new CSymTable();
-
 		pSymTable->CreateNamedScope("NewEnum");
 		pSymTable->AddVariable({ "first", nullptr, nullptr });
 		pSymTable->AddVariable({ "second", nullptr, nullptr });
 		pSymTable->LeaveScope();
 
-		REQUIRE(pSemanticAnalyser->Analyze(new CASTEnumDeclNode(new CASTIdentifierNode("NewEnum")), pTypeResolver, pSymTable));
-
-		delete pSymTable;
+		REQUIRE(pSemanticAnalyser->Analyze(pNodesFactory->CreateEnumDeclNode(pNodesFactory->CreateIdNode("NewEnum")), pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_CorrectPointerDeclaration_ReturnsTrue")
@@ -521,18 +515,16 @@ TEST_CASE("CSemanticAnalyser's tests")
 		/*
 			x : double*;
 		*/
-		auto pIdentifiersList = new CASTNode(NT_IDENTIFIERS_LIST);
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("x"));
+		
+		auto pPointerType = pNodesFactory->CreateTypeNode(NT_POINTER);
+		pPointerType->AttachChild(pNodesFactory->CreateTypeNode(NT_DOUBLE));
 
-		pIdentifiersList->AttachChild(new CASTIdentifierNode("x"));
+		auto pProgram = pNodesFactory->CreateSourceUnitNode();
+		pProgram->AttachChild(pNodesFactory->CreateDeclNode(pIdentifiersList, pPointerType));
 
-		auto pProgram = new CASTSourceUnitNode();
-
-		auto pPointerType = new CASTTypeNode(NT_POINTER);
-		pPointerType->AttachChild(new CASTTypeNode(NT_DOUBLE));
-
-		pProgram->AttachChild(new CASTDeclarationNode(pIdentifiersList, pPointerType));
-
-		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassBreakOperatorOutsideOfLoop_ReturnsFalse")
@@ -541,7 +533,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 			break;
 		*/
 
-		REQUIRE(!pSemanticAnalyser->Analyze(new CASTBreakOperatorNode(), pTypeResolver, new CSymTable()));
+		REQUIRE(!pSemanticAnalyser->Analyze(pNodesFactory->CreateBreakNode(), pTypeResolver, pSymTable, pNodesFactory));
 	}
 
 	SECTION("TestAnalyze_PassBreakOperatorWithinOfLoop_ReturnsTrue")
@@ -551,17 +543,19 @@ TEST_CASE("CSemanticAnalyser's tests")
 				break;
 			}
 		*/
-
-		auto pProgram = new CASTSourceUnitNode();
 		
-		auto pLoopBody = new CASTBlockNode();
-		pLoopBody->AttachChild(new CASTBreakOperatorNode());
+		auto pLoopBody = pNodesFactory->CreateBlockNode();
+		pLoopBody->AttachChild(pNodesFactory->CreateBreakNode());
 
-		pProgram->AttachChild(new CASTLoopStatementNode(pLoopBody));
+		auto pProgram = pNodesFactory->CreateSourceUnitNode();
+		pProgram->AttachChild(pNodesFactory->CreateLoopStmtNode(pLoopBody));
 
-		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, new CSymTable()));
+		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
+	delete pSymTable;
+	delete pNodesFactory;
 	delete pTypeResolver;
+	delete pInterpreter;
 	delete pSemanticAnalyser;
 }

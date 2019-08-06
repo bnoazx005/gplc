@@ -487,12 +487,14 @@ namespace gplc
 
 				currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
 
-				do
+				numberLiteral.push_back(currCh);
+
+				while (std::isdigit(currCh = _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos, 0)) && currCh != '9')
 				{
 					numberLiteral.push_back(currCh);
 
 					currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
-				} while (std::isdigit(currCh) && currCh != '9');
+				}
 			}
 
 			if (nextCh == 'x' || nextCh == 'X') // hexagonal 
@@ -501,13 +503,12 @@ namespace gplc
 
 				currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
 
-				do
+				while (std::isdigit(currCh = _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos, 0)))
 				{
 					numberLiteral.push_back(currCh);
 
 					currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
-				} 
-				while (std::isdigit(currCh) || hexAlphabet.find(currCh) != std::string::npos);
+				}
 			}
 
 			if (nextCh == 'b' || nextCh == 'B') // binary
@@ -515,11 +516,13 @@ namespace gplc
 				numberType |= NB_BIN;
 
 				currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
-
-				while ((currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)) == '0' || currCh == '1')
+				
+				while ((currCh = _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos, 0)) == '0' || currCh == '1')
 				{
 					numberLiteral.push_back(currCh);
-				} 
+
+					currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
+				}
 			}
 
 			if (nextCh == '.') // floating point value
