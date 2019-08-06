@@ -15,7 +15,7 @@ void OnLexerError(const TLexerErrorInfo& errorInfo)
 
 void OnParserError(const TParserErrorInfo& errorInfo)
 {
-	std::cout << "(" << errorInfo.mPos << ";" << errorInfo.mLine << ") " << errorInfo.mMessage << std::endl;
+	std::cout << "Error: (" << errorInfo.mPos << ";" << errorInfo.mLine << ") " << errorInfo.mMessage << std::endl;
 }
 
 
@@ -67,7 +67,7 @@ int main(int argc, const char** argv)
 		return -1;
 	}
 
-	bool result = pSemanticAnalyser->Analyze(pSourceAST, pTypeResolver, pSymTable);
+	bool result = pSemanticAnalyser->Analyze(pSourceAST, pTypeResolver, pSymTable, pASTNodesFactory);
 
 	if (!result)
 	{

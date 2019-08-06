@@ -1035,7 +1035,7 @@ namespace gplc
 		// add information about enum's type
 		auto pEnumDesc = mpSymTable->LookUpNamedScope(enumName);
 
-		pEnumDesc->mpType = new CEnumType(enumName);
+		pEnumDesc->mpType = new CEnumType(mpSymTable, enumName);
 
 		const CToken* pCurrEnumField = nullptr;
 
@@ -1071,24 +1071,10 @@ namespace gplc
 			{
 				pLexer->GetNextToken(); // take =
 
-				auto pCurrToken = pLexer->GetCurrToken();
-
 				// \note by default, the enumerator can be initialized with some basic literal's value, but all enumerators should have the same type of literals
-				
-				// \todo reimplement this to allow use of expressions too with literals
-				if (!SUCCESS(_expect(TT_LITERAL, pCurrToken)))
-				{
-
-					OnErrorOutput.Invoke({ PE_INVALID_ENUMERATOR_VALUE, "", pCurrToken->GetPos(), pCurrToken->GetLine() });
-
-					return false;
-				}
-
 				pPrevEnumeratorValue = _parseExpression(pLexer); // \note type is resolved in semantic analyser's stage
 
 				pCurrEnumerator->mpValue = pPrevEnumeratorValue;
-
-				pLexer->GetNextToken();
 			}
 			
 			// \note assign default value if it wasn't assigned by a user

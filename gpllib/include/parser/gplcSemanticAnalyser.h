@@ -23,6 +23,7 @@ namespace gplc
 	class CASTNode;
 	class ITypeResolver;
 	class ISymTable;
+	class IASTNodesFactory;
 
 
 	/*!
@@ -43,7 +44,7 @@ namespace gplc
 				false in other cases
 			*/
 
-			virtual bool Analyze(CASTNode* pInput, ITypeResolver* pTypeResolver, ISymTable* pSymTable) = 0;
+			virtual bool Analyze(CASTNode* pInput, ITypeResolver* pTypeResolver, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory) = 0;
 		public:
 			CDelegate<void, E_SEMANTIC_ANALYSER_ERRORS> OnErrorOutput;
 	};
@@ -63,7 +64,7 @@ namespace gplc
 				false in other cases
 			*/
 
-			bool Analyze(CASTNode* pInput, ITypeResolver* pTypeResolver, ISymTable* pSymTable) override;
+			bool Analyze(CASTNode* pInput, ITypeResolver* pTypeResolver, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory) override;
 
 			bool VisitProgramUnit(CASTSourceUnitNode* pProgramNode) override;
 
@@ -125,13 +126,15 @@ namespace gplc
 
 			bool _containsBreak(CASTBlockNode* pLoopBody) const;
 		protected:
-			ITypeResolver* mpTypeResolver;
+			ITypeResolver*    mpTypeResolver;
 
-			ISymTable*     mpSymTable;
+			ISymTable*        mpSymTable;
 			
-			bool           mLockSymbolTable;
+			IASTNodesFactory* mpNodesFactory;
 
-			bool           mStayWithinLoop;
+			bool              mLockSymbolTable;
+
+			bool              mStayWithinLoop;
 	};
 }
 

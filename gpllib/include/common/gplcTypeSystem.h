@@ -27,6 +27,7 @@ namespace gplc
 	class CType;
 	class CBaseValue;
 	class IConstExprInterpreter;
+	class IASTNodesFactory;
 
 
 	E_COMPILER_TYPES NodeToCompilerType(E_NODE_TYPE nodeType);
@@ -163,7 +164,7 @@ namespace gplc
 
 			virtual const std::string& GetName() const;
 
-			virtual CBaseValue* GetDefaultValue() const;
+			virtual CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const;
 
 			/*!
 				\brief The operator of equality checks up whether two
@@ -236,7 +237,7 @@ namespace gplc
 
 			const TFieldsArray& GetFieldsTypes() const;
 
-			CBaseValue* GetDefaultValue() const override;
+			CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const override;
 
 			bool AreSame(const CType* pType) const override;
 
@@ -269,7 +270,7 @@ namespace gplc
 
 			CType* GetReturnValueType() const;
 
-			CBaseValue* GetDefaultValue() const override;
+			CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const override;
 
 			bool AreSame(const CType* pType) const override;
 
@@ -290,12 +291,12 @@ namespace gplc
 	class CEnumType : public CType
 	{		
 		public:
-			CEnumType(const std::string& enumName);
+			CEnumType(const ISymTable* pSymTable, const std::string& enumName);
 			virtual ~CEnumType() = default;
 			
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
 
-			CBaseValue* GetDefaultValue() const override;
+			CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const override;
 
 			bool AreSame(const CType* pType) const override;
 
@@ -303,6 +304,8 @@ namespace gplc
 		protected:
 			CEnumType() = default;
 			CEnumType(const CEnumType& enumType) = default;
+		protected:
+			const ISymTable* mpSymTable;
 	};
 
 
@@ -320,7 +323,7 @@ namespace gplc
 
 			bool IsBuiltIn() const override;
 
-			CBaseValue* GetDefaultValue() const override;
+			CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const override;
 
 			bool AreSame(const CType* pType) const override;
 
@@ -359,7 +362,7 @@ namespace gplc
 
 			void SetAttributes(U32 attributes);
 
-			CBaseValue* GetDefaultValue() const override;
+			CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const override;
 
 			bool AreSame(const CType* pType) const override;
 

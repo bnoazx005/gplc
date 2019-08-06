@@ -216,6 +216,18 @@ namespace gplc
 		return value.first /* is valid */ ? &value.second : nullptr;
 	}
 
+	const TSymbolDesc* CSymTable::LookUp(TSymbolHandle symbolHandle) const
+	{
+		if (symbolHandle == InvalidSymbolHandle || symbolHandle > mSymbols.size())
+		{
+			return nullptr;
+		}
+
+		const TSymbolsArray::value_type& value = mSymbols.at(symbolHandle - 1);
+
+		return value.first /* is valid */ ? &value.second : nullptr;
+	}
+
 	CSymTable::TSymTableEntry* CSymTable::LookUpNamedScope(const std::string& scopeName) const
 	{
 		const TSymTableEntry* pCurrEntry = mpCurrScopeEntry;

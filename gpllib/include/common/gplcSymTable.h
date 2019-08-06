@@ -96,6 +96,7 @@ namespace gplc
 
 			virtual const TSymbolDesc* LookUp(const std::string& variableName) const = 0;
 			virtual TSymbolDesc* LookUp(TSymbolHandle symbolHandle) = 0;
+			virtual const TSymbolDesc* LookUp(TSymbolHandle symbolHandle) const = 0;
 
 			virtual TSymTableEntry* LookUpNamedScope(const std::string& scopeName) const = 0;
 
@@ -135,6 +136,7 @@ namespace gplc
 			
 			const TSymbolDesc* LookUp(const std::string& variableName) const override;
 			TSymbolDesc* LookUp(TSymbolHandle symbolHandle) override;
+			const TSymbolDesc* LookUp(TSymbolHandle symbolHandle) const override;
 
 			TSymTableEntry* LookUpNamedScope(const std::string& scopeName) const override;
 

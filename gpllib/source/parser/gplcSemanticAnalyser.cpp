@@ -2,19 +2,21 @@
 #include "common/gplcSymTable.h"
 #include "parser/gplcASTNodes.h"
 #include "common/gplcTypeSystem.h"
+#include "parser/gplcASTNodesFactory.h"
 
 
 namespace gplc
 {
-	bool CSemanticAnalyser::Analyze(CASTNode* pInput, ITypeResolver* pTypeResolver, ISymTable* pSymTable)
+	bool CSemanticAnalyser::Analyze(CASTNode* pInput, ITypeResolver* pTypeResolver, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory)
 	{
-		if (!pSymTable || !pInput || !pTypeResolver)
+		if (!pSymTable || !pInput || !pTypeResolver || !pNodesFactory)
 		{
 			return false;
 		}
 
 		mpTypeResolver = pTypeResolver;
 		mpSymTable     = pSymTable;
+		mpNodesFactory = pNodesFactory;
 
 		mLockSymbolTable = false;
 		mStayWithinLoop  = false;
@@ -77,7 +79,7 @@ namespace gplc
 
 			pTypeInfo->SetAttribute(currAttributes);
 
-			auto pDefaultValueExpr = new CASTUnaryExpressionNode(TT_DEFAULT, new CASTLiteralNode(pTypeInfo->GetDefaultValue()));
+			auto pDefaultValueExpr = pTypeInfo->GetDefaultValue(mpNodesFactory);
 
 			// do not register variable if it belongs to some structure, because it's already there
 			if (currAttributes & AV_STRUCT_FIELD_DECL)

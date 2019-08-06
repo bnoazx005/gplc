@@ -13,6 +13,7 @@
 #include "common/gplcValues.h"
 #include "common/gplcSymTable.h"
 #include "common/gplcConstExprInterpreter.h"
+#include "parser/gplcASTNodesFactory.h"
 #include "utils/CResult.h"
 #include <algorithm>
 
@@ -407,11 +408,11 @@ namespace gplc
 		return mAttributes;
 	}
 	
-	CBaseValue* CType::GetDefaultValue() const
+	CASTExpressionNode* CType::GetDefaultValue(IASTNodesFactory* pNodesFactory) const
 	{
 		if (IsBuiltIn())
 		{
-			return _getBuiltinTypeDefaultValue(mType);
+			return pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(_getBuiltinTypeDefaultValue(mType)));
 		}
 
 		return nullptr;
@@ -591,9 +592,9 @@ namespace gplc
 		return mFieldsTypes;
 	}
 
-	CBaseValue* CStructType::GetDefaultValue() const
+	CASTExpressionNode* CStructType::GetDefaultValue(IASTNodesFactory* pNodesFactory) const
 	{
-		return new CIntValue(0);
+		return pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(0)));
 	}
 
 	bool CStructType::AreSame(const CType* pType) const
@@ -660,9 +661,9 @@ namespace gplc
 		return mpReturnValueType;
 	}
 
-	CBaseValue* CFunctionType::GetDefaultValue() const
+	CASTExpressionNode* CFunctionType::GetDefaultValue(IASTNodesFactory* pNodesFactory) const
 	{
-		return new CPointerValue();
+		return pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CPointerValue()));
 	}
 
 	bool CFunctionType::AreSame(const CType* pType) const
@@ -708,8 +709,8 @@ namespace gplc
 	}
 
 
-	CEnumType::CEnumType(const std::string& enumName):
-		CType(CT_ENUM, BTS_INT32, 0x0, enumName)
+	CEnumType::CEnumType(const ISymTable* pSymTable, const std::string& enumName):
+		CType(CT_ENUM, BTS_INT32, 0x0, enumName), mpSymTable(pSymTable)
 	{
 		mChildren.push_back(nullptr); // \note this is a trick to make IsBuiltin work correct for this type
 	}
@@ -719,9 +720,18 @@ namespace gplc
 		return pVisitor->VisitEnumType(this);
 	}
 
-	CBaseValue* CEnumType::GetDefaultValue() const
+	CASTExpressionNode* CEnumType::GetDefaultValue(IASTNodesFactory* pNodesFactory) const
 	{
-		return new CIntValue(0);
+		auto pEnumDesc = mpSymTable->LookUpNamedScope(mName);
+		
+		// if the enumeration doesn't contain any enumerator return 0
+		if (pEnumDesc->mVariables.empty())
+		{
+			return pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(0)));
+		}
+
+		// return value of a first enumerator
+		return mpSymTable->LookUp(pEnumDesc->mVariables.begin()->second)->mpValue;
 	}
 	
 	bool CEnumType::AreSame(const CType* pType) const
@@ -758,11 +768,11 @@ namespace gplc
 		return pDependentType->IsBuiltIn();
 	}
 
-	CBaseValue* CDependentNamedType::GetDefaultValue() const
+	CASTExpressionNode* CDependentNamedType::GetDefaultValue(IASTNodesFactory* pNodesFactory) const
 	{
 		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
 
-		return pDependentType->GetDefaultValue();
+		return pDependentType->GetDefaultValue(pNodesFactory);
 	}
 
 	bool CDependentNamedType::AreSame(const CType* pType) const
@@ -834,9 +844,9 @@ namespace gplc
 		mAttributes = attributes;
 	}
 
-	CBaseValue* CArrayType::GetDefaultValue() const
+	CASTExpressionNode* CArrayType::GetDefaultValue(IASTNodesFactory* pNodesFactory) const
 	{
-		return new CIntValue(0);
+		return pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(0)));
 	}
 
 	bool CArrayType::AreSame(const CType* pType) const
