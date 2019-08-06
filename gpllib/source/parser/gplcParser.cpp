@@ -956,6 +956,13 @@ namespace gplc
 
 				return pFuncDefNode;
 			}
+
+			CASTExpressionNode* pInitializerExpr = _parseExpression(pLexer);
+
+			// if user didn't specify type explicitly we need to store initializer's value to infer it later in semantic analysis stage
+			pDecl->SetTypeInfo(pInitializerExpr);
+
+			return mpNodesFactory->CreateDefNode(pDecl, pInitializerExpr);
 		}
 		else if (pTypeInfo->GetType() == NT_FUNC_DECL)
 		{
