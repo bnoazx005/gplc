@@ -132,6 +132,9 @@ namespace gplc
 				case CT_STRUCT:
 					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext)));
 					break;
+				case CT_POINTER:
+					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, pIdentifiersType));
+					break;
 				default:
 					currIRBuidler.CreateStore(pIdentifiersValue, pCurrVariableAllocation); // for built-in types only
 					break;
@@ -403,7 +406,7 @@ namespace gplc
 		llvm::Value* pIdentifiersValue = nullptr;
 
 		auto& irBuilder = mIRBuildersStack.top();
-
+		
 		for (auto pCurrIdentifier : pIdentifiers)
 		{
 			const std::string& currIdentifierName = dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName();
@@ -638,6 +641,11 @@ namespace gplc
 		}
 
 		return pAccessInstruction;
+	}
+
+	TLLVMIRData CLLVMCodeGenerator::VisitPointerTypeNode(CASTPointerTypeNode* pNode)
+	{
+		return {};
 	}
 
 	llvm::Instruction::BinaryOps CLLVMCodeGenerator::_convertOpTypeToLLVM(E_TOKEN_TYPE opType, bool isFloatingPointOp) const

@@ -41,6 +41,7 @@ namespace gplc
 	class CASTAccessOperatorNode;
 	class CASTArrayTypeNode;
 	class CASTIndexedAccessOperatorNode;
+	class CASTPointerTypeNode;
 
 
 	template <typename T>
@@ -74,6 +75,7 @@ namespace gplc
 			virtual T VisitAccessOperator(CASTAccessOperatorNode* pNode) = 0;
 			virtual T VisitArrayTypeNode(CASTArrayTypeNode* pNode) = 0;
 			virtual T VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) = 0;
+			virtual T VisitPointerTypeNode(CASTPointerTypeNode* pNode) = 0;
 		protected:
 			IASTNodeVisitor() = default;
 			IASTNodeVisitor(const IASTNodeVisitor& visitor) = default;
@@ -130,6 +132,7 @@ namespace gplc
 	class CStructType;
 	class CDependentNamedType;
 	class CArrayType;
+	class CPointerType;
 
 
 	template <typename T>
@@ -145,6 +148,7 @@ namespace gplc
 			virtual T VisitNamedType(const CDependentNamedType* pNamedType) = 0;
 			virtual T VisitEnumType(const CEnumType* pEnumType) = 0;
 			virtual T VisitStaticSizedArray(const CArrayType* pArrayType) = 0;
+			virtual T VisitPointerType(const CPointerType* pPointerType) = 0;
 		protected:
 			ITypeVisitor(const ITypeVisitor& visitor) = default;
 	};

@@ -24,33 +24,35 @@ namespace gplc
 	{
 		switch (nodeType)
 		{
-		case CT_INT8:
-			return NT_INT8;
-		case CT_INT16:
-			return NT_INT16;
-		case CT_INT32:
-			return NT_INT32;
-		case CT_INT64:
-			return NT_INT64;
-		case CT_UINT8:
-			return NT_UINT8;
-		case CT_UINT16:
-			return NT_UINT16;
-		case CT_UINT32:
-			return NT_UINT32;
-		case CT_UINT64:
-			return NT_UINT64;
-		case CT_FLOAT:
-			return NT_FLOAT;
-		case CT_DOUBLE:
-			return NT_DOUBLE;
-		case CT_STRING:
-			return NT_STRING;
-		case CT_CHAR:
-			return NT_CHAR;
-		case CT_BOOL:
-			return NT_BOOL;
+			case CT_INT8:
+				return NT_INT8;
+			case CT_INT16:
+				return NT_INT16;
+			case CT_INT32:
+				return NT_INT32;
+			case CT_INT64:
+				return NT_INT64;
+			case CT_UINT8:
+				return NT_UINT8;
+			case CT_UINT16:
+				return NT_UINT16;
+			case CT_UINT32:
+				return NT_UINT32;
+			case CT_UINT64:
+				return NT_UINT64;
+			case CT_FLOAT:
+				return NT_FLOAT;
+			case CT_DOUBLE:
+				return NT_DOUBLE;
+			case CT_STRING:
+				return NT_STRING;
+			case CT_CHAR:
+				return NT_CHAR;
+			case CT_BOOL:
+				return NT_BOOL;
 		}
+
+		return NT_VOID;
 	}
 
 	/*!
@@ -77,9 +79,7 @@ namespace gplc
 
 	CType* CTypeResolver::VisitBaseNode(CASTTypeNode* pNode)
 	{
-		E_NODE_TYPE basicType = (pNode->GetType() == NT_POINTER) ? pNode->GetChildren()[0]->GetType() : pNode->GetType();
-
-		return _deduceBuiltinType(basicType, (pNode->GetType() == NT_POINTER) ? AV_POINTER : 0x0);
+		return _deduceBuiltinType(pNode->GetType());
 	}
 
 	CType* CTypeResolver::VisitIdentifier(CASTIdentifierNode* pNode)
@@ -249,6 +249,11 @@ namespace gplc
 		CArrayType* pArrayType = dynamic_cast<CArrayType*>(pExprType);
 
 		return pArrayType->GetBaseType();
+	}
+
+	CType* CTypeResolver::VisitPointerType(CASTPointerTypeNode* pNode)
+	{
+		return new CPointerType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())));
 	}
 
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type, U32 attributes)
@@ -559,6 +564,66 @@ namespace gplc
 		}
 
 		return nullptr; ///< unknown type
+	}
+
+
+	/*!
+		\brief CPointerType's definition
+	*/
+
+	CPointerType::CPointerType(CType* pType):
+		CType(CT_POINTER, BTS_POINTER, AV_POINTER), mpBaseType(pType)
+	{
+	}
+
+	CPointerType::~CPointerType()
+	{
+	}
+
+	TLLVMIRData CPointerType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitPointerType(this);
+	}
+
+	CASTExpressionNode* CPointerType::GetDefaultValue(IASTNodesFactory* pNodesFactory) const
+	{
+		// \todo temprorary solution, reimplement this later with CPointerValue type
+		return pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(0)));
+		//return pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CPointerValue()));
+	}
+
+	bool CPointerType::AreSame(const CType* pType) const
+	{
+		E_COMPILER_TYPES otherType = pType->GetType();
+
+		if (otherType != CT_POINTER || otherType != CT_ARRAY)
+		{
+			return false;
+		}
+
+		CType* pBaseType = nullptr;
+
+		switch (otherType)
+		{
+			case CT_POINTER:
+				pBaseType = dynamic_cast<const CPointerType*>(pType)->GetBaseType();
+				break;
+			case CT_ARRAY:
+				pBaseType = dynamic_cast<const CArrayType*>(pType)->GetBaseType();
+				break;
+		}
+
+		return mpBaseType->AreSame(pBaseType);
+	}
+
+	std::string CPointerType::ToShortAliasString() const
+	{
+		return "ptr_" + mpBaseType->ToShortAliasString();
+	}
+
+	CType* CPointerType::GetBaseType() const
+	{
+		return mpBaseType;
 	}
 
 

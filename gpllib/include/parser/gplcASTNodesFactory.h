@@ -56,6 +56,7 @@ namespace gplc
 			virtual CASTAccessOperatorNode* CreateAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pMemberName) = 0;
 			virtual CASTArrayTypeNode* CreateArrayTypeNode(CASTNode* pTypeInfo, CASTExpressionNode* pSizeExpr) = 0;
 			virtual CASTIndexedAccessOperatorNode* CreateIndexedAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pIndexExpr, U32 attributes) = 0;
+			virtual CASTPointerTypeNode* CreatePointerTypeNode(CASTNode* pTypeInfo) = 0;
 		protected:
 			IASTNodesFactory(const IASTNodesFactory&) = default;
 	};
@@ -95,6 +96,7 @@ namespace gplc
 			CASTAccessOperatorNode* CreateAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pMemberName) override;
 			CASTArrayTypeNode* CreateArrayTypeNode(CASTNode* pTypeInfo, CASTExpressionNode* pSizeExpr) override;
 			CASTIndexedAccessOperatorNode* CreateIndexedAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pIndexExpr, U32 attributes) override;
+			CASTPointerTypeNode* CreatePointerTypeNode(CASTNode* pTypeInfo) override;
 		protected:
 			CASTNodesFactory(const CASTNodesFactory&) = default;
 

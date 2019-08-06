@@ -183,4 +183,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CConstExprInterpreter::VisitPointerTypeNode(CASTPointerTypeNode* pNode)
+	{
+		return {};
+	}
 }

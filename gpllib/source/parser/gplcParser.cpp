@@ -442,9 +442,25 @@ namespace gplc
 	CASTNode* CParser::_parseType(ILexer* pLexer)
 	{
 		const CToken* pCurrToken = pLexer->GetCurrToken();
+		
+		CASTNode* pBaseType = _parseBaseType(pLexer);
+		CASTNode* pType     = pBaseType;
+
+		while (pType = _parseComplexType(pLexer, pBaseType))
+		{
+			pBaseType = pType;
+		}
+
+		return pType ? pType : pBaseType;
+	}
+
+	CASTNode* CParser::_parseBaseType(ILexer* pLexer)
+	{
+		const CToken* pCurrToken = pLexer->GetCurrToken(); 
+		const CToken* pNextToken = pLexer->PeekNextToken(1);
 
 		// function's declaration
-		if (_match(pCurrToken, TT_OPEN_SQR_BRACE) || 
+		if (_match(pCurrToken, TT_OPEN_SQR_BRACE) ||
 			_match(pCurrToken, TT_OPEN_BRACKET))
 		{
 			return _parseFunctionDeclaration(pLexer);
@@ -458,51 +474,30 @@ namespace gplc
 			return mpNodesFactory->CreateNamedTypeNode(mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()));
 		}
 
-		return _parseBuiltInType(pLexer);
+		CASTNode* pBuiltinType = _getBasicType(pCurrToken->GetType());
+
+		if (pBuiltinType)
+		{
+			pLexer->GetNextToken();
+		}
+
+		return pBuiltinType;
 	}
 
-	/*!
-		\brief Try to parse a type
-
-		<builtin_type> ::=   <intX>
-						   | <uintX>
-						   | <float>
-						   | <double>
-						   | <char>
-						   | <string>
-						   | <bool>
-						   | <void>
-						   | <pointer>
-						   | <array>
-
-		\param[in] pLexer A pointer to pLexer's object
-
-		\return  A pointer to node with a builtin type
-	*/
-
-	CASTNode* CParser::_parseBuiltInType(ILexer* pLexer)
+	CASTNode* CParser::_parseComplexType(ILexer* pLexer, CASTNode* pBaseType)
 	{
-		const CToken* pTypeName  = pLexer->GetCurrToken();
-		const CToken* pNextToken = pLexer->PeekNextToken(1);
-
-		CASTNode* pBuiltinType = _getBasicType(pTypeName->GetType());
-
-		pLexer->GetNextToken();
+		const CToken* pCurrToken = pLexer->GetCurrToken();
 
 		// pointer type
-		if (_match(pNextToken, TT_STAR))
+		if (_match(pCurrToken, TT_STAR))
 		{
 			pLexer->GetNextToken(); // take *
 
-			auto pPointerType = mpNodesFactory->CreateTypeNode(NT_POINTER);
-
-			pPointerType->AttachChild(pBuiltinType);
-
-			return pPointerType;
+			return mpNodesFactory->CreatePointerTypeNode(pBaseType);
 		}
 
 		// an array
-		if (_match(pNextToken, TT_OPEN_SQR_BRACE))
+		if (_match(pCurrToken, TT_OPEN_SQR_BRACE))
 		{
 			pLexer->GetNextToken(); // take [
 
@@ -520,10 +515,10 @@ namespace gplc
 
 			pLexer->GetNextToken(); // take ]
 
-			return mpNodesFactory->CreateArrayTypeNode(pBuiltinType, pSizeExpr);
+			return mpNodesFactory->CreateArrayTypeNode(pBaseType, pSizeExpr);
 		}
 
-		return pBuiltinType;
+		return nullptr;
 	}
 
 	CASTExpressionNode* CParser::_parseExpression(ILexer* pLexer, U32 attributes)

@@ -110,4 +110,9 @@ namespace gplc
 	{
 		return llvm::ArrayType::get(std::get<llvm::Type*>(pArrayType->GetBaseType()->Accept(this)), pArrayType->GetElementsCount());
 	}
+
+	TLLVMIRData CLLVMTypeVisitor::VisitPointerType(const CPointerType* pPointerType)
+	{
+		return llvm::PointerType::get(std::get<llvm::Type*>(pPointerType->GetBaseType()->Accept(this)), 0);
+	}
 }

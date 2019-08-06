@@ -546,6 +546,11 @@ namespace gplc
 		return true;
 	}
 
+	bool CSemanticAnalyser::VisitPointerTypeNode(CASTPointerTypeNode* pNode)
+	{
+		return true;
+	}
+
 	bool CSemanticAnalyser::_enterScope(CASTBlockNode* pNode, ISymTable* pSymTable)
 	{
 		pSymTable->CreateScope();

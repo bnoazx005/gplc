@@ -83,6 +83,8 @@ namespace gplc
 			TLLVMIRData VisitArrayTypeNode(CASTArrayTypeNode* pNode) override;
 
 			TLLVMIRData VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) override;
+
+			TLLVMIRData VisitPointerTypeNode(CASTPointerTypeNode* pNode) override;
 		protected:
 			CCCodeGenerator(const CCCodeGenerator& codeGenerator) = default;
 		protected:

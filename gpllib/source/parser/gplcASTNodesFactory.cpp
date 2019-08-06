@@ -165,4 +165,9 @@ namespace gplc
 	{
 		return _insertNode(new CASTIndexedAccessOperatorNode(pExpression, pIndexExpr, attributes));
 	}
+
+	CASTPointerTypeNode* CASTNodesFactory::CreatePointerTypeNode(CASTNode* pTypeInfo)
+	{
+		return _insertNode(new CASTPointerTypeNode(pTypeInfo));
+	}
 }

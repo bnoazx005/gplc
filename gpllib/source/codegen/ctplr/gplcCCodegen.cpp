@@ -389,4 +389,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CCCodeGenerator::VisitPointerTypeNode(CASTPointerTypeNode* pNode)
+	{
+		return {};
+	}
 }

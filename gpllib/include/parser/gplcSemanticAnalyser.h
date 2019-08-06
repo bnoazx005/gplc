@@ -115,6 +115,8 @@ namespace gplc
 			bool VisitArrayTypeNode(CASTArrayTypeNode* pNode) override;
 
 			bool VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) override;
+
+			bool VisitPointerTypeNode(CASTPointerTypeNode* pNode) override;
 		protected:
 			bool _enterScope(CASTBlockNode* pNode, ISymTable* pSymTable);
 

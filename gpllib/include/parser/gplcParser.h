@@ -192,27 +192,10 @@ namespace gplc
 
 			CASTNode* _parseType(ILexer* pLexer);
 
-			/*!
-				\brief Try to parse a type
+			CASTNode* _parseBaseType(ILexer* pLexer);
 
-				<builtin_type> ::=   <intX>
-				                   | <uintX>
-								   | <float>
-								   | <double>
-								   | <char>
-								   | <string>
-								   | <bool>
-								   | <void>
-								   | <pointer>
-								   | <array>
-
-				\param[in] pLexer A pointer to pLexer's object
-
-				\return  A pointer to node with a builtin type
-			*/
-
-			CASTNode* _parseBuiltInType(ILexer* pLexer);
-			
+			CASTNode* _parseComplexType(ILexer* pLexer, CASTNode* pBaseType);
+						
 			/*!
 				\brief The method tries to parse an expression
 

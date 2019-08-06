@@ -90,6 +90,7 @@ namespace gplc
 			virtual CType* VisitArrayType(CASTArrayTypeNode* pNode) = 0;
 			virtual CType* VisitAccessOperator(CASTAccessOperatorNode* pNode) = 0;
 			virtual CType* VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) = 0;
+			virtual CType* VisitPointerType(CASTPointerTypeNode* pNode) = 0;
 	};
 
 
@@ -120,7 +121,8 @@ namespace gplc
 			CType* VisitNamedType(CASTNamedTypeNode* pNode) override;
 			CType* VisitArrayType(CASTArrayTypeNode* pNode) override;
 			CType* VisitAccessOperator(CASTAccessOperatorNode* pNode) override;
-			CType* VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) override;
+			CType* VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) override; 
+			CType* VisitPointerType(CASTPointerTypeNode* pNode) override;
 		protected:
 			CType* _deduceBuiltinType(E_NODE_TYPE type, U32 attributes = 0x0);
 
@@ -208,11 +210,23 @@ namespace gplc
 	class CPointerType : public CType
 	{
 		public:
-			CPointerType(const CType* type);
+			CPointerType(CType* pType);
 			virtual ~CPointerType();
+
+			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
+
+			CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const override;
+
+			bool AreSame(const CType* pType) const override;
+
+			std::string ToShortAliasString() const override;
+
+			CType* GetBaseType() const;
 		protected:
-			CPointerType();
-			CPointerType(const CPointerType& type);
+			CPointerType() = default;
+			CPointerType(const CPointerType& type) = default;
+		protected:
+			CType* mpBaseType;
 	};
 	
 	

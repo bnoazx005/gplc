@@ -397,6 +397,35 @@ TEST_CASE("Parser's tests")
 		delete pSymbolTable;
 	}
 
+	SECTION("TestParse_PassComplexTypeDeclaration_ReturnsCorrectAST")
+	{
+		gplc::ISymTable* pSymbolTable = new gplc::CSymTable();
+
+		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
+			{
+				/*!
+					the sequence below specifies the following declaration
+					pPtr : int32*[5]*[10];
+				*/
+				new gplc::CIdentifierToken("x", 1),
+				new gplc::CToken(gplc::TT_COLON, 2),
+				new gplc::CToken(gplc::TT_INT32_TYPE, 5),
+				new gplc::CToken(gplc::TT_STAR, 6),
+				new gplc::CToken(gplc::TT_OPEN_SQR_BRACE, 6),
+				new gplc::CLiteralToken(new gplc::CIntValue(5), 6),
+				new gplc::CToken(gplc::TT_CLOSE_SQR_BRACE, 6),
+				new gplc::CToken(gplc::TT_STAR, 6),
+				new gplc::CToken(gplc::TT_OPEN_SQR_BRACE, 6),
+				new gplc::CLiteralToken(new gplc::CIntValue(10), 6),
+				new gplc::CToken(gplc::TT_CLOSE_SQR_BRACE, 6),
+				new gplc::CToken(gplc::TT_SEMICOLON, 6),
+			}), pSymbolTable, pNodesFactory);
+
+		REQUIRE(pMain != nullptr);
+
+		delete pSymbolTable;
+	}
+
 	if (pErrorInfo != nullptr)
 	{
 		delete pErrorInfo;

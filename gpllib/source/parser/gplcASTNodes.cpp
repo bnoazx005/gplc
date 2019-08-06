@@ -1154,4 +1154,40 @@ namespace gplc
 	{
 		return mAttributes;
 	}
+
+
+	/*!
+		\brief CASTPointerTypeNode's definition
+	*/
+
+	CASTPointerTypeNode::CASTPointerTypeNode(CASTNode* pTypeInfo):
+		CASTTypeNode(NT_POINTER)
+	{
+		AttachChild(pTypeInfo);
+	}
+		
+	std::string CASTPointerTypeNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitPointerTypeNode(this);
+	}
+
+	bool CASTPointerTypeNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitPointerTypeNode(this);
+	}
+
+	TLLVMIRData CASTPointerTypeNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitPointerTypeNode(this);
+	}
+
+	CType* CASTPointerTypeNode::Resolve(ITypeResolver* pResolver)
+	{
+		return pResolver->VisitPointerType(this);
+	}
+
+	CASTNode* CASTPointerTypeNode::GetTypeInfo() const
+	{
+		return mChildren[0];
+	}
 }

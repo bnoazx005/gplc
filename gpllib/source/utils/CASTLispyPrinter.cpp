@@ -221,4 +221,8 @@ namespace gplc
 		return {};
 	}
 
+	std::string CASTLispyPrinter::VisitPointerTypeNode(CASTPointerTypeNode* pNode)
+	{
+		return {};
+	}
 }

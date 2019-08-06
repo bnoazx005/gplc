@@ -654,6 +654,24 @@ namespace gplc
 		protected:
 			U32 mAttributes;
 	};
+
+
+	class CASTPointerTypeNode : public CASTTypeNode
+	{
+		public:
+			CASTPointerTypeNode(CASTNode* pTypeInfo);
+			virtual ~CASTPointerTypeNode() = default;
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			virtual CType* Resolve(ITypeResolver* pResolver);
+
+			CASTNode* GetTypeInfo() const;
+		protected:
+			CASTPointerTypeNode(const CASTPointerTypeNode& node) = default;
+	};
 }
 
 #endif

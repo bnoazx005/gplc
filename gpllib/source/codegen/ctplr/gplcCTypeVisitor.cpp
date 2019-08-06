@@ -108,4 +108,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CCTypeVisitor::VisitPointerType(const CPointerType* pPointerType)
+	{
+		return {};
+	}
 }
