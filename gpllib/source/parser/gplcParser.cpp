@@ -41,14 +41,7 @@ namespace gplc
 	{
 		if (!pLexer || !pSymTable || !pNodesFactory)
 		{
-			TParserErrorInfo errorInfo;
-
-			memset(&errorInfo, 0, sizeof(errorInfo));
-						
-			errorInfo.mErrorCode = RV_INVALID_ARGUMENTS;
-			errorInfo.mMessage   = "A pointer to either pLexer or pSymTable equals to null";
-			
-			OnErrorOutput.Invoke(errorInfo);
+			OnErrorOutput.Invoke({ PE_INVALID_ENVIRONMENT, 1, 1, { TParserErrorInfo::TUnexpectedTokenInfo { TT_DEFAULT, TT_DEFAULT } } });
 			
 			return nullptr;
 		}
@@ -67,19 +60,6 @@ namespace gplc
 
 	Result CParser::_expect(E_TOKEN_TYPE expectedValue, const CToken* currValue)
 	{
-		if (currValue == nullptr)
-		{
-			TParserErrorInfo errorInfo;
-
-			memset(&errorInfo, 0, sizeof(errorInfo));
-
-			errorInfo.mErrorCode = RV_INVALID_ARGUMENTS;
-
-			OnErrorOutput.Invoke(errorInfo);
-
-			return RV_FAIL;
-		}
-
 		E_TOKEN_TYPE currValueType = currValue->GetType();
 
 		if (expectedValue == currValueType)
@@ -87,22 +67,7 @@ namespace gplc
 			return RV_SUCCESS;
 		}
 
-		TParserErrorInfo errorInfo;
-
-		memset(&errorInfo, 0, sizeof(errorInfo));
-
-		errorInfo.mMessage = std::string("An unexpected token was found at ")
-															.append(std::to_string(currValue->GetPos()))
-															.append(". ")
-															.append(TokenTypeToString(currValueType))
-															.append(" instead of ")
-															.append(TokenTypeToString(expectedValue));
-		
-		errorInfo.mErrorCode = RV_UNEXPECTED_TOKEN;
-		errorInfo.mPos       = currValue->GetPos();
-		errorInfo.mLine      = currValue->GetLine();
-
-		OnErrorOutput.Invoke(errorInfo);
+		OnErrorOutput.Invoke({ PE_UNEXPECTED_TOKEN, currValue->GetPos(), currValue->GetLine(), { TParserErrorInfo::TUnexpectedTokenInfo { expectedValue, currValueType } } });
 
 		return RV_UNEXPECTED_TOKEN;
 	}
@@ -1058,7 +1023,7 @@ namespace gplc
 			{
 				auto pCurrToken = pLexer->GetCurrToken();
 
-				OnErrorOutput.Invoke({ PE_INVALID_ENUMERATOR_NAME, "", pCurrToken->GetPos(), pCurrToken->GetLine() });
+				OnErrorOutput.Invoke({ PE_INVALID_ENUMERATOR_NAME, pCurrToken->GetPos(), pCurrToken->GetLine(), {} });
 
 				return false;
 			}

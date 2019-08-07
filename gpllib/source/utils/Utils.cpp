@@ -1,4 +1,5 @@
 #include "utils/Utils.h"
+#include "lexer/gplcTokens.h"
 
 
 namespace gplc
@@ -22,6 +23,34 @@ namespace gplc
 		{
 			case LE_INVALID_END_OF_MULTILINE_COMMENT:
 				return "The end of multi-line comment wasn't found";
+		}
+
+		return {};
+	}
+
+	std::string CMessageOutputUtils::ParserMessageToString(const TParserErrorInfo& info)
+	{
+		switch (info.mType)
+		{
+			case PE_INVALID_ENUMERATOR_NAME:
+				return "Invalid enumerator's name";	
+			case PE_INVALID_ENUMERATOR_VALUE:
+				return "Invalid enumerator's value";
+			case PE_UNEXPECTED_TOKEN:
+				{
+					auto details = std::get<TParserErrorInfo::TUnexpectedTokenInfo>(info.mDetails);
+
+					std::string outputMessage = std::string("An unexpected token was found at ")
+																	.append(std::to_string(info.mPos))
+																	.append(". ")
+																	.append(TokenTypeToString(details.mActualToken))
+																	.append(" instead of ")
+																	.append(TokenTypeToString(details.mExpectedToken));
+
+					return outputMessage;
+				}
+			case PE_INVALID_ENVIRONMENT:
+				return "Some of input arguments of IParser::Parse method are invalid";
 		}
 
 		return {};

@@ -25,6 +25,8 @@ namespace gplc
 
 			static std::string LexerMessageToString(E_LEXER_ERRORS message);
 
+			static std::string ParserMessageToString(const TParserErrorInfo& info);
+
 			static std::string SemanticAnalyserMessageToString(E_SEMANTIC_ANALYSER_MESSAGE message);
 	};
 }

@@ -167,12 +167,12 @@ namespace gplc
 	{
 		mIsPanicModeEnabled = true;
 
-		std::cout << "Error: (" << errorInfo.mPos << ";" << errorInfo.mLine << ") " << errorInfo.mMessage << std::endl;
+		std::cout << "Error: (" << errorInfo.mPos << ";" << errorInfo.mLine << ") " << CMessageOutputUtils::ParserMessageToString(errorInfo) << std::endl;
 	}
 
 	void CCompilerDriver::_onSemanticAnalyserStageError(const TSemanticAnalyserMessageInfo& errorInfo)
 	{
-		mIsPanicModeEnabled = true;
+		mIsPanicModeEnabled = (errorInfo.mType == E_MESSAGE_TYPE::MT_ERROR);
 
 		std::cout << CMessageOutputUtils::MessageTypeToString(errorInfo.mType) << ": " << CMessageOutputUtils::SemanticAnalyserMessageToString(errorInfo.mMessage) << std::endl;
 	}
