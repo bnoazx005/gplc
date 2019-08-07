@@ -518,8 +518,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
 		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("x"));
 		
-		auto pPointerType = pNodesFactory->CreateTypeNode(NT_POINTER);
-		pPointerType->AttachChild(pNodesFactory->CreateTypeNode(NT_DOUBLE));
+		auto pPointerType = pNodesFactory->CreatePointerTypeNode(pNodesFactory->CreateTypeNode(NT_DOUBLE));
 
 		auto pProgram = pNodesFactory->CreateSourceUnitNode();
 		pProgram->AttachChild(pNodesFactory->CreateDeclNode(pIdentifiersList, pPointerType));

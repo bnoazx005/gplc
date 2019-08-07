@@ -317,6 +317,20 @@ TEST_CASE("Lexer's tests")
 
 		delete pInputStream;
 	}
+
+	SECTION("TestGetNextToken_PassMultilineCommentsWithStarInside_ReturnsNothing")
+	{
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"/* struct Node {\n\tdata: int32;\n\tnext: Node*;\n};*/"
+			});
+
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
+
+		REQUIRE(!pLexer->GetNextToken());
+
+		delete pInputStream;
+	}
 	
 	delete pLexer;
 }

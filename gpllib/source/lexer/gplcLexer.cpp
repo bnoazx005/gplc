@@ -309,11 +309,13 @@ namespace gplc
 	void CLexer::_skipMultiLineComment()
 	{
 		C8 currCh = ' ';
+		C8 nextCh = ' ';
 
 		U32 x = mCurrPos;
 		U32 y = mCurrLine;
 
-		while ((currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)) != EOF && currCh != '*')
+		while ((currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)) != EOF && currCh != '*' ||
+			   (currCh == '*' && (nextCh = _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos, 0)) != '/'))
 		{
 			_skipComments(currCh);
 		}

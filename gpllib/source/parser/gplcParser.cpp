@@ -624,18 +624,13 @@ namespace gplc
 	{
 		const CToken* pCurrToken = pLexer->GetCurrToken();
 
-		if (_match(pCurrToken, TT_MINUS))
+		if (_match(pCurrToken, TT_MINUS) || 
+			_match(pCurrToken, TT_NOT)   ||
+			_match(pCurrToken, TT_AMPERSAND))
 		{
 			pLexer->GetNextToken();
 
-			return mpNodesFactory->CreateUnaryExpr(TT_MINUS, _parsePrimaryExpression(pLexer));
-		}
-
-		if (_match(pCurrToken, TT_NOT))
-		{
-			pLexer->GetNextToken();
-
-			return mpNodesFactory->CreateUnaryExpr(TT_NOT, _parsePrimaryExpression(pLexer));
+			return mpNodesFactory->CreateUnaryExpr(pCurrToken->GetType(), _parsePrimaryExpression(pLexer));
 		}
 
 		auto pPrimaryExpr = _parsePrimaryExpression(pLexer, attributes);
