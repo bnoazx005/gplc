@@ -77,7 +77,7 @@ namespace gplc
 	};
 
 	CLexer::CLexer():
-		ILexer(), mCurrPos(1), mCurrLine(1), mpLastRecognizedToken(nullptr)
+		ILexer(), mCurrPos(0), mCurrLine(1), mpLastRecognizedToken(nullptr)
 	{
 	}
 
@@ -122,7 +122,7 @@ namespace gplc
 
 		mpTokens.clear();
 
-		mCurrPos  = 1;
+		mCurrPos  = 0;
 		mCurrLine = 1;
 
 		mpLastRecognizedToken = nullptr;
@@ -242,9 +242,7 @@ namespace gplc
 
 			if (std::isspace(currCh))
 			{
-				++mCurrLine;
-
-				mCurrPos = 1;
+				_pushNewLine(mCurrPos, mCurrLine);
 
 				continue;
 			}
@@ -280,6 +278,13 @@ namespace gplc
 
 		currCh = _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos, 0);
 
+		if (std::isspace(currCh))
+		{
+			_pushNewLine(mCurrPos, mCurrLine);
+
+			return false;
+		}
+
 		switch (currCh)
 		{
 			case '/':
@@ -303,7 +308,9 @@ namespace gplc
 
 		while ((currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos)) != EOF && currCh != '\n')
 		{
-		}
+		}		
+
+		_pushNewLine(mCurrPos, mCurrLine);
 	}
 
 	void CLexer::_skipMultiLineComment()
@@ -680,5 +687,12 @@ namespace gplc
 
 			currStreamBuffer.append(result.IsOk() ? result.Get() : "");
 		}
+	}
+
+	void CLexer::_pushNewLine(U32& currPos, U32& currLine)
+	{
+		++currLine;
+
+		currPos = 0;
 	}
 }

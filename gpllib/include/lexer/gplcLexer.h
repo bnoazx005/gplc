@@ -189,6 +189,8 @@ namespace gplc
 			CToken* _tryRecognizeStringOrCharLiteral(C8 currCh);
 			
 			void _streamInputData(std::string& currStreamBuffer, IInputStream* pInputStream);
+
+			void _pushNewLine(U32& currPos, U32& currLine);
 		private:
 			static TReservedTokensTable mReservedTokensMap;
 
