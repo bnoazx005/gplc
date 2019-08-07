@@ -101,7 +101,22 @@ namespace gplc
 	{
 		auto pOperandNode = pNode->GetData();
 
-		return pOperandNode ? dynamic_cast<CASTTypeNode*>(pOperandNode)->Resolve(this) : nullptr;
+		CType* pBaseType = pOperandNode ? dynamic_cast<CASTTypeNode*>(pOperandNode)->Resolve(this) : nullptr;
+
+		switch (pNode->GetOpType())
+		{
+			case TT_AMPERSAND:
+				return new CPointerType(pBaseType);
+			case TT_STAR:
+				{
+					// the type above should be a pointer
+					auto pPointerBaseType = dynamic_cast<CPointerType*>(pBaseType);
+
+					return pPointerBaseType ? pPointerBaseType->GetBaseType() : nullptr;
+				}
+		}
+
+		return pBaseType;
 	}
 
 	CType* CTypeResolver::VisitBinaryExpression(CASTBinaryExpressionNode* pNode)
@@ -596,7 +611,7 @@ namespace gplc
 	{
 		E_COMPILER_TYPES otherType = pType->GetType();
 
-		if (otherType != CT_POINTER || otherType != CT_ARRAY)
+		if (otherType != CT_POINTER && otherType != CT_ARRAY)
 		{
 			return false;
 		}

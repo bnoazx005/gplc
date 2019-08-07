@@ -626,11 +626,17 @@ namespace gplc
 
 		if (_match(pCurrToken, TT_MINUS) || 
 			_match(pCurrToken, TT_NOT)   ||
-			_match(pCurrToken, TT_AMPERSAND))
+			_match(pCurrToken, TT_AMPERSAND) ||
+			_match(pCurrToken, TT_STAR))
 		{
 			pLexer->GetNextToken();
 
-			return mpNodesFactory->CreateUnaryExpr(pCurrToken->GetType(), _parsePrimaryExpression(pLexer));
+			if (pCurrToken->GetType() == TT_AMPERSAND)
+			{
+				attributes &= ~AV_RVALUE; // if it's get address operator then it's already rvalue, so remove the flag
+			}
+
+			return mpNodesFactory->CreateUnaryExpr(pCurrToken->GetType(), _parsePrimaryExpression(pLexer, attributes));
 		}
 
 		auto pPrimaryExpr = _parsePrimaryExpression(pLexer, attributes);

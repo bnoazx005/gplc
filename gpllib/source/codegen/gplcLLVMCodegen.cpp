@@ -127,7 +127,7 @@ namespace gplc
 					break;
 				case CT_ARRAY:
 					// \todo invalid initialization, but it's enough for current tests, REIMPLEMENT THIS LATER
-					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext)));
+					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext), "arr_cast"));
 					break;
 				case CT_STRUCT:
 					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext)));
@@ -188,7 +188,17 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitUnaryExpression(CASTUnaryExpressionNode* pNode)
 	{
-		return pNode->GetData()->Accept(this);
+		llvm::Value* pBaseExpr = std::get<llvm::Value*>(pNode->GetData()->Accept(this));
+
+		auto& currIRBuidler = mIRBuildersStack.top();
+
+		switch (pNode->GetOpType())
+		{
+			case TT_STAR:	// \note dereference pointer value
+				return currIRBuidler.CreateLoad(pBaseExpr);
+		}
+
+		return pBaseExpr;
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitBinaryExpression(CASTBinaryExpressionNode* pNode)
