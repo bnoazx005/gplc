@@ -155,8 +155,8 @@ namespace gplc
 		\brief CASTSourceUnitNode's definition
 	*/
 
-	CASTSourceUnitNode::CASTSourceUnitNode():
-		CASTNode(NT_PROGRAM_UNIT)
+	CASTSourceUnitNode::CASTSourceUnitNode(const std::string& moduleName):
+		CASTNode(NT_PROGRAM_UNIT), mModuleName(moduleName)
 	{
 	}
 
@@ -178,6 +178,11 @@ namespace gplc
 	const std::vector<CASTNode*>& CASTSourceUnitNode::GetStatements() const
 	{
 		return mChildren;
+	}
+
+	const std::string& CASTSourceUnitNode::GetModuleName() const
+	{
+		return mModuleName;
 	}
 
 

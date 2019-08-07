@@ -31,6 +31,7 @@
 
 #include "utils/CASTLispyPrinter.h"
 #include "utils/CResult.h"
+#include "utils/Utils.h"
 
 #include "codegen/gplcCodegen.h"
 #include "codegen/gplcLLVMCodegen.h"

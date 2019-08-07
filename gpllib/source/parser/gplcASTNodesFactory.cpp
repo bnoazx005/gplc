@@ -31,9 +31,9 @@ namespace gplc
 		return _insertNode(new CASTNode(type));
 	}
 
-	CASTSourceUnitNode* CASTNodesFactory::CreateSourceUnitNode()
+	CASTSourceUnitNode* CASTNodesFactory::CreateSourceUnitNode(const std::string& moduleName)
 	{
-		return _insertNode(new CASTSourceUnitNode());
+		return _insertNode(new CASTSourceUnitNode(moduleName));
 	}
 
 	CASTTypeNode* CASTNodesFactory::CreateTypeNode(E_NODE_TYPE type)

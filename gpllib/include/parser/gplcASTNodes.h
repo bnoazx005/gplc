@@ -119,7 +119,7 @@ namespace gplc
 	class CASTSourceUnitNode: public CASTNode
 	{
 		public:
-			CASTSourceUnitNode();
+			CASTSourceUnitNode(const std::string& moduleName);
 			virtual ~CASTSourceUnitNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
@@ -127,8 +127,12 @@ namespace gplc
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
 			const std::vector<CASTNode*>& GetStatements() const;
+
+			const std::string& GetModuleName() const;
 		protected:
 			CASTSourceUnitNode(const CASTSourceUnitNode& node) = default;
+		protected:
+			std::string mModuleName;
 	};
 
 

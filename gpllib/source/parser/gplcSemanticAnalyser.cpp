@@ -51,7 +51,7 @@ namespace gplc
 		// multiple variable per single function argument's declaration are now allowed
 		if (pIdentifiersList->GetChildrenCount() > 1 && (pNode->GetAttributes() & AV_FUNC_ARG_DECL) == AV_FUNC_ARG_DECL)
 		{
-			OnErrorOutput.Invoke(SAE_FUNC_MULTIPLE_PARAM_PER_DECL_ARE_NOT_ALLOWED);
+			_notifyError(SAE_FUNC_MULTIPLE_PARAM_PER_DECL_ARE_NOT_ALLOWED);
 
 			return false;
 		}
@@ -93,7 +93,7 @@ namespace gplc
 			else if (!mpSymTable->IsLocked() && 
 					 mpSymTable->AddVariable({ currIdentifier, pDefaultValueExpr, pTypeInfo }) == InvalidSymbolHandle)
 			{
-				OnErrorOutput.Invoke(SAE_IDENTIFIER_ALREADY_DECLARED);
+				_notifyError(SAE_IDENTIFIER_ALREADY_DECLARED);
 
 				return false;
 			}
@@ -115,7 +115,7 @@ namespace gplc
 				return true;
 			}
 			
-			OnErrorOutput.Invoke(SAE_UNDECLARED_IDENTIFIER);
+			_notifyError(SAE_UNDECLARED_IDENTIFIER);
 
 			return false;
 		}
@@ -144,7 +144,7 @@ namespace gplc
 		if (!pLeftExpr->Accept(this) ||
 			!(pLeftValueType = pLeftExpr->Resolve(mpTypeResolver)))
 		{
-			OnErrorOutput.Invoke(SAE_INCOMPATIBLE_TYPES_INSIDE_EXPR);
+			_notifyError(SAE_INCOMPATIBLE_TYPES_INSIDE_EXPR);
 
 			return false;
 		}
@@ -155,7 +155,7 @@ namespace gplc
 		if (!pRightExpr->Accept(this) ||
 			!(pRightValueType = pRightExpr->Resolve(mpTypeResolver)))
 		{
-			OnErrorOutput.Invoke(SAE_INCOMPATIBLE_TYPES_INSIDE_EXPR);
+			_notifyError(SAE_INCOMPATIBLE_TYPES_INSIDE_EXPR);
 
 			return false;
 		}
@@ -185,7 +185,7 @@ namespace gplc
 		if (!pRightExpr->Accept(this) ||
 			!(pRightValueType = pRightExpr->Resolve(mpTypeResolver)))
 		{
-			OnErrorOutput.Invoke(SAE_INCOMPATIBLE_TYPES_INSIDE_EXPR);
+			_notifyError(SAE_INCOMPATIBLE_TYPES_INSIDE_EXPR);
 
 			return false;
 		}
@@ -225,7 +225,7 @@ namespace gplc
 
 		if (pConditionType->GetType() != CT_BOOL)
 		{
-			OnErrorOutput.Invoke(SAE_LOGIC_EXPR_IS_EXPECTED);
+			_notifyError(SAE_LOGIC_EXPR_IS_EXPECTED);
 
 			return false;
 		}
@@ -242,7 +242,7 @@ namespace gplc
 	{
 		if (pNode->GetBody()->GetChildrenCount() < 1)
 		{
-			OnErrorOutput.Invoke(SAE_REDUNDANT_LOOP_STATEMENT);
+			_notifyWarning(SAE_REDUNDANT_LOOP_STATEMENT);
 		}
 
 		auto pLoopBody = pNode->GetBody();
@@ -254,7 +254,7 @@ namespace gplc
 	{
 		if (pNode->GetBody()->GetChildrenCount() < 1)
 		{
-			OnErrorOutput.Invoke(SAE_REDUNDANT_LOOP_STATEMENT);
+			_notifyWarning(SAE_REDUNDANT_LOOP_STATEMENT);
 		}
 
 		auto pCondition = pNode->GetCondition();
@@ -270,7 +270,7 @@ namespace gplc
 
 		if (pConditionType->GetType() != CT_BOOL)
 		{
-			OnErrorOutput.Invoke(SAE_LOGIC_EXPR_IS_EXPECTED);
+			_notifyError(SAE_LOGIC_EXPR_IS_EXPECTED);
 
 			return false;
 		}
@@ -405,7 +405,7 @@ namespace gplc
 		// only single variable can be defined at once
 		if (pDeclaration->GetIdentifiers()->GetChildrenCount() > 1)
 		{
-			OnErrorOutput.Invoke(SAE_SINGLE_FUNC_IDENTIFIER_IS_EXPECTED);
+			_notifyError(SAE_SINGLE_FUNC_IDENTIFIER_IS_EXPECTED);
 
 			return false;
 		}
@@ -435,7 +435,7 @@ namespace gplc
 		// check whether the left type compatible with right one or not
 		if (!pDeclFuncType->AreSame(pAssignedLambdaType))
 		{
-			OnErrorOutput.Invoke(SAE_INCOMPATIBLE_TYPE_OF_ASSIGNED_LAMBDA);
+			_notifyError(SAE_INCOMPATIBLE_TYPE_OF_ASSIGNED_LAMBDA);
 
 			return false;
 		}
@@ -512,7 +512,7 @@ namespace gplc
 
 		if (!pSymbolDesc || !pSymbolDesc->mpType)
 		{
-			OnErrorOutput.Invoke(SAE_UNDEFINED_TYPE);
+			_notifyError(SAE_UNDEFINED_TYPE);
 
 			return false;
 		}
@@ -523,7 +523,7 @@ namespace gplc
 		{
 			if (pSymbolDesc->mVariables.find(pIdentifier->GetName()) == pSymbolDesc->mVariables.cend())
 			{
-				OnErrorOutput.Invoke(SAE_TRY_TO_ACCESS_UNDEFINED_FIELD);
+				_notifyError(SAE_TRY_TO_ACCESS_UNDEFINED_FIELD);
 
 				return false;
 			}
@@ -592,7 +592,7 @@ namespace gplc
 	{
 		if (!mStayWithinLoop)
 		{
-			OnErrorOutput.Invoke(SAE_INTERRUPT_STATEMENT_OUTSIDE_LOOP_IS_NOT_ALLOWED);
+			_notifyError(SAE_INTERRUPT_STATEMENT_OUTSIDE_LOOP_IS_NOT_ALLOWED);
 		}
 
 		return mStayWithinLoop;
@@ -614,9 +614,19 @@ namespace gplc
 
 		if (!containsBreak)
 		{
-			OnErrorOutput.Invoke(SAE_BLOCKING_LOOP);
+			_notifyWarning(SAE_BLOCKING_LOOP);
 		}
 
 		return true; // this rule is not an error just a warning for a user
+	}
+
+	void CSemanticAnalyser::_notifyWarning(E_SEMANTIC_ANALYSER_MESSAGE message) const
+	{
+		OnErrorOutput.Invoke({ message, E_MESSAGE_TYPE::MT_WARNING });
+	}
+
+	void CSemanticAnalyser::_notifyError(E_SEMANTIC_ANALYSER_MESSAGE message) const
+	{
+		OnErrorOutput.Invoke({ message, E_MESSAGE_TYPE::MT_ERROR });
 	}
 }

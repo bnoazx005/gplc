@@ -148,7 +148,7 @@ namespace gplc
 
 			TTypesTable            mTypesTable;
 
-			IConstExprInterpreter* mpInterpreter;
+			IConstExprInterpreter* mpConstExprInterpreter;
 	};
 }
 

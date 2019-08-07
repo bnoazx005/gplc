@@ -46,6 +46,7 @@ set(GPL_HEADERS
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/utils/CASTLispyPrinter.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/utils/CResult.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/utils/Delegate.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/utils/Utils.h"
 	)
 
 set(GPL_SOURCES
@@ -67,6 +68,7 @@ set(GPL_SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/parser/gplcASTNodesFactory.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/parser/gplcSemanticAnalyser.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/utils/CASTLispyPrinter.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/source/utils/Utils.cpp"
 	)
 
 source_group("includes" FILES ${GPL_HEADERS})

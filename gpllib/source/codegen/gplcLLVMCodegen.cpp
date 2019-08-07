@@ -30,7 +30,7 @@ namespace gplc
 
 		mpTypeResolver = pTypeResolver;
 
-		mpInterpreter = pInterpreter;
+		mpConstExprInterpreter = pInterpreter;
 
 		mpContext  = &llvmContext;
 		mpSymTable = pSymTable;
@@ -39,7 +39,7 @@ namespace gplc
 
 		mpGlobalIRBuilder = &mIRBuildersStack.top();
 
-		mpModule = new llvm::Module("top", llvmContext);
+		mpModule = new llvm::Module(pNode->GetModuleName(), llvmContext);
 
 		_defineInitModuleGlobalsFunction();
 
@@ -591,7 +591,7 @@ namespace gplc
 
 					pFieldValue = mpSymTable->LookUp(currFieldId);
 
-					auto enumeratorValue = mpInterpreter->Eval(pFieldValue->mpValue, mpSymTable);
+					auto enumeratorValue = mpConstExprInterpreter->Eval(pFieldValue->mpValue, mpSymTable);
 
 					if (enumeratorValue.HasError())
 					{

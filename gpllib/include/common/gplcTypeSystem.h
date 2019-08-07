@@ -130,7 +130,7 @@ namespace gplc
 		protected:
 			ISymTable*             mpSymTable;
 
-			IConstExprInterpreter* mpInterpreter;
+			IConstExprInterpreter* mpConstExprInterpreter;
 	};
 
 

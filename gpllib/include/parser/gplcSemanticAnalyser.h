@@ -46,7 +46,7 @@ namespace gplc
 
 			virtual bool Analyze(CASTNode* pInput, ITypeResolver* pTypeResolver, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory) = 0;
 		public:
-			CDelegate<void, E_SEMANTIC_ANALYSER_ERRORS> OnErrorOutput;
+			CDelegate<void, const TSemanticAnalyserMessageInfo&> OnErrorOutput;
 	};
 
 
@@ -127,6 +127,10 @@ namespace gplc
 			bool _isLoopInterruptionAllowed() const;
 
 			bool _containsBreak(CASTBlockNode* pLoopBody) const;
+
+			void _notifyWarning(E_SEMANTIC_ANALYSER_MESSAGE message) const;
+
+			void _notifyError(E_SEMANTIC_ANALYSER_MESSAGE message) const;
 		protected:
 			ITypeResolver*    mpTypeResolver;
 

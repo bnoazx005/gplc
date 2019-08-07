@@ -136,6 +136,14 @@ namespace gplc
 	};
 
 
+	enum class E_MESSAGE_TYPE : U8
+	{
+		MT_WARNING,
+		MT_ERROR,
+		MT_INFO,
+	};
+
+
 	enum E_PARSER_ERRORS : U16
 	{
 		PE_INVALID_ENUMERATOR_NAME,				/// Some enumerator with the enumeration have a name that is duplicate for the previous one
@@ -143,7 +151,7 @@ namespace gplc
 	};
 
 
-	enum E_SEMANTIC_ANALYSER_ERRORS: U16
+	enum E_SEMANTIC_ANALYSER_MESSAGE: U16
 	{
 		SAE_IDENTIFIER_ALREADY_DECLARED,
 		SAE_UNDECLARED_IDENTIFIER,
@@ -194,6 +202,14 @@ namespace gplc
 		U32            mLine;			// vertical position
 
 	} TLexerErrorInfo;
+
+
+	typedef struct TSemanticAnalyserMessageInfo
+	{
+		E_SEMANTIC_ANALYSER_MESSAGE mMessage;
+
+		E_MESSAGE_TYPE              mType;
+	} TSemanticAnalyserMessageInfo;
 
 
 	typedef U32 TSymbolHandle;

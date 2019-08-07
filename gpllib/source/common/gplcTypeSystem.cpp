@@ -67,7 +67,7 @@ namespace gplc
 		}
 
 		mpSymTable = pSymTable;
-		mpInterpreter = pInterpreter;
+		mpConstExprInterpreter = pInterpreter;
 
 		return RV_SUCCESS;
 	}
@@ -214,12 +214,12 @@ namespace gplc
 
 	CType* CTypeResolver::VisitArrayType(CASTArrayTypeNode* pNode)
 	{
-		if (!mpInterpreter)
+		if (!mpConstExprInterpreter)
 		{
 			return nullptr;
 		}
 
-		TResult<U32> evaluatedArraySize = mpInterpreter->Eval(pNode->GetSizeExpr(), mpSymTable);
+		TResult<U32> evaluatedArraySize = mpConstExprInterpreter->Eval(pNode->GetSizeExpr(), mpSymTable);
 
 		if (evaluatedArraySize.HasError())
 		{

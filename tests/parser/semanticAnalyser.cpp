@@ -434,7 +434,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 															pNodesFactory->CreateFuncCallNode(pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateIdNode("f")),
 																pCallArgs)))));
 		
-		pSemanticAnalyser->OnErrorOutput += [](E_SEMANTIC_ANALYSER_ERRORS err)
+		pSemanticAnalyser->OnErrorOutput += [](auto err)
 		{
 			REQUIRE(false);
 		};

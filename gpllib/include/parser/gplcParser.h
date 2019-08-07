@@ -15,6 +15,7 @@
 #include "common\gplcTypes.h"
 #include "lexer\gplcTokens.h"
 #include "..\utils\Delegate.h"
+#include <string>
 
 
 namespace gplc
@@ -60,7 +61,7 @@ namespace gplc
 			IParser() {}
 			virtual ~IParser() {}
 
-			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory) = 0;
+			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory, const std::string& moduleName = "") = 0;
 		public:
 			CDelegate<void, const TParserErrorInfo&> OnErrorOutput;
 		protected:
@@ -80,7 +81,7 @@ namespace gplc
 			CParser();
 			virtual ~CParser();
 
-			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory);
+			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory, const std::string& moduleName = "");
 		private:
 			CParser(const CParser& parser);
 
@@ -96,7 +97,7 @@ namespace gplc
 				\return A pointer to node of a program unit
 			*/
 			
-			CASTNode* _parseProgramUnit(ILexer* pLexer);
+			CASTNode* _parseProgramUnit(ILexer* pLexer, const std::string& moduleName);
 
 			/*!
 				\brief Try to parse the list of statements.

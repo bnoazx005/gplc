@@ -37,7 +37,7 @@ namespace gplc
 	{
 	}
 
-	CASTNode* CParser::Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory)
+	CASTNode* CParser::Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory, const std::string& moduleName)
 	{
 		if (!pLexer || !pSymTable || !pNodesFactory)
 		{
@@ -59,10 +59,10 @@ namespace gplc
 
 		if (!pLexer->GetCurrToken()) //returns just an empty program unit
 		{
-			return mpNodesFactory->CreateSourceUnitNode();
+			return mpNodesFactory->CreateSourceUnitNode(moduleName);
 		}
 
-		return _parseProgramUnit(pLexer);
+		return _parseProgramUnit(pLexer, moduleName);
 	}
 
 	Result CParser::_expect(E_TOKEN_TYPE expectedValue, const CToken* currValue)
@@ -117,9 +117,9 @@ namespace gplc
 		\return A pointer to node of a program unit
 	*/
 
-	CASTNode* CParser::_parseProgramUnit(ILexer* pLexer)
+	CASTNode* CParser::_parseProgramUnit(ILexer* pLexer, const std::string& moduleName)
 	{
-		CASTNode* pProgramUnit = mpNodesFactory->CreateSourceUnitNode();
+		CASTNode* pProgramUnit = mpNodesFactory->CreateSourceUnitNode(moduleName);
 
 		CASTNode* pStatements = _parseStatementsList(pLexer);
 		

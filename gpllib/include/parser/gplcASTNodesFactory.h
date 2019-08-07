@@ -29,7 +29,7 @@ namespace gplc
 			virtual ~IASTNodesFactory() = default;
 
 			virtual CASTNode* CreateNode(E_NODE_TYPE type) = 0;
-			virtual CASTSourceUnitNode* CreateSourceUnitNode() = 0;
+			virtual CASTSourceUnitNode* CreateSourceUnitNode(const std::string& moduleName = "") = 0;
 			virtual CASTTypeNode* CreateTypeNode(E_NODE_TYPE type) = 0;
 			virtual CASTDeclarationNode* CreateDeclNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo, U32 attributes = 0x0) = 0;
 			virtual CASTBlockNode* CreateBlockNode() = 0;
@@ -69,7 +69,7 @@ namespace gplc
 			virtual ~CASTNodesFactory();
 
 			CASTNode* CreateNode(E_NODE_TYPE type) override;
-			CASTSourceUnitNode* CreateSourceUnitNode() override;
+			CASTSourceUnitNode* CreateSourceUnitNode(const std::string& moduleName = "") override;
 			CASTTypeNode* CreateTypeNode(E_NODE_TYPE type) override;
 			CASTDeclarationNode* CreateDeclNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo, U32 attributes = 0x0) override;
 			CASTBlockNode* CreateBlockNode() override;
