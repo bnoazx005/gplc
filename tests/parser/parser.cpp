@@ -5,7 +5,7 @@
 
 void OnError(const gplc::TParserErrorInfo& errorInfo)
 {
-	std::cout << errorInfo.mMessage << std::endl;
+	std::cout << errorInfo.mType << std::endl;
 
 	REQUIRE(false);
 }

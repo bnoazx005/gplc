@@ -15,7 +15,7 @@ TEST_CASE("CASTLispyPrinter tests")
 
 	SECTION("TestPrint_PassEmptyASTTree_Returns()")
 	{
-		REQUIRE(pASTPrinter->Print(new gplc::CASTSourceUnitNode()) == "()");
+		REQUIRE(pASTPrinter->Print(new gplc::CASTSourceUnitNode("")) == "()");
 	}
 
 	SECTION("TestPrint_PassIdentifier_Returns(define <id> <default_value>)")

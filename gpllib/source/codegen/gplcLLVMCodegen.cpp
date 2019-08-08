@@ -772,8 +772,11 @@ namespace gplc
 	void CLLVMCodeGenerator::_defineInitModuleGlobalsFunction()
 	{
 		auto pInitModuleGlobalsFuncType = llvm::FunctionType::get(llvm::Type::getVoidTy(*mpContext), false);
+		
+		std::string moduleName = mpModule->getName();
+		moduleName = moduleName.substr(0, moduleName.find_first_of('.'));
 
-		mpInitModuleGlobalsFunction = llvm::Function::Create(pInitModuleGlobalsFuncType, llvm::Function::InternalLinkage, "_initModuleGlobals", mpModule);
+		mpInitModuleGlobalsFunction = llvm::Function::Create(pInitModuleGlobalsFuncType, llvm::Function::ExternalLinkage, moduleName + "$initModuleGlobals", mpModule);
 		
 		llvm::BasicBlock* pInitModuleGlobalsFuncBody = llvm::BasicBlock::Create(*mpContext, "entry", mpInitModuleGlobalsFunction);
 
