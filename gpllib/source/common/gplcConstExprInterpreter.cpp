@@ -188,4 +188,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CConstExprInterpreter::VisitImportDirectiveNode(CASTImportDirectiveNode* pNode)
+	{
+		return {};
+	}
 }

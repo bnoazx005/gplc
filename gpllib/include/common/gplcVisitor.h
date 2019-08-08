@@ -42,6 +42,7 @@ namespace gplc
 	class CASTArrayTypeNode;
 	class CASTIndexedAccessOperatorNode;
 	class CASTPointerTypeNode;
+	class CASTImportDirectiveNode;
 
 
 	template <typename T>
@@ -76,6 +77,7 @@ namespace gplc
 			virtual T VisitArrayTypeNode(CASTArrayTypeNode* pNode) = 0;
 			virtual T VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) = 0;
 			virtual T VisitPointerTypeNode(CASTPointerTypeNode* pNode) = 0;
+			virtual T VisitImportDirectiveNode(CASTImportDirectiveNode* pNode) = 0;
 		protected:
 			IASTNodeVisitor() = default;
 			IASTNodeVisitor(const IASTNodeVisitor& visitor) = default;

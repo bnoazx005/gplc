@@ -225,4 +225,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	std::string CASTLispyPrinter::VisitImportDirectiveNode(CASTImportDirectiveNode* pNode)
+	{
+		return {};
+	}
 }

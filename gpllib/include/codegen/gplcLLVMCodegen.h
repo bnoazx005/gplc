@@ -100,6 +100,8 @@ namespace gplc
 
 			TLLVMIRData VisitPointerTypeNode(CASTPointerTypeNode* pNode) override;
 
+			TLLVMIRData VisitImportDirectiveNode(CASTImportDirectiveNode* pNode) override;
+
 			llvm::IRBuilder<>* GetCurrIRBuilder();
 		protected:
 			CLLVMCodeGenerator(const CLLVMCodeGenerator& codeGenerator) = default;

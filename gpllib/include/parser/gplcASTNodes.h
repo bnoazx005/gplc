@@ -76,6 +76,7 @@ namespace gplc
 		NT_ACCESS_OPERATOR,
 		NT_ARRAY,
 		NT_INDEXED_ACCESS_OPERATOR,
+		NT_IMPORT,
 	};
 
 	/*!
@@ -675,6 +676,24 @@ namespace gplc
 			CASTNode* GetTypeInfo() const;
 		protected:
 			CASTPointerTypeNode(const CASTPointerTypeNode& node) = default;
+	};
+
+
+	class CASTImportDirectiveNode : public CASTNode
+	{
+		public:
+			CASTImportDirectiveNode(const std::string& moduleName);
+			virtual ~CASTImportDirectiveNode() = default;
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			const std::string& GetImportedModuleName() const;
+		protected:
+			CASTImportDirectiveNode(const CASTImportDirectiveNode& node) = default;
+		protected:
+			std::string mModuleName;
 	};
 }
 

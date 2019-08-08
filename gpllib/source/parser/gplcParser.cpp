@@ -152,6 +152,12 @@ namespace gplc
 
 			return pStatementNode;
 		}
+
+		// parse compiler directives what're builtin into the language
+		if (pStatementNode = _parseDirectives(pLexer))
+		{
+			return pStatementNode;
+		}
 		
 		if (_match(pLexer->GetCurrToken(), TT_IF_KEYWORD))
 		{
@@ -1231,5 +1237,41 @@ namespace gplc
 		pLexer->GetNextToken(); // take ']'
 
 		return mpNodesFactory->CreateIndexedAccessOperatorNode(pPrimaryExpr, pIndexedExpression, attributes);
+	}
+
+	CASTNode* CParser::_parseDirectives(ILexer* pLexer)
+	{
+		if (_match(pLexer->GetCurrToken(), TT_IMPORT_KEYWORD))
+		{
+			pLexer->GetNextToken();
+
+			return _parseImportDirective(pLexer);
+		}
+
+		return nullptr;
+	}
+
+	CASTImportDirectiveNode* CParser::_parseImportDirective(ILexer* pLexer)
+	{
+		const CToken* pCurrToken = pLexer->GetCurrToken();
+
+		if (!SUCCESS(_expect(TT_LITERAL, pLexer->GetCurrToken())))
+		{
+			// \todo implement error output
+			return nullptr;
+		}
+
+		const CLiteralToken* pLiteralToken = dynamic_cast<const CLiteralToken*>(pCurrToken);
+
+		if (!pLiteralToken || pLiteralToken->GetValue()->GetType() != LT_STRING)
+		{
+			// \todo implement error output
+
+			return nullptr;
+		}
+
+		pLexer->GetNextToken();
+
+		return mpNodesFactory->CreateImportDirective(dynamic_cast<CStringValue*>(pLiteralToken->GetValue())->GetValue());
 	}
 }

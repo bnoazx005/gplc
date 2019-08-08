@@ -78,6 +78,8 @@ namespace gplc
 			std::string VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) override;
 
 			std::string VisitPointerTypeNode(CASTPointerTypeNode* pNode) override;
+
+			std::string VisitImportDirectiveNode(CASTImportDirectiveNode* pNode) override;
 		protected:
 			CASTLispyPrinter(const CASTLispyPrinter& printer) = default;
 		protected:

@@ -46,7 +46,8 @@ namespace gplc
 	class CASTAccessOperatorNode;
 	class CASTArrayTypeNode;
 	class CASTIndexedAccessOperatorNode;
-	class IASTNodesFactory;
+	class IASTNodesFactory; 
+	class CASTImportDirectiveNode;
 
 
 	/*!
@@ -378,6 +379,10 @@ namespace gplc
 			*/
 
 			CASTIndexedAccessOperatorNode* _parseIndexedAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer*pLexer, U32 attributes = 0x0);
+
+			CASTNode* _parseDirectives(ILexer* pLexer);
+
+			CASTImportDirectiveNode* _parseImportDirective(ILexer* pLexer);
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 

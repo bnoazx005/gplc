@@ -74,6 +74,7 @@ namespace gplc
 		{ "static", TT_STATIC_KEYWORD },
 		{ "break", TT_BREAK_KEYWORD },
 		{ "continue", TT_CONTINUE_KEYWORD },
+		{ "import", TT_IMPORT_KEYWORD },
 	};
 
 	CLexer::CLexer():

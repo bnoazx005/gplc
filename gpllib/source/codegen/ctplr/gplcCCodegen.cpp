@@ -394,4 +394,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CCCodeGenerator::VisitImportDirectiveNode(CASTImportDirectiveNode* pNode)
+	{
+		return {};
+	}
 }

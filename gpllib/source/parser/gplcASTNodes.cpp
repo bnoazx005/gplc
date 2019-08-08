@@ -1195,4 +1195,34 @@ namespace gplc
 	{
 		return mChildren[0];
 	}
+
+
+	/*!
+		\brief CASTImportDirectiveNode's definition
+	*/
+
+	CASTImportDirectiveNode::CASTImportDirectiveNode(const std::string& moduleName):
+		CASTNode(NT_IMPORT), mModuleName(moduleName)
+	{
+	}
+
+	std::string CASTImportDirectiveNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitImportDirectiveNode(this);
+	}
+
+	bool CASTImportDirectiveNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitImportDirectiveNode(this);
+	}
+
+	TLLVMIRData CASTImportDirectiveNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitImportDirectiveNode(this);
+	}
+
+	const std::string& CASTImportDirectiveNode::GetImportedModuleName() const
+	{
+		return mModuleName;
+	}
 }
