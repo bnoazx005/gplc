@@ -15,6 +15,7 @@
 #include "common/gplcTypes.h"
 #include "common/gplcVisitor.h"
 #include "llvm/IR/Module.h"
+#include <unordered_map>
 
 
 namespace gplc
@@ -26,6 +27,8 @@ namespace gplc
 
 	class CLLVMTypeVisitor : public ITypeVisitor<TLLVMIRData>
 	{
+		public:
+			typedef std::unordered_map<std::string, llvm::Type*> TTypesTable;
 		public:
 			CLLVMTypeVisitor(llvm::LLVMContext& context);
 			virtual ~CLLVMTypeVisitor();
@@ -42,6 +45,9 @@ namespace gplc
 			CLLVMTypeVisitor(const CLLVMTypeVisitor& visitor) = default;
 		protected:
 			llvm::LLVMContext* mpContext;
+
+			TTypesTable        mTypesTable;
+
 	};
 }
 

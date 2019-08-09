@@ -79,7 +79,18 @@ namespace gplc
 			structFields.push_back(std::get<llvm::Type*>(currField.second->Accept(this)));
 		}
 
-		return llvm::StructType::create(structFields, pStructType->GetName());
+		const std::string& structName = pStructType->GetName();
+
+		llvm::Type* pInferredType = nullptr;
+
+		if (mTypesTable.find(structName) == mTypesTable.cend())
+		{
+			pInferredType = llvm::StructType::create(structFields, structName);
+
+			mTypesTable[structName] = pInferredType;
+		}
+
+		return pInferredType ? pInferredType : mTypesTable[structName];
 	}
 
 	TLLVMIRData CLLVMTypeVisitor::VisitNamedType(const CDependentNamedType* pNamedType)
@@ -89,7 +100,8 @@ namespace gplc
 		switch (pNamedType->GetType())
 		{
 			case CT_STRUCT:
-				return llvm::StructType::create(*mpContext, pNamedType->GetName());
+				return mTypesTable[pNamedType->GetName()];
+				//return llvm::StructType::create(*mpContext, pNamedType->GetName());
 			case CT_ENUM:
 				return llvm::Type::getInt32Ty(*mpContext);
 		}

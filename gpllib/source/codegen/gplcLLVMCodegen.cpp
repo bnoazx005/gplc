@@ -109,7 +109,7 @@ namespace gplc
 			if (!pIdentifiersType)
 			{
 				// if some type was already defined we use it, in other cases we infer it again based on pType's description
-				pIdentifiersType = (mTypesTable.find(pType->GetName()) != mTypesTable.cend()) ? mTypesTable[pType->GetName()] : std::get<llvm::Type*>(pType->Accept(mpTypeGenerator));
+				pIdentifiersType = std::get<llvm::Type*>(pType->Accept(mpTypeGenerator));
 			}
 
 			auto pCurrVariableAllocation = currIRBuidler.CreateAlloca(pIdentifiersType, nullptr, dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName());
@@ -441,8 +441,9 @@ namespace gplc
 
 			mVariablesTable[mpSymTable->GetSymbolHandleByName(currIdentifierName)] = pCurrVariableAllocation;
 
-			if (pType->GetType() == CT_POINTER)
+			if (pType->GetType() == CT_POINTER && pIdentifiersValue->getType()->isIntegerTy())
 			{
+				// \note this case is for null literal which is represented via 0 value of i32 type
 				irBuilder.CreateStore(pIdentifiersValue, irBuilder.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext)));
 			}
 			else
@@ -543,11 +544,6 @@ namespace gplc
 		assert(pStructSymbolDesc && pStructSymbolDesc->mpType);
 		
 		llvm::Type* pStructType = std::get<llvm::Type*>(pStructSymbolDesc->mpType->Accept(mpTypeGenerator));
-
-		if (mTypesTable.find(name) == mTypesTable.cend())
-		{
-			mTypesTable.insert({ name, pStructType });
-		}
 
 		// define struct's constructor
 		_defineStructTypeConstructor(dynamic_cast<CStructType*>(pStructSymbolDesc->mpType));
@@ -824,7 +820,7 @@ namespace gplc
 		std::string structName      = pType->GetName();
 		std::string constructorName = structName + "$ctor";
 
-		auto pInputArgType = llvm::PointerType::get(mTypesTable[structName], 0);
+		auto pInputArgType = llvm::PointerType::get(std::get<llvm::Type*>(pType->Accept(mpTypeGenerator)), 0);
 
 		llvm::FunctionType* pConstructorType = llvm::FunctionType::get(pInputArgType, { pInputArgType }, false);
 

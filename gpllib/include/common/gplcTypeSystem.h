@@ -217,6 +217,8 @@ namespace gplc
 
 			CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const override;
 
+			bool IsBuiltIn() const override;
+
 			bool AreSame(const CType* pType) const override;
 
 			std::string ToShortAliasString() const override;

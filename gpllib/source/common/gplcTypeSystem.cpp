@@ -385,7 +385,7 @@ namespace gplc
 
 	bool CType::IsBuiltIn() const
 	{
-		return mChildren.empty();
+		return mType != CT_ENUM && mType != CT_ARRAY && mType != CT_FUNCTION && mType != CT_STRUCT;
 	}
 
 	void CType::SetAttribute(U32 attribute)
@@ -589,6 +589,7 @@ namespace gplc
 	CPointerType::CPointerType(CType* pType):
 		CType(CT_POINTER, BTS_POINTER, AV_POINTER), mpBaseType(pType)
 	{
+		mName = (mpBaseType ? mpBaseType->GetName() : "void") + "*";
 	}
 
 	CPointerType::~CPointerType()
@@ -605,6 +606,11 @@ namespace gplc
 		// \todo temprorary solution, reimplement this later with CPointerValue type
 		return pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(0)));
 		//return pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CPointerValue()));
+	}
+
+	bool CPointerType::IsBuiltIn() const
+	{
+		return mpBaseType ? mpBaseType->IsBuiltIn() : false;
 	}
 
 	bool CPointerType::AreSame(const CType* pType) const
