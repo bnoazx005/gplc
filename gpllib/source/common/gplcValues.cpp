@@ -184,6 +184,6 @@ namespace gplc
 
 	CType* CPointerValue::GetTypeInfo() const
 	{
-		return new CType(CT_POINTER, BTS_POINTER, 0x0);
+		return new CPointerType(nullptr);
 	}
 }

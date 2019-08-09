@@ -119,6 +119,8 @@ namespace gplc
 			void _defineEntryPoint();
 
 			llvm::Value* _declareNativeFunction(const TSymbolDesc* pFuncDesc);
+
+			void _defineStructTypeConstructor(CStructType* pType);
 		protected:
 			TLLVMLiteralVisitor*   mpLiteralIRGenerator;
 

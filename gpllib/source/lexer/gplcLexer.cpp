@@ -396,7 +396,7 @@ namespace gplc
 
 			if (currSequence == "null")
 			{
-				return new CLiteralToken(nullptr, x, y);
+				return new CLiteralToken(new CPointerValue(), x, y);
 			}
 
 			return new CIdentifierToken(currSequence, x, y);

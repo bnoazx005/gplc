@@ -622,6 +622,11 @@ namespace gplc
 		{
 			case CT_POINTER:
 				pBaseType = dynamic_cast<const CPointerType*>(pType)->GetBaseType();
+
+				if (!pBaseType)
+				{
+					return true;
+				}
 				break;
 			case CT_ARRAY:
 				pBaseType = dynamic_cast<const CArrayType*>(pType)->GetBaseType();

@@ -115,12 +115,17 @@ namespace gplc
 			auto pCurrVariableAllocation = currIRBuidler.CreateAlloca(pIdentifiersType, nullptr, dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName());
 			
 			// retrieve initial value 
-			pIdentifiersValue = pIdentifiersValue ? pIdentifiersValue : std::get<llvm::Value*>(pCurrSymbolDesc->mpValue->Accept(this));
+			E_COMPILER_TYPES currType = pType->GetType();
+
+			if (currType != CT_STRUCT /*&& currType != CT_ARRAY*/)
+			{
+				pIdentifiersValue = pIdentifiersValue ? pIdentifiersValue : std::get<llvm::Value*>(pCurrSymbolDesc->mpValue->Accept(this));
+			}
 
 			mVariablesTable[mpSymTable->GetSymbolHandleByName(identifier)] = pCurrVariableAllocation;
 
 			// \todo replace this with visitor which generates initializing code per type, something like ITypeInitializer
-			switch (pType->GetType())
+			switch (currType)
 			{
 				case CT_ENUM:
 					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext)));
@@ -130,10 +135,10 @@ namespace gplc
 					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext), "arr_cast"));
 					break;
 				case CT_STRUCT:
-					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext)));
+					currIRBuidler.CreateCall(mpModule->getFunction(pType->GetName() + "$ctor"), { pCurrVariableAllocation });
 					break;
 				case CT_POINTER:
-					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, pIdentifiersType));
+					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, pIdentifiersType, "reinterp_cast"));
 					break;
 				default:
 					currIRBuidler.CreateStore(pIdentifiersValue, pCurrVariableAllocation); // for built-in types only
@@ -436,7 +441,14 @@ namespace gplc
 
 			mVariablesTable[mpSymTable->GetSymbolHandleByName(currIdentifierName)] = pCurrVariableAllocation;
 
-			irBuilder.CreateStore(pIdentifiersValue, pCurrVariableAllocation);
+			if (pType->GetType() == CT_POINTER)
+			{
+				irBuilder.CreateStore(pIdentifiersValue, irBuilder.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext)));
+			}
+			else
+			{
+				irBuilder.CreateStore(pIdentifiersValue, pCurrVariableAllocation);
+			}
 		}
 
 		return {};
@@ -536,6 +548,9 @@ namespace gplc
 		{
 			mTypesTable.insert({ name, pStructType });
 		}
+
+		// define struct's constructor
+		_defineStructTypeConstructor(dynamic_cast<CStructType*>(pStructSymbolDesc->mpType));
 
 		return pStructType;
 	}
@@ -802,5 +817,53 @@ namespace gplc
 		mVariablesTable[funcHandle] = llvm::Function::Create(pFunctionType, llvm::Function::ExternalLinkage, pFuncDesc->mName, *mpModule);
 
 		return mVariablesTable[funcHandle];
+	}
+
+	void CLLVMCodeGenerator::_defineStructTypeConstructor(CStructType* pType)
+	{
+		std::string structName      = pType->GetName();
+		std::string constructorName = structName + "$ctor";
+
+		auto pInputArgType = llvm::PointerType::get(mTypesTable[structName], 0);
+
+		llvm::FunctionType* pConstructorType = llvm::FunctionType::get(pInputArgType, { pInputArgType }, false);
+
+		auto pTypeDesc = mpSymTable->LookUpNamedScope(structName);
+
+		mpSymTable->VisitNamedScope(structName);
+
+		TSymbolHandle constructorHandle = mpSymTable->AddVariable({ constructorName, nullptr, nullptr });
+
+		auto pConstructorFunction = llvm::Function::Create(pConstructorType, llvm::Function::ExternalLinkage, constructorName, *mpModule);
+	
+		auto pArg = pConstructorFunction->args().begin();
+
+		mVariablesTable[constructorHandle] = pConstructorFunction;
+		
+		llvm::IRBuilder<> currIRBuilder{ llvm::BasicBlock::Create(*mpContext, "entry", pConstructorFunction) };
+
+		U32 firstFieldHandle = pTypeDesc->mVariables.begin()->second;
+		U32 currFieldHandle  = InvalidSymbolHandle;
+
+		llvm::Value* pCurrValue = nullptr;
+
+		auto zeroIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0);
+
+		for (auto currFieldTypeInfo : pType->GetFieldsTypes())
+		{
+			currFieldHandle = pTypeDesc->mVariables[currFieldTypeInfo.first];
+
+			pCurrValue = currIRBuilder.CreateGEP(pArg,
+				{
+					zeroIndex,
+					llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), currFieldHandle - firstFieldHandle)
+				});
+
+			currIRBuilder.CreateStore(std::get<llvm::Value*>(mpSymTable->LookUp(currFieldHandle)->mpValue->Accept(this)), pCurrValue);
+		}
+
+		mpSymTable->LeaveScope();
+
+		currIRBuilder.CreateRet(pArg);
 	}
 }

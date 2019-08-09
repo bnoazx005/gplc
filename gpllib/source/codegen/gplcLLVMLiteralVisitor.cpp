@@ -81,6 +81,7 @@ namespace gplc
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitNullLiteral(const CPointerValue* pLiteral)
 	{
-		return llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(*mpContext));
+		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0);
+		//return llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(*mpContext));
 	}
 }
