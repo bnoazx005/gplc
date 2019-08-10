@@ -202,6 +202,7 @@ namespace gplc
 		PE_INVALID_ENUMERATOR_VALUE,			///< Enumerators can be initialized only with basic literals: numbers, strings, chars, logic, etc
 		PE_UNEXPECTED_TOKEN,
 		PE_INVALID_ENVIRONMENT,					///< Some of input arguments of Parse method of IParser are invalid
+		PE_INVALID_TYPE,
 	};
 
 

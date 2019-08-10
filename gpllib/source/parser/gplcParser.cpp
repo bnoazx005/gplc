@@ -451,6 +451,10 @@ namespace gplc
 		{
 			pLexer->GetNextToken();
 		}
+		else
+		{
+			OnErrorOutput.Invoke({ PE_INVALID_TYPE, pCurrToken->GetPos(), pCurrToken->GetLine() });
+		}
 
 		return pBuiltinType;
 	}
@@ -1200,8 +1204,6 @@ namespace gplc
 			case TT_DOUBLE_TYPE:
 				return mpNodesFactory->CreateTypeNode(NT_DOUBLE);
 		}
-
-		assert(false); // unreachable code
 
 		return nullptr;
 	}

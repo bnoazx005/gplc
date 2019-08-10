@@ -51,6 +51,8 @@ namespace gplc
 				}
 			case PE_INVALID_ENVIRONMENT:
 				return "Some of input arguments of IParser::Parse method are invalid";
+			case PE_INVALID_TYPE:
+				return "Invalid type has found";
 		}
 
 		return {};
