@@ -1272,8 +1272,24 @@ namespace gplc
 			return nullptr;
 		}
 
+		pLexer->GetNextToken(); // take path to a module
+
+		if (!SUCCESS(_expect(TT_AS_KEYWORD, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take 'as'
+
+		if (!SUCCESS(_expect(TT_IDENTIFIER, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		const CIdentifierToken* pModuleName = dynamic_cast<const CIdentifierToken*>(pLexer->GetCurrToken());
+
 		pLexer->GetNextToken();
 
-		return mpNodesFactory->CreateImportDirective(dynamic_cast<CStringValue*>(pLiteralToken->GetValue())->GetValue());
+		return mpNodesFactory->CreateImportDirective(dynamic_cast<CStringValue*>(pLiteralToken->GetValue())->GetValue(), pModuleName->GetName());
 	}
 }

@@ -1201,8 +1201,8 @@ namespace gplc
 		\brief CASTImportDirectiveNode's definition
 	*/
 
-	CASTImportDirectiveNode::CASTImportDirectiveNode(const std::string& moduleName):
-		CASTNode(NT_IMPORT), mModuleName(moduleName)
+	CASTImportDirectiveNode::CASTImportDirectiveNode(const std::string& modulePath, const std::string& moduleName):
+		CASTNode(NT_IMPORT), mModulePath(modulePath), mModuleName(moduleName)
 	{
 	}
 
@@ -1219,6 +1219,11 @@ namespace gplc
 	TLLVMIRData CASTImportDirectiveNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
 	{
 		return pVisitor->VisitImportDirectiveNode(this);
+	}
+
+	const std::string& CASTImportDirectiveNode::GetModulePath() const
+	{
+		return mModulePath;
 	}
 
 	const std::string& CASTImportDirectiveNode::GetImportedModuleName() const

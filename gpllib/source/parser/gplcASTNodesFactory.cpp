@@ -171,8 +171,8 @@ namespace gplc
 		return _insertNode(new CASTPointerTypeNode(pTypeInfo));
 	}
 
-	CASTImportDirectiveNode* CASTNodesFactory::CreateImportDirective(const std::string& moduleName)
+	CASTImportDirectiveNode* CASTNodesFactory::CreateImportDirective(const std::string& modulePath, const std::string& moduleName)
 	{
-		return _insertNode(new CASTImportDirectiveNode(moduleName));
+		return _insertNode(new CASTImportDirectiveNode(modulePath, moduleName));
 	}
 }

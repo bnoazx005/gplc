@@ -682,17 +682,21 @@ namespace gplc
 	class CASTImportDirectiveNode : public CASTNode
 	{
 		public:
-			CASTImportDirectiveNode(const std::string& moduleName);
+			CASTImportDirectiveNode(const std::string& modulePath, const std::string& moduleName);
 			virtual ~CASTImportDirectiveNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
 
+			const std::string& GetModulePath() const;
+
 			const std::string& GetImportedModuleName() const;
 		protected:
 			CASTImportDirectiveNode(const CASTImportDirectiveNode& node) = default;
 		protected:
+			std::string mModulePath;
+
 			std::string mModuleName;
 	};
 }
