@@ -854,8 +854,17 @@ namespace gplc
 					zeroIndex,
 					llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), currFieldHandle - firstFieldHandle)
 				});
+			
+			auto pAssignedValue = std::get<llvm::Value*>(mpSymTable->LookUp(currFieldHandle)->mpValue->Accept(this));
 
-			currIRBuilder.CreateStore(std::get<llvm::Value*>(mpSymTable->LookUp(currFieldHandle)->mpValue->Accept(this)), pCurrValue);
+			if (currFieldTypeInfo.second->GetType() == CT_POINTER && pAssignedValue->getType()->isIntegerTy())
+			{
+				currIRBuilder.CreateStore(pAssignedValue, currIRBuilder.CreateBitOrPointerCast(pCurrValue, llvm::Type::getInt32PtrTy(*mpContext), "ptr_reinterp_cast"));
+			}
+			else
+			{
+				currIRBuilder.CreateStore(pAssignedValue, pCurrValue);
+			}
 		}
 
 		mpSymTable->LeaveScope();

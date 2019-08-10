@@ -74,20 +74,31 @@ namespace gplc
 
 		auto fields = pStructType->GetFieldsTypes();
 
+		// define an opaque structure
+		const std::string& structName = pStructType->GetName();
+
+		llvm::StructType* pInferredType = nullptr;
+
+		if (mTypesTable.find(structName) == mTypesTable.cend())
+		{
+			pInferredType = llvm::StructType::create(*mpContext, structName);
+
+			mTypesTable[structName] = pInferredType;
+		}
+		else
+		{
+			pInferredType = llvm::dyn_cast<llvm::StructType>(mTypesTable[structName]);
+		}
+
 		for (auto currField : fields)
 		{
 			structFields.push_back(std::get<llvm::Type*>(currField.second->Accept(this)));
 		}
 
-		const std::string& structName = pStructType->GetName();
-
-		llvm::Type* pInferredType = nullptr;
-
-		if (mTypesTable.find(structName) == mTypesTable.cend())
+		// if the structure was forwardly declared then define its body
+		if (pInferredType->isOpaque())
 		{
-			pInferredType = llvm::StructType::create(structFields, structName);
-
-			mTypesTable[structName] = pInferredType;
+			pInferredType->setBody(structFields);
 		}
 
 		return pInferredType ? pInferredType : mTypesTable[structName];
