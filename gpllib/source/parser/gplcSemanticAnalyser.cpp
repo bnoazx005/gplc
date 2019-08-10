@@ -332,16 +332,58 @@ namespace gplc
 		{
 			return false;
 		}
+
+		CFunctionType* pCalleeType = dynamic_cast<CFunctionType*>(pNode->GetIdentifier()->Resolve(mpTypeResolver));
 		
-		// \todo implement checks up of arguments with signatures
+		if (!pCalleeType)
+		{
+			// \todo callee's type couldn't be resolved
+			return false;
+		}
 
 		auto pChildren = pNode->GetArgs()->GetChildren();
 
-		for (auto pCurrChild : pChildren)
+		auto pCalleeArgsTypes = pCalleeType->GetArgsTypes();
+
+		if (pCalleeArgsTypes.size() != pChildren.size())
 		{
-			if (!pCurrChild->Accept(this))
+			// \todo number of arguments are mismatched between function's type and its usage
+			return false;
+		}
+
+		// \todo implement checks up of arguments with signatures
+		CASTTypeNode* pCurrArgNode = nullptr;
+
+		CType* pExpectedArgType = nullptr;
+		CType* pActualArgType   = nullptr;
+
+		for (U32 argIndex = 0; argIndex < pChildren.size(); ++argIndex)
+		{
+			pCurrArgNode = dynamic_cast<CASTTypeNode*>(pChildren[argIndex]);
+
+			pExpectedArgType = pCalleeArgsTypes[argIndex].second;
+
+			assert(pCurrArgNode && pExpectedArgType);
+
+			// this conditions check whether actual arguments are valid
+			if (!pCurrArgNode->Accept(this) || !(pActualArgType = pCurrArgNode->Resolve(mpTypeResolver)))
 			{
 				return false;
+			}
+
+			bool areSameTypes    = pActualArgType->AreSame(pExpectedArgType);
+			bool isConvertibleTo = pActualArgType->AreConvertibleTo(pExpectedArgType);
+
+			if (!areSameTypes)
+			{
+				switch (isConvertibleTo)
+				{
+					case false:
+						// \todo send a message
+						return false;
+					/*case true:
+						*/
+				}
 			}
 		}
 
