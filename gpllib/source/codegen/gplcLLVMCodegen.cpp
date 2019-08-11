@@ -41,6 +41,8 @@ namespace gplc
 
 		_defineInitModuleGlobalsFunction();
 
+		mShouldSkipLoopTail = false;
+
 		pNode->Accept(this);
 
 		mpInitModuleGlobalsIRBuilder->CreateRetVoid();
@@ -262,15 +264,30 @@ namespace gplc
 			_allocateVariableOnStack(currArg.getName(), true);
 		}
 
-		auto pBlock = llvm::BasicBlock::Create(mContext, "entry", mpCurrActiveFunction);
+		auto pBlock = llvm::BasicBlock::Create(mContext, "entry", mpCurrActiveFunction, mpLoopEndBlock);
 		
 		mIRBuildersStack.push(llvm::IRBuilder<>(pBlock));
 
+		E_NODE_TYPE nodeType;
+
 		for (auto pCurrStatement : pNode->GetStatements())
 		{
-			pCurrStatement->Accept(this);
-		}
+			if (mShouldSkipLoopTail)
+			{
+				break;
+			}
 
+			pCurrStatement->Accept(this);
+
+			nodeType = pCurrStatement->GetType();
+
+			// \note skip rest operators til the end of a loop
+			if ((mpLoopConditionBlock || mpLoopEndBlock) && (nodeType == NT_BREAK_OPERATOR || nodeType == NT_CONTINUE_OPERATOR))
+			{
+				mShouldSkipLoopTail = true;
+			}
+		}
+		
 		mIRBuildersStack.pop();
 
 		mpSymTable->LeaveScope();
@@ -316,25 +333,31 @@ namespace gplc
 	{
 		llvm::IRBuilder<>& currIRBuilder = mIRBuildersStack.top();
 
-		llvm::BasicBlock* pConditionBlock = llvm::BasicBlock::Create(mContext, "cond", mpCurrActiveFunction);
+		//llvm::BasicBlock* pConditionBlock = llvm::BasicBlock::Create(mContext, "cond", mpCurrActiveFunction);
 		llvm::BasicBlock* pEndBlock       = llvm::BasicBlock::Create(mContext, "end", mpCurrActiveFunction);
 
-		mpLoopConditionBlock = pConditionBlock; // the member is used for break and continue operators
+		mpLoopConditionBlock = nullptr; // the member is used for break and continue operators
 		mpLoopEndBlock       = pEndBlock;
 
 		llvm::BasicBlock* pLoopBody = llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetBody()->Accept(this)));
 
 		// link loop with its parent block
-
+		
 		currIRBuilder.CreateBr(pLoopBody);
 
 		llvm::IRBuilder<> loopIRBuilder { pLoopBody };
-		loopIRBuilder.CreateBr(pLoopBody);
-
-		currIRBuilder.SetInsertPoint(pConditionBlock);
-		currIRBuilder.CreateBr(pLoopBody);
-
+		
+		if (!mShouldSkipLoopTail)
+		{
+			loopIRBuilder.CreateBr(pLoopBody);
+		}
+		
 		currIRBuilder.SetInsertPoint(pEndBlock);
+
+		mpLoopConditionBlock = nullptr;
+		mpLoopEndBlock       = nullptr;
+
+		mShouldSkipLoopTail = false;
 
 		return pLoopBody;
 	}
@@ -360,12 +383,21 @@ namespace gplc
 
 		// create loop to condition's check up
 		llvm::IRBuilder<> loopIRBuilder { pLoopBody };
-		loopIRBuilder.CreateBr(pConditionBlock);
+
+		if (!mShouldSkipLoopTail)
+		{
+			loopIRBuilder.CreateBr(pConditionBlock);
+		}
 
 		currIRBuilder.SetInsertPoint(pConditionBlock);
 		llvm::Value* pBRInstruction = currIRBuilder.CreateCondBr(pLoopCondition, pLoopBody, pEndBlock);
 
 		currIRBuilder.SetInsertPoint(pEndBlock);
+
+		mpLoopConditionBlock = nullptr;
+		mpLoopEndBlock       = nullptr;
+
+		mShouldSkipLoopTail = false;
 
 		return pBRInstruction;
 	}
@@ -567,7 +599,7 @@ namespace gplc
 	{
 		auto& currIRBuilder = mIRBuildersStack.top();
 
-		return currIRBuilder.CreateBr(mpLoopConditionBlock);
+		return currIRBuilder.CreateBr(mpLoopConditionBlock ? mpLoopConditionBlock : currIRBuilder.GetInsertBlock());
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitAccessOperator(CASTAccessOperatorNode* pNode)

@@ -149,6 +149,8 @@ namespace gplc
 			llvm::BasicBlock*      mpLoopEndBlock;
 
 			IConstExprInterpreter* mpConstExprInterpreter;
+
+			bool                   mShouldSkipLoopTail;
 	};
 }
 
