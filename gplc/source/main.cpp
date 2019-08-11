@@ -9,7 +9,7 @@ int main(int argc, const char** argv)
 	// \todo parse options
 	ICompilerDriver* pCompilerDriver = CreateCompilerDriver().Get(); // this will raise panic if fails
 
-	pCompilerDriver->Run({ "test.gpls" });
+	pCompilerDriver->Run({ "Test.gpls" });
 
 	pCompilerDriver->Free();
 

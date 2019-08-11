@@ -1,5 +1,6 @@
 #include "gplcCompilerDriver.h"
 #include <iostream>
+#include <filesystem>
 
 
 namespace gplc
@@ -21,6 +22,7 @@ namespace gplc
 		mpTypeResolver         = new CTypeResolver();
 		mpConstExprInterpreter = new CConstExprInterpreter();
 		mpCodeGenerator        = new CLLVMCodeGenerator();
+		mpModuleResolver       = new CModuleResolver();
 
 		if (!SUCCESS(result = mpTypeResolver->Init(mpSymTable, mpConstExprInterpreter)))
 		{
@@ -46,6 +48,7 @@ namespace gplc
 			return RV_FAIL;
 		}
 
+		delete mpModuleResolver;
 		delete mpLexer;
 		delete mpParser;
 		delete mpSymTable;
@@ -76,11 +79,13 @@ namespace gplc
 
 		Result result = RV_SUCCESS;
 
+		TLLVMIRData compiledProgram;
+
 		for (auto currFilename : inputFiles)
 		{
 			mIsPanicModeEnabled = false;
 
-			if (!SUCCESS(result = _compileSeparateFile(currFilename)))
+			if (!SUCCESS(result = _compileSeparateFile(currFilename, currFilename.substr(0, currFilename.find_first_of('.')), compiledProgram)))
 			{
 				return result;
 			}
@@ -89,9 +94,11 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 
-	Result CCompilerDriver::_compileSeparateFile(const std::string& filename)
+	Result CCompilerDriver::_compileSeparateFile(const std::string& filename, const std::string& moduleName, TLLVMIRData& compiledModuleData)
 	{
 		Result result = mpLexer->Reset();
+
+		std::cout << "gplc: Compiling " << moduleName << " ..." << std::endl;
 
 		if (!SUCCESS(result))
 		{
@@ -124,12 +131,22 @@ namespace gplc
 		}
 
 		// parse the source file
-		CASTSourceUnitNode* pSourceAST = dynamic_cast<CASTSourceUnitNode*>(mpParser->Parse(mpLexer, mpSymTable, mpASTNodesFactory, filename));
+		CASTSourceUnitNode* pSourceAST = dynamic_cast<CASTSourceUnitNode*>(mpParser->Parse(mpLexer, mpSymTable, mpASTNodesFactory, moduleName));
 
 		if (mIsPanicModeEnabled)
 		{
 			disposeInputStream();
 
+			return RV_FAIL;
+		}
+
+		// \todo resolve all modules here
+		if (!SUCCESS(mpModuleResolver->Resolve(pSourceAST, mpSymTable, std::filesystem::current_path().string(), 
+											   std::bind(&CCompilerDriver::_compileSeparateFile, this, 
+														 std::placeholders::_1, 
+														 std::placeholders::_2,
+														 std::placeholders::_3))))
+		{
 			return RV_FAIL;
 		}
 
@@ -149,7 +166,7 @@ namespace gplc
 		}
 
 		// emit IR code
-		mpCodeGenerator->Generate(pSourceAST, mpSymTable, mpTypeResolver, mpConstExprInterpreter);
+		compiledModuleData = mpCodeGenerator->Generate(pSourceAST, mpSymTable, mpTypeResolver, mpConstExprInterpreter);
 
 		disposeInputStream();
 

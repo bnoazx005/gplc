@@ -47,7 +47,7 @@ namespace gplc
 		protected:
 			CLLVMCodeGenerator* mpCodeGenerator;
 
-			llvm::LLVMContext*  mpContext;
+			llvm::LLVMContext*  mContext;
 	};
 }
 

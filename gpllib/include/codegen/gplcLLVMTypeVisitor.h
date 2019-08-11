@@ -44,7 +44,7 @@ namespace gplc
 			CLLVMTypeVisitor() = default;
 			CLLVMTypeVisitor(const CLLVMTypeVisitor& visitor) = default;
 		protected:
-			llvm::LLVMContext* mpContext;
+			llvm::LLVMContext* mContext;
 
 			TTypesTable        mTypesTable;
 

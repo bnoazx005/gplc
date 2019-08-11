@@ -6,7 +6,7 @@
 namespace gplc
 {
 	CLLVMTypeVisitor::CLLVMTypeVisitor(llvm::LLVMContext& context):
-		mpContext(&context)
+		mContext(&context)
 	{
 	}
 
@@ -20,26 +20,26 @@ namespace gplc
 		{
 			case CT_INT8:
 			case CT_UINT8:
-				return llvm::Type::getInt8Ty(*mpContext);
+				return llvm::Type::getInt8Ty(*mContext);
 			case CT_INT16:
 			case CT_UINT16:
-				return llvm::Type::getInt16Ty(*mpContext);
+				return llvm::Type::getInt16Ty(*mContext);
 			case CT_INT32:
 			case CT_UINT32:
-				return llvm::Type::getInt32Ty(*mpContext);
+				return llvm::Type::getInt32Ty(*mContext);
 			case CT_INT64:
 			case CT_UINT64:
-				return llvm::Type::getInt64Ty(*mpContext);
+				return llvm::Type::getInt64Ty(*mContext);
 			case CT_FLOAT:
-				return llvm::Type::getFloatTy(*mpContext);
+				return llvm::Type::getFloatTy(*mContext);
 			case CT_DOUBLE:
-				return llvm::Type::getDoubleTy(*mpContext);
+				return llvm::Type::getDoubleTy(*mContext);
 			case CT_STRING:
-				return llvm::Type::getInt8PtrTy(*mpContext);
+				return llvm::Type::getInt8PtrTy(*mContext);
 			case CT_CHAR:
-				return llvm::Type::getInt8PtrTy(*mpContext);
+				return llvm::Type::getInt8PtrTy(*mContext);
 			case CT_BOOL:
-				return llvm::Type::getInt1Ty(*mpContext);
+				return llvm::Type::getInt1Ty(*mContext);
 		}
 
 		return {};
@@ -81,7 +81,7 @@ namespace gplc
 
 		if (mTypesTable.find(structName) == mTypesTable.cend())
 		{
-			pInferredType = llvm::StructType::create(*mpContext, structName);
+			pInferredType = llvm::StructType::create(*mContext, structName);
 
 			mTypesTable[structName] = pInferredType;
 		}
@@ -114,7 +114,7 @@ namespace gplc
 				return mTypesTable[pNamedType->GetName()];
 				//return llvm::StructType::create(*mpContext, pNamedType->GetName());
 			case CT_ENUM:
-				return llvm::Type::getInt32Ty(*mpContext);
+				return llvm::Type::getInt32Ty(*mContext);
 		}
 
 		return pNamedType->GetDependentType()->Accept(this);
@@ -126,7 +126,7 @@ namespace gplc
 			\note an enumeration is converted into integer value
 		*/
 
-		return llvm::Type::getInt32Ty(*mpContext);// llvm::StructType::create({ llvm::Type::getInt32Ty(*mpContext) }, pEnumType->GetName());
+		return llvm::Type::getInt32Ty(*mContext);// llvm::StructType::create({ llvm::Type::getInt32Ty(*mpContext) }, pEnumType->GetName());
 	}
 
 	TLLVMIRData CLLVMTypeVisitor::VisitStaticSizedArray(const CArrayType* pArrayType)

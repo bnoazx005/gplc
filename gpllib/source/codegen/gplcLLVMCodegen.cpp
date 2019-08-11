@@ -8,6 +8,7 @@
 #include "common/gplcConstExprInterpreter.h"
 #include "llvm/Bitcode/BitcodeWriter.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/FileSystem.h"
 #include <cassert>
 
 
@@ -22,24 +23,21 @@ namespace gplc
 
 		mpCurrActiveFunction = nullptr;
 
-		llvm::LLVMContext llvmContext;
+		mpLiteralIRGenerator = new CLLVMLiteralVisitor(mContext, this);
 
-		mpLiteralIRGenerator = new CLLVMLiteralVisitor(llvmContext, this);
-
-		mpTypeGenerator = new CLLVMTypeVisitor(llvmContext);
+		mpTypeGenerator = new CLLVMTypeVisitor(mContext);
 
 		mpTypeResolver = pTypeResolver;
 
 		mpConstExprInterpreter = pInterpreter;
 
-		mpContext  = &llvmContext;
 		mpSymTable = pSymTable;
 
-		mIRBuildersStack.push(llvm::IRBuilder<>(llvmContext)); // module's builder
+		mIRBuildersStack.push(llvm::IRBuilder<>(mContext)); // module's builder
 
 		mpGlobalIRBuilder = &mIRBuildersStack.top();
 
-		mpModule = new llvm::Module(pNode->GetModuleName(), llvmContext);
+		mpModule = new llvm::Module(pNode->GetModuleName(), mContext);
 
 		_defineInitModuleGlobalsFunction();
 
@@ -49,7 +47,11 @@ namespace gplc
 
 		// \note FOR DEBUG PURPOSE ONLY
 		mpModule->dump();
-		//llvm::WriteBitcodeToFile(*mpModule, llvm::outs());
+
+		std::error_code EC;
+		llvm::raw_fd_ostream OS(mpModule->getName(), EC, llvm::sys::fs::F_None);
+		WriteBitcodeToFile(*mpModule, OS);
+		OS.flush();
 		
 		delete mpLiteralIRGenerator;
 
@@ -57,9 +59,7 @@ namespace gplc
 
 		delete mpInitModuleGlobalsIRBuilder;
 
-		delete mpModule;
-
-		return {};
+		return mpModule;
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitProgramUnit(CASTSourceUnitNode* pProgramNode)
@@ -128,11 +128,11 @@ namespace gplc
 			switch (currType)
 			{
 				case CT_ENUM:
-					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext)));
+					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(mContext)));
 					break;
 				case CT_ARRAY:
 					// \todo invalid initialization, but it's enough for current tests, REIMPLEMENT THIS LATER
-					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext), "arr_cast"));
+					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(mContext), "arr_cast"));
 					break;
 				case CT_STRUCT:
 					currIRBuidler.CreateCall(mpModule->getFunction(pType->GetName() + "$ctor"), { pCurrVariableAllocation });
@@ -262,7 +262,7 @@ namespace gplc
 			_allocateVariableOnStack(currArg.getName(), true);
 		}
 
-		auto pBlock = llvm::BasicBlock::Create(*mpContext, "entry", mpCurrActiveFunction);
+		auto pBlock = llvm::BasicBlock::Create(mContext, "entry", mpCurrActiveFunction);
 		
 		mIRBuildersStack.push(llvm::IRBuilder<>(pBlock));
 
@@ -282,7 +282,7 @@ namespace gplc
 	{
 		llvm::IRBuilder<>& currIRBuilder = mIRBuildersStack.top();
 
-		llvm::BasicBlock* pConditionBlock = llvm::BasicBlock::Create(*mpContext, "cond", mpCurrActiveFunction);
+		llvm::BasicBlock* pConditionBlock = llvm::BasicBlock::Create(mContext, "cond", mpCurrActiveFunction);
 
 		mIRBuildersStack.push(llvm::IRBuilder<>(pConditionBlock));
 		llvm::Value* pConditifon = std::get<llvm::Value*>(pNode->GetCondition()->Accept(this));
@@ -290,7 +290,7 @@ namespace gplc
 
 		currIRBuilder.CreateBr(pConditionBlock);
 
-		llvm::BasicBlock* pEndBlock = llvm::BasicBlock::Create(*mpContext, "end", mpCurrActiveFunction);
+		llvm::BasicBlock* pEndBlock = llvm::BasicBlock::Create(mContext, "end", mpCurrActiveFunction);
 
 		llvm::BasicBlock* pThenBlock = llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetThenBlock()->Accept(this)));
 		
@@ -316,8 +316,8 @@ namespace gplc
 	{
 		llvm::IRBuilder<>& currIRBuilder = mIRBuildersStack.top();
 
-		llvm::BasicBlock* pConditionBlock = llvm::BasicBlock::Create(*mpContext, "cond", mpCurrActiveFunction);
-		llvm::BasicBlock* pEndBlock       = llvm::BasicBlock::Create(*mpContext, "end", mpCurrActiveFunction);
+		llvm::BasicBlock* pConditionBlock = llvm::BasicBlock::Create(mContext, "cond", mpCurrActiveFunction);
+		llvm::BasicBlock* pEndBlock       = llvm::BasicBlock::Create(mContext, "end", mpCurrActiveFunction);
 
 		mpLoopConditionBlock = pConditionBlock; // the member is used for break and continue operators
 		mpLoopEndBlock       = pEndBlock;
@@ -343,13 +343,13 @@ namespace gplc
 	{
 		llvm::IRBuilder<>& currIRBuilder = mIRBuildersStack.top();
 
-		llvm::BasicBlock* pConditionBlock = llvm::BasicBlock::Create(*mpContext, "cond", mpCurrActiveFunction);
+		llvm::BasicBlock* pConditionBlock = llvm::BasicBlock::Create(mContext, "cond", mpCurrActiveFunction);
 
 		mIRBuildersStack.push(llvm::IRBuilder<>(pConditionBlock));
 		llvm::Value* pLoopCondition = std::get<llvm::Value*>(pNode->GetCondition()->Accept(this));
 		mIRBuildersStack.pop();
 
-		llvm::BasicBlock* pEndBlock = llvm::BasicBlock::Create(*mpContext, "end", mpCurrActiveFunction);
+		llvm::BasicBlock* pEndBlock = llvm::BasicBlock::Create(mContext, "end", mpCurrActiveFunction);
 
 		mpLoopConditionBlock = pConditionBlock; // the member is used for break and continue operators
 		mpLoopEndBlock       = pEndBlock;
@@ -444,7 +444,7 @@ namespace gplc
 			if (pType->GetType() == CT_POINTER && pIdentifiersValue->getType()->isIntegerTy())
 			{
 				// \note this case is for null literal which is represented via 0 value of i32 type
-				irBuilder.CreateStore(pIdentifiersValue, irBuilder.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(*mpContext)));
+				irBuilder.CreateStore(pIdentifiersValue, irBuilder.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(mContext)));
 			}
 			else
 			{
@@ -625,8 +625,8 @@ namespace gplc
 
 				pCurrValue = currIRBuilder.CreateGEP(std::get<llvm::Value*>(pNode->GetExpression()->Accept(this)),
 												{
-													llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0),
-													llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), currFieldId - firstFieldId)
+													llvm::ConstantInt::get(llvm::Type::getInt32Ty(mContext), 0),
+													llvm::ConstantInt::get(llvm::Type::getInt32Ty(mContext), currFieldId - firstFieldId)
 												});
 
 				if (pFieldNode->GetAttributes() & AV_RVALUE)
@@ -654,7 +654,7 @@ namespace gplc
 
 		U32 attributes = pNode->GetAttributes();
 
-		auto pAccessInstruction = currIRBuilder.CreateGEP(pPrimaryExprCode, { llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0), pIndexExprCode }, "arr_access");
+		auto pAccessInstruction = currIRBuilder.CreateGEP(pPrimaryExprCode, { llvm::ConstantInt::get(llvm::Type::getInt32Ty(mContext), 0), pIndexExprCode }, "arr_access");
 
 		if (attributes & AV_RVALUE)
 		{
@@ -762,15 +762,15 @@ namespace gplc
 
 	void CLLVMCodeGenerator::_defineEntryPoint()
 	{
-		auto pMainFuncType = llvm::FunctionType::get(llvm::Type::getInt32Ty(*mpContext), 
+		auto pMainFuncType = llvm::FunctionType::get(llvm::Type::getInt32Ty(mContext), 
 													{
-														llvm::Type::getInt32Ty(*mpContext),
-														llvm::PointerType::get(llvm::Type::getInt8PtrTy(*mpContext), 0)
+														llvm::Type::getInt32Ty(mContext),
+														llvm::PointerType::get(llvm::Type::getInt8PtrTy(mContext), 0)
 													}, false);
 
 		auto pMainFunctionDef = llvm::Function::Create(pMainFuncType, llvm::Function::InternalLinkage, "main", mpModule);
 
-		llvm::BasicBlock* pMainFuncBody = llvm::BasicBlock::Create(*mpContext, "entry", pMainFunctionDef);
+		llvm::BasicBlock* pMainFuncBody = llvm::BasicBlock::Create(mContext, "entry", pMainFunctionDef);
 
 		llvm::IRBuilder<> mainFuncIRBuidler(pMainFuncBody);
 
@@ -787,14 +787,14 @@ namespace gplc
 
 	void CLLVMCodeGenerator::_defineInitModuleGlobalsFunction()
 	{
-		auto pInitModuleGlobalsFuncType = llvm::FunctionType::get(llvm::Type::getVoidTy(*mpContext), false);
+		auto pInitModuleGlobalsFuncType = llvm::FunctionType::get(llvm::Type::getVoidTy(mContext), false);
 		
 		std::string moduleName = mpModule->getName();
 		moduleName = moduleName.substr(0, moduleName.find_first_of('.'));
 
 		mpInitModuleGlobalsFunction = llvm::Function::Create(pInitModuleGlobalsFuncType, llvm::Function::ExternalLinkage, moduleName + "$initModuleGlobals", mpModule);
 		
-		llvm::BasicBlock* pInitModuleGlobalsFuncBody = llvm::BasicBlock::Create(*mpContext, "entry", mpInitModuleGlobalsFunction);
+		llvm::BasicBlock* pInitModuleGlobalsFuncBody = llvm::BasicBlock::Create(mContext, "entry", mpInitModuleGlobalsFunction);
 
 		mpInitModuleGlobalsIRBuilder = new llvm::IRBuilder<>(pInitModuleGlobalsFuncBody);
 	}
@@ -836,14 +836,14 @@ namespace gplc
 
 		mVariablesTable[constructorHandle] = pConstructorFunction;
 		
-		llvm::IRBuilder<> currIRBuilder{ llvm::BasicBlock::Create(*mpContext, "entry", pConstructorFunction) };
+		llvm::IRBuilder<> currIRBuilder{ llvm::BasicBlock::Create(mContext, "entry", pConstructorFunction) };
 
 		U32 firstFieldHandle = pTypeDesc->mVariables.begin()->second;
 		U32 currFieldHandle  = InvalidSymbolHandle;
 
 		llvm::Value* pCurrValue = nullptr;
 
-		auto zeroIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0);
+		auto zeroIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(mContext), 0);
 
 		for (auto currFieldTypeInfo : pType->GetFieldsTypes())
 		{
@@ -852,14 +852,14 @@ namespace gplc
 			pCurrValue = currIRBuilder.CreateGEP(pArg,
 				{
 					zeroIndex,
-					llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), currFieldHandle - firstFieldHandle)
+					llvm::ConstantInt::get(llvm::Type::getInt32Ty(mContext), currFieldHandle - firstFieldHandle)
 				});
 			
 			auto pAssignedValue = std::get<llvm::Value*>(mpSymTable->LookUp(currFieldHandle)->mpValue->Accept(this));
 
 			if (currFieldTypeInfo.second->GetType() == CT_POINTER && pAssignedValue->getType()->isIntegerTy())
 			{
-				currIRBuilder.CreateStore(pAssignedValue, currIRBuilder.CreateBitOrPointerCast(pCurrValue, llvm::Type::getInt32PtrTy(*mpContext), "ptr_reinterp_cast"));
+				currIRBuilder.CreateStore(pAssignedValue, currIRBuilder.CreateBitOrPointerCast(pCurrValue, llvm::Type::getInt32PtrTy(mContext), "ptr_reinterp_cast"));
 			}
 			else
 			{

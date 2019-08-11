@@ -54,7 +54,7 @@ namespace gplc
 
 			void _onSemanticAnalyserStageError(const TSemanticAnalyserMessageInfo& errorInfo);
 
-			Result _compileSeparateFile(const std::string& filename);
+			Result _compileSeparateFile(const std::string& filename, const std::string& moduleName, TLLVMIRData& compiledModuleData);
 		protected:
 			bool                   mIsInitialized;
 
@@ -73,6 +73,8 @@ namespace gplc
 			IConstExprInterpreter* mpConstExprInterpreter;
 
 			ICodeGenerator*        mpCodeGenerator;
+
+			IModuleResolver*       mpModuleResolver;
 
 			bool                   mIsPanicModeEnabled;
 	};

@@ -13,7 +13,7 @@ namespace gplc
 	CLLVMLiteralVisitor::CLLVMLiteralVisitor(llvm::LLVMContext& context, CLLVMCodeGenerator* pCodeGenerator):
 		mpCodeGenerator(pCodeGenerator)
 	{
-		mpContext = &context;
+		mContext = &context;
 	}
 
 	CLLVMLiteralVisitor::~CLLVMLiteralVisitor()
@@ -22,7 +22,7 @@ namespace gplc
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitIntLiteral(const CIntValue* pLiteral)
 	{
-		llvm::Type* pType = pLiteral->IsLong() ? llvm::Type::getInt64Ty(*mpContext) : llvm::Type::getInt32Ty(*mpContext);
+		llvm::Type* pType = pLiteral->IsLong() ? llvm::Type::getInt64Ty(*mContext) : llvm::Type::getInt32Ty(*mContext);
 
 		// \todo replace first argument with deduced one
 		return llvm::ConstantInt::get(pType, pLiteral->GetValue(), true);
@@ -30,7 +30,7 @@ namespace gplc
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitUIntLiteral(const CUIntValue* pLiteral)
 	{
-		llvm::Type* pType = pLiteral->IsLong() ? llvm::Type::getInt64Ty(*mpContext) : llvm::Type::getInt32Ty(*mpContext);
+		llvm::Type* pType = pLiteral->IsLong() ? llvm::Type::getInt64Ty(*mContext) : llvm::Type::getInt32Ty(*mContext);
 
 		// \todo replace first argument with deduced one
 		return llvm::ConstantInt::get(pType, pLiteral->GetValue(), false);
@@ -38,12 +38,12 @@ namespace gplc
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitFloatLiteral(const CFloatValue* pLiteral)
 	{
-		return llvm::ConstantFP::get(llvm::Type::getFloatTy(*mpContext), pLiteral->GetValue());
+		return llvm::ConstantFP::get(llvm::Type::getFloatTy(*mContext), pLiteral->GetValue());
 	}
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitDoubleLiteral(const CDoubleValue* pLiteral)
 	{
-		return llvm::ConstantFP::get(llvm::Type::getDoubleTy(*mpContext), pLiteral->GetValue());
+		return llvm::ConstantFP::get(llvm::Type::getDoubleTy(*mContext), pLiteral->GetValue());
 	}
 
 	TLLVMIRData CLLVMLiteralVisitor::VititCharLiteral(const CCharValue* pLiteral)
@@ -58,7 +58,7 @@ namespace gplc
 
 		auto pStringLiteral = pCurrIRBuilder->CreateGlobalString(pLiteral->GetValue());
 
-		return llvm::ConstantExpr::getBitCast(pStringLiteral, llvm::Type::getInt8PtrTy(*mpContext));
+		return llvm::ConstantExpr::getBitCast(pStringLiteral, llvm::Type::getInt8PtrTy(*mContext));
 /*
 		llvm::ConstantInt* pInitialIndex = llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0);
 		auto  t = llvm::cast<llvm::PointerType>(pStringLiteral->getType()->getScalarType())->getElementType();
@@ -76,12 +76,12 @@ namespace gplc
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitBoolLiteral(const CBoolValue* pLiteral)
 	{
-		return pLiteral->GetValue() ? llvm::ConstantInt::getTrue(*mpContext) : llvm::ConstantInt::getFalse(*mpContext);
+		return pLiteral->GetValue() ? llvm::ConstantInt::getTrue(*mContext) : llvm::ConstantInt::getFalse(*mContext);
 	}
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitNullLiteral(const CPointerValue* pLiteral)
 	{
-		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mpContext), 0);
+		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(*mContext), 0);
 		//return llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(*mpContext));
 	}
 }

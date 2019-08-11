@@ -126,7 +126,7 @@ namespace gplc
 
 			ITypeResolver*         mpTypeResolver;
 
-			llvm::LLVMContext*     mpContext;
+			llvm::LLVMContext      mContext;
 
 			llvm::Module*          mpModule;
 
