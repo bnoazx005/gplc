@@ -112,6 +112,7 @@ namespace gplc
 		CT_ENUM,
 		CT_ARRAY,
 		CT_ALIAS,
+		CT_MODULE,
 		CT_LAST
 	};
 

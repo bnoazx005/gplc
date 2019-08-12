@@ -91,6 +91,7 @@ namespace gplc
 			virtual CType* VisitAccessOperator(CASTAccessOperatorNode* pNode) = 0;
 			virtual CType* VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) = 0;
 			virtual CType* VisitPointerType(CASTPointerTypeNode* pNode) = 0;
+			virtual CType* VisitModuleType(CASTImportDirectiveNode* pNode) = 0;
 	};
 
 
@@ -123,6 +124,7 @@ namespace gplc
 			CType* VisitAccessOperator(CASTAccessOperatorNode* pNode) override;
 			CType* VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) override; 
 			CType* VisitPointerType(CASTPointerTypeNode* pNode) override;
+			CType* VisitModuleType(CASTImportDirectiveNode* pNode) override;
 		protected:
 			CType* _deduceBuiltinType(E_NODE_TYPE type, U32 attributes = 0x0);
 
@@ -394,6 +396,30 @@ namespace gplc
 			CType* mpBaseType;
 
 			U32    mElementsCount;
+	};
+
+
+	/*!
+		\brief CModuleType's definition
+	*/
+
+	class CModuleType : public CType
+	{
+		public:
+			CModuleType(const std::string& moduleName, U32 attributes = 0x0);
+			virtual ~CModuleType() = default;
+
+			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
+			
+			CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const override;
+
+			bool AreSame(const CType* pType) const override;
+
+			std::string ToShortAliasString() const override;
+		protected:
+			CModuleType() = default;
+			CModuleType(const CModuleType& structure) = default;
+		protected:
 	};
 
 

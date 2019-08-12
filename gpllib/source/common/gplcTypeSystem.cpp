@@ -271,6 +271,11 @@ namespace gplc
 		return new CPointerType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())));
 	}
 
+	CType* CTypeResolver::VisitModuleType(CASTImportDirectiveNode* pNode)
+	{
+		return new CModuleType(pNode->GetImportedModuleName());
+	}
+
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type, U32 attributes)
 	{
 		switch (type)
@@ -960,6 +965,41 @@ namespace gplc
 	U32 CArrayType::GetElementsCount() const
 	{
 		return mElementsCount;
+	}
+
+
+	/*!
+		\brief CModuleType's definition
+	*/
+	
+	CModuleType::CModuleType(const std::string& moduleName, U32 attributes):
+		CType(CT_MODULE, BTS_UNKNOWN, attributes, moduleName)
+	{
+	}
+
+	TLLVMIRData CModuleType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return {};
+	}
+
+	CASTExpressionNode* CModuleType::GetDefaultValue(IASTNodesFactory* pNodesFactory) const
+	{
+		return nullptr;
+	}
+
+	bool CModuleType::AreSame(const CType* pType) const
+	{
+		if (pType->GetType() != CT_MODULE)
+		{
+			return false;
+		}
+
+		return mName == pType->GetName();
+	}
+
+	std::string CModuleType::ToShortAliasString() const
+	{
+		return "module";
 	}
 
 
