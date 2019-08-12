@@ -84,6 +84,8 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitDeclaration(CASTDeclarationNode* pNode)
 	{
+		bool isGlobalScope = _isGlobalScope();
+
 		auto pIdentifiers = pNode->GetIdentifiers();
 		auto pTypeInfo    = pNode->GetTypeInfo();
 
@@ -95,7 +97,7 @@ namespace gplc
 		
 		CType* pType = nullptr;
 
-		auto& currIRBuidler = mIRBuildersStack.top();
+		auto& currIRBuidler = isGlobalScope ? *mpInitModuleGlobalsIRBuilder : mIRBuildersStack.top();
 
 		llvm::Value* pIdentifiersValue = nullptr;
 
@@ -114,14 +116,25 @@ namespace gplc
 				pIdentifiersType = std::get<llvm::Type*>(pType->Accept(mpTypeGenerator));
 			}
 
-			auto pCurrVariableAllocation = currIRBuidler.CreateAlloca(pIdentifiersType, nullptr, dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName());
-			
 			// retrieve initial value 
 			E_COMPILER_TYPES currType = pType->GetType();
 
 			if (currType != CT_STRUCT /*&& currType != CT_ARRAY*/)
 			{
 				pIdentifiersValue = pIdentifiersValue ? pIdentifiersValue : std::get<llvm::Value*>(pCurrSymbolDesc->mpValue->Accept(this));
+			}
+
+			llvm::Value* pCurrVariableAllocation = nullptr;
+
+			if (isGlobalScope)
+			{
+				pCurrVariableAllocation = mpModule->getOrInsertGlobal(identifier, pIdentifiersType);
+
+				llvm::dyn_cast<llvm::GlobalVariable>(pCurrVariableAllocation)->setInitializer(llvm::Constant::getNullValue(pIdentifiersType));
+			}
+			else
+			{
+				pCurrVariableAllocation = currIRBuidler.CreateAlloca(pIdentifiersType, nullptr, dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName());
 			}
 
 			mVariablesTable[mpSymTable->GetSymbolHandleByName(identifier)] = pCurrVariableAllocation;
@@ -442,6 +455,8 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitDefinitionNode(CASTDefinitionNode* pNode)
 	{
+		bool isGlobalScope = _isGlobalScope();
+
 		//get list of identifiers
 		auto pIdentifiers = pNode->GetDeclaration()->GetIdentifiers()->GetChildren();
 		
@@ -452,7 +467,7 @@ namespace gplc
 		llvm::Type* pIdentifiersType   = nullptr;
 		llvm::Value* pIdentifiersValue = nullptr;
 
-		auto& irBuilder = mIRBuildersStack.top();
+		auto& irBuilder = isGlobalScope ? *mpInitModuleGlobalsIRBuilder : mIRBuildersStack.top();
 		
 		for (auto pCurrIdentifier : pIdentifiers)
 		{
@@ -467,9 +482,20 @@ namespace gplc
 			// compute only once, because all identifiers are the same type
 			pIdentifiersType = pIdentifiersType ? pIdentifiersType : std::get<llvm::Type*>(pType->Accept(mpTypeGenerator));
 
-			auto pCurrVariableAllocation = irBuilder.CreateAlloca(pIdentifiersType, nullptr, dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName());
-
 			pIdentifiersValue = pIdentifiersValue ? pIdentifiersValue : std::get<llvm::Value*>(pNode->GetValue()->Accept(this));
+
+			llvm::Value* pCurrVariableAllocation = nullptr;
+
+			if (isGlobalScope)
+			{
+				pCurrVariableAllocation = mpModule->getOrInsertGlobal(currIdentifierName, pIdentifiersType);
+
+				mpModule->getGlobalVariable(currIdentifierName)->setInitializer(llvm::Constant::getNullValue(pIdentifiersType));
+			}
+			else
+			{
+				pCurrVariableAllocation = irBuilder.CreateAlloca(pIdentifiersType, nullptr, dynamic_cast<CASTIdentifierNode*>(pCurrIdentifier)->GetName());
+			}
 
 			mVariablesTable[mpSymTable->GetSymbolHandleByName(currIdentifierName)] = pCurrVariableAllocation;
 
@@ -800,7 +826,7 @@ namespace gplc
 														llvm::PointerType::get(llvm::Type::getInt8PtrTy(mContext), 0)
 													}, false);
 
-		auto pMainFunctionDef = llvm::Function::Create(pMainFuncType, llvm::Function::InternalLinkage, "main", mpModule);
+		auto pMainFunctionDef = llvm::Function::Create(pMainFuncType, llvm::Function::ExternalLinkage, "main", mpModule);
 
 		llvm::BasicBlock* pMainFuncBody = llvm::BasicBlock::Create(mContext, "entry", pMainFunctionDef);
 
@@ -902,5 +928,10 @@ namespace gplc
 		mpSymTable->LeaveScope();
 
 		currIRBuilder.CreateRet(pArg);
+	}
+
+	inline bool CLLVMCodeGenerator::_isGlobalScope() const
+	{
+		return mpCurrActiveFunction == nullptr;
 	}
 }

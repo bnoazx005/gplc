@@ -119,6 +119,8 @@ namespace gplc
 			llvm::Value* _declareNativeFunction(const TSymbolDesc* pFuncDesc);
 
 			void _defineStructTypeConstructor(CStructType* pType);
+
+			inline bool _isGlobalScope() const;
 		protected:
 			TLLVMLiteralVisitor*   mpLiteralIRGenerator;
 
