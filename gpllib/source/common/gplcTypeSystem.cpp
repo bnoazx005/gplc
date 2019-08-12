@@ -14,6 +14,7 @@
 #include "common/gplcSymTable.h"
 #include "common/gplcConstExprInterpreter.h"
 #include "parser/gplcASTNodesFactory.h"
+#include "common/gplcTypesFactory.h"
 #include "utils/CResult.h"
 #include <algorithm>
 
@@ -59,15 +60,16 @@ namespace gplc
 		\brief CTypeResolver's definition
 	*/
 
-	Result CTypeResolver::Init(ISymTable* pSymTable, IConstExprInterpreter* pInterpreter)
+	Result CTypeResolver::Init(ISymTable* pSymTable, IConstExprInterpreter* pInterpreter, ITypesFactory* pTypesFactory)
 	{
-		if (!pSymTable || !pInterpreter)
+		if (!pSymTable || !pInterpreter || !pTypesFactory)
 		{
 			return RV_FAIL;
 		}
 
-		mpSymTable = pSymTable;
+		mpSymTable             = pSymTable;
 		mpConstExprInterpreter = pInterpreter;
+		mpTypesFactory         = pTypesFactory;
 
 		return RV_SUCCESS;
 	}
@@ -106,7 +108,7 @@ namespace gplc
 		switch (pNode->GetOpType())
 		{
 			case TT_AMPERSAND:
-				return new CPointerType(pBaseType);
+				return mpTypesFactory->CreatePointerType(pBaseType);
 			case TT_STAR:
 				{
 					// the type above should be a pointer
@@ -184,7 +186,7 @@ namespace gplc
 
 		auto pStructBody = pNode->GetFieldsDeclarations();
 
-		CStructType* pStructType = new CStructType({}, AV_AGGREGATE_TYPE);
+		CStructType* pStructType = mpTypesFactory->CreateStructType({}, AV_AGGREGATE_TYPE);
 
 		CType* pFieldType = nullptr;
 
@@ -209,7 +211,7 @@ namespace gplc
 
 	CType* CTypeResolver::VisitNamedType(CASTNamedTypeNode* pNode)
 	{
-		return new CDependentNamedType(mpSymTable, pNode->GetTypeInfo()->GetName());
+		return mpTypesFactory->CreateDependentNamedType(mpSymTable, pNode->GetTypeInfo()->GetName());
 	}
 
 	CType* CTypeResolver::VisitArrayType(CASTArrayTypeNode* pNode)
@@ -226,7 +228,7 @@ namespace gplc
 			return nullptr;
 		}
 
-		return new CArrayType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())), evaluatedArraySize.Get(), AV_AGGREGATE_TYPE);
+		return mpTypesFactory->CreateArrayType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())), evaluatedArraySize.Get(), AV_AGGREGATE_TYPE);
 	}
 
 	CType* CTypeResolver::VisitAccessOperator(CASTAccessOperatorNode* pNode)
@@ -268,12 +270,12 @@ namespace gplc
 
 	CType* CTypeResolver::VisitPointerType(CASTPointerTypeNode* pNode)
 	{
-		return new CPointerType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())));
+		return mpTypesFactory->CreatePointerType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())));
 	}
 
 	CType* CTypeResolver::VisitModuleType(CASTImportDirectiveNode* pNode)
 	{
-		return new CModuleType(pNode->GetImportedModuleName());
+		return mpTypesFactory->CreateModuleType(pNode->GetImportedModuleName());
 	}
 
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type, U32 attributes)
@@ -281,31 +283,31 @@ namespace gplc
 		switch (type)
 		{
 			case NT_INT8:
-				return new CType(CT_INT8, BTS_INT8, attributes);
+				return mpTypesFactory->CreateType(CT_INT8, BTS_INT8, attributes);
 			case NT_INT16:
-				return new CType(CT_INT16,  BTS_INT16,  attributes);
+				return mpTypesFactory->CreateType(CT_INT16,  BTS_INT16,  attributes);
 			case NT_INT32:
-				return new CType(CT_INT32, BTS_INT32, attributes);
+				return mpTypesFactory->CreateType(CT_INT32, BTS_INT32, attributes);
 			case NT_INT64:
-				return new CType(CT_INT64, BTS_INT64, attributes);
+				return mpTypesFactory->CreateType(CT_INT64, BTS_INT64, attributes);
 			case NT_UINT8:
-				return new CType(CT_UINT8, BTS_UINT8, attributes);
+				return mpTypesFactory->CreateType(CT_UINT8, BTS_UINT8, attributes);
 			case NT_UINT16:
-				return new CType(CT_UINT16, BTS_UINT16, attributes);
+				return mpTypesFactory->CreateType(CT_UINT16, BTS_UINT16, attributes);
 			case NT_UINT32:
-				return new CType(CT_UINT32, BTS_UINT32, attributes);
+				return mpTypesFactory->CreateType(CT_UINT32, BTS_UINT32, attributes);
 			case NT_UINT64:
-				return new CType(CT_UINT64, BTS_UINT64, attributes);
+				return mpTypesFactory->CreateType(CT_UINT64, BTS_UINT64, attributes);
 			case NT_FLOAT:
-				return new CType(CT_FLOAT, BTS_FLOAT, attributes);
+				return mpTypesFactory->CreateType(CT_FLOAT, BTS_FLOAT, attributes);
 			case NT_DOUBLE:
-				return new CType(CT_DOUBLE, BTS_DOUBLE, attributes);
+				return mpTypesFactory->CreateType(CT_DOUBLE, BTS_DOUBLE, attributes);
 			case NT_STRING:
-				return new CType(CT_STRING, BTS_POINTER, attributes);
+				return mpTypesFactory->CreateType(CT_STRING, BTS_POINTER, attributes);
 			case NT_CHAR:
-				return new CType(CT_CHAR, BTS_CHAR, attributes);
+				return mpTypesFactory->CreateType(CT_CHAR, BTS_CHAR, attributes);
 			case NT_BOOL:
-				return new CType(CT_BOOL, BTS_BOOL, attributes);
+				return mpTypesFactory->CreateType(CT_BOOL, BTS_BOOL, attributes);
 		}
 
 		return nullptr;

@@ -28,6 +28,7 @@ namespace gplc
 	class CBaseValue;
 	class IConstExprInterpreter;
 	class IASTNodesFactory;
+	class ITypesFactory;
 
 
 	E_COMPILER_TYPES NodeToCompilerType(E_NODE_TYPE nodeType);
@@ -68,7 +69,7 @@ namespace gplc
 			ITypeResolver() = default;
 			virtual ~ITypeResolver() = default;
 
-			virtual Result Init(ISymTable* pSymTable, IConstExprInterpreter* pInterpreter) = 0;
+			virtual Result Init(ISymTable* pSymTable, IConstExprInterpreter* pInterpreter, ITypesFactory* pTypesFactory) = 0;
 
 			/*!
 				\brief The method deduces type based on information's taken from pTypeNode and pSymTable
@@ -101,7 +102,7 @@ namespace gplc
 			CTypeResolver() = default;
 			virtual ~CTypeResolver() = default;
 
-			Result Init(ISymTable* pSymTable, IConstExprInterpreter* pInterpreter) override;
+			Result Init(ISymTable* pSymTable, IConstExprInterpreter* pInterpreter, ITypesFactory* pTypesFactory) override;
 
 			/*!
 				\brief The method deduces type based on information's taken from pTypeNode and pSymTable
@@ -133,6 +134,8 @@ namespace gplc
 			ISymTable*             mpSymTable;
 
 			IConstExprInterpreter* mpConstExprInterpreter;
+
+			ITypesFactory*         mpTypesFactory;
 	};
 
 

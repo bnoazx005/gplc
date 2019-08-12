@@ -23,8 +23,9 @@ namespace gplc
 		mpConstExprInterpreter = new CConstExprInterpreter();
 		mpCodeGenerator        = new CLLVMCodeGenerator();
 		mpModuleResolver       = new CModuleResolver();
+		mpTypesFactory         = new CTypesFactory();
 
-		if (!SUCCESS(result = mpTypeResolver->Init(mpSymTable, mpConstExprInterpreter)))
+		if (!SUCCESS(result = mpTypeResolver->Init(mpSymTable, mpConstExprInterpreter, mpTypesFactory)))
 		{
 			return result;
 		}
@@ -34,7 +35,8 @@ namespace gplc
 		mpSemanticAnalyser->OnErrorOutput += MakeMethodDelegate(this, &CCompilerDriver::_onSemanticAnalyserStageError);
 
 		// \todo reorganize this stuff later
-		mpSymTable->AddVariable({ "puts", nullptr, new CFunctionType({ { "str", new CType(CT_STRING, BTS_POINTER, 0x0) } }, new CType(CT_INT32, BTS_INT32, 0x0), AV_NATIVE_FUNC) });
+		mpSymTable->AddVariable({ "puts", nullptr, mpTypesFactory->CreateFunctionType({ { "str", mpTypesFactory->CreateType(CT_STRING, BTS_POINTER, 0x0) } }, 
+																					  mpTypesFactory->CreateType(CT_INT32, BTS_INT32, 0x0), AV_NATIVE_FUNC) });
 
 		mIsInitialized = true;
 
@@ -48,6 +50,7 @@ namespace gplc
 			return RV_FAIL;
 		}
 
+		delete mpTypesFactory;
 		delete mpModuleResolver;
 		delete mpLexer;
 		delete mpParser;

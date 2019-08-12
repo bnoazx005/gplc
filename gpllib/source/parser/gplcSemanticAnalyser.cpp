@@ -595,6 +595,12 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitImportDirectiveNode(CASTImportDirectiveNode* pNode)
 	{
+		auto pModuleEntry = mpSymTable->LookUpNamedScope(pNode->GetImportedModuleName());
+
+		CType* pModuleType = mpTypeResolver->Resolve(pNode);
+
+		pModuleEntry->mpType = pModuleType;
+
 		return true;
 	}
 

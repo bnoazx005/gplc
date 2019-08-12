@@ -679,7 +679,7 @@ namespace gplc
 	};
 
 
-	class CASTImportDirectiveNode : public CASTNode
+	class CASTImportDirectiveNode : public CASTTypeNode
 	{
 		public:
 			CASTImportDirectiveNode(const std::string& modulePath, const std::string& moduleName);
@@ -688,6 +688,8 @@ namespace gplc
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
 			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
 			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			virtual CType* Resolve(ITypeResolver* pResolver);
 
 			const std::string& GetModulePath() const;
 

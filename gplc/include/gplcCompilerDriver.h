@@ -76,6 +76,8 @@ namespace gplc
 
 			IModuleResolver*       mpModuleResolver;
 
+			ITypesFactory*         mpTypesFactory;
+
 			bool                   mIsPanicModeEnabled;
 	};
 
