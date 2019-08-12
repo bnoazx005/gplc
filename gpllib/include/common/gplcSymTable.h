@@ -105,6 +105,8 @@ namespace gplc
 			virtual TSymbolHandle GetSymbolHandleByName(const std::string& variable) const = 0;
 
 			virtual std::string RenameReservedIdentifier(const std::string& identifier) const = 0;
+
+			virtual std::string GetMangledIdentifier(const std::string& identifier) const = 0;
 		protected:
 			ISymTable(const ISymTable& table);
 	};
@@ -145,6 +147,8 @@ namespace gplc
 			TSymbolHandle GetSymbolHandleByName(const std::string& variable) const override;
 
 			std::string RenameReservedIdentifier(const std::string& identifier) const override;
+			
+			std::string GetMangledIdentifier(const std::string& identifier) const override;
 		protected:
 			CSymTable(const CSymTable& table);
 

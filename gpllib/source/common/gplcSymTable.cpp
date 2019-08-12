@@ -39,7 +39,7 @@ namespace gplc
 	*/
 
 	CSymTable::CSymTable() :
-		mpGlobalScopeEntry(nullptr), mpCurrScopeEntry(nullptr), mIsLocked(false)
+		mpGlobalScopeEntry(nullptr), mpCurrScopeEntry(nullptr), mIsLocked(false), mCurrMangledPrefix()
 	{
 		mpGlobalScopeEntry = new TSymTableEntry();
 
@@ -134,6 +134,11 @@ namespace gplc
 
 		mpCurrScopeEntry = mpCurrScopeEntry->mNamedScopes[scopeName];
 
+		mCurrMangledPrefix
+				.append(mCurrMangledPrefix.empty() || mCurrMangledPrefix.back() == '$' ? "" : "$")
+				.append(scopeName)
+				.append("$");
+
 		return RV_SUCCESS;
 	}
 
@@ -157,6 +162,8 @@ namespace gplc
 		}
 		
 		mpCurrScopeEntry = mpCurrScopeEntry->mParentScope;
+
+		mCurrMangledPrefix.find_first_of('$');
 
 		return RV_SUCCESS;
 	}
@@ -289,6 +296,11 @@ namespace gplc
 		}
 
 		return identifier;
+	}
+
+	std::string CSymTable::GetMangledIdentifier(const std::string& identifier) const
+	{
+		return mCurrMangledPrefix + identifier;
 	}
 
 	TSymbolHandle CSymTable::_lookUp(TSymTableEntry* entry, const std::string& variableName) const
