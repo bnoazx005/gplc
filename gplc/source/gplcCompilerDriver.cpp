@@ -88,10 +88,18 @@ namespace gplc
 		{
 			mIsPanicModeEnabled = false;
 
-			if (!SUCCESS(result = _compileSeparateFile(currFilename, currFilename.substr(0, currFilename.find_first_of('.')), compiledProgram)))
+			auto moduleName = currFilename.substr(0, currFilename.find_first_of('.'));
+
+			mpSymTable->CreateNamedScope(moduleName);
+
+			if (!SUCCESS(result = _compileSeparateFile(currFilename, moduleName, compiledProgram)))
 			{
+				mpSymTable->LeaveScope();
+
 				return result;
 			}
+
+			mpSymTable->LeaveScope();
 		}
 
 		return RV_SUCCESS;
@@ -101,8 +109,10 @@ namespace gplc
 	{
 		Result result = mpLexer->Reset();
 
-		std::cout << "gplc: Compiling " << moduleName << " ..." << std::endl;
+		mpModuleResolver->ResolveModuleType(mpSymTable, mpTypesFactory, moduleName);
 
+		std::cout << "gplc: Compiling " << moduleName << " ..." << std::endl;
+		
 		if (!SUCCESS(result))
 		{
 			return result;
@@ -134,7 +144,7 @@ namespace gplc
 		}
 
 		// parse the source file
-		CASTSourceUnitNode* pSourceAST = dynamic_cast<CASTSourceUnitNode*>(mpParser->Parse(mpLexer, mpSymTable, mpASTNodesFactory, moduleName));
+		CASTSourceUnitNode* pSourceAST = dynamic_cast<CASTSourceUnitNode*>(mpParser->Parse(mpLexer, mpSymTable, mpASTNodesFactory, mpTypesFactory, moduleName));
 
 		if (mIsPanicModeEnabled)
 		{
@@ -144,7 +154,7 @@ namespace gplc
 		}
 
 		// \todo resolve all modules here
-		if (!SUCCESS(mpModuleResolver->Resolve(pSourceAST, mpSymTable, std::filesystem::current_path().string(), 
+		if (!SUCCESS(mpModuleResolver->Resolve(pSourceAST, mpSymTable, mpTypesFactory, std::filesystem::current_path().string(), 
 											   std::bind(&CCompilerDriver::_compileSeparateFile, this, 
 														 std::placeholders::_1, 
 														 std::placeholders::_2,

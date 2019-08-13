@@ -24,6 +24,7 @@ namespace gplc
 	class CASTSourceUnitNode;
 	class CASTNode;
 	class CASTImportDirectiveNode;
+	class ITypesFactory;
 
 
 	class IModuleResolver
@@ -55,8 +56,10 @@ namespace gplc
 			IModuleResolver() = default;
 			virtual ~IModuleResolver() = default;
 
-			virtual Result Resolve(CASTSourceUnitNode* pModuleAST, ISymTable* pSymTable, const std::string& currentWorkinDir,
+			virtual Result Resolve(CASTSourceUnitNode* pModuleAST, ISymTable* pSymTable, ITypesFactory* pTypesFactory, const std::string& currentWorkinDir,
 								   const TOnCompileCallback& onCompileModule) = 0;
+
+			virtual void ResolveModuleType(ISymTable* pSymTable, ITypesFactory* pTypesFactory, const std::string& moduleName) = 0;
 		protected:
 			IModuleResolver(const IModuleResolver&) = delete;
 	};
@@ -68,8 +71,10 @@ namespace gplc
 			CModuleResolver();
 			virtual ~CModuleResolver() = default;
 
-			Result Resolve(CASTSourceUnitNode* pModuleAST, ISymTable* pSymTable, const std::string& currentWorkinDir,
+			Result Resolve(CASTSourceUnitNode* pModuleAST, ISymTable* pSymTable, ITypesFactory* pTypesFactory, const std::string& currentWorkinDir,
 						   const TOnCompileCallback& onCompileModule) override;
+
+			void ResolveModuleType(ISymTable* pSymTable, ITypesFactory* pTypesFactory, const std::string& moduleName) override;
 		protected:
 			CModuleResolver(const CModuleResolver&) = delete;
 
@@ -90,6 +95,8 @@ namespace gplc
 			TModuleEntry*      mpCurrVisitingModule;
 
 			TModulesArray      mModulesRegistry;
+
+			ITypesFactory*     mpTypesFactory;
 	};
 }
 

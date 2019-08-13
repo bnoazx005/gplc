@@ -563,14 +563,17 @@ namespace gplc
 
 		if (pIdentifier)
 		{
-			if (pSymbolDesc->mVariables.find(pIdentifier->GetName()) == pSymbolDesc->mVariables.cend())
+			const std::string& identifier = pIdentifier->GetName();
+
+			if (pSymbolDesc->mVariables.find(identifier) == pSymbolDesc->mVariables.cend())
 			{
-				_notifyError(SAE_TRY_TO_ACCESS_UNDEFINED_FIELD);
+				if (pSymbolDesc->mNamedScopes.find(identifier) == pSymbolDesc->mNamedScopes.cend())
+				{
+					_notifyError(SAE_TRY_TO_ACCESS_UNDEFINED_FIELD);
 
-				return false;
+					return false;
+				}
 			}
-
-			return true;
 		}
 
 		return true;

@@ -96,33 +96,6 @@ TEST_CASE("CSymTable tests")
 		REQUIRE(pSymTable->AddVariable({ "x", }) != InvalidSymbolHandle);
 		REQUIRE(pSymTable->LookUp("x"));
 	}
-
-	SECTION("TestGetMangledIdentifier_PPPP_ReturnsCorrectlyMangledName")
-	{
-		std::string scopeNames[] = 
-		{
-			"Scope",
-			"StructType"
-		};
-		
-		pSymTable->CreateNamedScope(scopeNames[0]);
-
-		pSymTable->CreateNamedScope(scopeNames[1]);
-		pSymTable->AddVariable({ "x", nullptr, nullptr });
-		pSymTable->LeaveScope();
-
-		pSymTable->AddVariable({ "y", nullptr, nullptr });
-
-		pSymTable->LeaveScope();
-
-		REQUIRE("id" == pSymTable->GetMangledIdentifier("id"));
-
-		pSymTable->VisitNamedScope(scopeNames[0]);
-		REQUIRE((scopeNames[0] + "$y") == pSymTable->GetMangledIdentifier("y"));
-
-		pSymTable->VisitNamedScope(scopeNames[1]);
-		REQUIRE((scopeNames[0] + "$" + scopeNames[1] + "$x") == pSymTable->GetMangledIdentifier("x"));
-	}
 	
 	delete pSymTable;
 }

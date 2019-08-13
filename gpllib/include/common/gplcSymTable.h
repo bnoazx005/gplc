@@ -106,7 +106,10 @@ namespace gplc
 
 			virtual std::string RenameReservedIdentifier(const std::string& identifier) const = 0;
 
-			virtual std::string GetMangledIdentifier(const std::string& identifier) const = 0;
+			virtual CType* GetParentScopeType() const = 0;
+			virtual CType* GetCurrentScopeType() const = 0;
+
+			virtual void DumpScopesStructure() const = 0;
 		protected:
 			ISymTable(const ISymTable& table);
 	};
@@ -148,7 +151,10 @@ namespace gplc
 
 			std::string RenameReservedIdentifier(const std::string& identifier) const override;
 			
-			std::string GetMangledIdentifier(const std::string& identifier) const override;
+			CType* GetParentScopeType() const override;
+			CType* GetCurrentScopeType() const override;
+
+			void DumpScopesStructure() const override;
 		protected:
 			CSymTable(const CSymTable& table);
 

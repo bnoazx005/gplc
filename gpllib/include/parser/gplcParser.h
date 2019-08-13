@@ -48,6 +48,7 @@ namespace gplc
 	class CASTIndexedAccessOperatorNode;
 	class IASTNodesFactory; 
 	class CASTImportDirectiveNode;
+	class ITypesFactory;
 
 
 	/*!
@@ -62,7 +63,7 @@ namespace gplc
 			IParser() {}
 			virtual ~IParser() {}
 
-			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory, const std::string& moduleName = "") = 0;
+			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory, ITypesFactory* pTypesFactory, const std::string& moduleName = "") = 0;
 		public:
 			CDelegate<void, const TParserErrorInfo&> OnErrorOutput;
 		protected:
@@ -82,7 +83,7 @@ namespace gplc
 			CParser();
 			virtual ~CParser();
 
-			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory, const std::string& moduleName = "");
+			virtual CASTNode* Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory, ITypesFactory* pTypesFactory, const std::string& moduleName = "");
 		private:
 			CParser(const CParser& parser);
 
@@ -391,6 +392,8 @@ namespace gplc
 			ISymTable*        mpSymTable;
 
 			IASTNodesFactory* mpNodesFactory;
+
+			ITypesFactory*    mpTypesFactory;
 	};
 }
 

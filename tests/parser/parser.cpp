@@ -19,6 +19,8 @@ TEST_CASE("Parser's tests")
 
 	gplc::IASTNodesFactory* pNodesFactory = new gplc::CASTNodesFactory();
 
+	gplc::ITypesFactory* pTypesFactory = new gplc::CTypesFactory();
+
 	pParser->OnErrorOutput += OnError;
 
 	SECTION("TestParse_PassCorrectSequence_ReturnsCorrectAST")
@@ -32,7 +34,7 @@ TEST_CASE("Parser's tests")
 			new gplc::CToken(gplc::TT_COLON, 3),
 			new gplc::CToken(gplc::TT_INT32_TYPE, 4),
 			new gplc::CToken(gplc::TT_SEMICOLON, 5),
-			}), new gplc::CSymTable(), pNodesFactory);
+			}), new gplc::CSymTable(), pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 
@@ -52,7 +54,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CToken(gplc::TT_STAR, 5),
 				new gplc::CIdentifierToken("y", 6),
 				new gplc::CToken(gplc::TT_SEMICOLON, 7),
-			}), new gplc::CSymTable(), pNodesFactory);
+			}), new gplc::CSymTable(), pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 	}
@@ -76,7 +78,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CToken(gplc::TT_INT32_TYPE, 11),
 				new gplc::CToken(gplc::TT_SEMICOLON, 12),	
 				new gplc::CToken(gplc::TT_CLOSE_BRACE, 13)
-			}), new gplc::CSymTable(), pNodesFactory);
+			}), new gplc::CSymTable(), pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 		REQUIRE(pMain->GetChildrenCount() == 2);
@@ -95,7 +97,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CLiteralToken(new gplc::CIntValue(42), 5),
 				new gplc::CToken(gplc::TT_SEMICOLON, 6),
 				new gplc::CToken(gplc::TT_CLOSE_BRACE, 7),
-			}), new gplc::CSymTable(), pNodesFactory);
+			}), new gplc::CSymTable(), pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 	}
@@ -120,7 +122,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CLiteralToken(new gplc::CIntValue(24), 12),
 				new gplc::CToken(gplc::TT_SEMICOLON, 13),
 				new gplc::CToken(gplc::TT_CLOSE_BRACE, 14),
-			}), new gplc::CSymTable(), pNodesFactory);
+			}), new gplc::CSymTable(), pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 	}
@@ -140,7 +142,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CToken(gplc::TT_ARROW, 7),
 				new gplc::CToken(gplc::TT_INT32_TYPE, 8),
 				new gplc::CToken(gplc::TT_SEMICOLON, 9),
-			}), new gplc::CSymTable(), pNodesFactory);
+			}), new gplc::CSymTable(), pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 	}
@@ -158,7 +160,7 @@ TEST_CASE("Parser's tests")
 			new gplc::CIdentifierToken("z", 6),
 			new gplc::CToken(gplc::TT_CLOSE_BRACKET, 7),
 			new gplc::CToken(gplc::TT_SEMICOLON, 8),
-			}), new gplc::CSymTable(), pNodesFactory);
+			}), new gplc::CSymTable(), pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 	}
@@ -172,7 +174,7 @@ TEST_CASE("Parser's tests")
 			new gplc::CToken(gplc::TT_PLUS, 3),
 			new gplc::CIdentifierToken("x", 4),
 			new gplc::CToken(gplc::TT_SEMICOLON, 5),
-			}), new gplc::CSymTable(), pNodesFactory);
+			}), new gplc::CSymTable(), pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 	}
@@ -221,7 +223,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CToken(gplc::TT_SEMICOLON, 31),
 				new gplc::CToken(gplc::TT_CLOSE_BRACE, 32),
 				new gplc::CToken(gplc::TT_SEMICOLON, 33),
-			}), new gplc::CSymTable(), pNodesFactory);
+			}), new gplc::CSymTable(), pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 	}
@@ -240,7 +242,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CToken(gplc::TT_ASSIGN_OP, 3),
 				new gplc::CLiteralToken(new gplc::CIntValue(42), 4),
 				new gplc::CToken(gplc::TT_SEMICOLON, 5),
-			}), new gplc::CSymTable(), pNodesFactory);
+			}), new gplc::CSymTable(), pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 	}
@@ -284,7 +286,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CToken(gplc::TT_COMMA, 4),
 				new gplc::CIdentifierToken("second", 5),
 				new gplc::CToken(gplc::TT_CLOSE_BRACE, 9),
-			}), pSymbolTable, pNodesFactory);
+			}), pSymbolTable, pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 
@@ -326,7 +328,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CToken(gplc::TT_INT32_TYPE, 5),
 				new gplc::CToken(gplc::TT_SEMICOLON, 6),
 				new gplc::CToken(gplc::TT_CLOSE_BRACE, 7),
-			}), pSymbolTable, pNodesFactory);
+			}), pSymbolTable, pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 
@@ -354,7 +356,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CToken(gplc::TT_INT32_TYPE, 5),
 				new gplc::CToken(gplc::TT_STAR, 6),
 				new gplc::CToken(gplc::TT_SEMICOLON, 6),
-			}), pSymbolTable, pNodesFactory);
+			}), pSymbolTable, pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 
@@ -390,7 +392,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CToken(gplc::TT_POINT, 12),
 				new gplc::CIdentifierToken("first", 13),
 				new gplc::CToken(gplc::TT_SEMICOLON, 14),
-			}), pSymbolTable, pNodesFactory);
+			}), pSymbolTable, pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 
@@ -419,7 +421,7 @@ TEST_CASE("Parser's tests")
 				new gplc::CLiteralToken(new gplc::CIntValue(10), 6),
 				new gplc::CToken(gplc::TT_CLOSE_SQR_BRACE, 6),
 				new gplc::CToken(gplc::TT_SEMICOLON, 6),
-			}), pSymbolTable, pNodesFactory);
+			}), pSymbolTable, pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);
 
@@ -431,6 +433,7 @@ TEST_CASE("Parser's tests")
 		delete pErrorInfo;
 	}
 		
+	delete pTypesFactory;
 	delete pNodesFactory;
 	delete pParser;
 }

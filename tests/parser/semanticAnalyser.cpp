@@ -17,7 +17,9 @@ TEST_CASE("CSemanticAnalyser's tests")
 
 	ISymTable* pSymTable = new CSymTable();
 
-	pTypeResolver->Init(pSymTable, pInterpreter);
+	ITypesFactory* pTypesFactory = new CTypesFactory();
+
+	pTypeResolver->Init(pSymTable, pInterpreter, pTypesFactory);
 		
 	REQUIRE(pSemanticAnalyser != nullptr);
 
@@ -552,6 +554,7 @@ TEST_CASE("CSemanticAnalyser's tests")
 		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
+	delete pTypesFactory;
 	delete pSymTable;
 	delete pNodesFactory;
 	delete pTypeResolver;

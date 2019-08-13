@@ -1,5 +1,7 @@
 #include "common/gplcModuleResolver.h"
 #include "common/gplcSymTable.h"
+#include "common/gplcTypesFactory.h"
+#include "common/gplcTypeSystem.h"
 #include "parser/gplcASTNodes.h"
 #include <filesystem>
 #include <vector>
@@ -16,15 +18,17 @@ namespace gplc
 	{
 	}
 
-	Result CModuleResolver::Resolve(CASTSourceUnitNode* pModuleAST, ISymTable* pSymTable, const std::string& currentWorkinDir,
+	Result CModuleResolver::Resolve(CASTSourceUnitNode* pModuleAST, ISymTable* pSymTable, ITypesFactory* pTypesFactory, const std::string& currentWorkinDir,
 									const TOnCompileCallback& onCompileModule)
 	{
-		if (!pModuleAST || !pSymTable)
+		if (!pModuleAST || !pSymTable || !pTypesFactory)
 		{
 			return RV_INVALID_ARGUMENTS;
 		}
 
 		mpSymTable = pSymTable;
+
+		mpTypesFactory = pTypesFactory;
 
 		mCurrentWorkingDir = currentWorkinDir;
 
@@ -43,12 +47,24 @@ namespace gplc
 			return RV_SUCCESS;
 		}
 
+		ResolveModuleType(mpSymTable, mpTypesFactory, currModuleName);
+
 		mModulesRegistry.push_back({ currModuleName, pModuleAST });
 
 		// push back a top level module
 		*mpCurrVisitingModule = { currModuleName, {} };
 
 		return _visitNode(pModuleAST);
+	}
+
+	void CModuleResolver::ResolveModuleType(ISymTable* pSymTable, ITypesFactory* pTypesFactory, const std::string& moduleName)
+	{
+		auto pCurrModuleEntry = pSymTable->LookUpNamedScope(moduleName);
+
+		if (!pCurrModuleEntry->mpType)
+		{
+			pCurrModuleEntry->mpType = pTypesFactory->CreateModuleType(moduleName, 0x0, pSymTable->GetParentScopeType());
+		}
 	}
 
 	Result CModuleResolver::_visitNode(CASTNode* pNode)
@@ -85,6 +101,8 @@ namespace gplc
 		const std::string& moduleName = pNode->GetImportedModuleName();
 		
 		mpSymTable->CreateNamedScope(moduleName);
+
+		ResolveModuleType(mpSymTable, mpTypesFactory, moduleName);
 
 		Result result = RV_SUCCESS;
 

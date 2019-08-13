@@ -150,7 +150,16 @@ namespace gplc
 					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(mContext), "arr_cast"));
 					break;
 				case CT_STRUCT:
-					currIRBuidler.CreateCall(mpModule->getFunction(pType->GetName() + "$ctor"), { pCurrVariableAllocation });
+					{
+						// \todo if we call a constructor from other module first should declare it as external
+						std::string constructorName = pType->GetMangledName() + "$ctor";
+						
+						auto pInputArgType = llvm::PointerType::get(std::get<llvm::Type*>(pType->Accept(mpTypeGenerator)), 0);
+
+						auto pConstructor = mpModule->getOrInsertFunction(constructorName, llvm::FunctionType::get(pInputArgType, { pInputArgType }, false));
+
+						currIRBuidler.CreateCall(pConstructor, { pCurrVariableAllocation });
+					}
 					break;
 				case CT_POINTER:
 					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, pIdentifiersType, "reinterp_cast"));
@@ -596,11 +605,11 @@ namespace gplc
 	TLLVMIRData CLLVMCodeGenerator::VisitStructDeclaration(CASTStructDeclNode* pNode)
 	{
 		std::string name = pNode->GetStructName()->GetName();
-
+		
 		auto pStructSymbolDesc = mpSymTable->LookUpNamedScope(name);
 		
 		assert(pStructSymbolDesc && pStructSymbolDesc->mpType);
-		
+
 		llvm::Type* pStructType = std::get<llvm::Type*>(pStructSymbolDesc->mpType->Accept(mpTypeGenerator));
 
 		// define struct's constructor
@@ -876,7 +885,7 @@ namespace gplc
 	void CLLVMCodeGenerator::_defineStructTypeConstructor(CStructType* pType)
 	{
 		std::string structName      = pType->GetName();
-		std::string constructorName = structName + "$ctor";
+		std::string constructorName = pType->GetMangledName() + "$ctor";
 
 		auto pInputArgType = llvm::PointerType::get(std::get<llvm::Type*>(pType->Accept(mpTypeGenerator)), 0);
 

@@ -8,13 +8,14 @@
 	\todo
 */
 
-#include "parser\gplcParser.h"
-#include "parser\gplcASTNodes.h"
-#include "lexer\gplcLexer.h"
-#include "common\gplcTypeSystem.h"
+#include "lexer/gplcLexer.h"
+#include "parser/gplcParser.h"
+#include "parser/gplcASTNodes.h"
+#include "parser/gplcASTNodesFactory.h"
+#include "common/gplcTypeSystem.h"
 #include "common/gplcSymTable.h"
 #include "common/gplcValues.h"
-#include "parser/gplcASTNodesFactory.h"
+#include "common/gplcTypesFactory.h"
 
 
 namespace gplc
@@ -37,9 +38,9 @@ namespace gplc
 	{
 	}
 
-	CASTNode* CParser::Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory, const std::string& moduleName)
+	CASTNode* CParser::Parse(ILexer* pLexer, ISymTable* pSymTable, IASTNodesFactory* pNodesFactory, ITypesFactory* pTypesFactory, const std::string& moduleName)
 	{
-		if (!pLexer || !pSymTable || !pNodesFactory)
+		if (!pLexer || !pSymTable || !pNodesFactory || !pTypesFactory)
 		{
 			OnErrorOutput.Invoke({ PE_INVALID_ENVIRONMENT, 1, 1, { TParserErrorInfo::TUnexpectedTokenInfo { TT_DEFAULT, TT_DEFAULT } } });
 			
@@ -49,6 +50,8 @@ namespace gplc
 		mpSymTable = pSymTable;
 
 		mpNodesFactory = pNodesFactory;
+
+		mpTypesFactory = pTypesFactory;
 
 		if (!pLexer->GetCurrToken()) //returns just an empty program unit
 		{
@@ -441,6 +444,14 @@ namespace gplc
 		if (_match(pCurrToken, TT_IDENTIFIER))
 		{
 			pLexer->GetNextToken(); // take the identifier
+
+			// usage of scoped name
+			if (_match(pNextToken, TT_POINT))
+			{
+				pLexer->GetNextToken(); // take .
+
+				return _parseAccessOperator(mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName())), pLexer);
+			}
 
 			return mpNodesFactory->CreateNamedTypeNode(mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()));
 		}
@@ -1013,7 +1024,7 @@ namespace gplc
 		// add information about enum's type
 		auto pEnumDesc = mpSymTable->LookUpNamedScope(enumName);
 
-		pEnumDesc->mpType = new CEnumType(mpSymTable, enumName);
+		pEnumDesc->mpType = mpTypesFactory->CreateEnumType(mpSymTable, enumName, mpSymTable->GetCurrentScopeType());
 
 		const CToken* pCurrEnumField = nullptr;
 
@@ -1041,7 +1052,7 @@ namespace gplc
 			// assign values into enumerator's description
 			TSymbolDesc* pCurrEnumerator = mpSymTable->LookUp(currFieldHandle);
 
-			pCurrEnumerator->mpType = new CType(CT_INT32, BTS_INT32, 0x0);
+			pCurrEnumerator->mpType = mpTypesFactory->CreateType(CT_INT32, BTS_INT32, 0x0);
 
 			pLexer->GetNextToken(); // take identifier
 

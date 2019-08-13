@@ -12,6 +12,7 @@
 #include "common/gplcTypeSystem.h"
 #include "common/gplcValues.h"
 #include <cassert>
+#include <iostream>
 
 
 namespace gplc
@@ -291,9 +292,62 @@ namespace gplc
 		return identifier;
 	}
 
-	std::string CSymTable::GetMangledIdentifier(const std::string& identifier) const
+	CType* CSymTable::GetParentScopeType() const
 	{
-		return identifier;
+		auto pParentScope = mpCurrScopeEntry->mParentScope;
+
+		return pParentScope ? pParentScope->mpType : nullptr;
+	}
+
+	CType* CSymTable::GetCurrentScopeType() const
+	{
+		auto pCurrentScope = mpCurrScopeEntry;
+
+		return pCurrentScope ? pCurrentScope->mpType : nullptr;
+	}
+
+	void CSymTable::DumpScopesStructure() const
+	{
+		std::function<void(const TSymTableEntry*, U32)> _printScopeInfo = [this, &_printScopeInfo](const TSymTableEntry* pCurrTableEntry, U32 currLevel)
+		{
+			if (!pCurrTableEntry)
+			{
+				return;
+			}
+
+			CType* pCurrScopeType = pCurrTableEntry->mpType;
+
+			for (U32 i = 0; i < currLevel; ++i)
+			{
+				std::cout << "  ";
+			}
+
+			std::cout << (pCurrScopeType ? pCurrScopeType->GetName() : "<unnamed scope>") << ": " << (pCurrScopeType ? pCurrScopeType->ToShortAliasString() : "scope") << std::endl;
+
+			for (auto& currVariableInfo : pCurrTableEntry->mVariables)
+			{
+				for (U32 i = 0; i < currLevel + 1; ++i)
+				{
+					std::cout << "  ";
+				}
+
+				auto pCurrVariableType = LookUp(currVariableInfo.second)->mpType;
+
+				std::cout << currVariableInfo.first << ": " << (pCurrVariableType ? pCurrVariableType->ToShortAliasString() : "unknown") << std::endl;
+			}
+
+			for (auto pCurrNestedScope : pCurrTableEntry->mNestedScopes)
+			{
+				_printScopeInfo(pCurrNestedScope, currLevel + 1);
+			}
+
+			for (auto pCurrNamedScope : pCurrTableEntry->mNamedScopes)
+			{
+				_printScopeInfo(pCurrNamedScope.second, currLevel + 1);
+			}
+		};
+
+		_printScopeInfo(mpGlobalScopeEntry, 0);
 	}
 
 	TSymbolHandle CSymTable::_lookUp(TSymTableEntry* entry, const std::string& variableName) const

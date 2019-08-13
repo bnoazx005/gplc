@@ -81,7 +81,7 @@ namespace gplc
 
 		if (mTypesTable.find(structName) == mTypesTable.cend())
 		{
-			pInferredType = llvm::StructType::create(*mContext, structName);
+			pInferredType = llvm::StructType::create(*mContext, pStructType->GetMangledName()); // use mangled name if format Module$Type
 
 			mTypesTable[structName] = pInferredType;
 		}

@@ -108,7 +108,7 @@ namespace gplc
 		switch (pNode->GetOpType())
 		{
 			case TT_AMPERSAND:
-				return mpTypesFactory->CreatePointerType(pBaseType);
+				return mpTypesFactory->CreatePointerType(pBaseType, mpSymTable->GetCurrentScopeType());
 			case TT_STAR:
 				{
 					// the type above should be a pointer
@@ -161,7 +161,7 @@ namespace gplc
 			argsTypes.push_back({ pCurrArgDecl->GetName(), pCurrArgType });
 		}
 
-		return new CFunctionType(argsTypes, Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetReturnValueType())), 0x0);
+		return new CFunctionType(argsTypes, Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetReturnValueType())), 0x0, mpSymTable->GetCurrentScopeType());
 	}
 
 	CType* CTypeResolver::VisitFunctionCall(CASTFunctionCallNode* pNode)
@@ -186,7 +186,7 @@ namespace gplc
 
 		auto pStructBody = pNode->GetFieldsDeclarations();
 
-		CStructType* pStructType = mpTypesFactory->CreateStructType({}, AV_AGGREGATE_TYPE);
+		CStructType* pStructType = mpTypesFactory->CreateStructType({}, AV_AGGREGATE_TYPE, mpSymTable->GetCurrentScopeType());
 
 		CType* pFieldType = nullptr;
 
@@ -211,7 +211,7 @@ namespace gplc
 
 	CType* CTypeResolver::VisitNamedType(CASTNamedTypeNode* pNode)
 	{
-		return mpTypesFactory->CreateDependentNamedType(mpSymTable, pNode->GetTypeInfo()->GetName());
+		return mpTypesFactory->CreateDependentNamedType(mpSymTable, pNode->GetTypeInfo()->GetName(), mpSymTable->GetCurrentScopeType());
 	}
 
 	CType* CTypeResolver::VisitArrayType(CASTArrayTypeNode* pNode)
@@ -228,7 +228,7 @@ namespace gplc
 			return nullptr;
 		}
 
-		return mpTypesFactory->CreateArrayType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())), evaluatedArraySize.Get(), AV_AGGREGATE_TYPE);
+		return mpTypesFactory->CreateArrayType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())), evaluatedArraySize.Get(), AV_AGGREGATE_TYPE, mpSymTable->GetCurrentScopeType());
 	}
 
 	CType* CTypeResolver::VisitAccessOperator(CASTAccessOperatorNode* pNode)
@@ -249,6 +249,17 @@ namespace gplc
 				return pExprType;
 			case CT_STRUCT:
 				return mpSymTable->LookUp(mpSymTable->LookUpNamedScope(pExprType->GetName())->mVariables[identifierName])->mpType;
+			case CT_MODULE:
+				{
+					mpSymTable->VisitNamedScope(pExprType->GetName());
+
+					auto pVarDesc   = mpSymTable->LookUp(identifierName);
+					auto pTypeEntry = mpSymTable->LookUpNamedScope(identifierName);
+
+					mpSymTable->LeaveScope();
+
+					return pVarDesc ? pVarDesc->mpType : pTypeEntry->mpType;
+				}
 		}
 
 		return nullptr;
@@ -270,12 +281,12 @@ namespace gplc
 
 	CType* CTypeResolver::VisitPointerType(CASTPointerTypeNode* pNode)
 	{
-		return mpTypesFactory->CreatePointerType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())));
+		return mpTypesFactory->CreatePointerType(Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetTypeInfo())), mpSymTable->GetCurrentScopeType());
 	}
 
 	CType* CTypeResolver::VisitModuleType(CASTImportDirectiveNode* pNode)
 	{
-		return mpTypesFactory->CreateModuleType(pNode->GetImportedModuleName());
+		return mpTypesFactory->CreateModuleType(pNode->GetImportedModuleName(), 0x0, mpSymTable->GetCurrentScopeType());
 	}
 
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type, U32 attributes)
@@ -376,8 +387,8 @@ namespace gplc
 	{
 	}
 
-	CType::CType(E_COMPILER_TYPES type, U32 size, U32 attributes, const std::string& name):
-		mType(type), mSize(size), mAttributes(attributes), mName(name)
+	CType::CType(E_COMPILER_TYPES type, U32 size, U32 attributes, const std::string& name, CType* pParent):
+		mType(type), mSize(size), mAttributes(attributes), mName(name), mpParent(pParent)
 	{
 	}
 
@@ -408,6 +419,23 @@ namespace gplc
 	const std::string& CType::GetName() const
 	{
 		return mName;
+	}
+
+	std::string CType::GetMangledName() const
+	{
+		CType* pCurrScopeType = mpParent;
+
+		std::string mangledName = mName;
+		
+		do
+		{
+			mangledName = pCurrScopeType->GetName() + "$" + mangledName;
+
+			pCurrScopeType = pCurrScopeType->GetParent();
+		} 
+		while (pCurrScopeType && pCurrScopeType->GetType() != CT_MODULE);
+
+		return mangledName;
 	}
 
 	const std::vector<const CType*> CType::GetChildTypes() const
@@ -443,6 +471,11 @@ namespace gplc
 		}
 
 		return nullptr;
+	}
+
+	CType* CType::GetParent() const
+	{
+		return mpParent;
 	}
 
 	bool CType::AreSame(const CType* pType) const
@@ -593,8 +626,8 @@ namespace gplc
 		\brief CPointerType's definition
 	*/
 
-	CPointerType::CPointerType(CType* pType):
-		CType(CT_POINTER, BTS_POINTER, AV_POINTER), mpBaseType(pType)
+	CPointerType::CPointerType(CType* pType, CType* pParent):
+		CType(CT_POINTER, BTS_POINTER, AV_POINTER, "", pParent), mpBaseType(pType)
 	{
 		mName = (mpBaseType ? mpBaseType->GetName() : "void") + "*";
 	}
@@ -664,8 +697,8 @@ namespace gplc
 		CStructType's definition
 	*/
 
-	CStructType::CStructType(const TFieldsArray& fieldsTypes, U32 attributes):
-		CType(CT_STRUCT, BTS_POINTER, attributes)
+	CStructType::CStructType(const TFieldsArray& fieldsTypes, U32 attributes, CType* pParent):
+		CType(CT_STRUCT, BTS_POINTER, attributes, "", pParent)
 	{
 		std::copy(fieldsTypes.begin(), fieldsTypes.end(), std::back_inserter(mFieldsTypes));
 	}
@@ -733,8 +766,8 @@ namespace gplc
 		CFunctionType's definition
 	*/
 
-	CFunctionType::CFunctionType(const TArgsArray& argsTypes, CType* pReturnValueType, U32 attributes):
-		CType(CT_FUNCTION, CT_POINTER, attributes), mpReturnValueType(pReturnValueType)
+	CFunctionType::CFunctionType(const TArgsArray& argsTypes, CType* pReturnValueType, U32 attributes, CType* pParent):
+		CType(CT_FUNCTION, CT_POINTER, attributes, "", pParent), mpReturnValueType(pReturnValueType)
 	{
 		std::copy(argsTypes.begin(), argsTypes.end(), std::back_inserter(mArgsTypes));
 	}
@@ -807,8 +840,8 @@ namespace gplc
 	}
 
 
-	CEnumType::CEnumType(const ISymTable* pSymTable, const std::string& enumName):
-		CType(CT_ENUM, BTS_INT32, 0x0, enumName), mpSymTable(pSymTable)
+	CEnumType::CEnumType(const ISymTable* pSymTable, const std::string& enumName, CType* pParent):
+		CType(CT_ENUM, BTS_INT32, 0x0, enumName, pParent), mpSymTable(pSymTable)
 	{
 		mChildren.push_back(nullptr); // \note this is a trick to make IsBuiltin work correct for this type
 	}
@@ -849,8 +882,8 @@ namespace gplc
 		\brief CDependentNamedType's definition
 	*/
 
-	CDependentNamedType::CDependentNamedType(const ISymTable* pSymTable, const std::string& typeIdentifier):
-		CType(CT_ALIAS, BTS_UNKNOWN, 0x0, typeIdentifier), mpSymTable(pSymTable), mpDependentType(nullptr)
+	CDependentNamedType::CDependentNamedType(const ISymTable* pSymTable, const std::string& typeIdentifier, CType* pParent):
+		CType(CT_ALIAS, BTS_UNKNOWN, 0x0, typeIdentifier, pParent), mpSymTable(pSymTable), mpDependentType(nullptr)
 	{
 	}
 
@@ -918,13 +951,21 @@ namespace gplc
 
 		return pDependentType->GetAttributes();
 	}
+
+	std::string CDependentNamedType::GetMangledName() const
+	{
+		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
+
+		return pDependentType->GetMangledName();
+	}
+
 	
 	/*!
 		\brief CArrayType's definition
 	*/
 
-	CArrayType::CArrayType(CType* pBaseType, U32 elementsCount, U32 attribute):
-		CType(CT_ARRAY, BTS_POINTER, attribute), mElementsCount(elementsCount), mpBaseType(pBaseType)
+	CArrayType::CArrayType(CType* pBaseType, U32 elementsCount, U32 attribute, CType* pParent):
+		CType(CT_ARRAY, BTS_POINTER, attribute, "", pParent), mElementsCount(elementsCount), mpBaseType(pBaseType)
 	{
 	}
 
@@ -974,8 +1015,8 @@ namespace gplc
 		\brief CModuleType's definition
 	*/
 	
-	CModuleType::CModuleType(const std::string& moduleName, U32 attributes):
-		CType(CT_MODULE, BTS_UNKNOWN, attributes, moduleName)
+	CModuleType::CModuleType(const std::string& moduleName, U32 attributes, CType* pParent):
+		CType(CT_MODULE, BTS_UNKNOWN, attributes, moduleName, pParent)
 	{
 	}
 

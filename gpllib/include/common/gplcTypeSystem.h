@@ -148,7 +148,7 @@ namespace gplc
 		protected:
 			typedef std::unordered_map<E_COMPILER_TYPES, std::unordered_map<E_COMPILER_TYPES, bool>> TCastMap;
 		public:
-			CType(E_COMPILER_TYPES type, U32 size, U32 attributes, const std::string& name = "");
+			CType(E_COMPILER_TYPES type, U32 size, U32 attributes, const std::string& name = "", CType* pParent = nullptr);
 			virtual ~CType();
 
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
@@ -171,7 +171,11 @@ namespace gplc
 
 			virtual const std::string& GetName() const;
 
+			virtual std::string GetMangledName() const;
+
 			virtual CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const;
+
+			virtual CType* GetParent() const;
 
 			/*!
 				\brief The operator of equality checks up whether two
@@ -194,17 +198,19 @@ namespace gplc
 
 			CBaseValue* _getBuiltinTypeDefaultValue(E_COMPILER_TYPES type) const;
 		protected:
-			static TCastMap     mCastMap;
+			static TCastMap           mCastMap;
 
-			E_COMPILER_TYPES    mType;
+			E_COMPILER_TYPES          mType;
 
-			U32                 mSize;
+			U32                       mSize;
 
-			U32                 mAttributes;
+			U32                       mAttributes;
 
-			std::string         mName;
+			std::string               mName;
 
 			std::vector<const CType*> mChildren;
+
+			CType*                    mpParent;
 	};
 
 
@@ -215,7 +221,7 @@ namespace gplc
 	class CPointerType : public CType
 	{
 		public:
-			CPointerType(CType* pType);
+			CPointerType(CType* pType, CType* pParent = nullptr);
 			virtual ~CPointerType();
 
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
@@ -247,7 +253,7 @@ namespace gplc
 		public:
 			typedef std::vector<std::pair<std::string, CType*>> TFieldsArray;
 		public:
-			CStructType(const TFieldsArray& fieldsTypes, U32 attributes = 0x0);
+			CStructType(const TFieldsArray& fieldsTypes, U32 attributes = 0x0, CType* pParent = nullptr);
 			virtual ~CStructType() = default;
 
 			void AddField(const std::string& fieldName, CType* pFieldType);
@@ -280,7 +286,7 @@ namespace gplc
 		public:
 			typedef std::vector<std::pair<std::string, CType*>> TArgsArray;
 		public:
-			CFunctionType(const TArgsArray& argsTypes, CType* pReturnValueType, U32 attributes = 0x0);
+			CFunctionType(const TArgsArray& argsTypes, CType* pReturnValueType, U32 attributes = 0x0, CType* pParent = nullptr);
 			virtual ~CFunctionType() = default;
 
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
@@ -312,7 +318,7 @@ namespace gplc
 	class CEnumType : public CType
 	{		
 		public:
-			CEnumType(const ISymTable* pSymTable, const std::string& enumName);
+			CEnumType(const ISymTable* pSymTable, const std::string& enumName, CType* pParent = nullptr);
 			virtual ~CEnumType() = default;
 			
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
@@ -337,7 +343,7 @@ namespace gplc
 	class CDependentNamedType : public CType
 	{
 		public:
-			CDependentNamedType(const ISymTable* pSymTable, const std::string& typeIdentifier);
+			CDependentNamedType(const ISymTable* pSymTable, const std::string& typeIdentifier, CType* pParent = nullptr);
 			virtual ~CDependentNamedType() = default;
 
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
@@ -357,6 +363,8 @@ namespace gplc
 			CType* GetDependentType() const;
 
 			U32 GetAttributes() const override;
+
+			std::string GetMangledName() const override;
 		protected:
 			CDependentNamedType() = default;
 			CDependentNamedType(const CDependentNamedType& type) = default;
@@ -376,7 +384,7 @@ namespace gplc
 	class CArrayType : public CType
 	{
 		public:
-			CArrayType(CType* pBaseType, U32 elementsCount, U32 attribute = 0x0);
+			CArrayType(CType* pBaseType, U32 elementsCount, U32 attribute = 0x0, CType* pParent = nullptr);
 			virtual ~CArrayType();
 
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
@@ -409,7 +417,7 @@ namespace gplc
 	class CModuleType : public CType
 	{
 		public:
-			CModuleType(const std::string& moduleName, U32 attributes = 0x0);
+			CModuleType(const std::string& moduleName, U32 attributes = 0x0, CType* pParent = nullptr);
 			virtual ~CModuleType() = default;
 
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
