@@ -120,6 +120,8 @@ namespace gplc
 
 			void _defineStructTypeConstructor(CStructType* pType);
 
+			std::string _mangleGlobalModuleIdentifier(CType* pType, const std::string& identifier) const;
+
 			inline bool _isGlobalScope() const;
 		protected:
 			TLLVMLiteralVisitor*   mpLiteralIRGenerator;

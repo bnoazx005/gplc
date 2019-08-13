@@ -427,6 +427,8 @@ namespace gplc
 			bool AreSame(const CType* pType) const override;
 
 			std::string ToShortAliasString() const override;
+
+			std::string GetMangledName() const override;
 		protected:
 			CModuleType() = default;
 			CModuleType(const CModuleType& structure) = default;

@@ -128,7 +128,7 @@ namespace gplc
 
 			if (isGlobalScope)
 			{
-				pCurrVariableAllocation = mpModule->getOrInsertGlobal(identifier, pIdentifiersType);
+				pCurrVariableAllocation = mpModule->getOrInsertGlobal(_mangleGlobalModuleIdentifier(pType, identifier), pIdentifiersType);
 
 				llvm::dyn_cast<llvm::GlobalVariable>(pCurrVariableAllocation)->setInitializer(llvm::Constant::getNullValue(pIdentifiersType));
 			}
@@ -497,9 +497,11 @@ namespace gplc
 
 			if (isGlobalScope)
 			{
-				pCurrVariableAllocation = mpModule->getOrInsertGlobal(currIdentifierName, pIdentifiersType);
+				const std::string& mangledIdentifier = _mangleGlobalModuleIdentifier(pType, currIdentifierName);
 
-				mpModule->getGlobalVariable(currIdentifierName)->setInitializer(llvm::Constant::getNullValue(pIdentifiersType));
+				pCurrVariableAllocation = mpModule->getOrInsertGlobal(mangledIdentifier, pIdentifiersType);
+
+				mpModule->getGlobalVariable(mangledIdentifier)->setInitializer(llvm::Constant::getNullValue(pIdentifiersType));
 			}
 			else
 			{
@@ -942,5 +944,12 @@ namespace gplc
 	inline bool CLLVMCodeGenerator::_isGlobalScope() const
 	{
 		return mpCurrActiveFunction == nullptr;
+	}
+
+	std::string CLLVMCodeGenerator::_mangleGlobalModuleIdentifier(CType* pType, const std::string& identifier) const
+	{
+		CType* pParentType = pType->GetParent();
+
+		return (pParentType ? pParentType->GetMangledName() : "") + identifier;
 	}
 }

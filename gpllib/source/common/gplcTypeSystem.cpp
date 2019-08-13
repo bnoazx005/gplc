@@ -96,7 +96,7 @@ namespace gplc
 
 	CType* CTypeResolver::VisitLiteral(CASTLiteralNode* pNode)
 	{
-		return pNode->GetValue()->GetTypeInfo();
+		return pNode->GetValue()->GetTypeInfo(mpTypesFactory, mpSymTable);
 	}
 
 	CType* CTypeResolver::VisitUnaryExpression(CASTUnaryExpressionNode* pNode)
@@ -294,31 +294,31 @@ namespace gplc
 		switch (type)
 		{
 			case NT_INT8:
-				return mpTypesFactory->CreateType(CT_INT8, BTS_INT8, attributes);
+				return mpTypesFactory->CreateType(CT_INT8, BTS_INT8, attributes, "", mpSymTable->GetCurrentScopeType());
 			case NT_INT16:
-				return mpTypesFactory->CreateType(CT_INT16,  BTS_INT16,  attributes);
+				return mpTypesFactory->CreateType(CT_INT16,  BTS_INT16,  attributes , "", mpSymTable->GetCurrentScopeType());
 			case NT_INT32:
-				return mpTypesFactory->CreateType(CT_INT32, BTS_INT32, attributes);
+				return mpTypesFactory->CreateType(CT_INT32, BTS_INT32, attributes , "", mpSymTable->GetCurrentScopeType());
 			case NT_INT64:
-				return mpTypesFactory->CreateType(CT_INT64, BTS_INT64, attributes);
+				return mpTypesFactory->CreateType(CT_INT64, BTS_INT64, attributes , "", mpSymTable->GetCurrentScopeType());
 			case NT_UINT8:
-				return mpTypesFactory->CreateType(CT_UINT8, BTS_UINT8, attributes);
+				return mpTypesFactory->CreateType(CT_UINT8, BTS_UINT8, attributes , "", mpSymTable->GetCurrentScopeType());
 			case NT_UINT16:
-				return mpTypesFactory->CreateType(CT_UINT16, BTS_UINT16, attributes);
+				return mpTypesFactory->CreateType(CT_UINT16, BTS_UINT16, attributes , "", mpSymTable->GetCurrentScopeType());
 			case NT_UINT32:
-				return mpTypesFactory->CreateType(CT_UINT32, BTS_UINT32, attributes);
+				return mpTypesFactory->CreateType(CT_UINT32, BTS_UINT32, attributes , "", mpSymTable->GetCurrentScopeType());
 			case NT_UINT64:
-				return mpTypesFactory->CreateType(CT_UINT64, BTS_UINT64, attributes);
+				return mpTypesFactory->CreateType(CT_UINT64, BTS_UINT64, attributes , "", mpSymTable->GetCurrentScopeType());
 			case NT_FLOAT:
-				return mpTypesFactory->CreateType(CT_FLOAT, BTS_FLOAT, attributes);
+				return mpTypesFactory->CreateType(CT_FLOAT, BTS_FLOAT, attributes , "", mpSymTable->GetCurrentScopeType());
 			case NT_DOUBLE:
-				return mpTypesFactory->CreateType(CT_DOUBLE, BTS_DOUBLE, attributes);
+				return mpTypesFactory->CreateType(CT_DOUBLE, BTS_DOUBLE, attributes , "", mpSymTable->GetCurrentScopeType());
 			case NT_STRING:
-				return mpTypesFactory->CreateType(CT_STRING, BTS_POINTER, attributes);
+				return mpTypesFactory->CreateType(CT_STRING, BTS_POINTER, attributes , "", mpSymTable->GetCurrentScopeType());
 			case NT_CHAR:
-				return mpTypesFactory->CreateType(CT_CHAR, BTS_CHAR, attributes);
+				return mpTypesFactory->CreateType(CT_CHAR, BTS_CHAR, attributes , "", mpSymTable->GetCurrentScopeType());
 			case NT_BOOL:
-				return mpTypesFactory->CreateType(CT_BOOL, BTS_BOOL, attributes);
+				return mpTypesFactory->CreateType(CT_BOOL, BTS_BOOL, attributes , "", mpSymTable->GetCurrentScopeType());
 		}
 
 		return nullptr;
@@ -1043,6 +1043,11 @@ namespace gplc
 	std::string CModuleType::ToShortAliasString() const
 	{
 		return "module";
+	}
+
+	std::string CModuleType::GetMangledName() const
+	{
+		return mName + "$";
 	}
 
 

@@ -1,5 +1,7 @@
 #include "common/gplcValues.h"
 #include "common/gplcTypeSystem.h"
+#include "common/gplcSymTable.h"
+#include "common/gplcTypesFactory.h"
 #include <cassert>
 
 
@@ -30,9 +32,9 @@ namespace gplc
 		return new CStringValue(ToString());
 	}
 
-	CType* CIntValue::GetTypeInfo() const
+	CType* CIntValue::GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const
 	{
-		return new CType(mIsLong ? CT_INT64 : CT_INT32, mIsLong ? BTS_INT64 : BTS_INT32, 0x0);
+		return new CType(mIsLong ? CT_INT64 : CT_INT32, mIsLong ? BTS_INT64 : BTS_INT32, 0x0, "", pSymTable->GetCurrentScopeType());
 	}
 
 	bool CIntValue::IsLong() const
@@ -55,9 +57,9 @@ namespace gplc
 		return new CStringValue(ToString());
 	}
 
-	CType* CUIntValue::GetTypeInfo() const
+	CType* CUIntValue::GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const
 	{
-		return new CType(mIsLong ? CT_UINT64 : CT_UINT32, mIsLong ? BTS_UINT64 : BTS_UINT32, 0x0);
+		return new CType(mIsLong ? CT_UINT64 : CT_UINT32, mIsLong ? BTS_UINT64 : BTS_UINT32, 0x0, "", pSymTable->GetCurrentScopeType());
 	}
 
 	bool CUIntValue::IsLong() const
@@ -80,9 +82,9 @@ namespace gplc
 		return new CStringValue(ToString());
 	}
 
-	CType* CFloatValue::GetTypeInfo() const
+	CType* CFloatValue::GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const
 	{
-		return new CType(CT_FLOAT, BTS_FLOAT, 0x0);
+		return new CType(CT_FLOAT, BTS_FLOAT, 0x0, "", pSymTable->GetCurrentScopeType());
 	}
 
 	TLLVMIRData CDoubleValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
@@ -100,9 +102,9 @@ namespace gplc
 		return new CStringValue(ToString());
 	}
 
-	CType* CDoubleValue::GetTypeInfo() const
+	CType* CDoubleValue::GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const
 	{
-		return new CType(CT_DOUBLE, BTS_DOUBLE, 0x0);
+		return new CType(CT_DOUBLE, BTS_DOUBLE, 0x0, "", pSymTable->GetCurrentScopeType());
 	}
 
 	TLLVMIRData CStringValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
@@ -120,9 +122,9 @@ namespace gplc
 		return new CStringValue(ToString());
 	}
 
-	CType* CStringValue::GetTypeInfo() const
+	CType* CStringValue::GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const
 	{
-		return new CType(CT_STRING, BTS_POINTER, 0x0);
+		return new CType(CT_STRING, BTS_POINTER, 0x0, "", pSymTable->GetCurrentScopeType());
 	}
 
 	TLLVMIRData CCharValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
@@ -141,9 +143,9 @@ namespace gplc
 		return new CStringValue(ToString());
 	}
 
-	CType* CCharValue::GetTypeInfo() const
+	CType* CCharValue::GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const
 	{
-		return new CType(CT_CHAR, BTS_CHAR, 0x0);
+		return new CType(CT_CHAR, BTS_CHAR, 0x0, "", pSymTable->GetCurrentScopeType());
 	}
 
 	TLLVMIRData CBoolValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
@@ -161,9 +163,9 @@ namespace gplc
 		return new CStringValue(ToString());
 	}
 
-	CType* CBoolValue::GetTypeInfo() const
+	CType* CBoolValue::GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const
 	{
-		return new CType(CT_BOOL, BTS_BOOL, 0x0);
+		return new CType(CT_BOOL, BTS_BOOL, 0x0, "", pSymTable->GetCurrentScopeType());
 	}
 
 
@@ -182,7 +184,7 @@ namespace gplc
 		return new CStringValue(ToString());
 	}
 
-	CType* CPointerValue::GetTypeInfo() const
+	CType* CPointerValue::GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const
 	{
 		return new CPointerType(nullptr);
 	}

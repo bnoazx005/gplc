@@ -21,6 +21,8 @@ namespace gplc
 {
 	class CType;
 	class CStringValue;
+	class ITypesFactory;
+	class ISymTable;
 
 
 	enum E_LITERAL_TYPE
@@ -50,7 +52,7 @@ namespace gplc
 
 			virtual CStringValue* ToStringLiteral() const = 0;
 
-			virtual CType* GetTypeInfo() const = 0;
+			virtual CType* GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const = 0;
 		protected:
 			CBaseValue() = default;
 			CBaseValue(const CBaseValue& literal) = default;
@@ -75,7 +77,7 @@ namespace gplc
 				return mValue;
 			}
 
-			virtual CType* GetTypeInfo() const = 0;
+			virtual CType* GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const = 0;
 		protected:
 			CGenericBaseValue() = default;
 			CGenericBaseValue(const CGenericBaseValue& literal) = default;
@@ -98,7 +100,7 @@ namespace gplc
 
 			CStringValue* ToStringLiteral() const override;
 			
-			CType* GetTypeInfo() const override;
+			CType* GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const override;
 
 			bool IsLong() const;
 		protected:
@@ -120,7 +122,7 @@ namespace gplc
 			
 			CStringValue* ToStringLiteral() const override;
 
-			CType* GetTypeInfo() const override;
+			CType* GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const override;
 
 			bool IsLong() const;
 		protected:
@@ -142,7 +144,7 @@ namespace gplc
 			
 			CStringValue* ToStringLiteral() const override;
 
-			CType* GetTypeInfo() const override;
+			CType* GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const override;
 	};
 
 
@@ -160,7 +162,7 @@ namespace gplc
 
 			CStringValue* ToStringLiteral() const override;
 
-			CType* GetTypeInfo() const override;
+			CType* GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const override;
 	};
 
 
@@ -178,7 +180,7 @@ namespace gplc
 
 			CStringValue* ToStringLiteral() const override;
 
-			CType* GetTypeInfo() const override;
+			CType* GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const override;
 	};
 
 
@@ -196,7 +198,7 @@ namespace gplc
 
 			CStringValue* ToStringLiteral() const override;
 
-			CType* GetTypeInfo() const override;
+			CType* GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const override;
 	};
 
 
@@ -214,7 +216,7 @@ namespace gplc
 
 			CStringValue* ToStringLiteral() const override;
 
-			CType* GetTypeInfo() const override;
+			CType* GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const override;
 	};
 
 
@@ -232,7 +234,7 @@ namespace gplc
 
 			CStringValue* ToStringLiteral() const override;
 
-			CType* GetTypeInfo() const override;
+			CType* GetTypeInfo(ITypesFactory* pTypesFactory, ISymTable* pSymTable) const override;
 	};
 }
 
