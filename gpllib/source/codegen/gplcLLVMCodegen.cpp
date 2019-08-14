@@ -337,11 +337,18 @@ namespace gplc
 		llvm::IRBuilder<> thenBlockIRBuilder{ pThenBlock };
 		thenBlockIRBuilder.CreateBr(pEndBlock);
 
-		llvm::BasicBlock* pElseBlock = llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetElseBlock()->Accept(this)));
+		llvm::BasicBlock* pElseBlock = pNode->GetElseBlock() ? llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetElseBlock()->Accept(this))) : nullptr;
 
-		// add end point for else branch
-		llvm::IRBuilder<> elseBlockIRBuilder{ pElseBlock };
-		elseBlockIRBuilder.CreateBr(pEndBlock);
+		if (pElseBlock)
+		{
+			// add end point for else branch
+			llvm::IRBuilder<> elseBlockIRBuilder{ pElseBlock };
+			elseBlockIRBuilder.CreateBr(pEndBlock);
+		}
+		else
+		{
+			pElseBlock = pEndBlock;
+		}
 
 		currIRBuilder.SetInsertPoint(pConditionBlock);
 		llvm::Value* pBRInstruction = currIRBuilder.CreateCondBr(pConditifon, pThenBlock, pElseBlock);
