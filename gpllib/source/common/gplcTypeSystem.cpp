@@ -319,6 +319,8 @@ namespace gplc
 				return mpTypesFactory->CreateType(CT_CHAR, BTS_CHAR, attributes , "", mpSymTable->GetCurrentScopeType());
 			case NT_BOOL:
 				return mpTypesFactory->CreateType(CT_BOOL, BTS_BOOL, attributes , "", mpSymTable->GetCurrentScopeType());
+			case NT_VOID:
+				return mpTypesFactory->CreateType(CT_VOID, BTS_VOID, attributes, "", mpSymTable->GetCurrentScopeType());
 		}
 
 		return nullptr;
@@ -429,6 +431,11 @@ namespace gplc
 		
 		do
 		{
+			if (!pCurrScopeType)
+			{
+				break;
+			}
+
 			mangledName = pCurrScopeType->GetName() + "$" + mangledName;
 
 			pCurrScopeType = pCurrScopeType->GetParent();
@@ -536,6 +543,8 @@ namespace gplc
 				return "c8";
 			case CT_BOOL:
 				return "b";
+			case CT_VOID:
+				return "void";
 		}
 
 		return "unknown";

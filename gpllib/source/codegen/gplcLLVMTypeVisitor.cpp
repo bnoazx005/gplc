@@ -40,6 +40,8 @@ namespace gplc
 				return llvm::Type::getInt8PtrTy(*mContext);
 			case CT_BOOL:
 				return llvm::Type::getInt1Ty(*mContext);
+			case CT_VOID:
+				return llvm::Type::getVoidTy(*mContext);
 		}
 
 		return {};

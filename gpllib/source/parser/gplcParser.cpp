@@ -802,15 +802,15 @@ namespace gplc
 		// parse arguments
 		CASTFunctionArgsNode* pArgsList = _match(pLexer->GetCurrToken(), TT_OPEN_BRACKET) ? _parseFunctionArgs(pLexer) : nullptr;
 
-		if (!SUCCESS(_expect(TT_ARROW, pLexer->GetCurrToken())))
+		bool haveReturnType = _match(pLexer->GetCurrToken(), TT_ARROW);
+
+		if (haveReturnType)
 		{
-			return nullptr;
+			pLexer->GetNextToken(); // take ->
 		}
 
-		pLexer->GetNextToken(); // take ->
-
 		// parse return value's type
-		CASTNode* pReturnType = _parseType(pLexer);
+		CASTNode* pReturnType = haveReturnType ? _parseType(pLexer) : mpNodesFactory->CreateTypeNode(NT_VOID);
 
 		return mpNodesFactory->CreateFuncDeclNode(pClosureDecl, pArgsList, pReturnType);
 	}
