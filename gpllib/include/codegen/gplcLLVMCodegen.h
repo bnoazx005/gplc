@@ -44,7 +44,8 @@ namespace gplc
 			CLLVMCodeGenerator() = default;
 			virtual ~CLLVMCodeGenerator() = default;
 
-			TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter) override;
+			TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter,
+								 const TOnPreGenerateCallback& onPreGenerateCallback) override;
 
 			TLLVMIRData VisitProgramUnit(CASTSourceUnitNode* pProgramNode) override;
 
@@ -101,6 +102,10 @@ namespace gplc
 			TLLVMIRData VisitImportDirectiveNode(CASTImportDirectiveNode* pNode) override;
 
 			llvm::IRBuilder<>* GetCurrIRBuilder();
+
+			llvm::IRBuilder<>* GetGlobalIRBuilder();
+
+			ITypeVisitor<TLLVMIRData>* GetTypeGenerator() const override;
 		protected:
 			CLLVMCodeGenerator(const CLLVMCodeGenerator& codeGenerator) = default;
 

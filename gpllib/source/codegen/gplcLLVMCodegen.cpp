@@ -14,7 +14,8 @@
 
 namespace gplc
 {
-	TLLVMIRData CLLVMCodeGenerator::Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter)
+	TLLVMIRData CLLVMCodeGenerator::Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter,
+											 const TOnPreGenerateCallback& onPreGenerateCallback)
 	{
 		if (!pSymTable || !pTypeResolver || !pInterpreter)
 		{
@@ -38,6 +39,8 @@ namespace gplc
 		mpGlobalIRBuilder = &mIRBuildersStack.top();
 
 		mpModule = new llvm::Module(pNode->GetModuleName(), mContext);
+
+		onPreGenerateCallback(this);
 
 		_defineInitModuleGlobalsFunction();
 
@@ -647,6 +650,11 @@ namespace gplc
 		return &mIRBuildersStack.top();
 	}
 
+	llvm::IRBuilder<>* CLLVMCodeGenerator::GetGlobalIRBuilder()
+	{
+		return mpGlobalIRBuilder;
+	}
+
 	TLLVMIRData CLLVMCodeGenerator::VisitBreakOperator(CASTBreakOperatorNode* pNode)
 	{
 		auto& currIRBuilder = mIRBuildersStack.top();
@@ -763,6 +771,11 @@ namespace gplc
 	TLLVMIRData CLLVMCodeGenerator::VisitImportDirectiveNode(CASTImportDirectiveNode* pNode)
 	{
 		return {};
+	}
+
+	ITypeVisitor<TLLVMIRData>* CLLVMCodeGenerator::GetTypeGenerator() const
+	{
+		return mpTypeGenerator;
 	}
 
 	llvm::Instruction::BinaryOps CLLVMCodeGenerator::_convertOpTypeToLLVM(E_TOKEN_TYPE opType, bool isFloatingPointOp) const

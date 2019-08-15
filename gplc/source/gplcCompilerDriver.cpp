@@ -24,6 +24,7 @@ namespace gplc
 		mpCodeGenerator        = new CLLVMCodeGenerator();
 		mpModuleResolver       = new CModuleResolver();
 		mpTypesFactory         = new CTypesFactory();
+		mpNativeModules        = new CLLVMNativeModules();
 
 		if (!SUCCESS(result = mpTypeResolver->Init(mpSymTable, mpConstExprInterpreter, mpTypesFactory)))
 		{
@@ -50,6 +51,7 @@ namespace gplc
 			return RV_FAIL;
 		}
 
+		delete mpNativeModules;
 		delete mpTypesFactory;
 		delete mpModuleResolver;
 		delete mpLexer;
@@ -197,7 +199,8 @@ namespace gplc
 		mpSymTable->DumpScopesStructure();
 
 		// emit IR code
-		compiledModuleData = mpCodeGenerator->Generate(pSourceAST, mpSymTable, mpTypeResolver, mpConstExprInterpreter);
+		compiledModuleData = mpCodeGenerator->Generate(pSourceAST, mpSymTable, mpTypeResolver, mpConstExprInterpreter, 
+													   std::bind(&CCompilerDriver::_initNativeModules, this, std::placeholders::_1));
 
 		// \todo Refactor this later
 	//	system(std::string("llc --filetype=obj ").append(moduleName).c_str());
@@ -226,6 +229,12 @@ namespace gplc
 		mIsPanicModeEnabled = (errorInfo.mType == E_MESSAGE_TYPE::MT_ERROR);
 
 		std::cout << CMessageOutputUtils::MessageTypeToString(errorInfo.mType) << ": " << CMessageOutputUtils::SemanticAnalyserMessageToString(errorInfo.mMessage) << std::endl;
+	}
+
+	Result CCompilerDriver::_initNativeModules(ICodeGenerator* pCodeGenerator)
+	{
+		// \todo Initialize all native modules here
+		return mpNativeModules->InitModule(pCodeGenerator, mpTypesFactory, pCodeGenerator->GetTypeGenerator());
 	}
 
 

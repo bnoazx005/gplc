@@ -11,7 +11,8 @@
 
 namespace gplc
 {
-	TLLVMIRData CCCodeGenerator::Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter)
+	TLLVMIRData CCCodeGenerator::Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter,
+										  const TOnPreGenerateCallback& onPreGenerateCallback)
 	{
 		if (!pSymTable)
 		{
@@ -398,5 +399,10 @@ namespace gplc
 	TLLVMIRData CCCodeGenerator::VisitImportDirectiveNode(CASTImportDirectiveNode* pNode)
 	{
 		return {};
+	}
+
+	ITypeVisitor<TLLVMIRData>* CCCodeGenerator::GetTypeGenerator() const
+	{
+		return nullptr;
 	}
 }

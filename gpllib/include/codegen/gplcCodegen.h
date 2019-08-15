@@ -14,6 +14,7 @@
 
 #include "common/gplcTypes.h"
 #include "common/gplcVisitor.h"
+#include <functional>
 #include <string>
 
 
@@ -23,14 +24,21 @@ namespace gplc
 	class ITypeResolver;
 	class IConstExprInterpreter;
 
+	template <typename T> class ITypeVisitor;
+
 
 	class ICodeGenerator: public IASTNodeVisitor<TLLVMIRData>
 	{
 		public:
+			typedef std::function<Result(ICodeGenerator*)> TOnPreGenerateCallback;
+		public:
 			ICodeGenerator() = default;
 			virtual ~ICodeGenerator() = default;
 
-			virtual TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter) = 0;
+			virtual TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter,
+										 const TOnPreGenerateCallback& onPreGenerateCallback) = 0;
+
+			virtual ITypeVisitor<TLLVMIRData>* GetTypeGenerator() const = 0;
 		protected:
 			ICodeGenerator(const ICodeGenerator& codeGenerator) = default;
 	};

@@ -32,7 +32,8 @@ namespace gplc
 			CCCodeGenerator() = default;
 			virtual ~CCCodeGenerator() = default;
 
-			TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter) override;
+			TLLVMIRData Generate(CASTSourceUnitNode* pNode, ISymTable* pSymTable, ITypeResolver* pTypeResolver, IConstExprInterpreter* pInterpreter,
+								 const TOnPreGenerateCallback& onPreGenerateCallback) override;
 
 			TLLVMIRData VisitProgramUnit(CASTSourceUnitNode* pProgramNode) override;
 
@@ -87,6 +88,8 @@ namespace gplc
 			TLLVMIRData VisitPointerTypeNode(CASTPointerTypeNode* pNode) override;
 
 			TLLVMIRData VisitImportDirectiveNode(CASTImportDirectiveNode* pNode) override;
+
+			ITypeVisitor<TLLVMIRData>* GetTypeGenerator() const override;
 		protected:
 			CCCodeGenerator(const CCCodeGenerator& codeGenerator) = default;
 		protected:

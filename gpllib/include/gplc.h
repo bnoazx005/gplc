@@ -37,6 +37,8 @@
 
 #include "codegen/gplcCodegen.h"
 #include "codegen/gplcLinker.h"
+#include "codegen/gplcNativePrimitives.h"
+#include "codegen/gplcLLVMNativePrimitives.h"
 #include "codegen/gplcLLVMCodegen.h"
 #include "codegen/gplcLLVMLiteralVisitor.h"
 #include "codegen/gplcLLVMTypeVisitor.h"
