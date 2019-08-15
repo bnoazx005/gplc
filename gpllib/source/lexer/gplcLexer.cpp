@@ -75,7 +75,8 @@ namespace gplc
 		{ "break", TT_BREAK_KEYWORD },
 		{ "continue", TT_CONTINUE_KEYWORD },
 		{ "import", TT_IMPORT_KEYWORD },
-		{ "as", TT_AS_KEYWORD }
+		{ "as", TT_AS_KEYWORD },
+		{ "%", TT_PERCENT_SIGN },
 	};
 
 	CLexer::CLexer():

@@ -244,7 +244,7 @@ namespace gplc
 		bool isFloatingPoint = pLeftExprType->GetType() == CT_FLOAT || pLeftExprType->GetType() == CT_DOUBLE;
 
 		// arithmetic operations
-		if (opType == TT_PLUS || opType == TT_MINUS || opType == TT_STAR || opType == TT_SLASH)
+		if (opType == TT_PLUS || opType == TT_MINUS || opType == TT_STAR || opType == TT_SLASH || opType == TT_PERCENT_SIGN)
 		{
 			return currIRBuidler.CreateBinOp(_convertOpTypeToLLVM(opType, isFloatingPoint), pLeftExprValue, pRightExprValue, "tmpexpr");
 		}
@@ -778,6 +778,8 @@ namespace gplc
 				return isFloatingPointOp ? llvm::Instruction::FMul : llvm::Instruction::Mul;
 			case TT_SLASH:
 				return isFloatingPointOp ? llvm::Instruction::FDiv : llvm::Instruction::SDiv;
+			case TT_PERCENT_SIGN:
+				return isFloatingPointOp ? llvm::Instruction::FRem : llvm::Instruction::SRem;
 		}
 
 		return {};

@@ -543,8 +543,9 @@ namespace gplc
 
 		E_TOKEN_TYPE opType = TT_VOID_TYPE;
 
-		while (_match(pLexer->GetCurrToken(), TT_STAR) ||
-			_match(pLexer->GetCurrToken(), TT_SLASH))
+		while (_match(pLexer->GetCurrToken(), TT_STAR)  ||
+			   _match(pLexer->GetCurrToken(), TT_SLASH) ||
+			   _match(pLexer->GetCurrToken(), TT_PERCENT_SIGN))
 		{
 			opType = pLexer->GetCurrToken()->GetType();
 
