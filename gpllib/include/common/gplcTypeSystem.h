@@ -302,6 +302,8 @@ namespace gplc
 			bool AreSame(const CType* pType) const override;
 
 			std::string ToShortAliasString() const override;
+
+			bool IsProcedure() const;
 		protected:
 			CFunctionType() = default;
 			CFunctionType(const CFunctionType& function) = default;

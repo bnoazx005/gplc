@@ -842,6 +842,11 @@ namespace gplc
 		return mpReturnValueType->AreSame(pFunctionType->GetReturnValueType());
 	}
 
+	bool CFunctionType::IsProcedure() const
+	{
+		return mpReturnValueType->GetType() == CT_VOID;
+	}
+
 	std::string CFunctionType::ToShortAliasString() const
 	{
 		// \todo implement the method

@@ -466,7 +466,14 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitReturnStatement(CASTReturnStatementNode* pNode)
 	{
-		return  mIRBuildersStack.top().CreateRet(std::get<llvm::Value*>(pNode->GetExpr()->Accept(this)));
+		auto& currIRBuilder = mIRBuildersStack.top();
+
+		if (!pNode->GetExpr())
+		{
+			return currIRBuilder.CreateRetVoid();
+		}
+
+		return  currIRBuilder.CreateRet(std::get<llvm::Value*>(pNode->GetExpr()->Accept(this)));
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitDefinitionNode(CASTDefinitionNode* pNode)
@@ -588,7 +595,15 @@ namespace gplc
 		mVariablesTable[mpSymTable->GetSymbolHandleByName(pFuncIdentifierNode->GetName())] = pLValueFuncPointer;
 
 		// generate its definition
-		auto pBlock = std::get<llvm::Value*>(pNode->GetValue()->Accept(this));
+		llvm::BasicBlock* pBlock = llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetValue()->Accept(this)));
+
+		// \note skip this condition if there is return statement already
+		if (pInternalLambdaType->IsProcedure() && !pBlock->getInstList().back().getType()->isVoidTy())
+		{
+			llvm::IRBuilder<> funcBodyIRBuilder(pBlock);
+
+			funcBodyIRBuilder.CreateRetVoid();
+		}
 
 		mpCurrActiveFunction = pPrevActiveFunction; // restore previous value
 
