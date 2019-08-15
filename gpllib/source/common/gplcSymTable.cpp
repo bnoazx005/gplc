@@ -40,7 +40,7 @@ namespace gplc
 	*/
 
 	CSymTable::CSymTable() :
-		mpGlobalScopeEntry(nullptr), mpCurrScopeEntry(nullptr), mIsLocked(false)
+		mpGlobalScopeEntry(nullptr), mpCurrScopeEntry(nullptr), mIsLocked(false), mLastVisitedScopeIndex(-1)
 	{
 		mpGlobalScopeEntry = new TSymTableEntry();
 
@@ -50,7 +50,7 @@ namespace gplc
 	}
 
 	CSymTable::CSymTable(const CSymTable& table):
-		ISymTable(table), mIsLocked(false)
+		ISymTable(table), mIsLocked(false), mLastVisitedScopeIndex(-1)
 	{
 	}
 
@@ -90,6 +90,8 @@ namespace gplc
 			return RV_FAIL;
 		}
 
+		mIsReadMode = false;
+
 		TSymTableEntry* pNestedTable = new TSymTableEntry();
 
 		auto iter = mpCurrScopeEntry->mNamedScopes.find(scopeName);
@@ -105,6 +107,8 @@ namespace gplc
 
 		mpCurrScopeEntry = pNestedTable;
 
+		mpCurrScopeEntry->mScopeIndex = -1;
+
 		return RV_SUCCESS;
 	}
 
@@ -115,13 +119,19 @@ namespace gplc
 			return RV_FAIL;
 		}
 
+		mIsReadMode = false;
+
 		TSymTableEntry* pNestedTable = new TSymTableEntry();
+
+		U32 scopeIndex = mpCurrScopeEntry->mNestedScopes.size();
 
 		mpCurrScopeEntry->mNestedScopes.push_back(pNestedTable);
 
 		pNestedTable->mParentScope = mpCurrScopeEntry;
 
 		mpCurrScopeEntry = pNestedTable;
+
+		mpCurrScopeEntry->mScopeIndex = scopeIndex;
 
 		return RV_SUCCESS;
 	}
@@ -132,6 +142,8 @@ namespace gplc
 		{
 			return RV_FAIL;
 		}
+
+		mIsReadMode = true;
 
 		mpCurrScopeEntry = mpCurrScopeEntry->mNamedScopes[scopeName];
 
@@ -145,7 +157,11 @@ namespace gplc
 			return RV_FAIL;
 		}
 
-		mpCurrScopeEntry = mpCurrScopeEntry->mNestedScopes.front();
+		mIsReadMode = true;
+
+		mpCurrScopeEntry = mpCurrScopeEntry->mNestedScopes[mLastVisitedScopeIndex + 1];
+
+		mLastVisitedScopeIndex = -1;
 
 		return RV_SUCCESS;
 	}
@@ -157,7 +173,17 @@ namespace gplc
 			return RV_FAIL;
 		}
 		
+		I32 currScopeIndex = mpCurrScopeEntry->mScopeIndex;
+
+		bool isUnnamedScope = currScopeIndex >= 0;
+
 		mpCurrScopeEntry = mpCurrScopeEntry->mParentScope;
+
+		// \note move to next neighbour scope if we currently stay in unnamed one and there is this next neighbour
+		if (mIsReadMode && isUnnamedScope && (mpCurrScopeEntry->mNestedScopes.size() > currScopeIndex))
+		{
+			mLastVisitedScopeIndex = currScopeIndex;
+		}
 
 		return RV_SUCCESS;
 	}

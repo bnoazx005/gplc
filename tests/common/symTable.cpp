@@ -97,5 +97,36 @@ TEST_CASE("CSymTable tests")
 		REQUIRE(pSymTable->LookUp("x"));
 	}
 	
+	SECTION("TestLeaveScope_PassTwoNeighbourScopes_IteratesOverScopes")
+	{
+		pSymTable->CreateScope();
+		pSymTable->AddVariable({ "x", nullptr, nullptr });
+		pSymTable->LeaveScope();
+
+		pSymTable->CreateScope();
+		pSymTable->AddVariable({ "y", nullptr, nullptr });
+		pSymTable->LeaveScope();
+
+		pSymTable->CreateScope();
+		pSymTable->CreateScope();
+		pSymTable->AddVariable({ "z", nullptr, nullptr });
+		pSymTable->LeaveScope();
+		pSymTable->LeaveScope();
+
+		pSymTable->VisitScope();
+		REQUIRE(pSymTable->LookUp("x"));
+		pSymTable->LeaveScope();
+
+		pSymTable->VisitScope();
+		REQUIRE(pSymTable->LookUp("y"));
+		pSymTable->LeaveScope();
+
+		pSymTable->VisitScope();
+		pSymTable->VisitScope();
+		REQUIRE(pSymTable->LookUp("z"));
+		pSymTable->LeaveScope();
+		pSymTable->LeaveScope();
+	}
+	
 	delete pSymTable;
 }

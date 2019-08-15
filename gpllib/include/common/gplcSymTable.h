@@ -74,6 +74,8 @@ namespace gplc
 				TNamedScopesMap              mNamedScopes;
 
 				CType*                       mpType;	///< A type of a named scope, equals to nullptr for unnamed scopes
+
+				I32                          mScopeIndex;
 			};
 
 		public:
@@ -171,6 +173,10 @@ namespace gplc
 			TSymTableEntry* mpCurrScopeEntry;
 
 			bool            mIsLocked;
+
+			I32             mLastVisitedScopeIndex;
+
+			bool            mIsReadMode;
 	};
 }
 
