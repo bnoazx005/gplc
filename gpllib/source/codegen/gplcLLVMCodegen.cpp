@@ -50,10 +50,10 @@ namespace gplc
 		// \note FOR DEBUG PURPOSE ONLY
 		mpModule->dump();
 
-		std::error_code EC;
+		/*std::error_code EC;
 		llvm::raw_fd_ostream OS(mpModule->getName(), EC, llvm::sys::fs::F_None);
 		WriteBitcodeToFile(*mpModule, OS);
-		OS.flush();
+		OS.flush();*/
 		
 		delete mpLiteralIRGenerator;
 

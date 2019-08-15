@@ -100,7 +100,23 @@ namespace gplc
 			}
 
 			mpSymTable->LeaveScope();
-		}
+
+			if (mIsPanicModeEnabled)
+			{
+				return RV_FAIL;
+			}
+
+			auto pLinker = new CLLVMLinker();
+
+			if (!SUCCESS(result = mpModuleResolver->Link(pLinker)))
+			{
+				delete pLinker;
+
+				return result;
+			}
+
+			delete pLinker;
+		}		
 
 		return RV_SUCCESS;
 	}
@@ -178,8 +194,13 @@ namespace gplc
 			return RV_FAIL;
 		}
 
+		mpSymTable->DumpScopesStructure();
+
 		// emit IR code
 		compiledModuleData = mpCodeGenerator->Generate(pSourceAST, mpSymTable, mpTypeResolver, mpConstExprInterpreter);
+
+		// \todo Refactor this later
+	//	system(std::string("llc --filetype=obj ").append(moduleName).c_str());
 
 		disposeInputStream();
 

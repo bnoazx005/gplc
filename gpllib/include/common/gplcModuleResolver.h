@@ -25,6 +25,7 @@ namespace gplc
 	class CASTNode;
 	class CASTImportDirectiveNode;
 	class ITypesFactory;
+	class ILinker;
 
 
 	class IModuleResolver
@@ -60,6 +61,8 @@ namespace gplc
 								   const TOnCompileCallback& onCompileModule) = 0;
 
 			virtual void ResolveModuleType(ISymTable* pSymTable, ITypesFactory* pTypesFactory, const std::string& moduleName) = 0;
+
+			virtual Result Link(ILinker* pLinker) = 0;
 		protected:
 			IModuleResolver(const IModuleResolver&) = delete;
 	};
@@ -75,6 +78,8 @@ namespace gplc
 						   const TOnCompileCallback& onCompileModule) override;
 
 			void ResolveModuleType(ISymTable* pSymTable, ITypesFactory* pTypesFactory, const std::string& moduleName) override;
+
+			Result Link(ILinker* pLinker) override;
 		protected:
 			CModuleResolver(const CModuleResolver&) = delete;
 

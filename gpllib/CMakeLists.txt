@@ -22,7 +22,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/deps/cma
 set(GPL_HEADERS
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/gplc.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/codegen/gplcCodegen.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/codegen/gplcLinker.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/codegen/gplcLLVMCodegen.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/codegen/gplcLLVMLinker.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/codegen/gplcLLVMLiteralVisitor.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/codegen/gplcLLVMTypeVisitor.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/codegen/ctplr/gplcCCodegen.h"
@@ -55,6 +57,7 @@ set(GPL_SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/codegen/gplcLLVMCodegen.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/codegen/gplcLLVMLiteralVisitor.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/codegen/gplcLLVMTypeVisitor.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/source/codegen/gplcLLVMLinker.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/codegen/ctplr/gplcCCodegen.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/codegen/ctplr/gplcCTypeVisitor.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/codegen/ctplr/gplcCLiteralVisitor.cpp"

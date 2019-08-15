@@ -3,6 +3,7 @@
 #include "common/gplcTypesFactory.h"
 #include "common/gplcTypeSystem.h"
 #include "parser/gplcASTNodes.h"
+#include "codegen/gplcLinker.h"
 #include <filesystem>
 #include <vector>
 #include <algorithm>
@@ -67,6 +68,11 @@ namespace gplc
 		}
 	}
 
+	Result CModuleResolver::Link(ILinker* pLinker)
+	{
+		return RV_SUCCESS;
+	}
+
 	Result CModuleResolver::_visitNode(CASTNode* pNode)
 	{
 		Result result = RV_SUCCESS;
@@ -104,6 +110,14 @@ namespace gplc
 
 		ResolveModuleType(mpSymTable, mpTypesFactory, moduleName);
 
+		// build dependencies graph
+		TModuleEntry currModuleEntry { moduleName, {} };
+
+		mpCurrVisitingModule->mDependencies.push_back(currModuleEntry);
+
+		auto pCurrModuleDeps = mpCurrVisitingModule;
+		mpCurrVisitingModule = &mpCurrVisitingModule->mDependencies.back();
+
 		Result result = RV_SUCCESS;
 
 		TLLVMIRData compiledModuleData;
@@ -112,6 +126,8 @@ namespace gplc
 		{
 			return result;
 		}
+
+		mpCurrVisitingModule = pCurrModuleDeps;
 
 		mpSymTable->LeaveScope();
 

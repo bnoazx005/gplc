@@ -36,9 +36,11 @@
 #include "utils/Utils.h"
 
 #include "codegen/gplcCodegen.h"
+#include "codegen/gplcLinker.h"
 #include "codegen/gplcLLVMCodegen.h"
 #include "codegen/gplcLLVMLiteralVisitor.h"
 #include "codegen/gplcLLVMTypeVisitor.h"
+#include "codegen/gplcLLVMLinker.h"
 #include "codegen/ctplr/gplcCCodegen.h"
 #include "codegen/ctplr/gplcCTypeVisitor.h"
 #include "codegen/ctplr/gplcCLiteralVisitor.h"
