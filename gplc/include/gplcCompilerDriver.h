@@ -11,6 +11,7 @@
 #pragma once
 
 
+#include "gplcCommon.h"
 #include <gplc.h>
 #include <vector>
 #include <string>
@@ -23,7 +24,7 @@ namespace gplc
 		public:
 			typedef std::vector<std::string> TStringsArray;
 		public:
-			virtual Result Init() = 0;
+			virtual Result Init(const TCompilerOptions& options) = 0;
 			virtual Result Free() = 0;
 
 			virtual Result Run(const TStringsArray& inputFiles) = 0;
@@ -37,9 +38,9 @@ namespace gplc
 	class CCompilerDriver: public ICompilerDriver
 	{
 		public:
-			friend TResult<ICompilerDriver*> CreateCompilerDriver();
+			friend TResult<ICompilerDriver*> CreateCompilerDriver(const TCompilerOptions&);
 		public:
-			Result Init() override;
+			Result Init(const TCompilerOptions& options) override;
 			Result Free() override;
 
 			Result Run(const TStringsArray& inputFiles) override;
@@ -55,6 +56,8 @@ namespace gplc
 			void _onSemanticAnalyserStageError(const TSemanticAnalyserMessageInfo& errorInfo);
 
 			Result _compileSeparateFile(const std::string& filename, const std::string& moduleName, TLLVMIRData& compiledModuleData);
+
+			std::string _getCurrentWorkingDirectory(const TStringsArray& inputFiles) const;
 		protected:
 			bool                   mIsInitialized;
 
@@ -81,8 +84,10 @@ namespace gplc
 			INativeModules*        mpNativeModules;
 
 			bool                   mIsPanicModeEnabled;
+
+			TCompilerOptions       mCompilerOptions;
 	};
 
 
-	TResult<ICompilerDriver*> CreateCompilerDriver();
+	TResult<ICompilerDriver*> CreateCompilerDriver(const TCompilerOptions&);
 }

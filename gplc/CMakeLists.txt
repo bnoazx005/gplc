@@ -24,11 +24,13 @@ link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../bin")
 
 set(HEADERS
 	"${CMAKE_CURRENT_SOURCE_DIR}/deps/argparse/argparse.h"
-	"${CMAKE_CURRENT_SOURCE_DIR}/include/gplcCompilerDriver.h")
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/gplcCompilerDriver.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/gplcCommon.h")
 
 set(SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/main.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/gplcCompilerDriver.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/source/gplcCommon.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/deps/argparse/argparse.c")
 
 source_group("includes" FILES ${HEADERS})

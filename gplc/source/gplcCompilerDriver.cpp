@@ -1,11 +1,12 @@
 #include "gplcCompilerDriver.h"
+#include "gplcCommon.h"
 #include <iostream>
 #include <filesystem>
 
 
 namespace gplc
 {
-	Result CCompilerDriver::Init()
+	Result CCompilerDriver::Init(const TCompilerOptions& options)
 	{
 		Result result = RV_SUCCESS;
 
@@ -13,6 +14,8 @@ namespace gplc
 		{
 			return RV_SUCCESS;
 		}
+
+		mCompilerOptions = options;
 
 		mpLexer                = new CLexer();
 		mpParser               = new CParser();
@@ -91,10 +94,24 @@ namespace gplc
 
 		TLLVMIRData compiledProgram;
 
+		// extract directory with which we will associate current working directory
+		std::string currentWorkingDirectory = _getCurrentWorkingDirectory(inputFiles);
+
 		for (auto currFilename : inputFiles)
 		{
 			mIsPanicModeEnabled = false;
 
+			// check whether the specified file exist
+			if (!std::filesystem::exists(currFilename))
+			{
+				std::cout << GetRedConsoleText("Error: ").append("Source file not found (").append(currFilename).append(")") << std::endl;
+
+				mIsPanicModeEnabled = true;
+
+				continue;
+			}
+			
+			currFilename    = std::filesystem::path(currFilename).filename().string(); // extract filename without precedence path
 			auto moduleName = currFilename.substr(0, currFilename.find_first_of('.'));
 
 			mpSymTable->CreateNamedScope(moduleName);
@@ -123,7 +140,13 @@ namespace gplc
 			}
 
 			delete pLinker;
-		}		
+		}
+
+		// \note dump scope's structure on user's demand
+		if (!mIsPanicModeEnabled && (mCompilerOptions.mPrintFlags & PF_SYMTABLE_DUMP))
+		{
+			mpSymTable->DumpScopesStructure();
+		}
 
 		return RV_SUCCESS;
 	}
@@ -201,8 +224,6 @@ namespace gplc
 			return RV_FAIL;
 		}
 
-		mpSymTable->DumpScopesStructure();
-
 		// emit IR code
 		compiledModuleData = mpCodeGenerator->Generate(pSourceAST, mpSymTable, mpTypeResolver, mpConstExprInterpreter, [](ICodeGenerator* pCodeGenerator)
 		{
@@ -238,12 +259,22 @@ namespace gplc
 		std::cout << CMessageOutputUtils::MessageTypeToString(errorInfo.mType) << ": " << CMessageOutputUtils::SemanticAnalyserMessageToString(errorInfo.mMessage) << std::endl;
 	}
 
+	std::string CCompilerDriver::_getCurrentWorkingDirectory(const TStringsArray& inputFiles) const
+	{
+		if (inputFiles.empty())
+		{
+			return "";
+		}
 
-	TResult<ICompilerDriver*> CreateCompilerDriver()
+		return std::filesystem::path(inputFiles.front()).parent_path().string();
+	}
+
+
+	TResult<ICompilerDriver*> CreateCompilerDriver(const TCompilerOptions& compilerOptions)
 	{
 		ICompilerDriver* pCompilerDriver = new CCompilerDriver();
 
-		Result result = pCompilerDriver->Init();
+		Result result = pCompilerDriver->Init(compilerOptions);
 
 		if (!SUCCESS(result))
 		{

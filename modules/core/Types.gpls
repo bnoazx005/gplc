@@ -32,3 +32,14 @@ struct Range {
 	left: int64;
 	right: int64;
 }
+
+
+// struct Any {
+// 	type: TypeInfo;
+// 	pPtr: uint8*;
+// }
+
+
+/*
+Type := (type: Any)
+*/
