@@ -1,0 +1,34 @@
+/*!
+	\brief The file contains descriptions of all fundamental types that can be used in the programs
+*/
+
+enum TypeInfo {
+	Integer,
+	Float,
+	Char,
+	Struct,
+	Pointer,
+	Function,
+	String,
+	StaticArray,
+	DynamicArray,
+	Range,
+}
+
+
+struct String {
+	length: uint64;
+	pData: int8*;
+}
+
+
+struct Array {
+	size: uint64;
+	pData: int8*;
+}
+
+
+struct Range {
+	left: int64;
+	right: int64;
+}

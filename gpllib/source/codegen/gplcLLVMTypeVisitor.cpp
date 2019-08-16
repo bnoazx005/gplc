@@ -113,8 +113,16 @@ namespace gplc
 		switch (pNamedType->GetType())
 		{
 			case CT_STRUCT:
-				return mTypesTable[pNamedType->GetName()];
-				//return llvm::StructType::create(*mpContext, pNamedType->GetName());
+				{
+					auto typeName = pNamedType->GetName();
+
+					if (mTypesTable.find(typeName) != mTypesTable.cend())
+					{
+						return mTypesTable[typeName];
+					}
+
+					return pNamedType->GetDependentType()->Accept(this);
+				}
 			case CT_ENUM:
 				return llvm::Type::getInt32Ty(*mContext);
 		}

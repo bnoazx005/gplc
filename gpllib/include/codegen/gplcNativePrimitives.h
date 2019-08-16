@@ -13,12 +13,15 @@
 
 
 #include "common/gplcTypes.h"
+#include <functional>
 
 
 namespace gplc
 {
 	class ICodeGenerator;
 	class ITypesFactory;
+	class ISymTable;
+	class IASTNodesFactory;
 
 	template <typename T>
 	class ITypeVisitor;
@@ -27,10 +30,11 @@ namespace gplc
 	class INativeModules
 	{
 		public:
+		public:
 			INativeModules() = default;
 			virtual ~INativeModules() = default;
 
-			virtual Result InitModule(ICodeGenerator* pCodeGenerator, ITypesFactory* pTypesFactory, ITypeVisitor<TLLVMIRData>* pTypeVisitor) = 0;
+			virtual Result InitModules(ISymTable* pSymTable, IASTNodesFactory* pNodesFactory, ITypesFactory* pTypesFactory) = 0;
 		protected:
 			INativeModules(const INativeModules&) = delete;
 	};

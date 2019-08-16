@@ -23,9 +23,11 @@ namespace gplc
 			CLLVMNativeModules() = default;
 			virtual ~CLLVMNativeModules() = default;
 
-			Result InitModule(ICodeGenerator* pCodeGenerator, ITypesFactory* pTypesFactory, ITypeVisitor<TLLVMIRData>* pTypeVisitor) override;
+			Result InitModules(ISymTable* pSymTable, IASTNodesFactory* pNodesFactory, ITypesFactory* pTypesFactory) override;
 		protected:
 			CLLVMNativeModules(const CLLVMNativeModules&) = delete;
+
+			Result _initStringType(ISymTable* pSymTable, IASTNodesFactory* pNodesFactory, ITypesFactory* pTypesFactory);
 		protected:
 			bool mIsInitialized;
 	};

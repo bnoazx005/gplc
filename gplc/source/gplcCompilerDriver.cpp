@@ -35,6 +35,11 @@ namespace gplc
 		mpParser->OnErrorOutput           += MakeMethodDelegate(this, &CCompilerDriver::_onParserStageError);
 		mpSemanticAnalyser->OnErrorOutput += MakeMethodDelegate(this, &CCompilerDriver::_onSemanticAnalyserStageError);
 
+		//if (!SUCCESS(result = mpNativeModules->InitModules(mpSymTable, mpASTNodesFactory, mpTypesFactory)))
+		//{
+		//	return result;
+		//}
+
 		// \todo reorganize this stuff later
 		mpSymTable->AddVariable({ "puts", nullptr, mpTypesFactory->CreateFunctionType({ { "str", mpTypesFactory->CreateType(CT_STRING, BTS_POINTER, 0x0) } }, 
 																					  mpTypesFactory->CreateType(CT_INT32, BTS_INT32, 0x0), AV_NATIVE_FUNC) });
@@ -199,8 +204,10 @@ namespace gplc
 		mpSymTable->DumpScopesStructure();
 
 		// emit IR code
-		compiledModuleData = mpCodeGenerator->Generate(pSourceAST, mpSymTable, mpTypeResolver, mpConstExprInterpreter, 
-													   std::bind(&CCompilerDriver::_initNativeModules, this, std::placeholders::_1));
+		compiledModuleData = mpCodeGenerator->Generate(pSourceAST, mpSymTable, mpTypeResolver, mpConstExprInterpreter, [](ICodeGenerator* pCodeGenerator)
+		{
+			return RV_SUCCESS;
+		});
 
 		// \todo Refactor this later
 	//	system(std::string("llc --filetype=obj ").append(moduleName).c_str());
@@ -229,12 +236,6 @@ namespace gplc
 		mIsPanicModeEnabled = (errorInfo.mType == E_MESSAGE_TYPE::MT_ERROR);
 
 		std::cout << CMessageOutputUtils::MessageTypeToString(errorInfo.mType) << ": " << CMessageOutputUtils::SemanticAnalyserMessageToString(errorInfo.mMessage) << std::endl;
-	}
-
-	Result CCompilerDriver::_initNativeModules(ICodeGenerator* pCodeGenerator)
-	{
-		// \todo Initialize all native modules here
-		return mpNativeModules->InitModule(pCodeGenerator, mpTypesFactory, pCodeGenerator->GetTypeGenerator());
 	}
 
 

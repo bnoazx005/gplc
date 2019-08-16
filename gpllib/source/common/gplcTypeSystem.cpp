@@ -603,13 +603,13 @@ namespace gplc
 			case CT_INT16:
 			case CT_INT32:
 			case CT_INT64:
-				return new CIntValue(0);
+				return new CIntValue(0, type == CT_INT64);
 
 			case CT_UINT8:
 			case CT_UINT16:
 			case CT_UINT32:
 			case CT_UINT64:
-				return new CUIntValue(0);
+				return new CUIntValue(0, type == CT_UINT64);
 
 			case CT_FLOAT:
 				return new CFloatValue(0.0f);
