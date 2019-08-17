@@ -32,15 +32,34 @@ namespace gplc
 
 	enum E_PRINT_FLAGS: U32
 	{
-		PF_SYMTABLE_DUMP = 0x1,
+		PF_SYMTABLE_DUMP    = 0x1,
+		PF_COMPILER_TARGETS = 0x2,
 	};
+
+
+	enum class E_EMIT_FLAGS : U32
+	{
+		EF_LLVM_IR = 0x1,
+		EF_LLVM_BC = 0x2,
+		EF_ASM     = 0x4,
+		EF_NONE    = 0x0
+	};
+
+
+	std::string EmitFlagsToExtensionString(E_EMIT_FLAGS flag);
 
 
 	typedef struct TCompilerOptions
 	{
-		std::string mInputFilename;
+		std::string  mInputFilename;
 
-		U32         mPrintFlags     = 0x0;
+		std::string  mOutputFilename;
+
+		U32          mPrintFlags        = 0x0;
+
+		E_EMIT_FLAGS mEmitFlag          = E_EMIT_FLAGS::EF_NONE;
+
+		U8           mOptimizationLevel = 0;
 	} TCompilerOptions, *TCompilerOptionsPtr;
 
 
@@ -51,4 +70,7 @@ namespace gplc
 	{
 		return std::string("\x1B[91m").append(text).append("\033[0m");
 	}
+
+
+	Result InitLLVMInfrastructure();
 }

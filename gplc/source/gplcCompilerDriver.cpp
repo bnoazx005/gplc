@@ -1,5 +1,15 @@
 #include "gplcCompilerDriver.h"
 #include "gplcCommon.h"
+#include "llvm/IR/Module.h"
+#include "llvm/Bitcode/BitcodeWriter.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/TargetRegistry.h"
+#include "llvm/Support/TargetSelect.h"
+#include "llvm/Target/TargetMachine.h"
+#include "llvm/Target/TargetOptions.h"
+#include "llvm/ADT/Optional.h"
+#include "llvm/IR/LegacyPassManager.h"
 #include <iostream>
 #include <filesystem>
 
@@ -17,6 +27,8 @@ namespace gplc
 
 		mCompilerOptions = options;
 
+		_initLLVMInfrastructure();
+		
 		mpLexer                = new CLexer();
 		mpParser               = new CParser();
 		mpSymTable             = new CSymTable();
@@ -138,6 +150,9 @@ namespace gplc
 
 				return result;
 			}
+
+			_outputCompilationUnit(!mCompilerOptions.mOutputFilename.empty() ? mCompilerOptions.mOutputFilename : moduleName,
+								   *std::get<llvm::Module*>(compiledProgram));
 
 			delete pLinker;
 		}
@@ -267,6 +282,101 @@ namespace gplc
 		}
 
 		return std::filesystem::path(inputFiles.front()).parent_path().string();
+	}
+
+	void CCompilerDriver::_outputCompilationUnit(const std::string& filename, llvm::Module& module) const
+	{
+		std::error_code EC;
+
+		llvm::raw_fd_ostream out(std::filesystem::path(filename)
+										.replace_extension(EmitFlagsToExtensionString(mCompilerOptions.mEmitFlag))
+										.string(), 
+								 EC, llvm::sys::fs::F_None);
+
+		switch (mCompilerOptions.mEmitFlag)
+		{
+			case E_EMIT_FLAGS::EF_LLVM_BC:
+				{
+					WriteBitcodeToFile(module, out);
+					out.flush();
+				}
+				break;
+			case E_EMIT_FLAGS::EF_LLVM_IR:
+				{
+					module.print(out, nullptr);
+					out.flush();
+				}	
+				break;
+			case E_EMIT_FLAGS::EF_ASM:
+				{
+					// \todo Refactor this part later, define some class that will return assembly code for specific target machine
+					auto targetTriple = llvm::sys::getDefaultTargetTriple();
+
+					std::string errorMsg;
+
+					auto pTarget = llvm::TargetRegistry::lookupTarget(targetTriple, errorMsg);
+
+					if (!pTarget) 
+					{
+						Panic(GetRedConsoleText("Error: ").append("Couldn't find specified target"));
+					}
+
+					const C8* CPU      = "generic";
+					const C8* features = "";
+
+					llvm::TargetOptions targetOptions;
+
+					auto RM = llvm::Optional<llvm::Reloc::Model>();
+					
+					auto targetMachine = pTarget->createTargetMachine(targetTriple, CPU, features, targetOptions, RM);
+
+					// \todo move it from here to some proper place
+					module.setDataLayout(targetMachine->createDataLayout());
+					module.setTargetTriple(targetTriple);
+
+					llvm::legacy::PassManager passManager;
+
+					if (targetMachine->addPassesToEmitFile(passManager, out, nullptr, llvm::TargetMachine::CGFT_AssemblyFile)) 
+					{
+						Panic(GetRedConsoleText("Error: ").append("Couldn't emit code for specified target"));
+					}
+
+					passManager.run(module);
+
+					out.flush();
+				}
+				break;
+		}
+	}
+
+	void CCompilerDriver::_initLLVMInfrastructure() const
+	{
+		llvm::InitializeAllTargetInfos();
+		llvm::InitializeAllTargets();
+		llvm::InitializeAllTargetMCs();
+		llvm::InitializeAllAsmParsers();
+		llvm::InitializeAllAsmPrinters();
+
+		if (mCompilerOptions.mPrintFlags & PF_COMPILER_TARGETS)
+		{
+			auto indent = [](U8 count) -> std::string
+			{
+				return std::string().append(count, ' ');
+			};
+
+			auto allTargets = llvm::TargetRegistry::targets();
+
+			std::string currTargetName;
+
+			std::cout << "Registered targets:\n";
+
+			for (auto currTarget : allTargets)
+			{
+				currTargetName = currTarget.getName();
+
+				std::cout << "\t-- " << currTargetName << indent(12 - currTargetName.length()) << " - " << currTarget.getShortDescription() << std::endl;
+			}
+		}
 	}
 
 

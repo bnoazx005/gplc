@@ -58,6 +58,10 @@ namespace gplc
 			Result _compileSeparateFile(const std::string& filename, const std::string& moduleName, TLLVMIRData& compiledModuleData);
 
 			std::string _getCurrentWorkingDirectory(const TStringsArray& inputFiles) const;
+
+			void _outputCompilationUnit(const std::string& filename, llvm::Module& module) const;
+
+			void _initLLVMInfrastructure() const;
 		protected:
 			bool                   mIsInitialized;
 

@@ -106,7 +106,7 @@ add_definitions(${LLVM_DEFINITIONS})
 
 add_library(${GPL_LIBRARY_NAME} STATIC ${GPL_SOURCES} ${GPL_HEADERS})
 
-llvm_map_components_to_libnames(llvm_libs support core irreader bitwriter)
+llvm_map_components_to_libnames(llvm_libs all)
 
 # Link against LLVM libraries
 target_link_libraries(${GPL_LIBRARY_NAME} ${llvm_libs})
