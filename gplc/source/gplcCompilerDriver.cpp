@@ -142,9 +142,14 @@ namespace gplc
 				return RV_FAIL;
 			}
 
+			mpModuleResolver->GetModuleEntry(moduleName).mCompiledIRCode = std::move(compiledProgram);
+
 			auto pLinker = new CLLVMLinker();
 
-			if (!SUCCESS(result = mpModuleResolver->Link(pLinker)))
+			// \todo Implement proper way to append extension for an output file
+			mCompilerOptions.mOutputFilename.append(".exe");
+
+			if (!SUCCESS(result = mpModuleResolver->Link(mCompilerOptions.mOutputFilename, pLinker)))
 			{
 				delete pLinker;
 

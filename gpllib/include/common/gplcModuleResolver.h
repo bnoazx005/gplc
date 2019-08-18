@@ -62,7 +62,9 @@ namespace gplc
 
 			virtual void ResolveModuleType(ISymTable* pSymTable, ITypesFactory* pTypesFactory, const std::string& moduleName) = 0;
 
-			virtual Result Link(ILinker* pLinker) = 0;
+			virtual Result Link(const std::string& outputFilename, ILinker* pLinker) = 0;
+
+			virtual TCompiledModuleData& GetModuleEntry(const std::string& moduleName) = 0;
 		protected:
 			IModuleResolver(const IModuleResolver&) = delete;
 	};
@@ -79,7 +81,9 @@ namespace gplc
 
 			void ResolveModuleType(ISymTable* pSymTable, ITypesFactory* pTypesFactory, const std::string& moduleName) override;
 
-			Result Link(ILinker* pLinker) override;
+			Result Link(const std::string& outputFilename, ILinker* pLinker) override;
+
+			TCompiledModuleData& GetModuleEntry(const std::string& moduleName) override;
 		protected:
 			CModuleResolver(const CModuleResolver&) = delete;
 

@@ -25,7 +25,11 @@ namespace gplc
 			CLLVMLinker() = default;
 			virtual ~CLLVMLinker() = default;
 
-			Result Link() override;
+			Result Link(const std::string& outputFilename, TModulesArray& modulesRegistry, TModuleEntry* pMainModuleDependencies, bool isMainModule = false) override;
+		protected:
+			llvm::Module* _getModule(TModulesArray& modulesRegistry, const std::string& name) const;
+
+			Result _generateObjectFile(llvm::Module* pModule, const std::string& filename);
 		protected:
 			CLLVMLinker(const CLLVMLinker&) = delete;
 	};
