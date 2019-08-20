@@ -193,4 +193,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CConstExprInterpreter::VisitDeferOperatorNode(CASTDeferOperatorNode* pNode)
+	{
+		return {};
+	}
 }

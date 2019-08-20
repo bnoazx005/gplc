@@ -77,6 +77,7 @@ namespace gplc
 		{ "import", TT_IMPORT_KEYWORD },
 		{ "as", TT_AS_KEYWORD },
 		{ "%", TT_PERCENT_SIGN },
+		{ "defer", TT_DEFER_KEYWORD }
 	};
 
 	CLexer::CLexer():

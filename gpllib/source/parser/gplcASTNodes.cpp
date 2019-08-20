@@ -1235,4 +1235,35 @@ namespace gplc
 	{
 		return mModuleName;
 	}
+
+
+	/*!
+		\brief CASTDeferOperatorNode's definition
+	*/
+
+	CASTDeferOperatorNode::CASTDeferOperatorNode(CASTExpressionNode* pExpr):
+		CASTNode(NT_DEFER_OPERATOR)
+	{
+		AttachChild(pExpr);
+	}
+	
+	std::string CASTDeferOperatorNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitDeferOperatorNode(this);
+	}
+
+	bool CASTDeferOperatorNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitDeferOperatorNode(this);
+	}
+
+	TLLVMIRData CASTDeferOperatorNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitDeferOperatorNode(this);
+	}
+
+	CASTExpressionNode* CASTDeferOperatorNode::GetExpr() const
+	{
+		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
+	}
 }

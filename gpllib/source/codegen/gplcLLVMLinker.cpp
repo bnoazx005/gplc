@@ -18,7 +18,8 @@
 
 namespace gplc
 {
-	Result CLLVMLinker::Link(const std::string& outputFilename, TModulesArray& modulesRegistry, TModuleEntry* pMainModuleDependencies, bool isMainModule)
+	Result CLLVMLinker::Link(const std::string& outputFilename, TModulesArray& modulesRegistry, TModuleEntry* pMainModuleDependencies, bool isMainModule,
+							 bool skipFinalLinking)
 	{
 		Result result = RV_SUCCESS;
 
@@ -49,7 +50,7 @@ namespace gplc
 		}
 
 		// call system linker
-		if (isMainModule)
+		if (isMainModule && !skipFinalLinking)
 		{
 			if (!SUCCESS(result = _generateObjectFile(pMainModule, pMainModuleDependencies->mModuleName)))
 			{

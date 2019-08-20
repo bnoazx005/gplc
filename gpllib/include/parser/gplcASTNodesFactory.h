@@ -58,6 +58,7 @@ namespace gplc
 			virtual CASTIndexedAccessOperatorNode* CreateIndexedAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pIndexExpr, U32 attributes) = 0;
 			virtual CASTPointerTypeNode* CreatePointerTypeNode(CASTNode* pTypeInfo) = 0;
 			virtual CASTImportDirectiveNode* CreateImportDirective(const std::string& modulePath, const std::string& moduleName) = 0;
+			virtual CASTDeferOperatorNode* CreateDeferOperator(CASTExpressionNode* pExpression) = 0;
 		protected:
 			IASTNodesFactory(const IASTNodesFactory&) = default;
 	};
@@ -99,6 +100,7 @@ namespace gplc
 			CASTIndexedAccessOperatorNode* CreateIndexedAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pIndexExpr, U32 attributes) override;
 			CASTPointerTypeNode* CreatePointerTypeNode(CASTNode* pTypeInfo) override;
 			CASTImportDirectiveNode* CreateImportDirective(const std::string& modulePath, const std::string& moduleName) override;
+			CASTDeferOperatorNode* CreateDeferOperator(CASTExpressionNode* pExpression) override;
 		protected:
 			CASTNodesFactory(const CASTNodesFactory&) = default;
 

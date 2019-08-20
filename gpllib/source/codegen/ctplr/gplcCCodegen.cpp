@@ -401,6 +401,11 @@ namespace gplc
 		return {};
 	}
 
+	TLLVMIRData CCCodeGenerator::VisitDeferOperatorNode(CASTDeferOperatorNode* pNode)
+	{
+		return {};
+	}
+
 	ITypeVisitor<TLLVMIRData>* CCCodeGenerator::GetTypeGenerator() const
 	{
 		return nullptr;

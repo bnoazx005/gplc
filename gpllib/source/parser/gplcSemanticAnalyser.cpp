@@ -607,6 +607,13 @@ namespace gplc
 		return true;
 	}
 
+	bool CSemanticAnalyser::VisitDeferOperatorNode(CASTDeferOperatorNode* pNode)
+	{
+		auto pExpr = pNode->GetExpr();
+
+		return pExpr && pExpr->Accept(this);
+	}
+
 	bool CSemanticAnalyser::_enterScope(CASTBlockNode* pNode, ISymTable* pSymTable)
 	{
 		pSymTable->CreateScope();

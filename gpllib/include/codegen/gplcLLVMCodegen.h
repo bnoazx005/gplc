@@ -28,6 +28,7 @@ namespace gplc
 	struct TSymbolDesc;
 
 	class ITypeResolver;
+	class CASTExpressionNode;
 
 
 	class CLLVMCodeGenerator : public ICodeGenerator
@@ -40,6 +41,10 @@ namespace gplc
 			typedef std::unordered_map<TSymbolHandle, llvm::Value*> TValuesTable;
 
 			typedef std::stack<llvm::IRBuilder<>>                   TIRBuidlersStack;
+
+			typedef std::stack<CASTExpressionNode*>                 TExpressionsStack;
+
+			typedef std::stack<TExpressionsStack>                   TDeferredExpressionStack;
 		public:
 			CLLVMCodeGenerator() = default;
 			virtual ~CLLVMCodeGenerator() = default;
@@ -101,6 +106,8 @@ namespace gplc
 
 			TLLVMIRData VisitImportDirectiveNode(CASTImportDirectiveNode* pNode) override;
 
+			TLLVMIRData VisitDeferOperatorNode(CASTDeferOperatorNode* pNode) override;
+
 			llvm::IRBuilder<>* GetCurrIRBuilder();
 
 			llvm::IRBuilder<>* GetGlobalIRBuilder();
@@ -128,38 +135,42 @@ namespace gplc
 			std::string _mangleGlobalModuleIdentifier(CType* pType, const std::string& identifier) const;
 
 			inline bool _isGlobalScope() const;
+
+			llvm::BasicBlock* _constructDeferBlock(TExpressionsStack& expressionsStack);
 		protected:
-			TLLVMLiteralVisitor*   mpLiteralIRGenerator;
+			TLLVMLiteralVisitor*     mpLiteralIRGenerator;
 
-			TLLVMTypeVisitor*      mpTypeGenerator;
+			TLLVMTypeVisitor*        mpTypeGenerator;
 
-			ITypeResolver*         mpTypeResolver;
+			ITypeResolver*           mpTypeResolver;
 
-			llvm::LLVMContext      mContext;
+			llvm::LLVMContext        mContext;
 
-			llvm::Module*          mpModule;
+			llvm::Module*            mpModule;
 
-			llvm::Function*        mpCurrActiveFunction;
+			llvm::Function*          mpCurrActiveFunction;
 
-			ISymTable*             mpSymTable;
+			ISymTable*               mpSymTable;
 
-			TIRBuidlersStack       mIRBuildersStack;
+			TIRBuidlersStack         mIRBuildersStack;
 
-			llvm::IRBuilder<>*     mpGlobalIRBuilder;
+			llvm::IRBuilder<>*       mpGlobalIRBuilder;
 
-			TValuesTable           mVariablesTable;
+			TValuesTable             mVariablesTable;
 
-			llvm::Function*        mpInitModuleGlobalsFunction;
+			llvm::Function*          mpInitModuleGlobalsFunction;
 
-			llvm::IRBuilder<>*     mpInitModuleGlobalsIRBuilder;
+			llvm::IRBuilder<>*       mpInitModuleGlobalsIRBuilder;
 
-			llvm::BasicBlock*      mpLoopConditionBlock;
+			llvm::BasicBlock*        mpLoopConditionBlock;
 
-			llvm::BasicBlock*      mpLoopEndBlock;
+			llvm::BasicBlock*        mpLoopEndBlock;
 
-			IConstExprInterpreter* mpConstExprInterpreter;
+			IConstExprInterpreter*   mpConstExprInterpreter;
 
-			bool                   mShouldSkipLoopTail;
+			bool                     mShouldSkipLoopTail;
+
+			TDeferredExpressionStack mDefferedExpressionsStack;
 	};
 }
 

@@ -68,9 +68,9 @@ namespace gplc
 		}
 	}
 
-	Result CModuleResolver::Link(const std::string& outputFilename, ILinker* pLinker)
+	Result CModuleResolver::Link(const std::string& outputFilename, ILinker* pLinker, bool skipFinalLinking)
 	{
-		return pLinker->Link(outputFilename, mModulesRegistry, &mRootModuleDeps, true);
+		return pLinker->Link(outputFilename, mModulesRegistry, &mRootModuleDeps, true, skipFinalLinking);
 	}
 
 	CModuleResolver::TCompiledModuleData& CModuleResolver::GetModuleEntry(const std::string& moduleName)

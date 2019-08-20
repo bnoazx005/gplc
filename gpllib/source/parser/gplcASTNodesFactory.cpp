@@ -175,4 +175,9 @@ namespace gplc
 	{
 		return _insertNode(new CASTImportDirectiveNode(modulePath, moduleName));
 	}
+
+	CASTDeferOperatorNode* CASTNodesFactory::CreateDeferOperator(CASTExpressionNode* pExpression)
+	{
+		return _insertNode(new CASTDeferOperatorNode(pExpression));
+	}
 }

@@ -291,6 +291,14 @@ namespace gplc
 			}
 		}
 
+		// try to parse 'defer' operator
+		if (_match(pCurrToken, TT_DEFER_KEYWORD))
+		{
+			pLexer->GetNextToken(); // take 'defer' keyword
+
+			pOperator = mpNodesFactory->CreateDeferOperator(_parseExpression(pLexer));
+		}
+
 		if (!pOperator)
 		{
 			return _parseAssignment(pLexer);

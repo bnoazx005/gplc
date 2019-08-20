@@ -188,6 +188,7 @@ namespace gplc
 		TT_AS_KEYWORD,
 		TT_DEFAULT,
 		TT_PERCENT_SIGN,
+		TT_DEFER_KEYWORD,
 	};
 
 

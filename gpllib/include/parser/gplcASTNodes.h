@@ -77,6 +77,7 @@ namespace gplc
 		NT_ARRAY,
 		NT_INDEXED_ACCESS_OPERATOR,
 		NT_IMPORT,
+		NT_DEFER_OPERATOR,
 	};
 
 	/*!
@@ -700,6 +701,23 @@ namespace gplc
 			std::string mModulePath;
 
 			std::string mModuleName;
+	};
+
+
+	class CASTDeferOperatorNode : public CASTNode
+	{
+		public:
+			CASTDeferOperatorNode(CASTExpressionNode* pExpr);
+			virtual ~CASTDeferOperatorNode() = default;
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			CASTExpressionNode* GetExpr() const;
+		protected:
+			CASTDeferOperatorNode() = default;
+			CASTDeferOperatorNode(const CASTDeferOperatorNode&) = default;
 	};
 }
 

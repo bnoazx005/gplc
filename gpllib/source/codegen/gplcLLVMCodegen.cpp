@@ -38,6 +38,8 @@ namespace gplc
 
 		mpGlobalIRBuilder = &mIRBuildersStack.top();
 
+		mDefferedExpressionsStack = {};
+
 		mpModule = new llvm::Module(pNode->GetModuleName(), mContext);
 
 		onPreGenerateCallback(this);
@@ -188,6 +190,12 @@ namespace gplc
 			return _getIdentifierValue(name);
 		}
 
+		// \note if it's a function and its a native function we should apply CSymTable::RenameReservedIdentifiers
+		if (attributes & AV_NATIVE_FUNC)
+		{
+			return _declareNativeFunction(pSymbolDesc);
+		}
+
 		if (attributes & AV_RVALUE)
 		{
 			auto pValueInstruction = _getIdentifierValue(name);
@@ -199,12 +207,6 @@ namespace gplc
 			}
 
 			return mIRBuildersStack.top().CreateLoad(pValueInstruction, name);
-		}
-
-		// \note if it's a function and its a native function we should apply CSymTable::RenameReservedIdentifiers
-		if (attributes & AV_NATIVE_FUNC)
-		{
-			return _declareNativeFunction(pSymbolDesc);
 		}
 
 		return (mVariablesTable.find(mpSymTable->GetSymbolHandleByName(name)) != mVariablesTable.cend()) ? _getIdentifierValue(name) : _allocateVariableOnStack(name);
@@ -289,8 +291,13 @@ namespace gplc
 		auto pBlock = llvm::BasicBlock::Create(mContext, "entry", mpCurrActiveFunction, mpLoopEndBlock);
 		
 		mIRBuildersStack.push(llvm::IRBuilder<>(pBlock));
+		mDefferedExpressionsStack.push({});
 
 		E_NODE_TYPE nodeType;
+
+		llvm::BasicBlock* pDeferEndBlock = nullptr;
+
+		bool isDeferUsed = false;
 
 		for (auto pCurrStatement : pNode->GetStatements())
 		{
@@ -299,22 +306,45 @@ namespace gplc
 				break;
 			}
 
-			pCurrStatement->Accept(this);
-
 			nodeType = pCurrStatement->GetType();
 
 			// \note skip rest operators til the end of a loop
-			if ((mpLoopConditionBlock || mpLoopEndBlock) && (nodeType == NT_BREAK_OPERATOR || nodeType == NT_CONTINUE_OPERATOR))
+			if ((mShouldSkipLoopTail = ((mpLoopConditionBlock || mpLoopEndBlock) && (nodeType == NT_BREAK_OPERATOR || nodeType == NT_CONTINUE_OPERATOR))) ||
+				(nodeType == NT_RETURN_STATEMENT))
 			{
-				mShouldSkipLoopTail = true;
+				// \note execute defer block before the interrupting operator
+				pDeferEndBlock = _constructDeferBlock(mDefferedExpressionsStack.top());
+
+				if (pDeferEndBlock)
+				{
+					mIRBuildersStack.push(llvm::IRBuilder<>(pDeferEndBlock));
+					isDeferUsed = true;
+				}
+			}
+
+			pCurrStatement->Accept(this);
+
+			if (isDeferUsed)
+			{
+				// \note extract pushed "defer_end_block" from the stack
+				mIRBuildersStack.pop();
 			}
 		}
-		
+
+		// \note create deffer block if there is at least one deffered statement in the stack
+		// we should execute this one if block has no any interrupting operator at its end like 'break', 'return' and 'continue'
+		if (!isDeferUsed)
+		{
+			pDeferEndBlock = _constructDeferBlock(mDefferedExpressionsStack.top());
+		}
+
+		mDefferedExpressionsStack.pop();
 		mIRBuildersStack.pop();
 
 		mpSymTable->LeaveScope();
 
-		return pBlock;
+		// \note return defer block if it exists
+		return pDeferEndBlock ? pDeferEndBlock : pBlock;
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitIfStatement(CASTIfStatementNode* pNode)
@@ -473,7 +503,7 @@ namespace gplc
 			return currIRBuilder.CreateRetVoid();
 		}
 
-		return  currIRBuilder.CreateRet(std::get<llvm::Value*>(pNode->GetExpr()->Accept(this)));
+		return currIRBuilder.CreateRet(std::get<llvm::Value*>(pNode->GetExpr()->Accept(this)));
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitDefinitionNode(CASTDefinitionNode* pNode)
@@ -770,6 +800,15 @@ namespace gplc
 		return {};
 	}
 
+	TLLVMIRData CLLVMCodeGenerator::VisitDeferOperatorNode(CASTDeferOperatorNode* pNode)
+	{
+		auto& currBlockDefferedStmts = mDefferedExpressionsStack.top();
+
+		currBlockDefferedStmts.push(pNode->GetExpr());
+
+		return {};
+	}
+
 	ITypeVisitor<TLLVMIRData>* CLLVMCodeGenerator::GetTypeGenerator() const
 	{
 		return mpTypeGenerator;
@@ -985,5 +1024,41 @@ namespace gplc
 		CType* pParentType = pType->GetParent();
 
 		return (pParentType ? pParentType->GetMangledName() : "") + identifier;
+	}
+
+	llvm::BasicBlock* CLLVMCodeGenerator::_constructDeferBlock(TExpressionsStack& expressionsStack)
+	{
+		if (expressionsStack.empty())
+		{
+			return nullptr;
+		}
+		
+		auto pDeferBlock    = llvm::BasicBlock::Create(mContext, "defer_block", mpCurrActiveFunction);
+		auto pDeferEndBlock = llvm::BasicBlock::Create(mContext, "end_defer_block", mpCurrActiveFunction, pDeferBlock);
+
+		auto& predcessingIRBuilder = mIRBuildersStack.top();
+		predcessingIRBuilder.CreateBr(pDeferBlock);
+		
+		llvm::IRBuilder<> currIRBuilder { pDeferBlock };
+
+		mIRBuildersStack.push(currIRBuilder);
+
+		CASTExpressionNode* pCurrExpression = nullptr;
+
+		while (!expressionsStack.empty())
+		{
+			pCurrExpression = expressionsStack.top();
+
+			pCurrExpression->Accept(this);
+
+			expressionsStack.pop();
+		}
+		
+		// \note jump to "end_defer_block"
+		currIRBuilder.CreateBr(pDeferEndBlock);
+		
+		mIRBuildersStack.pop();
+
+		return pDeferEndBlock;
 	}
 }

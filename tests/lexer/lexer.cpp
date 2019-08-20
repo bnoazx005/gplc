@@ -331,6 +331,21 @@ TEST_CASE("Lexer's tests")
 
 		delete pInputStream;
 	}
+
+	SECTION("TestGetNextToken_PassDeferKeyword_returnsTokenWithTT_DEFER_KEYWORD_type")
+	{
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"defer"
+			});
+
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
+
+		REQUIRE(pLexer->GetNextToken()->GetType() == TT_DEFER_KEYWORD);
+		REQUIRE(!pLexer->GetNextToken());
+
+		delete pInputStream;
+	}
 	
 	delete pLexer;
 }

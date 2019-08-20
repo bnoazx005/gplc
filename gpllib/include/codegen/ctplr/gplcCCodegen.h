@@ -89,6 +89,8 @@ namespace gplc
 
 			TLLVMIRData VisitImportDirectiveNode(CASTImportDirectiveNode* pNode) override;
 
+			TLLVMIRData VisitDeferOperatorNode(CASTDeferOperatorNode* pNode) override;
+
 			ITypeVisitor<TLLVMIRData>* GetTypeGenerator() const override;
 		protected:
 			CCCodeGenerator(const CCCodeGenerator& codeGenerator) = default;

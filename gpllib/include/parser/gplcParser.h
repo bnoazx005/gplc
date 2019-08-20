@@ -49,6 +49,7 @@ namespace gplc
 	class IASTNodesFactory; 
 	class CASTImportDirectiveNode;
 	class ITypesFactory;
+	class CASTDeferOperatorNode;
 
 
 	/*!

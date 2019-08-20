@@ -230,4 +230,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	std::string CASTLispyPrinter::VisitDeferOperatorNode(CASTDeferOperatorNode* pNode)
+	{
+		return {};
+	}
 }

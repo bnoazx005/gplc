@@ -29,7 +29,8 @@ namespace gplc
 			ILinker() = default;
 			virtual ~ILinker() = default;
 
-			virtual Result Link(const std::string& outputFilename, TModulesArray& modulesRegistry, TModuleEntry* pMainModuleDependencies, bool isMainModule = false) = 0;
+			virtual Result Link(const std::string& outputFilename, TModulesArray& modulesRegistry, TModuleEntry* pMainModuleDependencies, bool isMainModule = false, 
+								bool skipFinalLinking = false) = 0;
 		protected:
 			ILinker(const ILinker&) = delete;
 	};

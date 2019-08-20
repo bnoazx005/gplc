@@ -428,6 +428,29 @@ TEST_CASE("Parser's tests")
 		delete pSymbolTable;
 	}
 
+
+	SECTION("TestParse_PassDeferExpression_ReturnsCorrectAST")
+	{
+		gplc::ISymTable* pSymbolTable = new gplc::CSymTable();
+
+		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
+			{
+				/*!
+					the sequence below specifies the following declaration
+					defer f();
+				*/
+				new gplc::CToken(gplc::TT_DEFER_KEYWORD, 0),
+				new gplc::CIdentifierToken("f", 1),
+				new gplc::CToken(gplc::TT_OPEN_BRACKET, 2),
+				new gplc::CToken(gplc::TT_CLOSE_BRACKET, 3),
+				new gplc::CToken(gplc::TT_SEMICOLON, 4),
+			}), pSymbolTable, pNodesFactory, pTypesFactory);
+
+		REQUIRE(pMain != nullptr);
+
+		delete pSymbolTable;
+	}
+
 	if (pErrorInfo != nullptr)
 	{
 		delete pErrorInfo;

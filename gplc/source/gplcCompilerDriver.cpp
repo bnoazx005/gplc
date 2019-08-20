@@ -149,7 +149,7 @@ namespace gplc
 			// \todo Implement proper way to append extension for an output file
 			mCompilerOptions.mOutputFilename.append(".exe");
 
-			if (!SUCCESS(result = mpModuleResolver->Link(mCompilerOptions.mOutputFilename, pLinker)))
+			if (!SUCCESS(result = mpModuleResolver->Link(mCompilerOptions.mOutputFilename, pLinker, mCompilerOptions.mEmitFlag != E_EMIT_FLAGS::EF_NONE)))
 			{
 				delete pLinker;
 
