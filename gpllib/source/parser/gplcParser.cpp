@@ -456,8 +456,6 @@ namespace gplc
 			// usage of scoped name
 			if (_match(pNextToken, TT_POINT))
 			{
-				pLexer->GetNextToken(); // take .
-
 				return _parseAccessOperator(mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName())), pLexer);
 			}
 
@@ -646,8 +644,6 @@ namespace gplc
 		// access to aggregate type's field
 		if (_match(pLexer->GetCurrToken(), TT_POINT))
 		{
-			pLexer->GetNextToken(); // take .
-
 			return _parseAccessOperator(pPrimaryNode, pLexer, attributes);
 		}
 
@@ -1230,19 +1226,39 @@ namespace gplc
 
 	CASTAccessOperatorNode* CParser::_parseAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer* pLexer, U32 attributes)
 	{
-		const CToken* pCurrToken = pLexer->GetCurrToken();
+		const CToken* pCurrToken = nullptr;
 
-		if (!SUCCESS(_expect(TT_IDENTIFIER, pCurrToken)))
+		CASTExpressionNode* pCurrExpr   = pPrimaryExpr;
+		CASTExpressionNode* pRightExpr  = nullptr;
+
+		CASTUnaryExpressionNode* pMemberExpr = nullptr;
+
+		while (_match(pCurrToken = pLexer->GetCurrToken(), TT_POINT))
 		{
-			return nullptr;
+			pLexer->GetNextToken(); // take '.'
+
+			if (!SUCCESS(_expect(TT_IDENTIFIER, pCurrToken = pLexer->GetCurrToken())))
+			{
+				return nullptr;
+			}
+
+			pMemberExpr = mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName(), attributes));
+
+			pLexer->GetNextToken(); // take an identifier
+						
+			if (_match(pCurrToken = pLexer->GetCurrToken(), TT_OPEN_BRACKET))
+			{
+				pRightExpr = mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, _parseFunctionCall(pMemberExpr, pLexer));
+			}
+			else
+			{
+				pRightExpr = mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, pMemberExpr);
+			}
+
+			pCurrExpr = mpNodesFactory->CreateAccessOperatorNode(pCurrExpr, pMemberExpr);
 		}
 
-		pLexer->GetNextToken(); // take an identifier
-
-		return mpNodesFactory->CreateAccessOperatorNode(pPrimaryExpr,	
-														mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, 
-																						mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName(), 
-																						attributes)));
+		return dynamic_cast<CASTAccessOperatorNode*>(pCurrExpr);
 	}
 
 	CASTIndexedAccessOperatorNode* CParser::_parseIndexedAccessOperator(CASTExpressionNode* pPrimaryExpr, ILexer*pLexer, U32 attributes)
