@@ -9,6 +9,7 @@
 #include "llvm/Bitcode/BitcodeWriter.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/FileSystem.h"
+#include "utils/Utils.h"
 #include <cassert>
 
 
@@ -130,9 +131,25 @@ namespace gplc
 
 			if (isGlobalScope)
 			{
-				pCurrVariableAllocation = mpModule->getOrInsertGlobal(_mangleGlobalModuleIdentifier(pType, identifier), pIdentifiersType);
+				switch (pType->GetType())
+				{
+					case CT_FUNCTION:
+						pCurrVariableAllocation = _declareNativeFunction(pCurrSymbolDesc);
+						/*pCurrVariableAllocation = mpModule->getOrInsertFunction(_mangleGlobalModuleIdentifier(pType, identifier), 
+																				llvm::dyn_cast<llvm::FunctionType>(pIdentifiersType)).getCallee();
 
-				llvm::dyn_cast<llvm::GlobalVariable>(pCurrVariableAllocation)->setInitializer(llvm::Constant::getNullValue(pIdentifiersType));
+						if (!(pType->GetAttributes() & AV_NATIVE_FUNC))
+						{
+							llvm::dyn_cast<llvm::GlobalVariable>(pCurrVariableAllocation)->setInitializer(llvm::Constant::getNullValue(pIdentifiersType));
+						}*/
+						break;
+					default:
+						pCurrVariableAllocation = mpModule->getOrInsertGlobal(_mangleGlobalModuleIdentifier(pType, identifier), pIdentifiersType);
+
+						llvm::dyn_cast<llvm::GlobalVariable>(pCurrVariableAllocation)->setInitializer(llvm::Constant::getNullValue(pIdentifiersType));
+
+						break;
+				}
 			}
 			else
 			{
@@ -542,7 +559,7 @@ namespace gplc
 			pIdentifiersType = pIdentifiersType ? pIdentifiersType : std::get<llvm::Type*>(pType->Accept(mpTypeGenerator));
 
 			pIdentifiersValue = pIdentifiersValue ? pIdentifiersValue : std::get<llvm::Value*>(pNode->GetValue()->Accept(this));
-
+			
 			llvm::Value* pCurrVariableAllocation = nullptr;
 
 			if (isGlobalScope)
@@ -706,17 +723,43 @@ namespace gplc
 	{
 		CType* pExprType = pNode->GetExpression()->Resolve(mpTypeResolver);
 
-		CASTIdentifierNode* pFieldNode = dynamic_cast<CASTIdentifierNode*>(dynamic_cast<CASTUnaryExpressionNode*>(pNode->GetMemberName())->GetData());
+		// evaluate right part of the AST, cause it stores actual data, left is just a module's name
+		// \note FIXME: possibly, this case should be work for structures too when you call their methods
+		if (pExprType->GetType() == CT_MODULE)
+		{
+			mpSymTable->VisitNamedScope(pExprType->GetName());
 
+			auto pResult = pNode->GetMemberName()->Accept(this);
+
+			mpSymTable->LeaveScope();
+
+			return pResult;
+		}
+
+		auto pMemberNode = dynamic_cast<CASTUnaryExpressionNode*>(pNode->GetMemberName());
+		
 		// \note for now we suppose that right part after '.' is an identifier
-		const std::string& identifierName = pFieldNode->GetName();
+		std::string identifier;
+
+		switch (pMemberNode->GetType())
+		{
+			case NT_IDENTIFIER:
+				identifier = _extractIdentifier(pMemberNode);
+				break;
+			case NT_UNARY_EXPR:
+				identifier = _extractIdentifier(dynamic_cast<CASTUnaryExpressionNode*>(pMemberNode->GetData()));
+				break;
+			default:
+				UNREACHABLE();
+				break;
+		}		
 
 		auto& currIRBuilder = mIRBuildersStack.top();
 
 		// get type's description
 		auto pTypeDesc = mpSymTable->LookUpNamedScope(pExprType->GetName());
 
-		assert(pTypeDesc && pTypeDesc->mpType && (pTypeDesc->mVariables.find(identifierName) != pTypeDesc->mVariables.cend()));
+		assert(pTypeDesc && pTypeDesc->mpType && (pTypeDesc->mVariables.find(identifier) != pTypeDesc->mVariables.cend()));
 
 		TSymbolHandle firstFieldId = pTypeDesc->mVariables.begin()->second;
 		TSymbolHandle currFieldId  = 0x0;
@@ -730,7 +773,7 @@ namespace gplc
 			case CT_ENUM:
 				{
 					// retrieve value of the field
-					currFieldId = pTypeDesc->mVariables[identifierName];
+					currFieldId = pTypeDesc->mVariables[identifier];
 
 					pFieldValue = mpSymTable->LookUp(currFieldId);
 
@@ -751,7 +794,7 @@ namespace gplc
 				}
 			case CT_STRUCT:
 				// retrieve value of the field
-				currFieldId = pTypeDesc->mVariables[identifierName];
+				currFieldId = pTypeDesc->mVariables[identifier];
 
 				pFieldValue = mpSymTable->LookUp(currFieldId);
 
@@ -761,7 +804,7 @@ namespace gplc
 													llvm::ConstantInt::get(llvm::Type::getInt32Ty(mContext), currFieldId - firstFieldId)
 												});
 
-				if (pFieldNode->GetAttributes() & AV_RVALUE)
+				if (dynamic_cast<CASTUnaryExpressionNode*>(pMemberNode->GetData())->GetData()->GetAttributes() & AV_RVALUE)
 				{
 					return currIRBuilder.CreateLoad(pCurrValue);
 				}
@@ -769,8 +812,21 @@ namespace gplc
 				return pCurrValue;
 			case CT_MODULE:
 				{
-					auto x = 2;
+					currFieldId = pTypeDesc->mVariables[identifier];
+					
+					auto pValue = mVariablesTable[currFieldId];
+
+					pFieldValue = mpSymTable->LookUp(currFieldId);
+
+					// if the variable is a function invoke it
+					if (pFieldValue->mpType->GetType() == CT_FUNCTION)
+					{
+						//return currIRBuilder.CreateCall(pValue,)
+					}
 				}
+
+				UNIMPLEMENTED();
+
 				return {};
 		}
 
@@ -964,7 +1020,7 @@ namespace gplc
 		auto pFunctionType = llvm::dyn_cast<llvm::FunctionType>(std::get<llvm::Type*>(pFuncDesc->mpType->Accept(mpTypeGenerator)));
 
 		mVariablesTable[funcHandle] = llvm::Function::Create(pFunctionType, llvm::Function::ExternalLinkage, pFuncDesc->mName, *mpModule);
-
+		
 		return mVariablesTable[funcHandle];
 	}
 
@@ -1032,6 +1088,12 @@ namespace gplc
 
 	std::string CLLVMCodeGenerator::_mangleGlobalModuleIdentifier(CType* pType, const std::string& identifier) const
 	{
+		// \note native functions are not mangled nomatter on module they are placed in
+		if (pType->GetAttributes() & AV_NATIVE_FUNC)
+		{
+			return identifier;
+		}
+
 		CType* pParentType = pType->GetParent();
 
 		return (pParentType ? pParentType->GetMangledName() : "") + identifier;
@@ -1071,5 +1133,10 @@ namespace gplc
 		mIRBuildersStack.pop();
 
 		return pDeferEndBlock;
+	}
+
+	std::string CLLVMCodeGenerator::_extractIdentifier(CASTUnaryExpressionNode* pNode) const
+	{
+		return dynamic_cast<CASTIdentifierNode*>(pNode->GetData())->GetName();
 	}
 }

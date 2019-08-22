@@ -36,9 +36,9 @@ namespace gplc
 		return _insertNode(new CASTSourceUnitNode(moduleName));
 	}
 
-	CASTTypeNode* CASTNodesFactory::CreateTypeNode(E_NODE_TYPE type)
+	CASTTypeNode* CASTNodesFactory::CreateTypeNode(E_NODE_TYPE type, U32 attributes)
 	{
-		return _insertNode(new CASTTypeNode(type));
+		return _insertNode(new CASTTypeNode(type, attributes));
 	}
 
 	CASTDeclarationNode* CASTNodesFactory::CreateDeclNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo, U32 attributes)
@@ -101,9 +101,9 @@ namespace gplc
 		return _insertNode(new CASTFunctionArgsNode());
 	}
 
-	CASTFunctionDeclNode* CASTNodesFactory::CreateFuncDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue)
+	CASTFunctionDeclNode* CASTNodesFactory::CreateFuncDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue, U32 attributes)
 	{
-		return _insertNode(new CASTFunctionDeclNode(pClosure, pArgs, pReturnValue));
+		return _insertNode(new CASTFunctionDeclNode(pClosure, pArgs, pReturnValue, attributes));
 	}
 
 	CASTFunctionCallNode* CASTNodesFactory::CreateFuncCallNode(CASTUnaryExpressionNode* pIdentifier, CASTNode* pArgsList)
@@ -136,9 +136,9 @@ namespace gplc
 		return _insertNode(new CASTStructDeclNode(pStructName, pStructFields));
 	}
 
-	CASTNamedTypeNode* CASTNodesFactory::CreateNamedTypeNode(CASTIdentifierNode* pIdentifier)
+	CASTNamedTypeNode* CASTNodesFactory::CreateNamedTypeNode(CASTIdentifierNode* pIdentifier, U32 attributes)
 	{
-		return _insertNode(new CASTNamedTypeNode(pIdentifier));
+		return _insertNode(new CASTNamedTypeNode(pIdentifier, attributes));
 	}
 
 	CASTBreakOperatorNode* CASTNodesFactory::CreateBreakNode()

@@ -16,6 +16,7 @@
 #include "common/gplcSymTable.h"
 #include "common/gplcValues.h"
 #include "common/gplcTypesFactory.h"
+#include "utils/Utils.h"
 
 
 namespace gplc
@@ -438,6 +439,8 @@ namespace gplc
 
 	CASTNode* CParser::_parseBaseType(ILexer* pLexer)
 	{
+		U32 typeAttributes = _parseAttributes(pLexer);
+
 		const CToken* pCurrToken = pLexer->GetCurrToken(); 
 		const CToken* pNextToken = pLexer->PeekNextToken(1);
 
@@ -445,7 +448,7 @@ namespace gplc
 		if (_match(pCurrToken, TT_OPEN_SQR_BRACE) ||
 			_match(pCurrToken, TT_OPEN_BRACKET))
 		{
-			return _parseFunctionDeclaration(pLexer);
+			return _parseFunctionDeclaration(pLexer, false, typeAttributes);
 		}
 
 		// named type
@@ -459,10 +462,10 @@ namespace gplc
 				return _parseAccessOperator(mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName())), pLexer);
 			}
 
-			return mpNodesFactory->CreateNamedTypeNode(mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()));
+			return mpNodesFactory->CreateNamedTypeNode(mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()), typeAttributes);
 		}
 
-		CASTNode* pBuiltinType = _getBasicType(pCurrToken->GetType());
+		CASTNode* pBuiltinType = _getBasicType(pCurrToken->GetType(), typeAttributes);
 
 		if (pBuiltinType)
 		{
@@ -799,7 +802,7 @@ namespace gplc
 		return mpNodesFactory->CreateWhileStmtNode(pCondition, pBodyBlock);
 	}
 
-	CASTFunctionDeclNode* CParser::_parseFunctionDeclaration(ILexer* pLexer, bool allowCapture)
+	CASTFunctionDeclNode* CParser::_parseFunctionDeclaration(ILexer* pLexer, bool allowCapture, U32 attributes)
 	{
 		// parse a closure's declaration if it exists
 		CASTFunctionClosureNode* pClosureDecl = allowCapture && _match(pLexer->GetCurrToken(), TT_OPEN_SQR_BRACE) ? _parseFunctionClosure(pLexer) : nullptr;
@@ -817,7 +820,7 @@ namespace gplc
 		// parse return value's type
 		CASTNode* pReturnType = haveReturnType ? _parseType(pLexer) : mpNodesFactory->CreateTypeNode(NT_VOID);
 
-		return mpNodesFactory->CreateFuncDeclNode(pClosureDecl, pArgsList, pReturnType);
+		return mpNodesFactory->CreateFuncDeclNode(pClosureDecl, pArgsList, pReturnType, attributes);
 	}
 	
 	CASTFunctionClosureNode* CParser::_parseFunctionClosure(ILexer* pLexer)
@@ -1174,51 +1177,51 @@ namespace gplc
 		return pToken && pToken->GetType() == type;
 	}
 
-	CASTTypeNode* CParser::_getBasicType(E_TOKEN_TYPE typeToken) const
+	CASTTypeNode* CParser::_getBasicType(E_TOKEN_TYPE typeToken, U32 attributes) const
 	{
 		switch (typeToken)
 		{
 			case TT_INT8_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_INT8);
+				return mpNodesFactory->CreateTypeNode(NT_INT8, attributes);
 
 			case TT_INT16_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_INT16);
+				return mpNodesFactory->CreateTypeNode(NT_INT16, attributes);
 
 			case TT_INT32_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_INT32);
+				return mpNodesFactory->CreateTypeNode(NT_INT32, attributes);
 
 			case TT_INT64_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_INT64);
+				return mpNodesFactory->CreateTypeNode(NT_INT64, attributes);
 
 			case TT_UINT8_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_UINT8);
+				return mpNodesFactory->CreateTypeNode(NT_UINT8, attributes);
 
 			case TT_UINT16_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_UINT16);
+				return mpNodesFactory->CreateTypeNode(NT_UINT16, attributes);
 
 			case TT_UINT32_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_UINT32);
+				return mpNodesFactory->CreateTypeNode(NT_UINT32, attributes);
 
 			case TT_UINT64_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_UINT64);
+				return mpNodesFactory->CreateTypeNode(NT_UINT64, attributes);
 
 			case TT_CHAR_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_CHAR);
+				return mpNodesFactory->CreateTypeNode(NT_CHAR, attributes);
 
 			case TT_STRING_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_STRING);
+				return mpNodesFactory->CreateTypeNode(NT_STRING, attributes);
 
 			case TT_BOOL_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_BOOL);
+				return mpNodesFactory->CreateTypeNode(NT_BOOL, attributes);
 
 			case TT_VOID_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_VOID);
+				return mpNodesFactory->CreateTypeNode(NT_VOID, attributes);
 
 			case TT_FLOAT_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_FLOAT);
+				return mpNodesFactory->CreateTypeNode(NT_FLOAT, attributes);
 
 			case TT_DOUBLE_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_DOUBLE);
+				return mpNodesFactory->CreateTypeNode(NT_DOUBLE, attributes);
 		}
 
 		return nullptr;
@@ -1255,7 +1258,7 @@ namespace gplc
 				pRightExpr = mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, pMemberExpr);
 			}
 
-			pCurrExpr = mpNodesFactory->CreateAccessOperatorNode(pCurrExpr, pMemberExpr);
+			pCurrExpr = mpNodesFactory->CreateAccessOperatorNode(pCurrExpr, pRightExpr);
 		}
 
 		return dynamic_cast<CASTAccessOperatorNode*>(pCurrExpr);
@@ -1327,5 +1330,34 @@ namespace gplc
 		pLexer->GetNextToken();
 
 		return mpNodesFactory->CreateImportDirective(dynamic_cast<CStringValue*>(pLiteralToken->GetValue())->GetValue(), pModuleName->GetName());
+	}
+
+	U32 CParser::_parseAttributes(ILexer* pLexer)
+	{
+		const CToken* pCurrToken = nullptr;
+
+		U32 attributes = 0x0;
+
+		// try to parse an @ attribute
+		while (_match(pLexer->GetCurrToken(), TT_AT_SIGN))
+		{
+			pLexer->GetNextToken(); // take @
+
+			pCurrToken = pLexer->GetCurrToken();
+
+			switch (pCurrToken->GetType())
+			{
+				case TT_FOREIGN_KEYWORD:
+					pLexer->GetNextToken(); // take foreign
+
+					attributes |= AV_NATIVE_FUNC;
+					break;
+				default:
+					UNIMPLEMENTED();	// \todo implement this case, it should be parsing error here
+					break;
+			}
+		}
+
+		return attributes;
 	}
 }

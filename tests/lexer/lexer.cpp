@@ -346,6 +346,38 @@ TEST_CASE("Lexer's tests")
 
 		delete pInputStream;
 	}
+
+	SECTION("TestGetNextToken_PassAttributes_ReturnsCorrectTokens")
+	{
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"@foreign"
+			});
+
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
+
+		REQUIRE(pLexer->GetNextToken()->GetType() == TT_AT_SIGN);
+		REQUIRE(pLexer->GetNextToken()->GetType() == TT_FOREIGN_KEYWORD);
+		REQUIRE(!pLexer->GetNextToken());
+
+		delete pInputStream;
+	}
+
+	SECTION("TestGetNextToken_PassNumberWithSuffixesAndSymbolNextUpToThat_ReturnsAllTokens")
+	{
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"1024uL)"
+			});
+
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
+
+		REQUIRE(pLexer->GetNextToken()->GetType() == TT_LITERAL);
+		REQUIRE(pLexer->GetNextToken()->GetType() == TT_CLOSE_BRACKET);
+		REQUIRE(!pLexer->GetNextToken());
+
+		delete pInputStream;
+	}
 	
 	delete pLexer;
 }

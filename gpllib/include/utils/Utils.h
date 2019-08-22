@@ -14,6 +14,7 @@
 
 #include "common/gplcTypes.h"
 #include <string>
+#include <iostream>
 
 
 namespace gplc
@@ -29,6 +30,18 @@ namespace gplc
 
 			static std::string SemanticAnalyserMessageToString(E_SEMANTIC_ANALYSER_MESSAGE message);
 	};
+
+	#define UNIMPLEMENTED() \
+			 do { \
+				std::cerr << "The feature is not implemented yet (" << __FILE__ << "; " << __LINE__ << ")\n"; \
+				abort(); \
+			 } while (0)
+
+	#define UNREACHABLE() \
+			do { \
+				std::cerr << "The program has reached unreachable section, possibly a bug (" << __FILE__ << "; " << __LINE__ << ")\n"; \
+				abort(); \
+			} while (0)
 }
 
 #endif

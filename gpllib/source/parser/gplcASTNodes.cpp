@@ -25,8 +25,8 @@ namespace gplc
 	{
 	}
 
-	CASTNode::CASTNode(E_NODE_TYPE type):
-		mType(type)
+	CASTNode::CASTNode(E_NODE_TYPE type, U32 attributes):
+		mType(type), mAttributes(attributes)
 	{
 	}
 
@@ -96,6 +96,11 @@ namespace gplc
 		return RV_SUCCESS;
 	}
 
+	void CASTNode::SetAttribute(U32 attribute)
+	{
+		mAttributes |= attribute;
+	}
+
 	const std::vector<CASTNode*> CASTNode::GetChildren() const
 	{
 		return mChildren;
@@ -109,6 +114,11 @@ namespace gplc
 	E_NODE_TYPE CASTNode::GetType() const
 	{
 		return mType;
+	}
+
+	U32 CASTNode::GetAttributes() const
+	{
+		return mAttributes;
 	}
 
 	void CASTNode::_removeNode(CASTNode** node)
@@ -187,7 +197,7 @@ namespace gplc
 
 
 	CASTDeclarationNode::CASTDeclarationNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo, U32 attributes):
-		CASTTypeNode(NT_DECL), mAttributes(attributes)
+		CASTTypeNode(NT_DECL, attributes)
 	{
 		AttachChild(pIdentifiers);
 		AttachChild(pTypeInfo);
@@ -228,11 +238,6 @@ namespace gplc
 		return dynamic_cast<CASTTypeNode*>(mChildren[1]);
 	}
 
-	U32 CASTDeclarationNode::GetAttributes() const
-	{
-		return mAttributes;
-	}
-
 
 	CASTBlockNode::CASTBlockNode():
 		CASTNode(NT_BLOCK)
@@ -264,8 +269,8 @@ namespace gplc
 		\brief CASTTypeNode's definition
 	*/
 
-	CASTTypeNode::CASTTypeNode(E_NODE_TYPE type):
-		CASTNode(type)
+	CASTTypeNode::CASTTypeNode(E_NODE_TYPE type, U32 attributes):
+		CASTNode(type, attributes)
 	{
 	}
 
@@ -295,7 +300,7 @@ namespace gplc
 	*/
 	
 	CASTIdentifierNode::CASTIdentifierNode(const std::string& name, U32 attributes) :
-		CASTTypeNode(NT_IDENTIFIER), mName(name), mAttributes(attributes)
+		CASTTypeNode(NT_IDENTIFIER, attributes), mName(name)
 	{
 	}
 
@@ -322,11 +327,6 @@ namespace gplc
 	const std::string& CASTIdentifierNode::GetName() const
 	{
 		return mName;
-	}
-
-	U32 CASTIdentifierNode::GetAttributes() const
-	{
-		return mAttributes;
 	}
 
 
@@ -365,8 +365,8 @@ namespace gplc
 	}
 
 
-	CASTExpressionNode::CASTExpressionNode(E_NODE_TYPE type):
-		CASTTypeNode(type)
+	CASTExpressionNode::CASTExpressionNode(E_NODE_TYPE type, U32 attributes):
+		CASTTypeNode(type, attributes)
 	{
 	}
 
@@ -617,8 +617,8 @@ namespace gplc
 	*/
 
 
-	CASTFunctionDeclNode::CASTFunctionDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue):
-		CASTTypeNode(NT_FUNC_DECL)
+	CASTFunctionDeclNode::CASTFunctionDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue, U32 attributes):
+		CASTTypeNode(NT_FUNC_DECL, attributes)
 	{
 		AttachChild(pArgs);
 		AttachChild(pReturnValue);
@@ -948,8 +948,8 @@ namespace gplc
 		\brief CASTNamedTypeNode's definition
 	*/
 
-	CASTNamedTypeNode::CASTNamedTypeNode(CASTIdentifierNode* pIdentifier):
-		CASTTypeNode(NT_DEPENDENT_TYPE)
+	CASTNamedTypeNode::CASTNamedTypeNode(CASTIdentifierNode* pIdentifier, U32 attributes):
+		CASTTypeNode(NT_DEPENDENT_TYPE, attributes)
 	{
 		AttachChild(pIdentifier);
 	}
@@ -1119,7 +1119,7 @@ namespace gplc
 	*/
 
 	CASTIndexedAccessOperatorNode::CASTIndexedAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pIndexExpr, U32 attributes) :
-		CASTExpressionNode(NT_INDEXED_ACCESS_OPERATOR), mAttributes(attributes)
+		CASTExpressionNode(NT_INDEXED_ACCESS_OPERATOR, attributes)
 	{
 		AttachChild(pExpression);
 		AttachChild(pIndexExpr);
@@ -1153,11 +1153,6 @@ namespace gplc
 	CASTExpressionNode* CASTIndexedAccessOperatorNode::GetIndexExpression() const
 	{
 		return dynamic_cast<CASTExpressionNode*>(mChildren[1]);
-	}
-
-	U32 CASTIndexedAccessOperatorNode::GetAttributes() const
-	{
-		return mAttributes;
 	}
 
 

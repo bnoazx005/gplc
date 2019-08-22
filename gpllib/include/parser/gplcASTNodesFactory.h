@@ -30,7 +30,7 @@ namespace gplc
 
 			virtual CASTNode* CreateNode(E_NODE_TYPE type) = 0;
 			virtual CASTSourceUnitNode* CreateSourceUnitNode(const std::string& moduleName = "") = 0;
-			virtual CASTTypeNode* CreateTypeNode(E_NODE_TYPE type) = 0;
+			virtual CASTTypeNode* CreateTypeNode(E_NODE_TYPE type, U32 attributes = 0x0) = 0;
 			virtual CASTDeclarationNode* CreateDeclNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo, U32 attributes = 0x0) = 0;
 			virtual CASTBlockNode* CreateBlockNode() = 0;
 			virtual CASTIdentifierNode* CreateIdNode(const std::string& name, U32 attributes = 0x0) = 0;
@@ -43,14 +43,14 @@ namespace gplc
 			virtual CASTWhileLoopStatementNode* CreateWhileStmtNode(CASTExpressionNode* pCondition, CASTBlockNode* pBody) = 0;
 			virtual CASTFunctionClosureNode* CreateFuncClosureNode() = 0;
 			virtual CASTFunctionArgsNode* CreateFuncArgsNode() = 0;
-			virtual CASTFunctionDeclNode* CreateFuncDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue) = 0;
+			virtual CASTFunctionDeclNode* CreateFuncDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue, U32 attributes = 0x0) = 0;
 			virtual CASTFunctionCallNode* CreateFuncCallNode(CASTUnaryExpressionNode* pIdentifier, CASTNode* pArgsList) = 0;
 			virtual CASTReturnStatementNode* CreateReturnStmtNode(CASTExpressionNode* pExpression) = 0;
 			virtual CASTDefinitionNode* CreateDefNode(CASTDeclarationNode* pDecl, CASTNode* pValue) = 0;
 			virtual CASTFuncDefinitionNode* CreateFuncDefNode(CASTDeclarationNode* pDecl, CASTFunctionDeclNode* pLambdaType, CASTNode* pBody) = 0;
 			virtual CASTEnumDeclNode* CreateEnumDeclNode(CASTIdentifierNode* pEnumName) = 0;
 			virtual CASTStructDeclNode* CreateStructDeclNode(CASTIdentifierNode* pStructName, CASTBlockNode* pStructFields) = 0;
-			virtual CASTNamedTypeNode* CreateNamedTypeNode(CASTIdentifierNode* pIdentifier) = 0;
+			virtual CASTNamedTypeNode* CreateNamedTypeNode(CASTIdentifierNode* pIdentifier, U32 attributes = 0x0) = 0;
 			virtual CASTBreakOperatorNode* CreateBreakNode() = 0;
 			virtual CASTContinueOperatorNode* CreateContinueNode() = 0;
 			virtual CASTAccessOperatorNode* CreateAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pMemberName) = 0;
@@ -72,7 +72,7 @@ namespace gplc
 
 			CASTNode* CreateNode(E_NODE_TYPE type) override;
 			CASTSourceUnitNode* CreateSourceUnitNode(const std::string& moduleName = "") override;
-			CASTTypeNode* CreateTypeNode(E_NODE_TYPE type) override;
+			CASTTypeNode* CreateTypeNode(E_NODE_TYPE type, U32 attributes = 0x0) override;
 			CASTDeclarationNode* CreateDeclNode(CASTNode* pIdentifiers, CASTNode* pTypeInfo, U32 attributes = 0x0) override;
 			CASTBlockNode* CreateBlockNode() override;
 			CASTIdentifierNode* CreateIdNode(const std::string& name, U32 attributes = 0x0) override;
@@ -85,14 +85,14 @@ namespace gplc
 			CASTWhileLoopStatementNode* CreateWhileStmtNode(CASTExpressionNode* pCondition, CASTBlockNode* pBody) override;
 			CASTFunctionClosureNode* CreateFuncClosureNode() override;
 			CASTFunctionArgsNode* CreateFuncArgsNode() override;
-			CASTFunctionDeclNode* CreateFuncDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue) override;
+			CASTFunctionDeclNode* CreateFuncDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue, U32 attributes = 0x0) override;
 			CASTFunctionCallNode* CreateFuncCallNode(CASTUnaryExpressionNode* pIdentifier, CASTNode* pArgsList) override;
 			CASTReturnStatementNode* CreateReturnStmtNode(CASTExpressionNode* pExpression) override;
 			CASTDefinitionNode* CreateDefNode(CASTDeclarationNode* pDecl, CASTNode* pValue) override;
 			CASTFuncDefinitionNode* CreateFuncDefNode(CASTDeclarationNode* pDecl, CASTFunctionDeclNode* pLambdaType, CASTNode* pBody) override;
 			CASTEnumDeclNode* CreateEnumDeclNode(CASTIdentifierNode* pEnumName) override;
 			CASTStructDeclNode* CreateStructDeclNode(CASTIdentifierNode* pStructName, CASTBlockNode* pStructFields) override;
-			CASTNamedTypeNode* CreateNamedTypeNode(CASTIdentifierNode* pIdentifier) override;
+			CASTNamedTypeNode* CreateNamedTypeNode(CASTIdentifierNode* pIdentifier, U32 attributes = 0x0) override;
 			CASTBreakOperatorNode* CreateBreakNode() override;
 			CASTContinueOperatorNode* CreateContinueNode() override;
 			CASTAccessOperatorNode* CreateAccessOperatorNode(CASTExpressionNode* pExpression, CASTExpressionNode* pMemberName) override;

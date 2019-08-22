@@ -16,7 +16,9 @@
 #include "parser/gplcASTNodesFactory.h"
 #include "common/gplcTypesFactory.h"
 #include "utils/CResult.h"
+#include "utils/Utils.h"
 #include <algorithm>
+#include <cassert>
 
 
 namespace gplc
@@ -105,6 +107,8 @@ namespace gplc
 
 		CType* pBaseType = pOperandNode ? dynamic_cast<CASTTypeNode*>(pOperandNode)->Resolve(this) : nullptr;
 
+		assert(pBaseType);
+
 		switch (pNode->GetOpType())
 		{
 			case TT_AMPERSAND:
@@ -161,7 +165,7 @@ namespace gplc
 			argsTypes.push_back({ pCurrArgDecl->GetName(), pCurrArgType });
 		}
 
-		return new CFunctionType(argsTypes, Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetReturnValueType())), 0x0, mpSymTable->GetCurrentScopeType());
+		return new CFunctionType(argsTypes, Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetReturnValueType())), pNode->GetAttributes(), mpSymTable->GetCurrentScopeType());
 	}
 
 	CType* CTypeResolver::VisitFunctionCall(CASTFunctionCallNode* pNode)
@@ -240,8 +244,41 @@ namespace gplc
 			return nullptr;
 		}
 
-		// \note for now we suppose that right part after '.' is an identifier
-		const std::string& identifierName = dynamic_cast<CASTIdentifierNode*>(dynamic_cast<CASTUnaryExpressionNode*>(pNode->GetMemberName())->GetData())->GetName();
+		if (pExprType->GetType() == CT_MODULE)
+		{
+			mpSymTable->VisitNamedScope(pExprType->GetName());
+
+			auto pInferredType = pNode->GetMemberName()->Resolve(this);
+
+			mpSymTable->LeaveScope();
+
+			return pInferredType;
+		}
+
+		auto extractIdentifier = [](CASTUnaryExpressionNode* pNode)
+		{
+			return dynamic_cast<CASTIdentifierNode*>(pNode->GetData())->GetName();
+		};
+		
+		auto pMember = dynamic_cast<CASTUnaryExpressionNode*>(pNode->GetMemberName());
+
+		std::string identifierName;
+
+		switch (pMember->GetData()->GetType())
+		{
+			case NT_IDENTIFIER:
+				identifierName = extractIdentifier(pMember);
+				break;
+			case NT_FUNC_CALL:
+				identifierName = extractIdentifier(dynamic_cast<CASTFunctionCallNode*>(dynamic_cast<CASTUnaryExpressionNode*>(pMember)->GetData())->GetIdentifier());
+				break;
+			case NT_UNARY_EXPR:
+				identifierName = extractIdentifier(dynamic_cast<CASTUnaryExpressionNode*>(pMember->GetData()));
+				break;
+			default:
+				UNREACHABLE();
+				break;
+		}
 
 		switch (pExprType->GetType())
 		{

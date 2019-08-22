@@ -137,6 +137,8 @@ namespace gplc
 			inline bool _isGlobalScope() const;
 
 			llvm::BasicBlock* _constructDeferBlock(TExpressionsStack& expressionsStack);
+
+			std::string _extractIdentifier(CASTUnaryExpressionNode* pNode) const;
 		protected:
 			TLLVMLiteralVisitor*     mpLiteralIRGenerator;
 

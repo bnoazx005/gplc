@@ -88,7 +88,7 @@ namespace gplc
 					public virtual IVisitable<TLLVMIRData, IASTNodeVisitor<TLLVMIRData>>
 	{
 		public:
-			CASTNode(E_NODE_TYPE type);
+			CASTNode(E_NODE_TYPE type, U32 attributes = 0x0);
 			virtual ~CASTNode() = default;
 			
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
@@ -101,11 +101,15 @@ namespace gplc
 
 			Result DettachChild(CASTNode** node);
 						
+			void SetAttribute(U32 attribute);
+
 			const std::vector<CASTNode*> GetChildren() const;
 
 			U32 GetChildrenCount() const;
 
 			E_NODE_TYPE GetType() const;
+
+			U32 GetAttributes() const;
 		protected:
 			CASTNode();
 			CASTNode(const CASTNode& node);
@@ -115,6 +119,8 @@ namespace gplc
 			E_NODE_TYPE            mType;
 
 			std::vector<CASTNode*> mChildren;
+
+			U32                    mAttributes;
 	};
 	
 
@@ -141,7 +147,7 @@ namespace gplc
 	class CASTTypeNode : public CASTNode
 	{
 		public:
-			CASTTypeNode(E_NODE_TYPE type);
+			CASTTypeNode(E_NODE_TYPE type, U32 attributes = 0x0);
 			virtual ~CASTTypeNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
@@ -171,13 +177,9 @@ namespace gplc
 			CASTNode* GetIdentifiers() const;
 
 			CASTTypeNode* GetTypeInfo() const;
-
-			U32 GetAttributes() const;
 		protected:
 			CASTDeclarationNode() = default;
 			CASTDeclarationNode(const CASTDeclarationNode& node) = default;
-		protected:
-			U32 mAttributes;
 	};
 
 
@@ -214,15 +216,11 @@ namespace gplc
 			CType* Resolve(ITypeResolver* pResolver) override;
 
 			const std::string& GetName() const;
-
-			U32 GetAttributes() const;
 		protected:
 			CASTIdentifierNode() = default;
 			CASTIdentifierNode(const CASTIdentifierNode& node) = default;
 		protected:
 			std::string mName;
-
-			U32         mAttributes;
 	};
 
 
@@ -250,7 +248,7 @@ namespace gplc
 	class CASTExpressionNode : public CASTTypeNode
 	{
 		public:
-			CASTExpressionNode(E_NODE_TYPE type);
+			CASTExpressionNode(E_NODE_TYPE type, U32 attributes = 0x0);
 			virtual ~CASTExpressionNode() = default;
 		protected:
 			CASTExpressionNode() = default;
@@ -413,7 +411,7 @@ namespace gplc
 	class CASTFunctionDeclNode : public CASTTypeNode
 	{
 		public:
-			CASTFunctionDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue);
+			CASTFunctionDeclNode(CASTFunctionClosureNode* pClosure, CASTFunctionArgsNode* pArgs, CASTNode* pReturnValue, U32 attributes = 0x0);
 			virtual ~CASTFunctionDeclNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
@@ -552,7 +550,7 @@ namespace gplc
 	class CASTNamedTypeNode : public CASTTypeNode
 	{
 		public:
-			CASTNamedTypeNode(CASTIdentifierNode* pIdentifier);
+			CASTNamedTypeNode(CASTIdentifierNode* pIdentifier, U32 attributes = 0x0);
 			virtual ~CASTNamedTypeNode() = default;
 
 			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
@@ -652,13 +650,9 @@ namespace gplc
 			CASTExpressionNode* GetExpression() const;
 
 			CASTExpressionNode* GetIndexExpression() const;
-
-			U32 GetAttributes() const;
 		protected:
 			CASTIndexedAccessOperatorNode() = default;
 			CASTIndexedAccessOperatorNode(const CASTIndexedAccessOperatorNode& node) = default;
-		protected:
-			U32 mAttributes;
 	};
 
 

@@ -77,7 +77,9 @@ namespace gplc
 		{ "import", TT_IMPORT_KEYWORD },
 		{ "as", TT_AS_KEYWORD },
 		{ "%", TT_PERCENT_SIGN },
-		{ "defer", TT_DEFER_KEYWORD }
+		{ "defer", TT_DEFER_KEYWORD },
+		{ "@", TT_AT_SIGN },
+		{ "foreign", TT_FOREIGN_KEYWORD },
 	};
 
 	CLexer::CLexer():
@@ -594,23 +596,24 @@ namespace gplc
 			case NB_INT:
 
 				//all possible literals are placed in allowableLiterals
-				while (allowableIntLiterals.find_first_of(currCh) != -1)
+				do
 				{
 					switch (currCh)
 					{
 						case 'L':
 							numberType |= (numberType & NB_LONG) ? NB_ADD_LONG : NB_LONG;
+							currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
 							break;
 						case 'u':
 							numberType &= ~NB_SIGNED; //clear 'long' bit
+							currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
 							break;
 						default:
 							numberType |= NB_SIGNED;
 							break;
 					}
-
-					currCh = _getNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos);
-				}
+				} 
+				while (allowableIntLiterals.find_first_of(currCh = _peekNextChar(mCurrStreamBuffer, mpInputStream, mCurrPos, 0)) != -1);
 
 				if (currCh == 'f')
 				{

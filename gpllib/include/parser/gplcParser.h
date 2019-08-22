@@ -306,7 +306,7 @@ namespace gplc
 									| (<expr> [,<expr>]*) -> <type>;
 			*/
 
-			CASTFunctionDeclNode* _parseFunctionDeclaration(ILexer* pLexer, bool allowCapture = false);
+			CASTFunctionDeclNode* _parseFunctionDeclaration(ILexer* pLexer, bool allowCapture = false, U32 attributes = 0x0);
 						
 			/*!
 				\brief The method parses the following rule
@@ -388,7 +388,9 @@ namespace gplc
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 
-			CASTTypeNode* _getBasicType(E_TOKEN_TYPE typeToken) const;
+			CASTTypeNode* _getBasicType(E_TOKEN_TYPE typeToken, U32 attributes) const;
+
+			U32 _parseAttributes(ILexer* pLexer);
 		private:
 			ISymTable*        mpSymTable;
 

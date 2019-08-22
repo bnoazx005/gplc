@@ -7,5 +7,5 @@
 	\todo Implement @foreign attribute for native functions
 */
 
-malloc : /*@foreign*/ (size: uint64) -> uint8*;
-free : /*@foreign*/ (pPtr: uint8*);
+malloc : @foreign (size: uint64) -> uint8*;
+free : @foreign (pPtr: uint8*);
