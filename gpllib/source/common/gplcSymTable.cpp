@@ -138,12 +138,28 @@ namespace gplc
 
 	Result CSymTable::VisitNamedScope(const std::string& scopeName)
 	{
-		if (mIsLocked || mpCurrScopeEntry == nullptr || (mpCurrScopeEntry->mNamedScopes.find(scopeName) == mpCurrScopeEntry->mNamedScopes.cend()))
+		if (mIsLocked || mpCurrScopeEntry == nullptr)
 		{
 			return RV_FAIL;
 		}
 
+		mpPrevScopeEntry = mpCurrScopeEntry;
+
 		mIsReadMode = true;
+
+		auto pCurrScope = mpCurrScopeEntry;
+
+		while (pCurrScope->mParentScope)
+		{
+			if (pCurrScope->mNamedScopes.find(scopeName) != pCurrScope->mNamedScopes.cend())
+			{
+				mpCurrScopeEntry = pCurrScope;
+
+				break;
+			}
+
+			pCurrScope = pCurrScope->mParentScope;
+		}
 
 		mpCurrScopeEntry = mpCurrScopeEntry->mNamedScopes[scopeName];
 
@@ -183,6 +199,12 @@ namespace gplc
 		if (mIsReadMode && isUnnamedScope && (mpCurrScopeEntry->mNestedScopes.size() > currScopeIndex))
 		{
 			mLastVisitedScopeIndex = currScopeIndex;
+		}
+
+		// \note restore previous pointer when came back from VisitNamedScope
+		if (mIsReadMode && !isUnnamedScope)
+		{
+			mpCurrScopeEntry = mpPrevScopeEntry;
 		}
 
 		return RV_SUCCESS;

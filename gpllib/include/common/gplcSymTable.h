@@ -172,6 +172,8 @@ namespace gplc
 
 			TSymTableEntry* mpCurrScopeEntry;
 
+			TSymTableEntry* mpPrevScopeEntry; // \note used only when visiting named scopes
+
 			bool            mIsLocked;
 
 			I32             mLastVisitedScopeIndex;

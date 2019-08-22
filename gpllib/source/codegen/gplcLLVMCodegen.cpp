@@ -767,6 +767,11 @@ namespace gplc
 				}
 
 				return pCurrValue;
+			case CT_MODULE:
+				{
+					auto x = 2;
+				}
+				return {};
 		}
 
 		return {};
