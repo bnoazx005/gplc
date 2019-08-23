@@ -3,8 +3,6 @@
 
 	\brief The file contains definitions that are related with memory management
 	including allocators, native functions that are migrated from C language, etc.
-
-	\todo Implement @foreign attribute for native functions
 */
 
 malloc : @foreign (size: uint64) -> uint8*;

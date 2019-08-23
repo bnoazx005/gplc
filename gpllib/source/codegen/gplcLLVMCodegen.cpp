@@ -33,6 +33,8 @@ namespace gplc
 
 		mpConstExprInterpreter = pInterpreter;
 
+		mVariablesTable.clear();
+
 		mpSymTable = pSymTable;
 
 		mIRBuildersStack.push(llvm::IRBuilder<>(mContext)); // module's builder
@@ -135,6 +137,7 @@ namespace gplc
 				{
 					case CT_FUNCTION:
 						pCurrVariableAllocation = _declareNativeFunction(pCurrSymbolDesc);
+
 						/*pCurrVariableAllocation = mpModule->getOrInsertFunction(_mangleGlobalModuleIdentifier(pType, identifier), 
 																				llvm::dyn_cast<llvm::FunctionType>(pIdentifiersType)).getCallee();
 
