@@ -80,6 +80,7 @@ namespace gplc
 		{ "defer", TT_DEFER_KEYWORD },
 		{ "@", TT_AT_SIGN },
 		{ "foreign", TT_FOREIGN_KEYWORD },
+		{ "uninit", TT_UNINIT_KEYWORD },
 	};
 
 	CLexer::CLexer():

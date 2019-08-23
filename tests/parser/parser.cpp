@@ -428,7 +428,6 @@ TEST_CASE("Parser's tests")
 		delete pSymbolTable;
 	}
 
-
 	SECTION("TestParse_PassDeferExpression_ReturnsCorrectAST")
 	{
 		gplc::ISymTable* pSymbolTable = new gplc::CSymTable();
@@ -444,6 +443,29 @@ TEST_CASE("Parser's tests")
 				new gplc::CToken(gplc::TT_OPEN_BRACKET, 2),
 				new gplc::CToken(gplc::TT_CLOSE_BRACKET, 3),
 				new gplc::CToken(gplc::TT_SEMICOLON, 4),
+			}), pSymbolTable, pNodesFactory, pTypesFactory);
+
+		REQUIRE(pMain != nullptr);
+
+		delete pSymbolTable;
+	}
+
+	SECTION("TestParse_PassAccessToModuleFunction_ReturnsCorrectAST")
+	{
+		gplc::ISymTable* pSymbolTable = new gplc::CSymTable();
+
+		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
+			{
+				/*!
+					the sequence below specifies the following declaration
+					Test.f();
+				*/
+				new gplc::CIdentifierToken("Test", 0),
+				new gplc::CToken(gplc::TT_POINT, 1),
+				new gplc::CIdentifierToken("f", 2),
+				new gplc::CToken(gplc::TT_OPEN_BRACKET, 3),
+				new gplc::CToken(gplc::TT_CLOSE_BRACKET, 4),
+				new gplc::CToken(gplc::TT_SEMICOLON, 5),
 			}), pSymbolTable, pNodesFactory, pTypesFactory);
 
 		REQUIRE(pMain != nullptr);

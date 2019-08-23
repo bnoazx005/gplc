@@ -351,13 +351,15 @@ TEST_CASE("Lexer's tests")
 	{
 		IInputStream* pInputStream = new CStubInputStream(
 			{
-				"@foreign"
+				"@foreign@uninit"
 			});
 
 		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
 
 		REQUIRE(pLexer->GetNextToken()->GetType() == TT_AT_SIGN);
 		REQUIRE(pLexer->GetNextToken()->GetType() == TT_FOREIGN_KEYWORD);
+		REQUIRE(pLexer->GetNextToken()->GetType() == TT_AT_SIGN);
+		REQUIRE(pLexer->GetNextToken()->GetType() == TT_UNINIT_KEYWORD);
 		REQUIRE(!pLexer->GetNextToken());
 
 		delete pInputStream;

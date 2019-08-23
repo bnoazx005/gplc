@@ -263,17 +263,26 @@ namespace gplc
 			{
 				pOperator = _parseAssignment(pLexer);
 			}
-			else if (_match(pLexer->PeekNextToken(1), TT_OPEN_BRACKET))
+			else if (_match(pLexer->PeekNextToken(1), TT_OPEN_BRACKET) || _match(pLexer->PeekNextToken(1), TT_POINT)) // \note either function's call or access operator
 			{
-				CASTUnaryExpressionNode* pUnaryExpr = dynamic_cast<CASTUnaryExpressionNode*>(_parseUnaryExpression(pLexer)); 
+				auto pExpr = _parseUnaryExpression(pLexer);
 
-				CASTNode* pNestedExprNode = pUnaryExpr ? pUnaryExpr->GetData() : nullptr;
-
-				if (pNestedExprNode != nullptr && 
-					(pNestedExprNode->GetType() == NT_FUNC_CALL || 
-					 pNestedExprNode->GetType() == NT_ACCESS_OPERATOR)) // return if the node is a function's call or an access operator
+				if (pExpr) // return if the node is a function's call or an access operator
 				{
-					return pNestedExprNode;
+					switch (pExpr->GetType())
+					{
+						case NT_UNARY_EXPR:
+							{
+								CASTUnaryExpressionNode* pUnaryExpr = dynamic_cast<CASTUnaryExpressionNode*>(pExpr);
+
+								CASTNode* pNestedExprNode = pUnaryExpr ? pUnaryExpr->GetData() : nullptr;
+							}
+						case NT_ACCESS_OPERATOR:
+							return pExpr;
+						default:
+							UNREACHABLE();
+							break;
+					}
 				}
 			}
 		}
@@ -1352,6 +1361,10 @@ namespace gplc
 
 					attributes |= AV_NATIVE_FUNC;
 					break;
+				case TT_UNINIT_KEYWORD:
+					pLexer->GetNextToken();
+
+					attributes |= AV_KEEP_UNINITIALIZED;
 				default:
 					UNIMPLEMENTED();	// \todo implement this case, it should be parsing error here
 					break;

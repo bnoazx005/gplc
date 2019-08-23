@@ -191,6 +191,7 @@ namespace gplc
 		TT_DEFER_KEYWORD,
 		TT_FOREIGN_KEYWORD,
 		TT_AT_SIGN,
+		TT_UNINIT_KEYWORD,
 	};
 
 
@@ -261,14 +262,15 @@ namespace gplc
 
 	enum E_ATTRIBUTES_VALUES : U32
 	{
-		AV_STATIC            = 0x1,
-		AV_FUNC_ARG_DECL     = 0x2,
-		AV_ENTRY_POINT       = 0x4,
-		AV_STRUCT_FIELD_DECL = 0x8,
-		AV_NATIVE_FUNC		 = 0x10,
-		AV_RVALUE            = 0x20,
-		AV_POINTER           = 0x40,
-		AV_AGGREGATE_TYPE    = 0x80,
+		AV_STATIC             = 0x1,
+		AV_FUNC_ARG_DECL      = 0x2,
+		AV_ENTRY_POINT        = 0x4,
+		AV_STRUCT_FIELD_DECL  = 0x8,
+		AV_NATIVE_FUNC		  = 0x10,
+		AV_RVALUE             = 0x20,
+		AV_POINTER            = 0x40,
+		AV_AGGREGATE_TYPE     = 0x80, 
+		AV_KEEP_UNINITIALIZED = 0x100,
 	};
 
 
