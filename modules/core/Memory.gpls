@@ -5,5 +5,10 @@
 	including allocators, native functions that are migrated from C language, etc.
 */
 
+/*!
+	\todo We should change current signature of the function onto the following
+	(size: uint64) -> Result<uint8*>,
+*/
+
 malloc : @foreign (size: uint64) -> uint8*;
 free : @foreign (pPtr: uint8*);

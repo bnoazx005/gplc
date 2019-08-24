@@ -518,7 +518,7 @@ namespace gplc
 			args.push_back(std::get<llvm::Value*>(pCurrArg->Accept(this)));
 		}
 
-		return currIRBuilder.CreateCall(pCallee, args, "tmpfncall");
+		return currIRBuilder.CreateCall(pCallee, args);
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitReturnStatement(CASTReturnStatementNode* pNode)

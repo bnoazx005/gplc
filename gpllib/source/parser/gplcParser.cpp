@@ -253,7 +253,19 @@ namespace gplc
 
 		const CToken* pCurrToken = pLexer->GetCurrToken();
 
-		if (_match(pCurrToken, TT_IDENTIFIER))
+		// \note Try to parse function or method call
+		if (pOperator = _parseUnaryExpression(pLexer, 0x0, true))
+		{
+			// \note if we've found out '=' symbol as next one, suppose that it's assignment
+			if (_match(pLexer->GetCurrToken(), TT_ASSIGN_OP))
+			{
+				pOperator = _parseAssignment(pLexer, dynamic_cast<CASTExpressionNode*>(pOperator));
+			}
+
+			return pOperator;
+		}
+
+		if (_match(pCurrToken = pLexer->GetCurrToken(), TT_IDENTIFIER))
 		{
 			if (_match(pLexer->PeekNextToken(1), TT_COMMA) || _match(pLexer->PeekNextToken(1), TT_COLON))
 			{
@@ -263,22 +275,22 @@ namespace gplc
 			{
 				pOperator = _parseAssignment(pLexer);
 			}
-			else if (_match(pLexer->PeekNextToken(1), TT_OPEN_BRACKET))
-			{
-				CASTUnaryExpressionNode* pUnaryExpr = dynamic_cast<CASTUnaryExpressionNode*>(_parseUnaryExpression(pLexer));
+			//else if (_match(pLexer->PeekNextToken(1), TT_OPEN_BRACKET))
+			//{
+			//	CASTUnaryExpressionNode* pUnaryExpr = dynamic_cast<CASTUnaryExpressionNode*>(_parseUnaryExpression(pLexer));
 
-				CASTNode* pNestedExprNode = pUnaryExpr ? pUnaryExpr->GetData() : nullptr;
+			//	CASTNode* pNestedExprNode = pUnaryExpr ? pUnaryExpr->GetData() : nullptr;
 
-				if (pNestedExprNode != nullptr &&
-					(pNestedExprNode->GetType() == NT_FUNC_CALL ||
-						pNestedExprNode->GetType() == NT_ACCESS_OPERATOR)) // return if the node is a function's call or an access operator
-				{
-					return pNestedExprNode;
-				}
-			}
+			//	if (pNestedExprNode != nullptr &&
+			//		(pNestedExprNode->GetType() == NT_FUNC_CALL ||
+			//			pNestedExprNode->GetType() == NT_ACCESS_OPERATOR)) // return if the node is a function's call or an access operator
+			//	{
+			//		return pNestedExprNode;
+			//	}
+			//}
 		}
 
-		if (_match(pCurrToken, TT_BREAK_KEYWORD) || _match(pCurrToken, TT_CONTINUE_KEYWORD))
+		if (_match(pCurrToken = pLexer->GetCurrToken(), TT_BREAK_KEYWORD) || _match(pCurrToken, TT_CONTINUE_KEYWORD))
 		{
 			pLexer->GetNextToken(); // take 'break' or 'continue'
 
@@ -293,7 +305,7 @@ namespace gplc
 		}
 
 		// try to parse 'defer' operator
-		if (_match(pCurrToken, TT_DEFER_KEYWORD))
+		if (_match(pCurrToken = pLexer->GetCurrToken(), TT_DEFER_KEYWORD))
 		{
 			pLexer->GetNextToken(); // take 'defer' keyword
 
@@ -622,7 +634,7 @@ namespace gplc
 		return pLeft;
 	}
 
-	CASTExpressionNode* CParser::_parseUnaryExpression(ILexer* pLexer, U32 attributes)
+	CASTExpressionNode* CParser::_parseUnaryExpression(ILexer* pLexer, U32 attributes, bool isFunctionCall)
 	{
 		const CToken* pCurrToken = pLexer->GetCurrToken();
 
@@ -638,10 +650,10 @@ namespace gplc
 				attributes &= ~AV_RVALUE; // if it's get address operator then it's already rvalue, so remove the flag
 			}
 
-			return mpNodesFactory->CreateUnaryExpr(pCurrToken->GetType(), _parsePrimaryExpression(pLexer, attributes));
+			return mpNodesFactory->CreateUnaryExpr(pCurrToken->GetType(), _parseUnaryExpression(pLexer, attributes, isFunctionCall));
 		}
 
-		auto pPrimaryExpr = _parsePrimaryExpression(pLexer, attributes);
+		auto pPrimaryExpr = _parsePrimaryExpression(pLexer, attributes, isFunctionCall);
 
 		if (!pPrimaryExpr)
 		{
@@ -671,7 +683,7 @@ namespace gplc
 		return pPrimaryNode;
 	}
 
-	CASTNode* CParser::_parsePrimaryExpression(ILexer* pLexer, U32 attributes)
+	CASTNode* CParser::_parsePrimaryExpression(ILexer* pLexer, U32 attributes, bool isFunctionCall)
 	{
 		const CToken* pCurrToken = pLexer->GetCurrToken();
 
@@ -685,7 +697,18 @@ namespace gplc
 		switch (pCurrToken->GetType())
 		{
 			case TT_IDENTIFIER:
-				pNode = mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName(), attributes);
+				{
+					pNode = mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName(), attributes);
+
+					const CToken* pNextToken = pLexer->PeekNextToken(1);
+
+					// \note we assume that we recognize either function or method call
+					// \note last part of condition is used to skip nullification because we will parse assignment from this step
+					if (isFunctionCall && !_match(pNextToken, TT_POINT) && !_match(pNextToken, TT_OPEN_BRACKET) && !_match(pNextToken, TT_ASSIGN_OP))
+					{
+						return nullptr;
+					}
+				}
 				break;
 			case TT_LITERAL:
 				pNode = mpNodesFactory->CreateLiteralNode(dynamic_cast<const CLiteralToken*>(pCurrToken)->GetValue());
@@ -700,9 +723,9 @@ namespace gplc
 		return pNode;
 	}
 
-	CASTNode* CParser::_parseAssignment(ILexer* pLexer)
+	CASTNode* CParser::_parseAssignment(ILexer* pLexer, CASTExpressionNode* pLeftValue)
 	{
-		CASTExpressionNode* pLeftNode = _parseUnaryExpression(pLexer);
+		CASTExpressionNode* pLeftNode = pLeftValue ? pLeftValue : _parseUnaryExpression(pLexer);
 
 		if (!pLeftNode)
 		{

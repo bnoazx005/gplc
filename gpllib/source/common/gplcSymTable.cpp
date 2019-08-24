@@ -250,6 +250,15 @@ namespace gplc
 	{
 		TSymbolHandle handle = _lookUp(mpCurrScopeEntry, RenameReservedIdentifier(variableName));
 
+		/*! \note when we work with aggregate types such as structures or modules we need to go into their scopes.
+			This situation makes current local variables invisible for us from that point,
+			so we also check previous active scope, which is our local scope 
+		*/
+		if ((handle == InvalidSymbolHandle) && (mpCurrScopeEntry->mScopeIndex < 0))
+		{
+			handle = _lookUp(mpPrevScopeEntry, RenameReservedIdentifier(variableName));
+		}
+
 		return handle != InvalidSymbolHandle ? (&mSymbols[handle - 1].second) : nullptr;
 	}
 
@@ -322,7 +331,18 @@ namespace gplc
 
 	TSymbolHandle CSymTable::GetSymbolHandleByName(const std::string& variable) const
 	{
-		return _lookUp(mpCurrScopeEntry, variable);
+		auto handle = _lookUp(mpCurrScopeEntry, variable);
+
+		/*! \note when we work with aggregate types such as structures or modules we need to go into their scopes.
+			This situation makes current local variables invisible for us from that point,
+			so we also check previous active scope, which is our local scope
+		*/
+		if ((handle == InvalidSymbolHandle) && (mpCurrScopeEntry->mScopeIndex < 0))
+		{
+			handle = _lookUp(mpPrevScopeEntry, variable);
+		}
+
+		return handle;
 	}
 
 	std::string CSymTable::RenameReservedIdentifier(const std::string& identifier) const

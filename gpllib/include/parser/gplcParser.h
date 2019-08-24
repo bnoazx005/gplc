@@ -256,7 +256,7 @@ namespace gplc
 				<unary_expr> ::= <identifier> | <value> | <function-call> 
 			*/
 
-			CASTExpressionNode* _parseUnaryExpression(ILexer* pLexer, U32 attributes = 0x0);
+			CASTExpressionNode* _parseUnaryExpression(ILexer* pLexer, U32 attributes = 0x0, bool isFunctionCall = false);
 
 			/*!
 				\brief The method tries to parse primary expression
@@ -264,7 +264,7 @@ namespace gplc
 				<value> ::= 
 			*/
 
-			CASTNode* _parsePrimaryExpression(ILexer* pLexer, U32 attributes = 0x0);
+			CASTNode* _parsePrimaryExpression(ILexer* pLexer, U32 attributes = 0x0, bool isFunctionCall = false);
 
 			/*!
 				\brief The method tries to parse an assigment operator
@@ -272,7 +272,7 @@ namespace gplc
 				<assignment> ::= <unary_expr> '=' <expression>
 			*/
 
-			CASTNode* _parseAssignment(ILexer* pLexer);
+			CASTNode* _parseAssignment(ILexer* pLexer, CASTExpressionNode* pLeftValue = nullptr);
 
 			/*!
 				\brief The method tries to parse the following rule
