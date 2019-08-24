@@ -162,11 +162,12 @@ namespace gplc
 			mVariablesTable[mpSymTable->GetSymbolHandleByName(identifier)] = pCurrVariableAllocation;
 
 			// \note we don't need to do any additional stuff when work with global function declarations
-			if (isGlobalScope && currType == CT_FUNCTION)
+			if ((isGlobalScope && currType == CT_FUNCTION) ||
+				(pType->GetAttributes() & AV_KEEP_UNINITIALIZED))
 			{
 				return {};
 			}
-
+			
 			// \todo replace this with visitor which generates initializing code per type, something like ITypeInitializer
 			switch (currType)
 			{

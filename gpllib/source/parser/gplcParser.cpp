@@ -263,26 +263,17 @@ namespace gplc
 			{
 				pOperator = _parseAssignment(pLexer);
 			}
-			else if (_match(pLexer->PeekNextToken(1), TT_OPEN_BRACKET) || _match(pLexer->PeekNextToken(1), TT_POINT)) // \note either function's call or access operator
+			else if (_match(pLexer->PeekNextToken(1), TT_OPEN_BRACKET))
 			{
-				auto pExpr = _parseUnaryExpression(pLexer);
+				CASTUnaryExpressionNode* pUnaryExpr = dynamic_cast<CASTUnaryExpressionNode*>(_parseUnaryExpression(pLexer));
 
-				if (pExpr) // return if the node is a function's call or an access operator
+				CASTNode* pNestedExprNode = pUnaryExpr ? pUnaryExpr->GetData() : nullptr;
+
+				if (pNestedExprNode != nullptr &&
+					(pNestedExprNode->GetType() == NT_FUNC_CALL ||
+						pNestedExprNode->GetType() == NT_ACCESS_OPERATOR)) // return if the node is a function's call or an access operator
 				{
-					switch (pExpr->GetType())
-					{
-						case NT_UNARY_EXPR:
-							{
-								CASTUnaryExpressionNode* pUnaryExpr = dynamic_cast<CASTUnaryExpressionNode*>(pExpr);
-
-								CASTNode* pNestedExprNode = pUnaryExpr ? pUnaryExpr->GetData() : nullptr;
-							}
-						case NT_ACCESS_OPERATOR:
-							return pExpr;
-						default:
-							UNREACHABLE();
-							break;
-					}
+					return pNestedExprNode;
 				}
 			}
 		}
@@ -347,6 +338,14 @@ namespace gplc
 			pLexer->GetNextToken();
 
 			return _parseDefinition(mpNodesFactory->CreateDeclNode(pIdentifiers, nullptr, attributes), pLexer);
+		}
+
+		// \note allow attributes usage only in full declaration or definition
+		U32 typeAttributes = _parseAttributes(pLexer);
+
+		for (auto& pCurrIdentifier : pIdentifiers->GetChildren())
+		{
+			pCurrIdentifier->SetAttribute(typeAttributes);
 		}
 
 		pTypeInfo = _parseType(pLexer);
@@ -448,8 +447,6 @@ namespace gplc
 
 	CASTNode* CParser::_parseBaseType(ILexer* pLexer)
 	{
-		U32 typeAttributes = _parseAttributes(pLexer);
-
 		const CToken* pCurrToken = pLexer->GetCurrToken(); 
 		const CToken* pNextToken = pLexer->PeekNextToken(1);
 
@@ -457,7 +454,7 @@ namespace gplc
 		if (_match(pCurrToken, TT_OPEN_SQR_BRACE) ||
 			_match(pCurrToken, TT_OPEN_BRACKET))
 		{
-			return _parseFunctionDeclaration(pLexer, false, typeAttributes);
+			return _parseFunctionDeclaration(pLexer, false);
 		}
 
 		// named type
@@ -471,10 +468,10 @@ namespace gplc
 				return _parseAccessOperator(mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName())), pLexer);
 			}
 
-			return mpNodesFactory->CreateNamedTypeNode(mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()), typeAttributes);
+			return mpNodesFactory->CreateNamedTypeNode(mpNodesFactory->CreateIdNode(dynamic_cast<const CIdentifierToken*>(pCurrToken)->GetName()));
 		}
 
-		CASTNode* pBuiltinType = _getBasicType(pCurrToken->GetType(), typeAttributes);
+		CASTNode* pBuiltinType = _getBasicType(pCurrToken->GetType());
 
 		if (pBuiltinType)
 		{
@@ -1186,51 +1183,51 @@ namespace gplc
 		return pToken && pToken->GetType() == type;
 	}
 
-	CASTTypeNode* CParser::_getBasicType(E_TOKEN_TYPE typeToken, U32 attributes) const
+	CASTTypeNode* CParser::_getBasicType(E_TOKEN_TYPE typeToken) const
 	{
 		switch (typeToken)
 		{
 			case TT_INT8_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_INT8, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_INT8);
 
 			case TT_INT16_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_INT16, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_INT16);
 
 			case TT_INT32_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_INT32, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_INT32);
 
 			case TT_INT64_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_INT64, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_INT64);
 
 			case TT_UINT8_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_UINT8, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_UINT8);
 
 			case TT_UINT16_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_UINT16, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_UINT16);
 
 			case TT_UINT32_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_UINT32, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_UINT32);
 
 			case TT_UINT64_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_UINT64, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_UINT64);
 
 			case TT_CHAR_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_CHAR, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_CHAR);
 
 			case TT_STRING_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_STRING, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_STRING);
 
 			case TT_BOOL_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_BOOL, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_BOOL);
 
 			case TT_VOID_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_VOID, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_VOID);
 
 			case TT_FLOAT_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_FLOAT, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_FLOAT);
 
 			case TT_DOUBLE_TYPE:
-				return mpNodesFactory->CreateTypeNode(NT_DOUBLE, attributes);
+				return mpNodesFactory->CreateTypeNode(NT_DOUBLE);
 		}
 
 		return nullptr;
@@ -1365,6 +1362,7 @@ namespace gplc
 					pLexer->GetNextToken();
 
 					attributes |= AV_KEEP_UNINITIALIZED;
+					break;
 				default:
 					UNIMPLEMENTED();	// \todo implement this case, it should be parsing error here
 					break;

@@ -388,7 +388,7 @@ namespace gplc
 
 			bool _match(const CToken* pToken, E_TOKEN_TYPE type);
 
-			CASTTypeNode* _getBasicType(E_TOKEN_TYPE typeToken, U32 attributes) const;
+			CASTTypeNode* _getBasicType(E_TOKEN_TYPE typeToken) const;
 
 			U32 _parseAttributes(ILexer* pLexer);
 		private:

@@ -1000,7 +1000,7 @@ namespace gplc
 	{
 		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
 
-		return pDependentType->GetAttributes();
+		return pDependentType->GetAttributes() | mAttributes;
 	}
 
 	std::string CDependentNamedType::GetMangledName() const
