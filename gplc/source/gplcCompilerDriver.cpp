@@ -156,8 +156,11 @@ namespace gplc
 				return result;
 			}
 
-			_outputCompilationUnit(!mCompilerOptions.mOutputFilename.empty() ? mCompilerOptions.mOutputFilename : moduleName,
-								   *std::get<llvm::Module*>(compiledProgram));
+			if (mCompilerOptions.mEmitFlag != E_EMIT_FLAGS::EF_NONE)
+			{
+				_outputCompilationUnit(!mCompilerOptions.mOutputFilename.empty() ? mCompilerOptions.mOutputFilename : moduleName,
+									   *std::get<llvm::Module*>(compiledProgram));
+			}
 
 			delete pLinker;
 		}
@@ -250,8 +253,7 @@ namespace gplc
 			return RV_SUCCESS;
 		});
 
-		// \todo Refactor this later
-	//	system(std::string("llc --filetype=obj ").append(moduleName).c_str());
+		std::cout << "gplc: Compiling " << moduleName << " (Finished)" << std::endl;
 
 		disposeInputStream();
 
