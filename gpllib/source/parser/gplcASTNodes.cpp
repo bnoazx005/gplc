@@ -12,6 +12,7 @@
 #include "common/gplcValues.h"
 #include "common/gplcTypeSystem.h"
 #include "common/gplcSymTable.h"
+#include "utils/Utils.h"
 #include <stack>
 
 
@@ -726,7 +727,11 @@ namespace gplc
 		CASTTypeNode(NT_FUNC_CALL)
 	{
 		AttachChild(pIdentifier);
-		AttachChild(pArgsList);
+		
+		if (pArgsList)
+		{
+			AttachChild(pArgsList);
+		}
 	}
 
 	std::string CASTFunctionCallNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
@@ -756,7 +761,7 @@ namespace gplc
 
 	CASTNode* CASTFunctionCallNode::GetArgs() const
 	{
-		return mChildren[1];
+		return mChildren.size() < 2 ? nullptr : mChildren[1];
 	}
 
 	
@@ -1260,5 +1265,41 @@ namespace gplc
 	CASTExpressionNode* CASTDeferOperatorNode::GetExpr() const
 	{
 		return dynamic_cast<CASTExpressionNode*>(mChildren[0]);
+	}
+
+
+	/*!
+		\brief CASTIntrinsicCallNode's definition
+	*/
+	
+	CASTIntrinsicCallNode::CASTIntrinsicCallNode(E_NODE_TYPE intrinsicType, CASTNode* pArgsList):
+		CASTTypeNode(intrinsicType)
+	{
+		AttachChild(pArgsList);
+	}
+
+	std::string CASTIntrinsicCallNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitIntrinsicCall(this);
+	}
+
+	bool CASTIntrinsicCallNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitIntrinsicCall(this);
+	}
+
+	TLLVMIRData CASTIntrinsicCallNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitIntrinsicCall(this);
+	}
+
+	CType* CASTIntrinsicCallNode::Resolve(ITypeResolver* pResolver)
+	{
+		return pResolver->VisitIntrinsicCall(this);
+	}
+
+	CASTNode* CASTIntrinsicCallNode::GetArgs() const
+	{
+		return mChildren[0];
 	}
 }

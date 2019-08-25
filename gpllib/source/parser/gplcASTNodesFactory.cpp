@@ -180,4 +180,9 @@ namespace gplc
 	{
 		return _insertNode(new CASTDeferOperatorNode(pExpression));
 	}
+
+	CASTIntrinsicCallNode* CASTNodesFactory::CreateIntrinsicCall(E_NODE_TYPE intrinsicType, CASTNode* pArgsList)
+	{
+		return _insertNode(new CASTIntrinsicCallNode(intrinsicType, pArgsList));
+	}
 }

@@ -198,4 +198,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CConstExprInterpreter::VisitIntrinsicCall(CASTIntrinsicCallNode* pNode)
+	{
+		return {};
+	}
 }

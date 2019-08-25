@@ -223,7 +223,8 @@ namespace gplc
 			return _declareNativeFunction(pSymbolDesc);
 		}
 
-		if (attributes & AV_RVALUE)
+		// \note the second case is true when identifier is a user-defined function pointer
+		if (attributes & AV_RVALUE || (pSymbolDesc->mpType->GetType() == CT_FUNCTION && !(attributes & AV_NATIVE_FUNC)))
 		{
 			auto pValueInstruction = _getIdentifierValue(name);
 
@@ -509,9 +510,14 @@ namespace gplc
 
 		llvm::Value* pCallee = std::get<llvm::Value*>(pNode->GetIdentifier()->Accept(this));
 		
-		std::vector<llvm::Value*> args;
+		std::vector<llvm::Value*> args{};
 
 		auto pNodeArgs = pNode->GetArgs();
+
+		if (!pNodeArgs)
+		{
+			return currIRBuilder.CreateCall(pCallee);
+		}
 
 		for (auto pCurrArg : pNodeArgs->GetChildren())
 		{
@@ -519,6 +525,31 @@ namespace gplc
 		}
 
 		return currIRBuilder.CreateCall(pCallee, args);
+	}
+	
+	TLLVMIRData CLLVMCodeGenerator::VisitIntrinsicCall(CASTIntrinsicCallNode* pNode)
+	{
+		auto pArgs = pNode->GetArgs();
+
+		switch (pNode->GetType())
+		{
+			case NT_SIZEOF_OPERATOR:
+				{
+					CType* pType = mpTypeResolver->Resolve(dynamic_cast<CASTTypeNode*>(pArgs->GetChildren()[0]));
+
+					return llvm::ConstantInt::get(llvm::Type::getInt64Ty(mContext), pType->GetSize());
+				}
+			case NT_TYPEID_OPERATOR:
+				{
+					CType* pType = mpTypeResolver->Resolve(dynamic_cast<CASTTypeNode*>(pArgs->GetChildren()[0]));
+
+					return llvm::ConstantInt::get(llvm::Type::getInt64Ty(mContext), pType->GetTypeId());
+				}
+		}
+
+		UNIMPLEMENTED();
+
+		return {};
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitReturnStatement(CASTReturnStatementNode* pNode)

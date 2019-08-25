@@ -50,6 +50,7 @@ namespace gplc
 	class CASTImportDirectiveNode;
 	class ITypesFactory;
 	class CASTDeferOperatorNode;
+	class CASTIntrinsicCallNode;
 
 
 	/*!
@@ -391,6 +392,8 @@ namespace gplc
 			CASTTypeNode* _getBasicType(E_TOKEN_TYPE typeToken) const;
 
 			U32 _parseAttributes(ILexer* pLexer);
+
+			CASTIntrinsicCallNode* _parseIntrinsicCall(ILexer* pLexer);
 		private:
 			ISymTable*        mpSymTable;
 

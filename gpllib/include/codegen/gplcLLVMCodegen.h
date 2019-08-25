@@ -108,6 +108,8 @@ namespace gplc
 
 			TLLVMIRData VisitDeferOperatorNode(CASTDeferOperatorNode* pNode) override;
 
+			TLLVMIRData VisitIntrinsicCall(CASTIntrinsicCallNode* pNode) override;
+
 			llvm::IRBuilder<>* GetCurrIRBuilder();
 
 			llvm::IRBuilder<>* GetGlobalIRBuilder();

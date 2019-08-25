@@ -653,6 +653,14 @@ namespace gplc
 			return mpNodesFactory->CreateUnaryExpr(pCurrToken->GetType(), _parseUnaryExpression(pLexer, attributes, isFunctionCall));
 		}
 
+		// try to parse compiler's builtin function like operators
+		auto pIntrinsicCall = _parseIntrinsicCall(pLexer);
+
+		if (pIntrinsicCall)
+		{
+			return mpNodesFactory->CreateUnaryExpr(TT_DEFAULT, pIntrinsicCall);
+		}
+
 		auto pPrimaryExpr = _parsePrimaryExpression(pLexer, attributes, isFunctionCall);
 
 		if (!pPrimaryExpr)
@@ -934,6 +942,8 @@ namespace gplc
 
 		CASTNode* pArgsNode = mpNodesFactory->CreateNode(NT_FUNC_ARGS);
 
+		CASTNode* pCurrArg = nullptr;
+
 		do
 		{
 			if (_match(pLexer->GetCurrToken(), TT_COMMA))
@@ -941,7 +951,12 @@ namespace gplc
 				pLexer->GetNextToken();
 			}
 
-			pArgsNode->AttachChild(_parseExpression(pLexer)); ///< \todo function's arguments can't have attributes before type's description
+			pCurrArg = _parseExpression(pLexer);
+
+			if (pCurrArg)
+			{
+				pArgsNode->AttachChild(pCurrArg); ///< \todo function's arguments can't have attributes before type's description
+			}
 		} while (_match(pLexer->GetCurrToken(), TT_COMMA));
 
 		if (!SUCCESS(_expect(TT_CLOSE_BRACKET, pLexer->GetCurrToken())))
@@ -951,7 +966,7 @@ namespace gplc
 
 		pLexer->GetNextToken(); // take )
 
-		return mpNodesFactory->CreateFuncCallNode(pPrimaryExpr, pArgsNode);
+		return mpNodesFactory->CreateFuncCallNode(pPrimaryExpr, pArgsNode->GetChildrenCount() ? pArgsNode : nullptr);
 	}
 
 	CASTReturnStatementNode* CParser::_parseReturnStatement(ILexer* pLexer)
@@ -1393,5 +1408,67 @@ namespace gplc
 		}
 
 		return attributes;
+	}
+
+	CASTIntrinsicCallNode* CParser::_parseIntrinsicCall(ILexer* pLexer)
+	{
+		const CToken* pCurrToken = pLexer->GetCurrToken();
+
+		if (!pCurrToken)
+		{
+			return nullptr;
+		}
+
+		E_NODE_TYPE intrinsicType;
+
+		switch (pCurrToken->GetType())
+		{
+			case TT_SIZEOF_OPERATOR:
+				intrinsicType = NT_SIZEOF_OPERATOR;
+				break;
+			case TT_TYPEID_OPERATOR:
+				intrinsicType = NT_TYPEID_OPERATOR;
+				break;
+			default:
+				return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take identifier
+
+		if (!SUCCESS(_expect(TT_OPEN_BRACKET, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take (
+
+		CASTNode* pArgsNode = mpNodesFactory->CreateNode(NT_FUNC_ARGS);
+
+		switch (intrinsicType)
+		{
+			case NT_SIZEOF_OPERATOR:
+			case NT_TYPEID_OPERATOR:
+				{
+					// this two allow either unary expression or type's identifier
+					CASTNode* pArg = _parseUnaryExpression(pLexer);
+
+					pArg = pArg ? pArg : _parseType(pLexer);
+
+					pArgsNode->AttachChild(pArg);
+				}
+				break;
+			default:
+				UNREACHABLE();
+				break;
+		}
+
+		if (!SUCCESS(_expect(TT_CLOSE_BRACKET, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take )
+			
+		return mpNodesFactory->CreateIntrinsicCall(intrinsicType, pArgsNode);
 	}
 }

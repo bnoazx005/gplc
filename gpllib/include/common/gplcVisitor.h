@@ -44,6 +44,7 @@ namespace gplc
 	class CASTPointerTypeNode;
 	class CASTImportDirectiveNode;
 	class CASTDeferOperatorNode;
+	class CASTIntrinsicCallNode;
 
 
 	template <typename T>
@@ -80,6 +81,7 @@ namespace gplc
 			virtual T VisitPointerTypeNode(CASTPointerTypeNode* pNode) = 0;
 			virtual T VisitImportDirectiveNode(CASTImportDirectiveNode* pNode) = 0;
 			virtual T VisitDeferOperatorNode(CASTDeferOperatorNode* pNode) = 0;
+			virtual T VisitIntrinsicCall(CASTIntrinsicCallNode* pNode) = 0;
 		protected:
 			IASTNodeVisitor() = default;
 			IASTNodeVisitor(const IASTNodeVisitor& visitor) = default;

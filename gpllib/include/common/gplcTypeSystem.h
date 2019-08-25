@@ -93,6 +93,7 @@ namespace gplc
 			virtual CType* VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) = 0;
 			virtual CType* VisitPointerType(CASTPointerTypeNode* pNode) = 0;
 			virtual CType* VisitModuleType(CASTImportDirectiveNode* pNode) = 0;
+			virtual CType* VisitIntrinsicCall(CASTIntrinsicCallNode* pNode) = 0;
 	};
 
 
@@ -126,6 +127,7 @@ namespace gplc
 			CType* VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode) override; 
 			CType* VisitPointerType(CASTPointerTypeNode* pNode) override;
 			CType* VisitModuleType(CASTImportDirectiveNode* pNode) override;
+			CType* VisitIntrinsicCall(CASTIntrinsicCallNode* pNode) override;
 		protected:
 			CType* _deduceBuiltinType(E_NODE_TYPE type, U32 attributes = 0x0);
 
@@ -182,6 +184,8 @@ namespace gplc
 				types are same or not. This implementation doesn't support
 				implicit type castings
 			*/
+
+			virtual U64 GetTypeId() const;
 
 			virtual bool AreSame(const CType* pType) const;
 
@@ -265,6 +269,8 @@ namespace gplc
 			const TFieldsArray& GetFieldsTypes() const;
 
 			CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const override;
+			
+			U64 GetTypeId() const override;
 
 			bool AreSame(const CType* pType) const override;
 
@@ -298,6 +304,8 @@ namespace gplc
 			CType* GetReturnValueType() const;
 
 			CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const override;
+			
+			U64 GetTypeId() const override;
 
 			bool AreSame(const CType* pType) const override;
 
@@ -326,6 +334,8 @@ namespace gplc
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
 
 			CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const override;
+
+			U64 GetTypeId() const override;
 
 			bool AreSame(const CType* pType) const override;
 
@@ -367,6 +377,8 @@ namespace gplc
 			U32 GetAttributes() const override;
 
 			std::string GetMangledName() const override;
+			
+			U64 GetTypeId() const override;
 		protected:
 			CDependentNamedType() = default;
 			CDependentNamedType(const CDependentNamedType& type) = default;
@@ -402,6 +414,8 @@ namespace gplc
 			CType* GetBaseType() const;
 
 			U32 GetElementsCount() const;
+
+			U64 GetTypeId() const override;
 		protected:
 			CArrayType() = default;
 			CArrayType(const CArrayType& arrayType) = default;

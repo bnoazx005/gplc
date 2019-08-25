@@ -31,6 +31,25 @@ namespace gplc
 			static std::string SemanticAnalyserMessageToString(E_SEMANTIC_ANALYSER_MESSAGE message);
 	};
 
+
+	/*!
+		\brief The method computes 32 bits hash based on an input string's value.
+		The underlying algorithm's description can be found here
+		http://www.cse.yorku.ca/~oz/hash.html
+
+		\param[in] pStr An input string
+
+		\param[in] hash The argument is used to store current hash value during a recursion
+
+		\return 32 bits hash of the input string
+	*/
+
+	constexpr U32 ComputeHash(const C8* pStr, U32 hash = 5381)
+	{
+		return (*pStr != 0) ? ComputeHash(pStr + 1, ((hash << 5) + hash) + *pStr) : hash;
+	}
+
+
 	#define UNIMPLEMENTED() \
 			 do { \
 				std::cerr << "The feature is not implemented yet (" << __FILE__ << "; " << __LINE__ << ")\n"; \

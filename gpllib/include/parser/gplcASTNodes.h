@@ -78,6 +78,8 @@ namespace gplc
 		NT_INDEXED_ACCESS_OPERATOR,
 		NT_IMPORT,
 		NT_DEFER_OPERATOR,
+		NT_SIZEOF_OPERATOR,
+		NT_TYPEID_OPERATOR,
 	};
 
 	/*!
@@ -712,6 +714,25 @@ namespace gplc
 		protected:
 			CASTDeferOperatorNode() = default;
 			CASTDeferOperatorNode(const CASTDeferOperatorNode&) = default;
+	};
+
+
+	class CASTIntrinsicCallNode : public CASTTypeNode
+	{
+		public:
+			CASTIntrinsicCallNode(E_NODE_TYPE intrinsicType, CASTNode* pArgsList);
+			virtual ~CASTIntrinsicCallNode() = default;
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			CType* Resolve(ITypeResolver* pResolver) override;
+
+			CASTNode* GetArgs() const;
+		protected:
+			CASTIntrinsicCallNode() = default;
+			CASTIntrinsicCallNode(const CASTIntrinsicCallNode& node) = default;
 	};
 }
 

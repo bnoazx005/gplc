@@ -410,4 +410,9 @@ namespace gplc
 	{
 		return nullptr;
 	}
+
+	TLLVMIRData CCCodeGenerator::VisitIntrinsicCall(CASTIntrinsicCallNode* pNode)
+	{
+		return {};
+	}
 }

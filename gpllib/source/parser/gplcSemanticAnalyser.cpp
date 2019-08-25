@@ -3,6 +3,7 @@
 #include "parser/gplcASTNodes.h"
 #include "common/gplcTypeSystem.h"
 #include "parser/gplcASTNodesFactory.h"
+#include "utils/Utils.h"
 
 
 namespace gplc
@@ -341,11 +342,11 @@ namespace gplc
 			return false;
 		}
 
-		auto pChildren = pNode->GetArgs()->GetChildren();
+		auto actualArgsCount = pNode->GetArgs() ? pNode->GetArgs()->GetChildrenCount() : 0;
 
 		auto pCalleeArgsTypes = pCalleeType->GetArgsTypes();
 
-		if (pCalleeArgsTypes.size() != pChildren.size())
+		if (pCalleeArgsTypes.size() != actualArgsCount)
 		{
 			// \todo number of arguments are mismatched between function's type and its usage
 			return false;
@@ -357,9 +358,9 @@ namespace gplc
 		CType* pExpectedArgType = nullptr;
 		CType* pActualArgType   = nullptr;
 
-		for (U32 argIndex = 0; argIndex < pChildren.size(); ++argIndex)
+		for (U32 argIndex = 0; argIndex < actualArgsCount; ++argIndex)
 		{
-			pCurrArgNode = dynamic_cast<CASTTypeNode*>(pChildren[argIndex]);
+			pCurrArgNode = dynamic_cast<CASTTypeNode*>(pNode->GetArgs()->GetChildren()[argIndex]);
 
 			pExpectedArgType = pCalleeArgsTypes[argIndex].second;
 
@@ -612,6 +613,30 @@ namespace gplc
 		auto pExpr = pNode->GetExpr();
 
 		return pExpr && pExpr->Accept(this);
+	}
+
+	bool CSemanticAnalyser::VisitIntrinsicCall(CASTIntrinsicCallNode* pNode)
+	{
+		auto pArgs = pNode->GetArgs();
+
+		switch (pNode->GetType())
+		{
+			case NT_SIZEOF_OPERATOR:
+			case NT_TYPEID_OPERATOR:
+				if (pArgs->GetChildrenCount() != 1)
+				{
+					_notifyError(SAE_INVALID_NUMBER_OF_ARGUMENTS);
+
+					return false;
+				}
+
+				break;
+			default:
+				UNIMPLEMENTED();
+				break;
+		}
+
+		return true;
 	}
 
 	bool CSemanticAnalyser::_enterScope(CASTBlockNode* pNode, ISymTable* pSymTable)

@@ -86,6 +86,8 @@ namespace gplc
 				return "The infinite loop does not contain any break operator";
 			case SAE_TRY_TO_ACCESS_UNDEFINED_FIELD:
 				return "Try to get an access to undeclared field";
+			case SAE_INVALID_NUMBER_OF_ARGUMENTS:
+				return "Invalid number of arguments";
 		}
 
 		return {};

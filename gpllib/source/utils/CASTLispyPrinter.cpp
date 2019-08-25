@@ -235,4 +235,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	std::string CASTLispyPrinter::VisitIntrinsicCall(CASTIntrinsicCallNode* pNode)
+	{
+		return {};
+	}
 }

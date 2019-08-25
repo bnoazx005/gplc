@@ -121,6 +121,8 @@ namespace gplc
 			bool VisitImportDirectiveNode(CASTImportDirectiveNode* pNode) override;
 			
 			bool VisitDeferOperatorNode(CASTDeferOperatorNode* pNode) override;
+
+			bool VisitIntrinsicCall(CASTIntrinsicCallNode* pNode) override;
 		protected:
 			bool _enterScope(CASTBlockNode* pNode, ISymTable* pSymTable);
 

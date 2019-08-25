@@ -326,6 +326,23 @@ namespace gplc
 		return mpTypesFactory->CreateModuleType(pNode->GetImportedModuleName(), 0x0, mpSymTable->GetCurrentScopeType());
 	}
 
+	CType* CTypeResolver::VisitIntrinsicCall(CASTIntrinsicCallNode* pNode)
+	{
+		auto pArgs = pNode->GetArgs();
+
+		switch (pNode->GetType())
+		{
+			case NT_SIZEOF_OPERATOR:
+			case NT_TYPEID_OPERATOR:
+				return mpTypesFactory->CreateType(CT_UINT64, BTS_UINT64, 0x0);
+			default:
+				UNIMPLEMENTED();
+				break;
+		}
+
+		return nullptr;
+	}
+
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type, U32 attributes)
 	{
 		switch (type)
@@ -520,6 +537,11 @@ namespace gplc
 	CType* CType::GetParent() const
 	{
 		return mpParent;
+	}
+
+	U64 CType::GetTypeId() const
+	{
+		return ComputeHash(ToShortAliasString().c_str());
 	}
 
 	bool CType::AreSame(const CType* pType) const
@@ -774,6 +796,18 @@ namespace gplc
 		return pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(0)));
 	}
 
+	U64 CStructType::GetTypeId() const
+	{
+		std::string fullTypeSignature = "struct_";
+
+		for (auto currField : mFieldsTypes)
+		{
+			fullTypeSignature.append(currField.second->ToShortAliasString());
+		}
+
+		return ComputeHash(fullTypeSignature.c_str());
+	}
+
 	bool CStructType::AreSame(const CType* pType) const
 	{
 		if (!pType || pType->GetType() != CT_STRUCT)
@@ -841,6 +875,18 @@ namespace gplc
 	CASTExpressionNode* CFunctionType::GetDefaultValue(IASTNodesFactory* pNodesFactory) const
 	{
 		return pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CPointerValue()));
+	}
+
+	U64 CFunctionType::GetTypeId() const
+	{
+		std::string fullTypeSignature = ToShortAliasString().append("_");
+
+		for (auto currField : mArgsTypes)
+		{
+			fullTypeSignature.append(currField.second->ToShortAliasString());
+		}
+
+		return ComputeHash(fullTypeSignature.c_str());
 	}
 
 	bool CFunctionType::AreSame(const CType* pType) const
@@ -914,6 +960,11 @@ namespace gplc
 
 		// return value of a first enumerator
 		return mpSymTable->LookUp(pEnumDesc->mVariables.begin()->second)->mpValue;
+	}
+
+	U64 CEnumType::GetTypeId() const
+	{
+		return ComputeHash(ToShortAliasString().append("_").append(GetMangledName() + mName).c_str());
 	}
 	
 	bool CEnumType::AreSame(const CType* pType) const
@@ -1010,6 +1061,13 @@ namespace gplc
 		return pDependentType->GetMangledName();
 	}
 
+	U64 CDependentNamedType::GetTypeId() const
+	{
+		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
+
+		return pDependentType->GetTypeId();
+	}
+
 	
 	/*!
 		\brief CArrayType's definition
@@ -1037,6 +1095,11 @@ namespace gplc
 	CASTExpressionNode* CArrayType::GetDefaultValue(IASTNodesFactory* pNodesFactory) const
 	{
 		return pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(0)));
+	}
+
+	U64 CArrayType::GetTypeId() const
+	{
+		return ComputeHash(ToShortAliasString().append("_").append(mpBaseType->ToShortAliasString()).c_str());
 	}
 
 	bool CArrayType::AreSame(const CType* pType) const

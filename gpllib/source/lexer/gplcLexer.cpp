@@ -81,6 +81,8 @@ namespace gplc
 		{ "@", TT_AT_SIGN },
 		{ "foreign", TT_FOREIGN_KEYWORD },
 		{ "uninit", TT_UNINIT_KEYWORD },
+		{ "sizeof", TT_SIZEOF_OPERATOR },
+		{ "typeid", TT_TYPEID_OPERATOR },
 	};
 
 	CLexer::CLexer():
