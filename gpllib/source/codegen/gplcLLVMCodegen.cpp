@@ -542,6 +542,8 @@ namespace gplc
 	{
 		auto pArgs = pNode->GetArgs();
 
+		auto& irBuilder = mIRBuildersStack.top();
+
 		switch (pNode->GetType())
 		{
 			case NT_SIZEOF_OPERATOR:
@@ -555,6 +557,33 @@ namespace gplc
 					CType* pType = mpTypeResolver->Resolve(dynamic_cast<CASTTypeNode*>(pArgs->GetChildren()[0]));
 
 					return llvm::ConstantInt::get(llvm::Type::getInt64Ty(mContext), pType->GetTypeId());
+				}
+			case NT_MEMCPY32_INTRINSIC:
+				{
+					static auto pFunctionType = llvm::FunctionType::get(llvm::Type::getVoidTy(mContext), 
+																		{ 
+																			llvm::Type::getInt8PtrTy(mContext),
+																			llvm::Type::getInt8PtrTy(mContext),
+																			llvm::Type::getInt32Ty(mContext),
+																			llvm::Type::getInt1Ty(mContext),
+																		}, false);
+
+					auto pFunction = mpModule->getOrInsertFunction("memcpy", pFunctionType).getCallee();
+
+					std::vector<llvm::Value*> args;
+
+					for (auto pCurrArg : pArgs->GetChildren())
+					{
+						args.push_back(std::get<llvm::Value*>(pCurrArg->Accept(this)));
+					}
+
+					args.push_back(llvm::ConstantInt::getFalse(mContext));
+
+					return irBuilder.CreateCall(pFunction, args, "__memcpy_32_call");
+				}
+			case NT_MEMCPY64_INTRINSIC:
+				{
+
 				}
 		}
 

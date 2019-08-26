@@ -631,6 +631,17 @@ namespace gplc
 				}
 
 				break;
+			case NT_MEMCPY32_INTRINSIC:
+			case NT_MEMCPY64_INTRINSIC:
+				if (pArgs->GetChildrenCount() != 3)
+				{
+					_notifyError(SAE_INVALID_NUMBER_OF_ARGUMENTS);
+
+					return false;
+				}
+
+				// \todo add checking types of arguments here
+				break;
 			default:
 				UNIMPLEMENTED();
 				break;

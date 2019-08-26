@@ -1429,6 +1429,21 @@ namespace gplc
 			case TT_TYPEID_OPERATOR:
 				intrinsicType = NT_TYPEID_OPERATOR;
 				break;
+			case TT_MEMCPY32_INTRINSIC:
+				intrinsicType = NT_MEMCPY32_INTRINSIC;
+				break;
+			case TT_MEMCPY64_INTRINSIC:
+				intrinsicType = NT_MEMCPY64_INTRINSIC;				
+				break;
+			case TT_MEMSET32_INTRINSIC:
+				intrinsicType = NT_MEMSET32_INTRINSIC;
+				break;
+			case TT_MEMSET64_INTRINSIC:
+				intrinsicType = NT_MEMSET64_INTRINSIC;
+				break;
+			case TT_ASSERT_INTRINSIC:
+				intrinsicType = NT_ASSERT_INTRINSIC;
+				break;
 			default:
 				return nullptr;
 		}
@@ -1455,6 +1470,27 @@ namespace gplc
 					pArg = pArg ? pArg : _parseType(pLexer);
 
 					pArgsNode->AttachChild(pArg);
+				}
+				break;
+			case NT_MEMCPY32_INTRINSIC:
+			case NT_MEMCPY64_INTRINSIC:
+				{
+					for (U8 i = 0; i < 3; ++i)
+					{
+						CASTNode* pArg = _parseUnaryExpression(pLexer);
+
+						pArgsNode->AttachChild(pArg);
+
+						if (i < 2)
+						{
+							if (!SUCCESS(_expect(TT_COMMA, pLexer->GetCurrToken())))
+							{
+								return nullptr;
+							}
+
+							pLexer->GetNextToken(); // take ,
+						}
+					}
 				}
 				break;
 			default:

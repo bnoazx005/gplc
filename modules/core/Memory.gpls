@@ -22,5 +22,5 @@ free : @foreign (pPtr: uint8*);
 // 	// \todo here we will call __memcpy_64 intrinsic 
 // };
 memcpy64 := (dest: uint32, src: uint32, size: uint32) {
-	// \todo here we will call __memcpy_64 intrinsic 
+	//__memcpy_64(dest, src, size);
 };

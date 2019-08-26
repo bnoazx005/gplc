@@ -380,6 +380,22 @@ TEST_CASE("Lexer's tests")
 
 		delete pInputStream;
 	}
+
+	SECTION("TestGetNextToken_ParseIntrinsicsNames_ReturnsCorrectTypesOfTokens")
+	{
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"__memcpy_32 __memcpy_64"
+			});
+
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
+
+		REQUIRE(pLexer->GetNextToken()->GetType() == TT_MEMCPY32_INTRINSIC);
+		REQUIRE(pLexer->GetNextToken()->GetType() == TT_MEMCPY64_INTRINSIC);
+		REQUIRE(!pLexer->GetNextToken());
+
+		delete pInputStream;
+	}
 	
 	delete pLexer;
 }

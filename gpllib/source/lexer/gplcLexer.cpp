@@ -83,6 +83,11 @@ namespace gplc
 		{ "uninit", TT_UNINIT_KEYWORD },
 		{ "sizeof", TT_SIZEOF_OPERATOR },
 		{ "typeid", TT_TYPEID_OPERATOR },
+		{ "__memcpy_32", TT_MEMCPY32_INTRINSIC },
+		{ "__memcpy_64", TT_MEMCPY64_INTRINSIC },
+		{ "__memset_32", TT_MEMSET32_INTRINSIC },
+		{ "__memset_64", TT_MEMSET64_INTRINSIC },
+		{ "assert", TT_ASSERT_INTRINSIC },
 	};
 
 	CLexer::CLexer():
