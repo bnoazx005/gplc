@@ -141,6 +141,10 @@ namespace gplc
 			llvm::BasicBlock* _constructDeferBlock(TExpressionsStack& expressionsStack);
 
 			std::string _extractIdentifier(CASTUnaryExpressionNode* pNode) const;
+
+			std::string _getInitModuleFuncName(const std::string& moduleName) const;
+
+			llvm::Value* _declareImportedFunction(const TSymbolDesc* pFuncDesc);
 		protected:
 			TLLVMLiteralVisitor*     mpLiteralIRGenerator;
 

@@ -208,6 +208,8 @@ namespace gplc
 
 		const TSymbolDesc* pSymbolDesc = mpSymTable->LookUp(name);
 
+		TSymbolHandle identifierHandle = mpSymTable->GetSymbolHandleByName(name);
+
 		assert(pSymbolDesc);
 
 		U32 attributes = pSymbolDesc->mpType->GetAttributes() | pNode->GetAttributes();
@@ -223,8 +225,17 @@ namespace gplc
 			return _declareNativeFunction(pSymbolDesc);
 		}
 
+		auto& irBuilder = mIRBuildersStack.top();
+
 		// \note the second case is true when identifier is a user-defined function pointer
-		if (attributes & AV_RVALUE || (pSymbolDesc->mpType->GetType() == CT_FUNCTION && !(attributes & AV_NATIVE_FUNC)))
+		if ((pSymbolDesc->mpType->GetType() == CT_FUNCTION && !(attributes & AV_NATIVE_FUNC)))
+		{
+			llvm::Value* pValueInstruction = (mVariablesTable.find(identifierHandle) == mVariablesTable.cend()) ? _declareImportedFunction(pSymbolDesc) : _getIdentifierValue(name);
+			
+			return irBuilder.CreateLoad(pValueInstruction, name);
+		}
+
+		if (attributes & AV_RVALUE)
 		{
 			auto pValueInstruction = _getIdentifierValue(name);
 
@@ -234,10 +245,10 @@ namespace gplc
 				return pValueInstruction; 
 			}
 
-			return mIRBuildersStack.top().CreateLoad(pValueInstruction, name);
+			return irBuilder.CreateLoad(pValueInstruction, name);
 		}
 
-		return (mVariablesTable.find(mpSymTable->GetSymbolHandleByName(name)) != mVariablesTable.cend()) ? _getIdentifierValue(name) : _allocateVariableOnStack(name);
+		return (mVariablesTable.find(identifierHandle) != mVariablesTable.cend()) ? _getIdentifierValue(name) : _allocateVariableOnStack(name);
 	}
 
 	TLLVMIRData CLLVMCodeGenerator::VisitLiteral(CASTLiteralNode* pNode)
@@ -686,7 +697,7 @@ namespace gplc
 		llvm::BasicBlock* pBlock = llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetValue()->Accept(this)));
 
 		// \note skip this condition if there is return statement already
-		if (pInternalLambdaType->IsProcedure() && !pBlock->getInstList().back().getType()->isVoidTy())
+		if (pInternalLambdaType->IsProcedure() && pBlock->getInstList().back().getOpcode() != llvm::Instruction::Ret)
 		{
 			llvm::IRBuilder<> funcBodyIRBuilder(pBlock);
 
@@ -899,6 +910,15 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitImportDirectiveNode(CASTImportDirectiveNode* pNode)
 	{
+		// \note here we add initialization functions calls of modules that are imported into this one
+
+		// firstly, we declare it
+
+		// then call
+		llvm::FunctionType* pFuncType = llvm::FunctionType::get(llvm::Type::getVoidTy(mContext), {}, false);
+
+		mpInitModuleGlobalsIRBuilder->CreateCall(mpModule->getOrInsertFunction(_getInitModuleFuncName(pNode->GetImportedModuleName()), pFuncType));
+
 		return {};
 	}
 
@@ -1036,11 +1056,31 @@ namespace gplc
 		std::string moduleName = mpModule->getName();
 		moduleName = moduleName.substr(0, moduleName.find_first_of('.'));
 
-		mpInitModuleGlobalsFunction = llvm::Function::Create(pInitModuleGlobalsFuncType, llvm::Function::ExternalLinkage, moduleName + "$initModuleGlobals", mpModule);
+		// \note create flag that tells was the module initialized or not
+		auto boolType = llvm::Type::getInt1Ty(mContext);
+
+		auto isModuleInitialized = mpModule->getOrInsertGlobal(std::string("is_").append(moduleName).append("_initialized"), boolType);
+
+		llvm::dyn_cast<llvm::GlobalVariable>(isModuleInitialized)->setInitializer(llvm::ConstantInt::get(boolType, 0));
+
+		mpInitModuleGlobalsFunction = llvm::Function::Create(pInitModuleGlobalsFuncType, llvm::Function::ExternalLinkage, _getInitModuleFuncName(moduleName), mpModule);
 		
 		llvm::BasicBlock* pInitModuleGlobalsFuncBody = llvm::BasicBlock::Create(mContext, "entry", mpInitModuleGlobalsFunction);
 
 		mpInitModuleGlobalsIRBuilder = new llvm::IRBuilder<>(pInitModuleGlobalsFuncBody);
+
+		// \note assign true to is_<module-name>_initialized variable
+		mpInitModuleGlobalsIRBuilder->CreateStore(llvm::ConstantInt::getTrue(mContext), isModuleInitialized);
+
+		// \note add check up whether the module's globals were initialized or not to prevent doubled initialization
+		llvm::IRBuilder<> preConditionIRBuilder(llvm::BasicBlock::Create(mContext, "pre_cond_entry", mpInitModuleGlobalsFunction, pInitModuleGlobalsFuncBody));
+		
+		llvm::BasicBlock* pTruePreConditionBlock = llvm::BasicBlock::Create(mContext, "already_initialized", mpInitModuleGlobalsFunction);
+
+		preConditionIRBuilder.CreateCondBr(preConditionIRBuilder.CreateLoad(isModuleInitialized), pTruePreConditionBlock, pInitModuleGlobalsFuncBody);
+
+		llvm::IRBuilder<> trueConditionIRBuilder(pTruePreConditionBlock);
+		trueConditionIRBuilder.CreateRetVoid();
 	}
 
 	llvm::Value* CLLVMCodeGenerator::_declareNativeFunction(const TSymbolDesc* pFuncDesc)
@@ -1173,5 +1213,26 @@ namespace gplc
 	std::string CLLVMCodeGenerator::_extractIdentifier(CASTUnaryExpressionNode* pNode) const
 	{
 		return dynamic_cast<CASTIdentifierNode*>(pNode->GetData())->GetName();
+	}
+
+	std::string CLLVMCodeGenerator::_getInitModuleFuncName(const std::string& moduleName) const
+	{
+		return std::string(moduleName).append("$initModuleGlobals");
+	}
+
+	llvm::Value* CLLVMCodeGenerator::_declareImportedFunction(const TSymbolDesc* pFuncDesc)
+	{
+		TSymbolHandle funcHandle = mpSymTable->GetSymbolHandleByName(pFuncDesc->mName);
+
+		if (mVariablesTable.find(funcHandle) != mVariablesTable.cend())
+		{
+			return mVariablesTable[funcHandle];
+		}
+
+		auto pFunctionType = llvm::dyn_cast<llvm::PointerType>(std::get<llvm::Type*>(pFuncDesc->mpType->Accept(mpTypeGenerator)));
+
+		mVariablesTable[funcHandle] = mpModule->getOrInsertGlobal(pFuncDesc->mName, pFunctionType);
+
+		return mVariablesTable[funcHandle];
 	}
 }

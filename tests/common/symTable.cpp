@@ -127,6 +127,45 @@ TEST_CASE("CSymTable tests")
 		pSymTable->LeaveScope();
 		pSymTable->LeaveScope();
 	}
+
+	SECTION("TestLeaveScope_PassTwoNeighbourNamedScopes_IterateOverThem")
+	{
+		std::string scopes[] =
+		{
+			"Scope1", "Scope2"
+		};
+		
+		pSymTable->CreateNamedScope(scopes[0]);
+
+		pSymTable->CreateScope();
+		pSymTable->LeaveScope();
+
+		pSymTable->CreateScope();
+		pSymTable->AddVariable({ "x", nullptr, nullptr });
+		pSymTable->LeaveScope();
+
+		pSymTable->LeaveScope();
+
+		pSymTable->CreateNamedScope(scopes[1]);
+		pSymTable->AddVariable({ "y", nullptr, nullptr });
+		pSymTable->LeaveScope();
+
+		pSymTable->VisitNamedScope(scopes[0]);
+
+		pSymTable->VisitScope();
+		pSymTable->LeaveScope();
+
+		pSymTable->VisitScope();
+		REQUIRE(pSymTable->LookUp("x"));
+		pSymTable->LeaveScope();
+
+		pSymTable->LeaveScope();
+
+		pSymTable->VisitNamedScope(scopes[1]);
+		REQUIRE(pSymTable->LookUp("y"));
+		pSymTable->LeaveScope();
+
+	}
 	
 	delete pSymTable;
 }

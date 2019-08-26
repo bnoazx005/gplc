@@ -47,6 +47,7 @@ namespace gplc
 		mpGlobalScopeEntry->mParentScope = nullptr;
 
 		mpCurrScopeEntry = mpGlobalScopeEntry;
+		mpPrevScopeEntry = mpGlobalScopeEntry;
 	}
 
 	CSymTable::CSymTable(const CSymTable& table):
@@ -85,7 +86,7 @@ namespace gplc
 
 	Result CSymTable::CreateNamedScope(const std::string& scopeName)
 	{
-		if (mIsLocked || mpCurrScopeEntry == nullptr)
+		if (mIsLocked || !mpCurrScopeEntry)
 		{
 			return RV_FAIL;
 		}
@@ -114,7 +115,7 @@ namespace gplc
 
 	Result CSymTable::CreateScope()
 	{
-		if (mIsLocked || mpCurrScopeEntry == nullptr)
+		if (mIsLocked || !mpCurrScopeEntry)
 		{
 			return RV_FAIL;
 		}
@@ -138,7 +139,7 @@ namespace gplc
 
 	Result CSymTable::VisitNamedScope(const std::string& scopeName)
 	{
-		if (mIsLocked || mpCurrScopeEntry == nullptr)
+		if (mIsLocked || !mpCurrScopeEntry)
 		{
 			return RV_FAIL;
 		}
@@ -148,30 +149,32 @@ namespace gplc
 		mIsReadMode = true;
 
 		auto pCurrScope = mpCurrScopeEntry;
-
-		while (pCurrScope->mParentScope)
+		
+		while (pCurrScope && (pCurrScope->mNamedScopes.find(scopeName) == pCurrScope->mNamedScopes.cend()) && pCurrScope->mParentScope)
 		{
-			if (pCurrScope->mNamedScopes.find(scopeName) != pCurrScope->mNamedScopes.cend())
-			{
-				mpCurrScopeEntry = pCurrScope;
-
-				break;
-			}
-
 			pCurrScope = pCurrScope->mParentScope;
 		}
 
-		mpCurrScopeEntry = mpCurrScopeEntry->mNamedScopes[scopeName];
+		if (!pCurrScope)
+		{
+			return RV_FAIL;
+		}
+
+		mpCurrScopeEntry = pCurrScope->mNamedScopes[scopeName];
+
+		assert(mpCurrScopeEntry);
 
 		return RV_SUCCESS;
 	}
 
 	Result CSymTable::VisitScope()
 	{
-		if (mIsLocked || mpCurrScopeEntry == nullptr || mpCurrScopeEntry->mNestedScopes.size() < 1)
+		if (mIsLocked || !mpCurrScopeEntry || mpCurrScopeEntry->mNestedScopes.size() < 1)
 		{
 			return RV_FAIL;
 		}
+
+		mpPrevScopeEntry = mpCurrScopeEntry;
 
 		mIsReadMode = true;
 
@@ -184,7 +187,7 @@ namespace gplc
 
 	Result CSymTable::LeaveScope()
 	{
-		if (mIsLocked || mpCurrScopeEntry->mParentScope == nullptr) //we stay in a global scope
+		if (mIsLocked || !mpCurrScopeEntry->mParentScope) //we stay in a global scope
 		{
 			return RV_FAIL;
 		}
