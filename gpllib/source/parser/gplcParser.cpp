@@ -1444,6 +1444,9 @@ namespace gplc
 			case TT_ASSERT_INTRINSIC:
 				intrinsicType = NT_ASSERT_INTRINSIC;
 				break;
+			case TT_CAST_INTRINSIC:
+				intrinsicType = NT_CAST_INTRINSIC;
+				break;
 			default:
 				return nullptr;
 		}
@@ -1491,6 +1494,20 @@ namespace gplc
 							pLexer->GetNextToken(); // take ,
 						}
 					}
+				}
+				break;
+			case NT_CAST_INTRINSIC:
+				{
+					pArgsNode->AttachChild(_parseType(pLexer));
+
+					if (!SUCCESS(_expect(TT_COMMA, pLexer->GetCurrToken())))
+					{
+						return nullptr;
+					}
+
+					pLexer->GetNextToken(); //take ,
+
+					pArgsNode->AttachChild(_parseUnaryExpression(pLexer));
 				}
 				break;
 			default:

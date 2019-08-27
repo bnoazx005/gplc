@@ -29,6 +29,8 @@ namespace gplc
 
 	class ITypeResolver;
 	class CASTExpressionNode;
+	class CASTTypeNode;
+	class CASTUnaryExpressionNode;
 
 
 	class CLLVMCodeGenerator : public ICodeGenerator
@@ -145,6 +147,8 @@ namespace gplc
 			std::string _getInitModuleFuncName(const std::string& moduleName) const;
 
 			llvm::Value* _declareImportedFunction(const TSymbolDesc* pFuncDesc);
+
+			llvm::Value* _emitTypeConversion(CASTTypeNode* pType, CASTUnaryExpressionNode* pExpr);
 		protected:
 			TLLVMLiteralVisitor*     mpLiteralIRGenerator;
 

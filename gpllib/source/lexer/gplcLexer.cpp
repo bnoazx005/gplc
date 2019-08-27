@@ -88,6 +88,7 @@ namespace gplc
 		{ "__memset_32", TT_MEMSET32_INTRINSIC },
 		{ "__memset_64", TT_MEMSET64_INTRINSIC },
 		{ "assert", TT_ASSERT_INTRINSIC },
+		{ "cast", TT_CAST_INTRINSIC },
 	};
 
 	CLexer::CLexer():

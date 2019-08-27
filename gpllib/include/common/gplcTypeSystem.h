@@ -157,6 +157,12 @@ namespace gplc
 
 			virtual bool IsBuiltIn() const;
 
+			virtual bool IsInteger() const;
+
+			virtual bool IsUnsignedInteger() const;
+
+			virtual bool IsFloatingPoint() const;
+
 			void SetAttribute(U32 attribute);
 
 			virtual void SetName(const std::string& name);
@@ -361,6 +367,12 @@ namespace gplc
 			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
 
 			bool IsBuiltIn() const override;
+			
+			bool IsInteger() const override;
+
+			bool IsUnsignedInteger() const override;
+
+			bool IsFloatingPoint() const override;
 
 			CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const override;
 

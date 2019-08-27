@@ -642,6 +642,14 @@ namespace gplc
 
 				// \todo add checking types of arguments here
 				break;
+			case NT_CAST_INTRINSIC:
+				if (pArgs->GetChildrenCount() != 2)
+				{
+					_notifyError(SAE_INVALID_NUMBER_OF_ARGUMENTS);
+					
+					return false;
+				}
+				break;
 			default:
 				UNIMPLEMENTED();
 				break;

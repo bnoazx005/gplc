@@ -335,6 +335,8 @@ namespace gplc
 			case NT_SIZEOF_OPERATOR:
 			case NT_TYPEID_OPERATOR:
 				return mpTypesFactory->CreateType(CT_UINT64, BTS_UINT64, 0x0);
+			case NT_CAST_INTRINSIC:
+				return dynamic_cast<CASTTypeNode*>(pNode->GetArgs()->GetChildren()[0])->Resolve(this);
 			default:
 				UNIMPLEMENTED();
 				break;
@@ -460,6 +462,22 @@ namespace gplc
 	bool CType::IsBuiltIn() const
 	{
 		return mType != CT_ENUM && mType != CT_ARRAY && mType != CT_FUNCTION && mType != CT_STRUCT;
+	}
+
+	bool CType::IsInteger() const
+	{
+		return (mType == CT_INT8 || mType == CT_INT16 || mType == CT_INT32 || mType == CT_INT64) ||
+			   (mType == CT_UINT8 || mType == CT_UINT16 || mType == CT_UINT32 || mType == CT_UINT64);
+	}
+
+	bool CType::IsUnsignedInteger() const
+	{
+		return mType == CT_UINT8 || mType == CT_UINT16 || mType == CT_UINT32 || mType == CT_UINT64;
+	}
+
+	bool CType::IsFloatingPoint() const
+	{
+		return mType == CT_FLOAT || mType == CT_DOUBLE;
 	}
 
 	void CType::SetAttribute(U32 attribute)
@@ -999,6 +1017,27 @@ namespace gplc
 		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
 
 		return pDependentType->IsBuiltIn();
+	}
+
+	bool CDependentNamedType::IsInteger() const
+	{
+		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
+
+		return pDependentType->IsInteger();
+	}
+
+	bool CDependentNamedType::IsUnsignedInteger() const
+	{
+		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
+
+		return pDependentType->IsUnsignedInteger();
+	}
+
+	bool CDependentNamedType::IsFloatingPoint() const
+	{
+		const CType* pDependentType = mpSymTable->LookUpNamedScope(mName)->mpType;
+
+		return pDependentType->IsFloatingPoint();
 	}
 
 	CASTExpressionNode* CDependentNamedType::GetDefaultValue(IASTNodesFactory* pNodesFactory) const

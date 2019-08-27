@@ -266,6 +266,8 @@ namespace gplc
 		{
 			case TT_STAR:	// \note dereference pointer value
 				return currIRBuidler.CreateLoad(pBaseExpr);
+			case TT_MINUS:
+				return currIRBuidler.CreateNeg(pBaseExpr, "neg_value");
 		}
 
 		return pBaseExpr;
@@ -584,6 +586,11 @@ namespace gplc
 			case NT_MEMCPY64_INTRINSIC:
 				{
 
+				}
+			case NT_CAST_INTRINSIC:
+				{
+					return _emitTypeConversion(dynamic_cast<CASTTypeNode*>(pArgs->GetChildren()[0]), 
+											   dynamic_cast<CASTUnaryExpressionNode*>(pArgs->GetChildren()[1]));
 				}
 		}
 
@@ -1263,5 +1270,92 @@ namespace gplc
 		mVariablesTable[funcHandle] = mpModule->getOrInsertGlobal(pFuncDesc->mName, pFunctionType);
 
 		return mVariablesTable[funcHandle];
+	}
+
+	llvm::Value* CLLVMCodeGenerator::_emitTypeConversion(CASTTypeNode* pType, CASTUnaryExpressionNode* pExpr)
+	{
+		CType* pInternalType     = pType->Resolve(mpTypeResolver);
+		CType* pInternalExprType = pExpr->Resolve(mpTypeResolver);
+
+		E_COMPILER_TYPES destType = pInternalType->GetType();
+		E_COMPILER_TYPES srcType  = pInternalExprType->GetType();
+
+		U32 destTypeSize = pInternalType->GetSize();
+		U32 srcTypeSize  = pInternalExprType->GetSize();
+
+		auto& irBuilder = mIRBuildersStack.top();
+
+		auto pValue = std::get<llvm::Value*>(pExpr->Accept(this));
+
+		// \note integer -> integer
+		if (pInternalType->IsInteger() && pInternalExprType->IsInteger()) 
+		{			
+			// \note the situation is possible when you want downcast to lesser integral type or upcast to wider one
+			if (srcTypeSize > destTypeSize)
+			{
+				return irBuilder.CreateTrunc(pValue, std::get<llvm::Type*>(pInternalType->Accept(mpTypeGenerator)), "trunc_cast");
+			}
+			else if (srcTypeSize < destTypeSize) // make upcast to wider type
+			{
+				// \note signed -> unsigned
+				if (pInternalType->IsUnsignedInteger() && !pInternalExprType->IsUnsignedInteger())
+				{
+					return irBuilder.CreateSExt(pValue, std::get<llvm::Type*>(pInternalType->Accept(mpTypeGenerator)), "sign_cast");
+				}
+				else
+				{
+					return irBuilder.CreateZExt(pValue, std::get<llvm::Type*>(pInternalType->Accept(mpTypeGenerator)), "up_cast");
+				}
+			}
+			else
+			{
+				if (pInternalType->IsUnsignedInteger() && !pInternalExprType->IsUnsignedInteger())
+				{
+					return irBuilder.CreateSExtOrBitCast(pValue, std::get<llvm::Type*>(pInternalType->Accept(mpTypeGenerator)), "sign_cast");
+				}
+
+				return pValue;
+			}
+		}
+
+		// \note float <-> double
+		if (pInternalType->IsFloatingPoint() && pInternalExprType->IsFloatingPoint())
+		{
+			// double -> float
+			if (srcTypeSize < destTypeSize)
+			{
+				return irBuilder.CreateFPExt(pValue, std::get<llvm::Type*>(pInternalType->Accept(mpTypeGenerator)), "fp_up_cast");
+			}
+			else // float -> double
+			{
+				return irBuilder.CreateFPTrunc(pValue, std::get<llvm::Type*>(pInternalType->Accept(mpTypeGenerator)), "fp_trunc_cast");
+			}
+		}
+
+		// \note float -> integer
+		if (pInternalType->IsInteger() && pInternalExprType->IsFloatingPoint())
+		{
+			if (pInternalType->IsUnsignedInteger())
+			{
+				return irBuilder.CreateFPToUI(pValue, std::get<llvm::Type*>(pInternalType->Accept(mpTypeGenerator)), "fp2uint_cast");
+			}
+
+			return irBuilder.CreateFPToSI(pValue, std::get<llvm::Type*>(pInternalType->Accept(mpTypeGenerator)), "fp2sint_cast");
+		}
+
+		// \note integer -> float
+		if (pInternalType->IsFloatingPoint() && pInternalExprType->IsInteger())
+		{
+			if (pInternalExprType->IsUnsignedInteger())
+			{
+				return irBuilder.CreateUIToFP(pValue, std::get<llvm::Type*>(pInternalType->Accept(mpTypeGenerator)), "uint2fp_cast");
+			}
+
+			return irBuilder.CreateSIToFP(pValue, std::get<llvm::Type*>(pInternalType->Accept(mpTypeGenerator)), "sint2fp_cast");
+		}
+
+		UNIMPLEMENTED();
+
+		return nullptr;
 	}
 }
