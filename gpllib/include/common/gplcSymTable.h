@@ -111,7 +111,7 @@ namespace gplc
 			virtual CType* GetParentScopeType() const = 0;
 			virtual CType* GetCurrentScopeType() const = 0;
 
-			virtual void DumpScopesStructure() = 0;
+			virtual void DumpScopesStructure() const = 0;
 		protected:
 			ISymTable(const ISymTable& table);
 	};
@@ -156,7 +156,7 @@ namespace gplc
 			CType* GetParentScopeType() const override;
 			CType* GetCurrentScopeType() const override;
 
-			void DumpScopesStructure() override;
+			void DumpScopesStructure() const override;
 		protected:
 			CSymTable(const CSymTable& table);
 

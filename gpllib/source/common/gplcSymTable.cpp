@@ -377,7 +377,7 @@ namespace gplc
 		return pCurrentScope ? pCurrentScope->mpType : nullptr;
 	}
 
-	void CSymTable::DumpScopesStructure()
+	void CSymTable::DumpScopesStructure() const
 	{
 		std::function<void(const TSymTableEntry*, U32)> _printScopeInfo = [this, &_printScopeInfo](const TSymTableEntry* pCurrTableEntry, U32 currLevel)
 		{
@@ -414,9 +414,7 @@ namespace gplc
 
 			for (auto pCurrNamedScope : pCurrTableEntry->mNamedScopes)
 			{
-				VisitNamedScope(pCurrNamedScope.first);
 				_printScopeInfo(pCurrNamedScope.second, currLevel + 1);
-				LeaveScope();
 			}
 		};
 
