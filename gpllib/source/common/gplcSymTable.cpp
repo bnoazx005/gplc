@@ -47,7 +47,9 @@ namespace gplc
 		mpGlobalScopeEntry->mParentScope = nullptr;
 
 		mpCurrScopeEntry = mpGlobalScopeEntry;
-		mpPrevScopeEntry = mpGlobalScopeEntry;
+		mpPrevScopeEntry = mpCurrScopeEntry;
+
+		mPrevVisitedScopeIndex = -1;
 	}
 
 	CSymTable::CSymTable(const CSymTable& table):
@@ -146,6 +148,11 @@ namespace gplc
 
 		mpPrevScopeEntry = mpCurrScopeEntry;
 
+		if (mpCurrScopeEntry->mScopeIndex >= 0)
+		{
+			mPrevVisitedScopeIndex = mLastVisitedScopeIndex;
+		}
+		
 		mIsReadMode = true;
 
 		auto pCurrScope = mpCurrScopeEntry;
@@ -162,7 +169,32 @@ namespace gplc
 
 		mpCurrScopeEntry = pCurrScope->mNamedScopes[scopeName];
 
+		mLastVisitedScopeIndex = -1;
+
 		assert(mpCurrScopeEntry);
+
+		return RV_SUCCESS;
+	}
+
+	Result CSymTable::VisitNamedScopeWithRestore(const std::string& scopeName, const ISymTable::TSymTableTransactionCallback& transaction)
+	{
+		auto pCurrScopeEntry = mpCurrScopeEntry;
+
+		I32 prevScopeIndex = mLastVisitedScopeIndex;
+
+		Result result = VisitNamedScope(scopeName);
+
+		if (!SUCCESS(result))
+		{
+			return result;
+		}
+
+		transaction(this);
+
+		// restore previous state
+		mpCurrScopeEntry = pCurrScopeEntry;
+
+		mLastVisitedScopeIndex = prevScopeIndex;
 
 		return RV_SUCCESS;
 	}
@@ -173,10 +205,10 @@ namespace gplc
 		{
 			return RV_FAIL;
 		}
+		
+		mIsReadMode = true;
 
 		mpPrevScopeEntry = mpCurrScopeEntry;
-
-		mIsReadMode = true;
 
 		mpCurrScopeEntry = mpCurrScopeEntry->mNestedScopes[mLastVisitedScopeIndex + 1];
 
@@ -207,7 +239,8 @@ namespace gplc
 		// \note restore previous pointer when came back from VisitNamedScope
 		if (mIsReadMode && !isUnnamedScope)
 		{
-			mpCurrScopeEntry = mpPrevScopeEntry;
+			mLastVisitedScopeIndex = mPrevVisitedScopeIndex;
+			mPrevVisitedScopeIndex = -1;
 		}
 
 		return RV_SUCCESS;
@@ -379,7 +412,8 @@ namespace gplc
 
 	void CSymTable::DumpScopesStructure() const
 	{
-		std::function<void(const TSymTableEntry*, U32)> _printScopeInfo = [this, &_printScopeInfo](const TSymTableEntry* pCurrTableEntry, U32 currLevel)
+		std::function<void(const TSymTableEntry*, const TSymTableEntry*, U32)> _printScopeInfo = 
+		[this, &_printScopeInfo](const TSymTableEntry* pCurrTableEntry,  const TSymTableEntry* pActiveEntry, U32 currLevel)
 		{
 			if (!pCurrTableEntry)
 			{
@@ -393,7 +427,9 @@ namespace gplc
 				std::cout << "  ";
 			}
 
-			std::cout << (pCurrScopeType ? pCurrScopeType->GetName() : "<unnamed scope>") << ": " << (pCurrScopeType ? pCurrScopeType->ToShortAliasString() : "scope") << std::endl;
+			std::cout << ((pCurrTableEntry == pActiveEntry) ? "*" : "")
+					  << (pCurrScopeType ? pCurrScopeType->GetName() : "<unnamed scope>") 
+					  << ": " << (pCurrScopeType ? pCurrScopeType->ToShortAliasString() : "scope") << std::endl;
 
 			for (auto& currVariableInfo : pCurrTableEntry->mVariables)
 			{
@@ -409,16 +445,16 @@ namespace gplc
 
 			for (auto pCurrNestedScope : pCurrTableEntry->mNestedScopes)
 			{
-				_printScopeInfo(pCurrNestedScope, currLevel + 1);
+				_printScopeInfo(pCurrNestedScope, pActiveEntry, currLevel + 1);
 			}
 
 			for (auto pCurrNamedScope : pCurrTableEntry->mNamedScopes)
 			{
-				_printScopeInfo(pCurrNamedScope.second, currLevel + 1);
+				_printScopeInfo(pCurrNamedScope.second, pActiveEntry, currLevel + 1);
 			}
 		};
 
-		_printScopeInfo(mpGlobalScopeEntry, 0);
+		_printScopeInfo(mpGlobalScopeEntry, mpCurrScopeEntry, 0);
 	}
 
 	TSymbolHandle CSymTable::_lookUp(TSymTableEntry* entry, const std::string& variableName) const

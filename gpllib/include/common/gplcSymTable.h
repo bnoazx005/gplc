@@ -14,6 +14,7 @@
 #include "gplcTypes.h"
 #include <vector>
 #include <unordered_map>
+#include <functional>
 #include "utils/CResult.h"
 
 
@@ -59,6 +60,8 @@ namespace gplc
 
 			typedef std::vector<std::pair<bool, TSymbolDesc>>        TSymbolsArray;
 
+			typedef std::function<void(ISymTable*)>                  TSymTableTransactionCallback;
+
 			/*!
 				\brief The TSymTableEntry structure
 			*/
@@ -90,6 +93,13 @@ namespace gplc
 			virtual Result CreateScope() = 0;
 
 			virtual Result VisitNamedScope(const std::string& scopeName) = 0;
+
+			/*!
+				\brief The method works the same as VisitNamedScope, but in the end restore original state of a table after
+				transaction is evaluated. The best primer of usage is resolving access operator or something like that.
+			*/
+
+			virtual Result VisitNamedScopeWithRestore(const std::string& scopeName, const TSymTableTransactionCallback& transaction) = 0;
 			virtual Result VisitScope() = 0;
 
 			virtual Result LeaveScope() = 0;
@@ -135,6 +145,7 @@ namespace gplc
 			Result CreateScope() override;
 
 			Result VisitNamedScope(const std::string& scopeName) override;
+			Result VisitNamedScopeWithRestore(const std::string& scopeName, const TSymTableTransactionCallback& transaction) override;
 			Result VisitScope() override;
 
 			Result LeaveScope() override;
@@ -172,11 +183,13 @@ namespace gplc
 
 			TSymTableEntry* mpCurrScopeEntry;
 
-			TSymTableEntry* mpPrevScopeEntry; // \note used only when visiting named scopes
+			TSymTableEntry* mpPrevScopeEntry;
 
 			bool            mIsLocked;
 
 			I32             mLastVisitedScopeIndex;
+
+			I32             mPrevVisitedScopeIndex; ///< \note The field is only updated when visiting VisitNamedScope
 
 			bool            mIsReadMode;
 	};
