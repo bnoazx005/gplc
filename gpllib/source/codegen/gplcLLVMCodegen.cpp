@@ -25,6 +25,8 @@ namespace gplc
 
 		mpCurrActiveFunction = nullptr;
 
+		mpLastVisitedEndBlock = nullptr;
+
 		mpLiteralIRGenerator = new CLLVMLiteralVisitor(mContext, this);
 
 		mpTypeGenerator = new CLLVMTypeVisitor(mContext);
@@ -51,7 +53,15 @@ namespace gplc
 
 		mShouldSkipLoopTail = false;
 
+#if !defined(NDEBUG)
+		auto pCurrScopeEntry = mpSymTable->GetCurrentScopeType();
+#endif
+
 		pNode->Accept(this);
+
+#if !defined(NDEBUG)
+		assert(mpSymTable->GetCurrentScopeType() == pCurrScopeEntry);
+#endif
 
 		mpInitModuleGlobalsIRBuilder->CreateRetVoid();
 
@@ -323,7 +333,7 @@ namespace gplc
 	TLLVMIRData CLLVMCodeGenerator::VisitStatementsBlock(CASTBlockNode* pNode)
 	{
 		mpSymTable->VisitScope();
-	
+
 		for (auto& currArg : mpCurrActiveFunction->args())
 		{
 			_allocateVariableOnStack(currArg.getName(), true);
@@ -383,7 +393,7 @@ namespace gplc
 		mIRBuildersStack.pop();
 
 		mpSymTable->LeaveScope();
-
+		
 		// \note return defer block if it exists
 		return pDeferEndBlock ? pDeferEndBlock : pBlock;
 	}
@@ -405,8 +415,11 @@ namespace gplc
 		llvm::BasicBlock* pThenBlock = llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetThenBlock()->Accept(this)));
 		
 		// add end point for then branch
-		llvm::IRBuilder<> thenBlockIRBuilder{ pThenBlock };
-		thenBlockIRBuilder.CreateBr(pEndBlock);
+		if (pThenBlock->back().getOpcode() != llvm::Instruction::Ret)
+		{
+			llvm::IRBuilder<> thenBlockIRBuilder{ pThenBlock };
+			thenBlockIRBuilder.CreateBr(pEndBlock);
+		}
 
 		llvm::BasicBlock* pElseBlock = pNode->GetElseBlock() ? llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetElseBlock()->Accept(this))) : nullptr;
 
@@ -425,6 +438,8 @@ namespace gplc
 		llvm::Value* pBRInstruction = currIRBuilder.CreateCondBr(pConditifon, pThenBlock, pElseBlock);
 
 		currIRBuilder.SetInsertPoint(pEndBlock);
+
+		mpLastVisitedEndBlock = pEndBlock;
 
 		return pBRInstruction;
 	}
@@ -453,6 +468,8 @@ namespace gplc
 		}
 		
 		currIRBuilder.SetInsertPoint(pEndBlock);
+
+		mpLastVisitedEndBlock = pEndBlock;
 
 		mpLoopConditionBlock = nullptr;
 		mpLoopEndBlock       = nullptr;
@@ -493,6 +510,8 @@ namespace gplc
 		llvm::Value* pBRInstruction = currIRBuilder.CreateCondBr(pLoopCondition, pLoopBody, pEndBlock);
 
 		currIRBuilder.SetInsertPoint(pEndBlock);
+
+		mpLastVisitedEndBlock = pEndBlock;
 
 		mpLoopConditionBlock = nullptr;
 		mpLoopEndBlock       = nullptr;
@@ -591,6 +610,10 @@ namespace gplc
 				{
 					return _emitTypeConversion(dynamic_cast<CASTTypeNode*>(pArgs->GetChildren()[0]), 
 											   dynamic_cast<CASTUnaryExpressionNode*>(pArgs->GetChildren()[1]));
+				}
+			case NT_ABORT_INTRINSIC:
+				{
+					return irBuilder.CreateIntrinsic(llvm::Intrinsic::trap, {}, {});
 				}
 		}
 
@@ -729,13 +752,15 @@ namespace gplc
 
 		mVariablesTable[mpSymTable->GetSymbolHandleByName(pFuncIdentifierNode->GetName())] = pLValueFuncPointer;
 
+		mpLastVisitedEndBlock = nullptr; // \note if this pointer will be changed later, it means there are loops, conditional branches, etc
+
 		// generate its definition
 		llvm::BasicBlock* pBlock = llvm::dyn_cast<llvm::BasicBlock>(std::get<llvm::Value*>(pNode->GetValue()->Accept(this)));
 
 		// \note skip this condition if there is return statement already
 		if (pInternalLambdaType->IsProcedure() && pBlock->getInstList().back().getOpcode() != llvm::Instruction::Ret)
 		{
-			llvm::IRBuilder<> funcBodyIRBuilder(pBlock);
+			llvm::IRBuilder<> funcBodyIRBuilder(mpLastVisitedEndBlock ? mpLastVisitedEndBlock : pBlock);
 
 			funcBodyIRBuilder.CreateRetVoid();
 		}
@@ -809,13 +834,14 @@ namespace gplc
 		// \note FIXME: possibly, this case should be work for structures too when you call their methods
 		if (pExprType->GetType() == CT_MODULE)
 		{
-			mpSymTable->VisitNamedScope(pExprType->GetName());
+			TLLVMIRData result = {};
 
-			auto pResult = pNode->GetMemberName()->Accept(this);
+			mpSymTable->VisitNamedScopeWithRestore(pExprType->GetName(), [&result, &pNode, this](ISymTable* pSymTable)
+			{
+				result = pNode->GetMemberName()->Accept(this);
+			});
 
-			mpSymTable->LeaveScope();
-
-			return pResult;
+			return result;
 		}
 
 		auto pMemberNode = dynamic_cast<CASTUnaryExpressionNode*>(pNode->GetMemberName());

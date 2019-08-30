@@ -307,7 +307,7 @@ namespace gplc
 									| (<expr> [,<expr>]*) -> <type>;
 			*/
 
-			CASTFunctionDeclNode* _parseFunctionDeclaration(ILexer* pLexer, bool allowCapture = false, U32 attributes = 0x0);
+			CASTFunctionDeclNode* _parseFunctionDeclaration(ILexer* pLexer, bool allowCapture = false, bool isFunctionPrototype = false, U32 attributes = 0x0);
 						
 			/*!
 				\brief The method parses the following rule
@@ -325,7 +325,7 @@ namespace gplc
 				<function-args-declaration> ::=   <func-arg> [,<func-arg>]*
 			*/
 
-			CASTFunctionArgsNode* _parseFunctionArgs(ILexer* pLexer);
+			CASTFunctionArgsNode* _parseFunctionArgs(ILexer* pLexer, bool isFunctionPrototype = false);
 
 			/*!
 				\brief The method parses the following rule

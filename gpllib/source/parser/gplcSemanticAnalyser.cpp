@@ -34,6 +34,10 @@ namespace gplc
 
 		auto pStatements = pProgramNode->GetStatements();
 
+#if !defined(NDEBUG)
+		auto pCurrScopeType = mpSymTable->GetCurrentScopeType();
+#endif
+
 		for (auto pCurrStatement : pStatements)
 		{
 			if (!pCurrStatement->Accept(this))
@@ -41,6 +45,10 @@ namespace gplc
 				return false;
 			}
 		}
+
+#if !defined(NDEBUG)
+		assert(mpSymTable->GetCurrentScopeType() == pCurrScopeType);
+#endif
 
 		return true;
 	}
@@ -649,6 +657,8 @@ namespace gplc
 					
 					return false;
 				}
+				break;
+			case NT_ABORT_INTRINSIC:
 				break;
 			default:
 				UNIMPLEMENTED();

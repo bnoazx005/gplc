@@ -466,7 +466,7 @@ namespace gplc
 		if (_match(pCurrToken, TT_OPEN_SQR_BRACE) ||
 			_match(pCurrToken, TT_OPEN_BRACKET))
 		{
-			return _parseFunctionDeclaration(pLexer, false);
+			return _parseFunctionDeclaration(pLexer, false, true);
 		}
 
 		// named type
@@ -839,13 +839,13 @@ namespace gplc
 		return mpNodesFactory->CreateWhileStmtNode(pCondition, pBodyBlock);
 	}
 
-	CASTFunctionDeclNode* CParser::_parseFunctionDeclaration(ILexer* pLexer, bool allowCapture, U32 attributes)
+	CASTFunctionDeclNode* CParser::_parseFunctionDeclaration(ILexer* pLexer, bool allowCapture, bool isFunctionPrototype, U32 attributes)
 	{
 		// parse a closure's declaration if it exists
 		CASTFunctionClosureNode* pClosureDecl = allowCapture && _match(pLexer->GetCurrToken(), TT_OPEN_SQR_BRACE) ? _parseFunctionClosure(pLexer) : nullptr;
 
 		// parse arguments
-		CASTFunctionArgsNode* pArgsList = _match(pLexer->GetCurrToken(), TT_OPEN_BRACKET) ? _parseFunctionArgs(pLexer) : nullptr;
+		CASTFunctionArgsNode* pArgsList = _match(pLexer->GetCurrToken(), TT_OPEN_BRACKET) ? _parseFunctionArgs(pLexer, isFunctionPrototype) : nullptr;
 
 		bool haveReturnType = _match(pLexer->GetCurrToken(), TT_ARROW);
 
@@ -856,6 +856,8 @@ namespace gplc
 
 		// parse return value's type
 		CASTNode* pReturnType = haveReturnType ? _parseType(pLexer) : mpNodesFactory->CreateTypeNode(NT_VOID);
+
+		attributes |= (isFunctionPrototype ? AV_FUNC_PROTOTYPE : 0x0);
 
 		return mpNodesFactory->CreateFuncDeclNode(pClosureDecl, pArgsList, pReturnType, attributes);
 	}
@@ -892,7 +894,7 @@ namespace gplc
 		return pClosureDecl;
 	}
 
-	CASTFunctionArgsNode* CParser::_parseFunctionArgs(ILexer* pLexer)
+	CASTFunctionArgsNode* CParser::_parseFunctionArgs(ILexer* pLexer, bool isFunctionPrototype)
 	{
 		if (!SUCCESS(_expect(TT_OPEN_BRACKET, pLexer->GetCurrToken())))
 		{
@@ -918,7 +920,8 @@ namespace gplc
 				pLexer->GetNextToken();
 			}
 
-			pArgsNode->AttachChild(_parseDeclaration(pLexer, AV_FUNC_ARG_DECL)); ///< \todo function's arguments can't have attributes before type's description
+			// \note function prototype allows only types descriptions for arguments
+			pArgsNode->AttachChild(isFunctionPrototype ? _parseType(pLexer) : _parseDeclaration(pLexer, AV_FUNC_ARG_DECL));
 		} while (_match(pLexer->GetCurrToken(), TT_COMMA));
 
 		if (!SUCCESS(_expect(TT_CLOSE_BRACKET, pLexer->GetCurrToken())))
@@ -1441,8 +1444,8 @@ namespace gplc
 			case TT_MEMSET64_INTRINSIC:
 				intrinsicType = NT_MEMSET64_INTRINSIC;
 				break;
-			case TT_ASSERT_INTRINSIC:
-				intrinsicType = NT_ASSERT_INTRINSIC;
+			case TT_ABORT_INTRINSIC:
+				intrinsicType = NT_ABORT_INTRINSIC;
 				break;
 			case TT_CAST_INTRINSIC:
 				intrinsicType = NT_CAST_INTRINSIC;
@@ -1495,6 +1498,8 @@ namespace gplc
 						}
 					}
 				}
+				break;
+			case NT_ABORT_INTRINSIC:
 				break;
 			case NT_CAST_INTRINSIC:
 				{

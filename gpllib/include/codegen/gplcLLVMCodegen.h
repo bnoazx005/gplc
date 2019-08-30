@@ -178,6 +178,8 @@ namespace gplc
 
 			llvm::BasicBlock*        mpLoopEndBlock;
 
+			llvm::BasicBlock*        mpLastVisitedEndBlock; ///< \note the field is used to store a pointer to BB when we create conditional branches, loops, etc
+
 			IConstExprInterpreter*   mpConstExprInterpreter;
 
 			bool                     mShouldSkipLoopTail;

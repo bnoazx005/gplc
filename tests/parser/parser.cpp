@@ -131,12 +131,10 @@ TEST_CASE("Parser's tests")
 	{
 		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
 			{
-				//the sequence below specifies the following declaration of a function: f: (z: int32) -> int32;
+				//the sequence below specifies the following declaration of a function: f: (int32) -> int32;
 				new gplc::CIdentifierToken("f", 0),
 				new gplc::CToken(gplc::TT_COLON, 1),
 				new gplc::CToken(gplc::TT_OPEN_BRACKET, 2),
-				new gplc::CIdentifierToken("z", 3),
-				new gplc::CToken(gplc::TT_COLON, 4),
 				new gplc::CToken(gplc::TT_INT32_TYPE, 5),
 				new gplc::CToken(gplc::TT_CLOSE_BRACKET, 6),
 				new gplc::CToken(gplc::TT_ARROW, 7),
@@ -185,15 +183,13 @@ TEST_CASE("Parser's tests")
 		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
 			{
 				/*!
-					the sequence below specifies the following declaration of a function: f: (z: int32) -> int32 = [x, y](z: int32) -> int32 {
+					the sequence below specifies the following declaration of a function: f: (int32) -> int32 = [x, y](z: int32) -> int32 {
 						return z + x + 2 * y;
 					};
 				*/
 				new gplc::CIdentifierToken("f", 0),
 				new gplc::CToken(gplc::TT_COLON, 1),
 				new gplc::CToken(gplc::TT_OPEN_BRACKET, 2),
-				new gplc::CIdentifierToken("z", 3),
-				new gplc::CToken(gplc::TT_COLON, 4),
 				new gplc::CToken(gplc::TT_INT32_TYPE, 5),
 				new gplc::CToken(gplc::TT_CLOSE_BRACKET, 6),
 				new gplc::CToken(gplc::TT_ARROW, 7),

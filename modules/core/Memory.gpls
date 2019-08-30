@@ -9,9 +9,8 @@
 	\todo We should change current signature of the function onto the following
 	(size: uint64) -> Result<uint8*>,
 */
-
-malloc : @foreign (size: uint64) -> uint8*;
-free : @foreign (pPtr: uint8*);
+malloc : @foreign (uint64) -> uint8*;
+free : @foreign (uint8*);
 
 
 // memcpy32 := @foreign (dest: uint8*, src: uint8*, size: uint32) {

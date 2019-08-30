@@ -1,0 +1,9 @@
+// Debug.gpls
+
+assert := (expr : bool) {
+	if expr {
+		return;
+	}
+
+	__abort();
+};

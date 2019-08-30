@@ -87,7 +87,7 @@ namespace gplc
 		{ "__memcpy_64", TT_MEMCPY64_INTRINSIC },
 		{ "__memset_32", TT_MEMSET32_INTRINSIC },
 		{ "__memset_64", TT_MEMSET64_INTRINSIC },
-		{ "assert", TT_ASSERT_INTRINSIC },
+		{ "__abort", TT_ABORT_INTRINSIC },
 		{ "cast", TT_CAST_INTRINSIC },
 	};
 

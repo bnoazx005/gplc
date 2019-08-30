@@ -154,18 +154,30 @@ namespace gplc
 
 		CASTIdentifierNode* pCurrArgDecl = nullptr;
 
-		for (auto pCurrArgNode : args)
+		U32 funcDeclarationAttributes = pNode->GetAttributes();
+
+		if (funcDeclarationAttributes & AV_FUNC_PROTOTYPE)
 		{
-			pCurrArgDecl = dynamic_cast<CASTIdentifierNode*>((dynamic_cast<CASTDeclarationNode*>(pCurrArgNode))->GetIdentifiers()->GetChildren()[0]);
-			
-			auto pCurrArgType = Resolve(dynamic_cast<CASTTypeNode*>(pCurrArgNode));
+			for (auto pCurrArgNode : args)
+			{
+				argsTypes.push_back({ "", Resolve(dynamic_cast<CASTTypeNode*>(pCurrArgNode)) });
+			}
+		}
+		else
+		{
+			for (auto pCurrArgNode : args)
+			{
+				pCurrArgDecl = dynamic_cast<CASTIdentifierNode*>((dynamic_cast<CASTDeclarationNode*>(pCurrArgNode))->GetIdentifiers()->GetChildren()[0]);
 
-			pCurrArgType->SetAttribute(pCurrArgDecl->GetAttributes());
+				auto pCurrArgType = Resolve(dynamic_cast<CASTTypeNode*>(pCurrArgNode));
 
-			argsTypes.push_back({ pCurrArgDecl->GetName(), pCurrArgType });
+				pCurrArgType->SetAttribute(pCurrArgDecl->GetAttributes());
+
+				argsTypes.push_back({ pCurrArgDecl->GetName(), pCurrArgType });
+			}
 		}
 
-		return new CFunctionType(argsTypes, Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetReturnValueType())), pNode->GetAttributes(), mpSymTable->GetCurrentScopeType());
+		return new CFunctionType(argsTypes, Resolve(dynamic_cast<CASTTypeNode*>(pNode->GetReturnValueType())), funcDeclarationAttributes, mpSymTable->GetCurrentScopeType());
 	}
 
 	CType* CTypeResolver::VisitFunctionCall(CASTFunctionCallNode* pNode)
@@ -246,11 +258,12 @@ namespace gplc
 
 		if (pExprType->GetType() == CT_MODULE)
 		{
-			mpSymTable->VisitNamedScope(pExprType->GetName());
+			CType* pInferredType = nullptr;
 
-			auto pInferredType = pNode->GetMemberName()->Resolve(this);
-
-			mpSymTable->LeaveScope();
+			mpSymTable->VisitNamedScopeWithRestore(pExprType->GetName(), [this, &pNode, &pInferredType](ISymTable* pSymTable) 
+			{
+				pInferredType = pNode->GetMemberName()->Resolve(this);
+			});
 
 			return pInferredType;
 		}
@@ -288,14 +301,17 @@ namespace gplc
 				return mpSymTable->LookUp(mpSymTable->LookUpNamedScope(pExprType->GetName())->mVariables[identifierName])->mpType;
 			case CT_MODULE:
 				{
-					mpSymTable->VisitNamedScope(pExprType->GetName());
+					CType* pType = nullptr;
 
-					auto pVarDesc   = mpSymTable->LookUp(identifierName);
-					auto pTypeEntry = mpSymTable->LookUpNamedScope(identifierName);
+					mpSymTable->VisitNamedScopeWithRestore(pExprType->GetName(), [&pType, &identifierName](ISymTable* pSymTable)
+					{
+						auto pVarDesc   = pSymTable->LookUp(identifierName);
+						auto pTypeEntry = pSymTable->LookUpNamedScope(identifierName);
 
-					mpSymTable->LeaveScope();
+						pType = pVarDesc ? pVarDesc->mpType : pTypeEntry->mpType;
+					});
 
-					return pVarDesc ? pVarDesc->mpType : pTypeEntry->mpType;
+					return pType;
 				}
 		}
 
@@ -335,6 +351,8 @@ namespace gplc
 			case NT_SIZEOF_OPERATOR:
 			case NT_TYPEID_OPERATOR:
 				return mpTypesFactory->CreateType(CT_UINT64, BTS_UINT64, 0x0);
+			case NT_ABORT_INTRINSIC:
+				return mpTypesFactory->CreateType(CT_VOID, BTS_VOID, 0x0);
 			case NT_CAST_INTRINSIC:
 				return dynamic_cast<CASTTypeNode*>(pNode->GetArgs()->GetChildren()[0])->Resolve(this);
 			default:
