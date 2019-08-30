@@ -201,7 +201,7 @@ namespace gplc
 					}
 					break;
 				case CT_POINTER:
-					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, pIdentifiersType, "reinterp_cast"));
+					currIRBuidler.CreateStore(llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(pIdentifiersType)), pCurrVariableAllocation, "ptr_init");
 					break;
 				default:
 					currIRBuidler.CreateStore(pIdentifiersValue, pCurrVariableAllocation); // for built-in types only
@@ -580,16 +580,14 @@ namespace gplc
 					return llvm::ConstantInt::get(llvm::Type::getInt64Ty(mContext), pType->GetTypeId());
 				}
 			case NT_MEMCPY32_INTRINSIC:
+			case NT_MEMCPY64_INTRINSIC:
 				{
-					static auto pFunctionType = llvm::FunctionType::get(llvm::Type::getVoidTy(mContext), 
-																		{ 
-																			llvm::Type::getInt8PtrTy(mContext),
-																			llvm::Type::getInt8PtrTy(mContext),
-																			llvm::Type::getInt32Ty(mContext),
-																			llvm::Type::getInt1Ty(mContext),
-																		}, false);
-
-					auto pFunction = mpModule->getOrInsertFunction("memcpy", pFunctionType).getCallee();
+					llvm::Type* types[] = {
+						llvm::Type::getInt8PtrTy(mContext),
+						llvm::Type::getInt8PtrTy(mContext),
+						(pNode->GetType() == NT_MEMCPY32_INTRINSIC) ? llvm::Type::getInt32Ty(mContext) : llvm::Type::getInt64Ty(mContext),
+						llvm::Type::getInt1Ty(mContext),
+					};
 
 					std::vector<llvm::Value*> args;
 
@@ -600,11 +598,7 @@ namespace gplc
 
 					args.push_back(llvm::ConstantInt::getFalse(mContext));
 
-					return irBuilder.CreateCall(pFunction, args, "__memcpy_32_call");
-				}
-			case NT_MEMCPY64_INTRINSIC:
-				{
-
+					return irBuilder.CreateIntrinsic(llvm::Intrinsic::memcpy, types, args);
 				}
 			case NT_CAST_INTRINSIC:
 				{
