@@ -1480,6 +1480,8 @@ namespace gplc
 				break;
 			case NT_MEMCPY32_INTRINSIC:
 			case NT_MEMCPY64_INTRINSIC:
+			case NT_MEMSET32_INTRINSIC:
+			case NT_MEMSET64_INTRINSIC:
 				{
 					for (U8 i = 0; i < 3; ++i)
 					{

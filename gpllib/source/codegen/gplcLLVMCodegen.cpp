@@ -595,10 +595,31 @@ namespace gplc
 					{
 						args.push_back(std::get<llvm::Value*>(pCurrArg->Accept(this)));
 					}
-
+					
 					args.push_back(llvm::ConstantInt::getFalse(mContext));
 
 					return irBuilder.CreateIntrinsic(llvm::Intrinsic::memcpy, types, args);
+				}
+			case NT_MEMSET32_INTRINSIC:
+			case NT_MEMSET64_INTRINSIC:
+				{
+					llvm::Type* types[] = {
+							llvm::Type::getInt8PtrTy(mContext),
+							llvm::Type::getInt8Ty(mContext),
+							(pNode->GetType() == NT_MEMSET32_INTRINSIC) ? llvm::Type::getInt32Ty(mContext) : llvm::Type::getInt64Ty(mContext),
+							llvm::Type::getInt1Ty(mContext),
+					};
+
+					std::vector<llvm::Value*> args;
+
+					for (auto pCurrArg : pArgs->GetChildren())
+					{
+						args.push_back(std::get<llvm::Value*>(pCurrArg->Accept(this)));
+					}
+
+					args.push_back(llvm::ConstantInt::getFalse(mContext));
+
+					return irBuilder.CreateIntrinsic(llvm::Intrinsic::memset, types, args);
 				}
 			case NT_CAST_INTRINSIC:
 				{
