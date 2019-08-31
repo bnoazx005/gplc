@@ -65,6 +65,8 @@ namespace gplc
 			virtual Result Link(const std::string& outputFilename, ILinker* pLinker, bool skipFinalLinking = false) = 0;
 
 			virtual TCompiledModuleData& GetModuleEntry(const std::string& moduleName) = 0;
+
+			virtual void DumpDependencyGraph() const = 0;
 		protected:
 			IModuleResolver(const IModuleResolver&) = delete;
 	};
@@ -84,12 +86,16 @@ namespace gplc
 			Result Link(const std::string& outputFilename, ILinker* pLinker, bool skipFinalLinking = false) override;
 
 			TCompiledModuleData& GetModuleEntry(const std::string& moduleName) override;
+
+			void DumpDependencyGraph() const override;
 		protected:
 			CModuleResolver(const CModuleResolver&) = delete;
 
 			Result _visitNode(CASTNode* pNode);
 
 			Result _resolveImport(CASTImportDirectiveNode* pNode);
+			
+			void _printDependencyGraphLevel(const TModuleEntry* pCurrModuleEntry, U32 currLevel = 0) const;
 		protected:
 			static std::string mFileExtension;
 

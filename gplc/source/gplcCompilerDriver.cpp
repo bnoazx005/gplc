@@ -171,6 +171,8 @@ namespace gplc
 			mpSymTable->DumpScopesStructure();
 		}
 
+		mpModuleResolver->DumpDependencyGraph();
+
 		return RV_SUCCESS;
 	}
 

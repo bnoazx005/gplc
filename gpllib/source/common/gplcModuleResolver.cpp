@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <vector>
 #include <algorithm>
+#include <iostream>
 #include <cassert>
 
 
@@ -81,6 +82,26 @@ namespace gplc
 		});
 
 		return (*iter);
+	}
+
+	void CModuleResolver::DumpDependencyGraph() const
+	{
+		_printDependencyGraphLevel(&mRootModuleDeps);
+	}
+
+	void CModuleResolver::_printDependencyGraphLevel(const TModuleEntry* pCurrModuleEntry, U32 currLevel) const
+	{
+		for (U32 i = 0; i < currLevel; ++i)
+		{
+			std::cout << "    ";
+		}
+
+		std::cout << pCurrModuleEntry->mModuleName << std::endl;
+
+		for (const auto pCurrDependency : pCurrModuleEntry->mDependencies)
+		{
+			_printDependencyGraphLevel(&pCurrDependency, currLevel + 1);
+		}
 	}
 
 	Result CModuleResolver::_visitNode(CASTNode* pNode)
