@@ -165,6 +165,8 @@ namespace gplc
 
 			void SetAttribute(U32 attribute);
 
+			void ResetAttribute(U32 attribute);
+
 			virtual void SetName(const std::string& name);
 
 			const std::vector<const CType*> GetChildTypes() const;

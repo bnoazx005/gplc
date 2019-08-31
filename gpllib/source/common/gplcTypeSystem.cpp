@@ -352,6 +352,10 @@ namespace gplc
 			case NT_TYPEID_OPERATOR:
 				return mpTypesFactory->CreateType(CT_UINT64, BTS_UINT64, 0x0);
 			case NT_ABORT_INTRINSIC:
+			case NT_MEMCPY32_INTRINSIC:
+			case NT_MEMCPY64_INTRINSIC:
+			case NT_MEMSET32_INTRINSIC:
+			case NT_MEMSET64_INTRINSIC:
 				return mpTypesFactory->CreateType(CT_VOID, BTS_VOID, 0x0);
 			case NT_CAST_INTRINSIC:
 				return dynamic_cast<CASTTypeNode*>(pNode->GetArgs()->GetChildren()[0])->Resolve(this);
@@ -501,6 +505,11 @@ namespace gplc
 	void CType::SetAttribute(U32 attribute)
 	{
 		mAttributes |= attribute;
+	}
+
+	void CType::ResetAttribute(U32 attribute)
+	{
+		mAttributes &= ~attribute;
 	}
 
 	void CType::SetName(const std::string& name)

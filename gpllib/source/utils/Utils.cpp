@@ -88,6 +88,10 @@ namespace gplc
 				return "Try to get an access to undeclared field";
 			case SAE_INVALID_NUMBER_OF_ARGUMENTS:
 				return "Invalid number of arguments";
+			case SAE_TRY_TO_DEREF_NON_POINTER_TYPE:
+				return "Try to dereference a non-pointer type";
+			case SAE_TRY_TO_REREF_INVALID_POINTER:
+				return "Try to dereference either invalid or dangling pointer";
 		}
 
 		return {};

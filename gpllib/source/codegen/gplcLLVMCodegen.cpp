@@ -619,6 +619,7 @@ namespace gplc
 
 					args.push_back(llvm::ConstantInt::getFalse(mContext));
 
+					// \todo FIXME: this intrinsic doesn't work
 					return irBuilder.CreateIntrinsic(llvm::Intrinsic::memset, types, args);
 				}
 			case NT_CAST_INTRINSIC:

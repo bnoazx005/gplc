@@ -263,6 +263,8 @@ namespace gplc
 		SAE_BLOCKING_LOOP,
 		SAE_TRY_TO_ACCESS_UNDEFINED_FIELD,
 		SAE_INVALID_NUMBER_OF_ARGUMENTS,
+		SAE_TRY_TO_DEREF_NON_POINTER_TYPE,
+		SAE_TRY_TO_REREF_INVALID_POINTER,
 	};
 
 
@@ -281,10 +283,11 @@ namespace gplc
 		AV_AGGREGATE_TYPE     = 0x80, 
 		AV_KEEP_UNINITIALIZED = 0x100,
 		AV_FUNC_PROTOTYPE     = 0x200,
+		AV_INVALID_POINTER    = 0x400, ///< \note The attribute is used in pair with AV_KEEP_UNITIALIZED to check up whether the pointer was initialized before dereferencing or not
 	};
 
 
-	constexpr U32 SignificantAttributesMask = AV_STATIC | AV_RVALUE | AV_POINTER | AV_AGGREGATE_TYPE;
+	constexpr U32 SignificantAttributesMask = AV_STATIC | AV_RVALUE | AV_POINTER | AV_AGGREGATE_TYPE | AV_FUNC_PROTOTYPE;
 
 
 	enum E_LEXER_ERRORS : U32

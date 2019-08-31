@@ -86,6 +86,13 @@ namespace gplc
 
 			currAttributes = pCurrIdentifierNode->GetAttributes();
 
+			// \note if we have a pointer and it's marked as uninitializable we should mark it also
+			// with AV_INVALID_POINTER to prevent dereferencing of it in compile-time
+			if ((currAttributes & AV_KEEP_UNINITIALIZED) && (pTypeInfo->GetType() == CT_POINTER))
+			{
+				currAttributes |= AV_INVALID_POINTER;
+			}
+
 			pTypeInfo->SetAttribute(currAttributes);
 
 			auto pDefaultValueExpr = pTypeInfo->GetDefaultValue(mpNodesFactory);
@@ -139,7 +146,38 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitUnaryExpression(CASTUnaryExpressionNode* pNode) 
 	{
-		return pNode->GetData()->Accept(this);
+		auto pDataNode = pNode->GetData();
+		
+		CType* pDataType = nullptr;
+
+		if (!pDataNode->Accept(this) || !(pDataType = dynamic_cast<CASTTypeNode*>(pDataNode)->Resolve(mpTypeResolver)))
+		{
+			return false;
+		}
+
+		switch (pNode->GetOpType())
+		{
+			case TT_STAR: ///< dereferencing
+				// \note this case is just a simple typo
+				if (pDataType->GetType() != CT_POINTER)
+				{
+					_notifyError(SAE_TRY_TO_DEREF_NON_POINTER_TYPE);
+
+					return false;
+				}
+
+				// \note this check up is more serious and important, because it detects semantic mistake
+				// which was made by a programmer. It's dereferencing of either invalid or dangling pointer
+				if (pDataType->GetAttributes() & AV_INVALID_POINTER)
+				{
+					_notifyError(SAE_TRY_TO_REREF_INVALID_POINTER);
+
+					return false;
+				}
+				break;
+		}
+
+		return true;
 	}
 
 	bool CSemanticAnalyser::VisitBinaryExpression(CASTBinaryExpressionNode* pNode) 
@@ -186,6 +224,13 @@ namespace gplc
 			!(pLeftValueType = pLeftExpr->Resolve(mpTypeResolver)))
 		{
 			return false;
+		}
+
+		// \note if we assign an address to a pointer and it was unitinialized, we need to remove
+		// AV_INVALID_POINTER mark, because now it's absolutely correct
+		if ((pLeftValueType->GetType() == CT_POINTER) && (pLeftValueType->GetAttributes() & AV_INVALID_POINTER))
+		{
+			pLeftValueType->ResetAttribute(AV_INVALID_POINTER);
 		}
 
 		// check right side

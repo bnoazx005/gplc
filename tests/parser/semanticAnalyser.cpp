@@ -554,6 +554,30 @@ TEST_CASE("CSemanticAnalyser's tests")
 		REQUIRE(pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
+	SECTION("TestAnalyze_PassDereferencingOfInvalidPointer_ReturnsFalse")
+	{
+		/*
+			pPtr : @uninit int32*;
+			val := *pPtr;
+		*/
+
+		auto pIdentifiersList = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
+		pIdentifiersList->AttachChild(pNodesFactory->CreateIdNode("pPtr", AV_KEEP_UNINITIALIZED));
+
+		auto pPointerType = pNodesFactory->CreatePointerTypeNode(pNodesFactory->CreateTypeNode(NT_INT32));
+
+		auto pProgram = pNodesFactory->CreateSourceUnitNode();
+		pProgram->AttachChild(pNodesFactory->CreateDeclNode(pIdentifiersList, pPointerType));
+
+		auto pIdentifiersList2 = pNodesFactory->CreateNode(NT_IDENTIFIERS_LIST);
+		pIdentifiersList2->AttachChild(pNodesFactory->CreateIdNode("val"));
+
+		pProgram->AttachChild(pNodesFactory->CreateDefNode(pNodesFactory->CreateDeclNode(pIdentifiersList2, pNodesFactory->CreateTypeNode(NT_INT32)), 
+							  pNodesFactory->CreateUnaryExpr(TT_STAR, pNodesFactory->CreateIdNode("pPtr"))));
+
+		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
+	}
+
 	delete pTypesFactory;
 	delete pSymTable;
 	delete pNodesFactory;
