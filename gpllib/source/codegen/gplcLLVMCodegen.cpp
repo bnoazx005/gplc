@@ -709,7 +709,19 @@ namespace gplc
 			}
 			else
 			{
-				irBuilder.CreateStore(pIdentifiersValue, pCurrVariableAllocation);
+				switch (pType->GetType())
+				{
+					case CT_CHAR:
+						{
+							auto runeValue = _getStructElementValue(irBuilder, pCurrVariableAllocation, 0);
+
+							irBuilder.CreateStore(pIdentifiersValue, runeValue);
+						}
+						break;
+					default:
+						irBuilder.CreateStore(pIdentifiersValue, pCurrVariableAllocation);
+						break;
+				}
 			}
 		}
 
@@ -1333,9 +1345,15 @@ namespace gplc
 
 		auto pValue = std::get<llvm::Value*>(pExpr->Accept(this));
 
-		// \note integer -> integer
-		if (pInternalType->IsInteger() && pInternalExprType->IsInteger()) 
-		{			
+		// \note integer <-> integer or char <-> integer
+		if ((pInternalType->IsInteger() || destType == CT_CHAR) && (pInternalExprType->IsInteger() || srcType == CT_CHAR))
+		{		
+			// \note firstly, extract value from the structure { i32 } if it's not just a character literal
+			if (srcType == CT_CHAR && pValue->getType()->isStructTy())
+			{
+				pValue = _getStructElementValue(irBuilder, pValue, 0);
+			}
+
 			// \note the situation is possible when you want downcast to lesser integral type or upcast to wider one
 			if (srcTypeSize > destTypeSize)
 			{

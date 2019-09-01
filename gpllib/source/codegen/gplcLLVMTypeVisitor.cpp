@@ -37,7 +37,7 @@ namespace gplc
 			case CT_STRING:
 				return llvm::Type::getInt8PtrTy(*mContext);
 			case CT_CHAR:
-				return llvm::Type::getInt8PtrTy(*mContext);
+				return llvm::StructType::get(llvm::Type::getInt32Ty(*mContext));
 			case CT_BOOL:
 				return llvm::Type::getInt1Ty(*mContext);
 			case CT_VOID:

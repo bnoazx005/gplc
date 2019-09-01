@@ -129,8 +129,7 @@ namespace gplc
 
 	TLLVMIRData CCharValue::Accept(ILiteralVisitor<TLLVMIRData>* pVisitor)
 	{
-		assert(false); // \todo implement the method
-		return {};
+		return pVisitor->VititCharLiteral(this);
 	}
 
 	std::string CCharValue::ToString() const

@@ -50,10 +50,10 @@ namespace gplc
 		BTS_UINT64  = 8,
 		BTS_FLOAT   = 4,
 		BTS_DOUBLE  = 8,
-		BTS_CHAR    = 2,
+		BTS_CHAR    = 4,
 		BTS_VOID    = 4,
 		BTS_BOOL    = 1,
-		BTS_POINTER = 4,
+		BTS_POINTER = 8,
 		BTS_UNKNOWN,
 	};
 

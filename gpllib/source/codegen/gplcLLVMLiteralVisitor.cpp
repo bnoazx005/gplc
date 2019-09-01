@@ -6,6 +6,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/IRBuilder.h"
 #include "codegen/gplcLLVMCodegen.h"
+#include "utils/Utils.h"
 
 
 namespace gplc
@@ -48,8 +49,20 @@ namespace gplc
 
 	TLLVMIRData CLLVMLiteralVisitor::VititCharLiteral(const CCharValue* pLiteral)
 	{
-		// \todo implement char literal
-		return {};
+		I32 runeValue = 0x0;
+
+		const std::string& value = pLiteral->GetValue();
+
+		const U32 size = value.length();
+
+		for (U8 i = 0; i < size; ++i)
+		{
+			runeValue |= static_cast<U8>(value[size - i - 1]) << 8 * i;
+		}
+
+		static llvm::Type* pInt32Type = llvm::Type::getInt32Ty(*mContext);
+
+		return llvm::ConstantInt::get(pInt32Type, runeValue);
 	}
 
 	TLLVMIRData CLLVMLiteralVisitor::VisitStringLiteral(const CStringValue* pLiteral)
