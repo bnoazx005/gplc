@@ -899,16 +899,18 @@ namespace gplc
 		// get type's description
 		auto pTypeDesc = mpSymTable->LookUpNamedScope(pExprType->GetName());
 
-		assert(pTypeDesc && pTypeDesc->mpType && (pTypeDesc->mVariables.find(identifier) != pTypeDesc->mVariables.cend()));
+		E_COMPILER_TYPES objectType = pExprType->GetType();
 
-		TSymbolHandle firstFieldId = pTypeDesc->mVariables.begin()->second;
+		bool isCompoundType = objectType == CT_ENUM || objectType == CT_STRUCT || objectType == CT_MODULE;
+
+		TSymbolHandle firstFieldId = isCompoundType ? pTypeDesc->mVariables.begin()->second: 0x0;
 		TSymbolHandle currFieldId  = 0x0;
 
 		TSymbolDesc* pFieldValue = nullptr;
 
 		llvm::Value* pCurrValue = nullptr;
 
-		switch (pTypeDesc->mpType->GetType())
+		switch (pExprType->GetType())
 		{
 			case CT_ENUM:
 				{
@@ -968,6 +970,9 @@ namespace gplc
 				UNIMPLEMENTED();
 
 				return {};
+			case CT_ARRAY:
+				// \note for now there is only "length" field available for arrays
+				return currIRBuilder.CreateLoad(_getStructElementValue(currIRBuilder, std::get<llvm::Value*>(pNode->GetExpression()->Accept(this)), 1), "arr_get_length");
 		}
 
 		return {};

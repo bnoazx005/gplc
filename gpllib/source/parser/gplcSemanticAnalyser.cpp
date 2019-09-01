@@ -606,13 +606,16 @@ namespace gplc
 		// check whether the given field exist for the object of the specified type
 		auto pSymbolDesc = mpSymTable->LookUpNamedScope(pType->GetName());
 
-		if (!pSymbolDesc || !pSymbolDesc->mpType)
+		E_COMPILER_TYPES type = pType->GetType();
+
+		if ((type == CT_STRUCT || type == CT_MODULE) && (!pSymbolDesc || !pSymbolDesc->mpType))
 		{
 			_notifyError(SAE_UNDEFINED_TYPE);
 
 			return false;
 		}
 
+		// \todo FIXME: this expression is always nullptr
 		CASTIdentifierNode* pIdentifier = dynamic_cast<CASTIdentifierNode*>(dynamic_cast<CASTUnaryExpressionNode*>(pFieldExpr)->GetData());
 
 		if (pIdentifier)

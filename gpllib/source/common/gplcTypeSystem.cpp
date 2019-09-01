@@ -313,6 +313,11 @@ namespace gplc
 
 					return pType;
 				}
+			case CT_ARRAY:
+				if (identifierName == "length") // \note length is a built-in field that is available for both static and dynamic arrays
+				{
+					return mpTypesFactory->CreateType(CT_UINT64, BTS_UINT64, 0x0, "length", pExprType);
+				}
 		}
 
 		return nullptr;
