@@ -149,6 +149,8 @@ namespace gplc
 			llvm::Value* _declareImportedFunction(const TSymbolDesc* pFuncDesc);
 
 			llvm::Value* _emitTypeConversion(CASTTypeNode* pType, CASTUnaryExpressionNode* pExpr);
+
+			llvm::Value* _getStructElementValue(llvm::IRBuilder<>& irBuilder, llvm::Value* pStructValue, I32 index);
 		protected:
 			TLLVMLiteralVisitor*     mpLiteralIRGenerator;
 

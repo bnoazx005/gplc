@@ -186,7 +186,11 @@ namespace gplc
 					break;
 				case CT_ARRAY:
 					// \todo invalid initialization, but it's enough for current tests, REIMPLEMENT THIS LATER
-					currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(mContext), "arr_cast"));
+
+					//currIRBuidler.CreateStore(pIdentifiersValue, currIRBuidler.CreateBitCast(pCurrVariableAllocation, llvm::Type::getInt32PtrTy(mContext), "arr_cast"));
+					
+					currIRBuidler.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt64Ty(mContext), dynamic_cast<CArrayType*>(pType)->GetElementsCount()), 
+											  _getStructElementValue(currIRBuidler, pCurrVariableAllocation, 1)); // 1 is an index of length field
 					break;
 				case CT_STRUCT:
 					{
@@ -964,10 +968,10 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitIndexedAccessOperator(CASTIndexedAccessOperatorNode* pNode)
 	{
-		llvm::Value* pPrimaryExprCode = std::get<llvm::Value*>(pNode->GetExpression()->Accept(this));
-		llvm::Value* pIndexExprCode   = std::get<llvm::Value*>(pNode->GetIndexExpression()->Accept(this));
-
 		auto& currIRBuilder = mIRBuildersStack.top();
+
+		llvm::Value* pPrimaryExprCode = _getStructElementValue(currIRBuilder, std::get<llvm::Value*>(pNode->GetExpression()->Accept(this)), 0);
+		llvm::Value* pIndexExprCode   = std::get<llvm::Value*>(pNode->GetIndexExpression()->Accept(this));
 
 		U32 attributes = pNode->GetAttributes();
 
@@ -1399,5 +1403,15 @@ namespace gplc
 		UNIMPLEMENTED();
 
 		return nullptr;
+	}
+
+	llvm::Value* CLLVMCodeGenerator::_getStructElementValue(llvm::IRBuilder<>& irBuilder, llvm::Value* pStructValue, I32 index)
+	{
+		static auto zeroIndex { llvm::ConstantInt::get(llvm::Type::getInt32Ty(mContext), 0) };
+
+		return irBuilder.CreateGEP(pStructValue,
+			{
+				zeroIndex, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mContext), index)
+			});
 	}
 }

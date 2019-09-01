@@ -141,7 +141,23 @@ namespace gplc
 
 	TLLVMIRData CLLVMTypeVisitor::VisitStaticSizedArray(const CArrayType* pArrayType)
 	{
-		return llvm::ArrayType::get(std::get<llvm::Type*>(pArrayType->GetBaseType()->Accept(this)), pArrayType->GetElementsCount());
+		std::string arrayTypeName = "StaticArray$" + pArrayType->GetBaseType()->ToShortAliasString();
+
+		if (mTypesTable.find(arrayTypeName) != mTypesTable.cend())
+		{
+			return mTypesTable[arrayTypeName];
+		}
+
+		// \note fat static array is a structure that consists of an array pointer and a field that stores its size
+		auto pArrayFatType = llvm::StructType::create(*mContext,
+								{
+									llvm::ArrayType::get(std::get<llvm::Type*>(pArrayType->GetBaseType()->Accept(this)), pArrayType->GetElementsCount()),
+									llvm::Type::getInt64Ty(*mContext)
+								}, arrayTypeName);
+
+		mTypesTable[arrayTypeName] = pArrayFatType;
+
+		return pArrayFatType;
 	}
 
 	TLLVMIRData CLLVMTypeVisitor::VisitPointerType(const CPointerType* pPointerType)
