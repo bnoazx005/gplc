@@ -45,6 +45,7 @@ namespace gplc
 	class CASTImportDirectiveNode;
 	class CASTDeferOperatorNode;
 	class CASTIntrinsicCallNode;
+	class CASTVariantDeclNode;
 
 
 	template <typename T>
@@ -82,6 +83,7 @@ namespace gplc
 			virtual T VisitImportDirectiveNode(CASTImportDirectiveNode* pNode) = 0;
 			virtual T VisitDeferOperatorNode(CASTDeferOperatorNode* pNode) = 0;
 			virtual T VisitIntrinsicCall(CASTIntrinsicCallNode* pNode) = 0;
+			virtual T VisitVariantDeclaration(CASTVariantDeclNode* pNode) = 0;
 		protected:
 			IASTNodeVisitor() = default;
 			IASTNodeVisitor(const IASTNodeVisitor& visitor) = default;
@@ -139,6 +141,7 @@ namespace gplc
 	class CDependentNamedType;
 	class CArrayType;
 	class CPointerType;
+	class CVariantType;
 
 
 	template <typename T>
@@ -155,6 +158,7 @@ namespace gplc
 			virtual T VisitEnumType(const CEnumType* pEnumType) = 0;
 			virtual T VisitStaticSizedArray(const CArrayType* pArrayType) = 0;
 			virtual T VisitPointerType(const CPointerType* pPointerType) = 0;
+			virtual T VisitVariantType(const CVariantType* pVariantType) = 0;
 		protected:
 			ITypeVisitor(const ITypeVisitor& visitor) = default;
 	};

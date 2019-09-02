@@ -86,6 +86,7 @@ namespace gplc
 		NT_MEMSET64_INTRINSIC,
 		NT_ABORT_INTRINSIC,
 		NT_CAST_INTRINSIC,
+		NT_VARIANT_DECL,
 	};
 
 	/*!
@@ -739,6 +740,27 @@ namespace gplc
 		protected:
 			CASTIntrinsicCallNode() = default;
 			CASTIntrinsicCallNode(const CASTIntrinsicCallNode& node) = default;
+	};
+
+
+	class CASTVariantDeclNode : public CASTTypeNode
+	{
+		public:
+			CASTVariantDeclNode(CASTIdentifierNode* pVariantName, CASTBlockNode* pVariantFields);
+			virtual ~CASTVariantDeclNode() = default;
+
+			std::string Accept(IASTNodeVisitor<std::string>* pVisitor) override;
+			bool Accept(IASTNodeVisitor<bool>* pVisitor) override;
+			TLLVMIRData Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor) override;
+
+			CType* Resolve(ITypeResolver* pResolver) override;
+
+			// get values
+			CASTIdentifierNode* GetVariantName() const;
+
+			CASTBlockNode* GetAltTypes() const;
+		protected:
+			CASTVariantDeclNode(const CASTVariantDeclNode& node) = default;
 	};
 }
 

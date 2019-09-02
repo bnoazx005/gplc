@@ -1302,4 +1302,46 @@ namespace gplc
 	{
 		return mChildren[0];
 	}
+
+
+	/*!
+		\brief CASTVariantDeclNode's definition
+	*/
+
+	CASTVariantDeclNode::CASTVariantDeclNode(CASTIdentifierNode* pVariantName, CASTBlockNode* pVariantFields):
+		CASTTypeNode(NT_VARIANT_DECL)
+	{
+		AttachChild(pVariantName);
+		AttachChild(pVariantFields);
+	}
+	
+	std::string CASTVariantDeclNode::Accept(IASTNodeVisitor<std::string>* pVisitor)
+	{
+		return pVisitor->VisitVariantDeclaration(this);
+	}
+
+	bool CASTVariantDeclNode::Accept(IASTNodeVisitor<bool>* pVisitor)
+	{
+		return pVisitor->VisitVariantDeclaration(this);
+	}
+
+	TLLVMIRData CASTVariantDeclNode::Accept(IASTNodeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitVariantDeclaration(this);
+	}
+
+	CType* CASTVariantDeclNode::Resolve(ITypeResolver* pResolver)
+	{
+		return pResolver->VisitVariantDeclaration(this);
+	}
+
+	CASTIdentifierNode* CASTVariantDeclNode::GetVariantName() const
+	{
+		return dynamic_cast<CASTIdentifierNode*>(mChildren[0]);
+	}
+
+	CASTBlockNode* CASTVariantDeclNode::GetAltTypes() const
+	{
+		return dynamic_cast<CASTBlockNode*>(mChildren[1]);
+	}
 }

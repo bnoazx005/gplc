@@ -94,6 +94,7 @@ namespace gplc
 			virtual CType* VisitPointerType(CASTPointerTypeNode* pNode) = 0;
 			virtual CType* VisitModuleType(CASTImportDirectiveNode* pNode) = 0;
 			virtual CType* VisitIntrinsicCall(CASTIntrinsicCallNode* pNode) = 0;
+			virtual CType* VisitVariantDeclaration(CASTVariantDeclNode* pNode) = 0;
 	};
 
 
@@ -128,6 +129,7 @@ namespace gplc
 			CType* VisitPointerType(CASTPointerTypeNode* pNode) override;
 			CType* VisitModuleType(CASTImportDirectiveNode* pNode) override;
 			CType* VisitIntrinsicCall(CASTIntrinsicCallNode* pNode) override;
+			CType* VisitVariantDeclaration(CASTVariantDeclNode* pNode) override;
 		protected:
 			CType* _deduceBuiltinType(E_NODE_TYPE type, U32 attributes = 0x0);
 
@@ -463,6 +465,38 @@ namespace gplc
 			CModuleType() = default;
 			CModuleType(const CModuleType& structure) = default;
 		protected:
+	};
+
+
+	/*!
+		\brief CVariantType class
+	*/
+
+
+	class CVariantType : public CType
+	{
+		public:
+			typedef std::vector<CType*> TFieldsArray;
+		public:
+			CVariantType(const TFieldsArray& fieldsTypes, const std::string& name, U32 attributes = 0x0, CType* pParent = nullptr);
+			virtual ~CVariantType() = default;
+
+			TLLVMIRData Accept(ITypeVisitor<TLLVMIRData>* pVisitor) override;
+
+			const TFieldsArray& GetFieldsTypes() const;
+
+			CASTExpressionNode* GetDefaultValue(IASTNodesFactory* pNodesFactory) const override;
+
+			U64 GetTypeId() const override;
+
+			bool AreSame(const CType* pType) const override;
+
+			std::string ToShortAliasString() const override;
+		protected:
+			CVariantType() = default;
+			CVariantType(const CVariantType& structure) = default;
+		protected:
+			TFieldsArray mFieldsTypes;
 	};
 
 

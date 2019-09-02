@@ -1030,6 +1030,13 @@ namespace gplc
 		return {};
 	}
 
+	TLLVMIRData CLLVMCodeGenerator::VisitVariantDeclaration(CASTVariantDeclNode* pNode)
+	{
+		UNIMPLEMENTED();
+
+		return {};
+	}
+
 	ITypeVisitor<TLLVMIRData>* CLLVMCodeGenerator::GetTypeGenerator() const
 	{
 		return mpTypeGenerator;

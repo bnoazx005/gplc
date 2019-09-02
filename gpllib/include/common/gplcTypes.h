@@ -113,6 +113,7 @@ namespace gplc
 		CT_ARRAY,
 		CT_ALIAS,
 		CT_MODULE,
+		CT_VARIANT,
 		CT_LAST
 	};
 
@@ -200,6 +201,7 @@ namespace gplc
 		TT_MEMSET64_INTRINSIC,
 		TT_ABORT_INTRINSIC,
 		TT_CAST_INTRINSIC,
+		TT_VARIANT_TYPE,
 	};
 
 

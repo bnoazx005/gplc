@@ -203,4 +203,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CConstExprInterpreter::VisitVariantDeclaration(CASTVariantDeclNode* pNode)
+	{
+		return {};
+	}
 }

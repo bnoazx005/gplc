@@ -578,6 +578,23 @@ TEST_CASE("CSemanticAnalyser's tests")
 		REQUIRE(!pSemanticAnalyser->Analyze(pProgram, pTypeResolver, pSymTable, pNodesFactory));
 	}
 
+	SECTION("TestAnalyze_PassCorrectVariantDeclaration_ReturnsTrue")
+	{
+		/*!
+			variant Data {
+				int32,
+				string
+			}
+		*/
+		auto pVariantBody = pNodesFactory->CreateBlockNode();
+		auto pVariantDecl = pNodesFactory->CreateVariantDeclNode(pNodesFactory->CreateIdNode("Data"), pVariantBody);
+
+		pVariantBody->AttachChild(pNodesFactory->CreateTypeNode(NT_INT32));
+		pVariantBody->AttachChild(pNodesFactory->CreateTypeNode(NT_STRING));
+
+		REQUIRE(pSemanticAnalyser->Analyze(pVariantDecl, pTypeResolver, pSymTable, pNodesFactory));
+	}
+
 	delete pTypesFactory;
 	delete pSymTable;
 	delete pNodesFactory;

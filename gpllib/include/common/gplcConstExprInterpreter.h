@@ -95,6 +95,8 @@ namespace gplc
 			TLLVMIRData VisitDeferOperatorNode(CASTDeferOperatorNode* pNode) override;
 
 			TLLVMIRData VisitIntrinsicCall(CASTIntrinsicCallNode* pNode) override;
+
+			TLLVMIRData VisitVariantDeclaration(CASTVariantDeclNode* pNode) override;
 		protected:
 			ISymTable* mpSymTable;
 	};

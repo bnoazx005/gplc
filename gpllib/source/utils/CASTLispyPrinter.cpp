@@ -240,4 +240,10 @@ namespace gplc
 	{
 		return {};
 	}
+
+	std::string CASTLispyPrinter::VisitVariantDeclaration(CASTVariantDeclNode* pNode)
+	{
+		return {};
+	}
+
 }

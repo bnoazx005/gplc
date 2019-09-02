@@ -31,6 +31,7 @@ namespace gplc
 			TLLVMIRData VisitEnumType(const CEnumType* pEnumType) override;
 			TLLVMIRData VisitStaticSizedArray(const CArrayType* pArrayType) override;
 			TLLVMIRData VisitPointerType(const CPointerType* pPointerType) override;
+			TLLVMIRData VisitVariantType(const CVariantType* pVariantType) override;
 		protected:
 			CCTypeVisitor(const CCTypeVisitor& visitor) = default;
 	};

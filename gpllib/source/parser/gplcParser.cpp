@@ -197,6 +197,13 @@ namespace gplc
 
 			return _parseStructDeclaration(pLexer);
 		}
+
+		if (_match(pLexer->GetCurrToken(), TT_VARIANT_TYPE))
+		{
+			pLexer->GetNextToken();
+
+			return _parseVariantDeclaration(pLexer);
+		}
 		
 		if (_match(pLexer->GetCurrToken(), TT_RETURN_KEYWORD))
 		{
@@ -1530,5 +1537,50 @@ namespace gplc
 		pLexer->GetNextToken(); // take )
 			
 		return mpNodesFactory->CreateIntrinsicCall(intrinsicType, pArgsNode);
+	}
+
+	CASTVariantDeclNode* CParser::_parseVariantDeclaration(ILexer* pLexer)
+	{
+		if (!SUCCESS(_expect(TT_IDENTIFIER, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		CASTIdentifierNode* pVariantIdentifier = mpNodesFactory->CreateIdNode((dynamic_cast<const CIdentifierToken*>(pLexer->GetCurrToken()))->GetName());
+
+		pLexer->GetNextToken(); // take variant's name
+
+		if (!SUCCESS(_expect(TT_OPEN_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take {
+
+		// parse variant's alternative types
+		CASTBlockNode* pVariantTypes = mpNodesFactory->CreateBlockNode();
+
+		CASTNode* pCurrTypeNode = nullptr;
+
+		while (pCurrTypeNode = _parseType(pLexer))
+		{
+			pVariantTypes->AttachChild(pCurrTypeNode);
+
+			if (_match(pLexer->GetCurrToken(), TT_CLOSE_BRACE) || !SUCCESS(_expect(TT_COMMA, pLexer->GetCurrToken())))
+			{
+				break;
+			}
+
+			pLexer->GetNextToken(); // take ','
+		}
+
+		if (!SUCCESS(_expect(TT_CLOSE_BRACE, pLexer->GetCurrToken())))
+		{
+			return nullptr;
+		}
+
+		pLexer->GetNextToken(); // take }
+
+		return mpNodesFactory->CreateVariantDeclNode(pVariantIdentifier, pVariantTypes);
 	}
 }

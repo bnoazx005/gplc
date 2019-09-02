@@ -89,6 +89,7 @@ namespace gplc
 		{ "__memset_64", TT_MEMSET64_INTRINSIC },
 		{ "__abort", TT_ABORT_INTRINSIC },
 		{ "cast", TT_CAST_INTRINSIC },
+		{ "variant", TT_VARIANT_TYPE },
 	};
 
 	CLexer::CLexer():

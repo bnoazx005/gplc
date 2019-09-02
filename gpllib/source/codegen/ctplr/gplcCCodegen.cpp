@@ -415,4 +415,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CCCodeGenerator::VisitVariantDeclaration(CASTVariantDeclNode* pNode)
+	{
+		return {};
+	}
 }

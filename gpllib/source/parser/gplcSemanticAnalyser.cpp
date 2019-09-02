@@ -718,6 +718,21 @@ namespace gplc
 		return true;
 	}
 
+	bool CSemanticAnalyser::VisitVariantDeclaration(CASTVariantDeclNode* pNode)
+	{
+		CType* pVariantType = nullptr;
+
+		// \todo check up whether the type with a given name was already specified or not
+
+		if (!pNode->GetAltTypes()->Accept(this) ||
+			!(pVariantType = mpTypeResolver->Resolve(pNode)))
+		{
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CSemanticAnalyser::_enterScope(CASTBlockNode* pNode, ISymTable* pSymTable)
 	{
 		pSymTable->CreateScope();

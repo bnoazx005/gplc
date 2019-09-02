@@ -63,4 +63,9 @@ namespace gplc
 	{
 		return _insertValue(new CArrayType(pBaseType, elementsCount, attribute, pParent));
 	}
+
+	CVariantType* CTypesFactory::CreateVariantType(const TTypesArray& typesArray, const std::string& name, U32 attributes, CType* pParent)
+	{
+		return _insertValue(new CVariantType(typesArray, name, attributes, pParent));
+	}
 }

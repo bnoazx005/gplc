@@ -113,4 +113,9 @@ namespace gplc
 	{
 		return {};
 	}
+
+	TLLVMIRData CCTypeVisitor::VisitVariantType(const CVariantType* pVariantType)
+	{
+		return {};
+	}
 }

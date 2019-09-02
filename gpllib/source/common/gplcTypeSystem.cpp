@@ -372,6 +372,19 @@ namespace gplc
 		return nullptr;
 	}
 
+	CType* CTypeResolver::VisitVariantDeclaration(CASTVariantDeclNode* pNode)
+	{
+		CVariantType::TFieldsArray altTypes;
+
+		for (auto pCurrField : pNode->GetAltTypes()->GetStatements())
+		{
+			altTypes.push_back(Resolve(dynamic_cast<CASTTypeNode*>(pCurrField)));
+		}
+
+		return mpTypesFactory->CreateVariantType(altTypes, dynamic_cast<CASTIdentifierNode*>(pNode->GetVariantName())->GetName(),
+												 AV_AGGREGATE_TYPE, mpSymTable->GetCurrentScopeType());
+	}
+
 	CType* CTypeResolver::_deduceBuiltinType(E_NODE_TYPE type, U32 attributes)
 	{
 		switch (type)
@@ -1233,6 +1246,57 @@ namespace gplc
 	std::string CModuleType::GetMangledName() const
 	{
 		return mName + "$";
+	}
+
+	
+	/*!
+		\brief CVariantType's definition
+	*/
+
+	CVariantType::CVariantType(const TFieldsArray& fieldsTypes, const std::string& name, U32 attributes, CType* pParent) :
+		CType(CT_VARIANT, BTS_POINTER, attributes, name, pParent)
+	{
+		std::copy(fieldsTypes.begin(), fieldsTypes.end(), std::back_inserter(mFieldsTypes));
+	}
+
+	TLLVMIRData CVariantType::Accept(ITypeVisitor<TLLVMIRData>* pVisitor)
+	{
+		return pVisitor->VisitVariantType(this);
+	}
+
+	const CVariantType::TFieldsArray& CVariantType::GetFieldsTypes() const
+	{
+		return mFieldsTypes;
+	}
+
+	CASTExpressionNode* CVariantType::GetDefaultValue(IASTNodesFactory* pNodesFactory) const
+	{
+		// \note reimplement this later
+		return pNodesFactory->CreateUnaryExpr(TT_DEFAULT, pNodesFactory->CreateLiteralNode(new CIntValue(0)));
+	}
+
+	U64 CVariantType::GetTypeId() const
+	{
+		std::string fullTypeSignature = ToShortAliasString();
+
+		for (auto currField : mFieldsTypes)
+		{
+			fullTypeSignature.append(currField->ToShortAliasString());
+		}
+
+		return ComputeHash(fullTypeSignature.c_str());
+	}
+
+	bool CVariantType::AreSame(const CType* pType) const
+	{
+		UNIMPLEMENTED();
+
+		return false;
+	}
+
+	std::string CVariantType::ToShortAliasString() const
+	{
+		return "variant";
 	}
 
 

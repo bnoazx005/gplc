@@ -185,4 +185,9 @@ namespace gplc
 	{
 		return _insertNode(new CASTIntrinsicCallNode(intrinsicType, pArgsList));
 	}
+
+	CASTVariantDeclNode* CASTNodesFactory::CreateVariantDeclNode(CASTIdentifierNode* pVariantName, CASTBlockNode* pVariantTypes)
+	{
+		return _insertNode(new CASTVariantDeclNode(pVariantName, pVariantTypes));
+	}
 }

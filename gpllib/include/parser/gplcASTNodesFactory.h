@@ -60,6 +60,7 @@ namespace gplc
 			virtual CASTImportDirectiveNode* CreateImportDirective(const std::string& modulePath, const std::string& moduleName) = 0;
 			virtual CASTDeferOperatorNode* CreateDeferOperator(CASTExpressionNode* pExpression) = 0;
 			virtual CASTIntrinsicCallNode* CreateIntrinsicCall(E_NODE_TYPE intrinsicType, CASTNode* pArgsList) = 0;
+			virtual CASTVariantDeclNode* CreateVariantDeclNode(CASTIdentifierNode* pVariantName, CASTBlockNode* pVariantTypes) = 0;
 		protected:
 			IASTNodesFactory(const IASTNodesFactory&) = default;
 	};
@@ -103,6 +104,7 @@ namespace gplc
 			CASTImportDirectiveNode* CreateImportDirective(const std::string& modulePath, const std::string& moduleName) override;
 			CASTDeferOperatorNode* CreateDeferOperator(CASTExpressionNode* pExpression) override;
 			CASTIntrinsicCallNode* CreateIntrinsicCall(E_NODE_TYPE intrinsicType, CASTNode* pArgsList) override;
+			CASTVariantDeclNode* CreateVariantDeclNode(CASTIdentifierNode* pVariantName, CASTBlockNode* pVariantTypes) override;
 		protected:
 			CASTNodesFactory(const CASTNodesFactory&) = default;
 

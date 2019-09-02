@@ -27,12 +27,14 @@ namespace gplc
 	class CDependentNamedType;
 	class CArrayType;
 	class ISymTable;
+	class CVariantType;
 
 
 	class ITypesFactory
 	{
 		public:
 			typedef std::vector<std::pair<std::string, CType*>> TSubTypesArray;
+			typedef std::vector<CType*>                         TTypesArray;
 		public:
 			ITypesFactory() = default;
 			virtual ~ITypesFactory() = default;
@@ -45,6 +47,7 @@ namespace gplc
 			virtual CModuleType* CreateModuleType(const std::string& moduleName, U32 attributes = 0x0, CType* pParent = nullptr) = 0;
 			virtual CDependentNamedType* CreateDependentNamedType(const ISymTable* pSymTable, const std::string& typeIdentifier, CType* pParent = nullptr) = 0;
 			virtual CArrayType* CreateArrayType(CType* pBaseType, U32 elementsCount, U32 attribute = 0x0, CType* pParent = nullptr) = 0;
+			virtual CVariantType* CreateVariantType(const TTypesArray& typesArray, const std::string& name, U32 attributes = 0x0, CType* pParent = nullptr) = 0;
 		protected:
 			ITypesFactory(const ITypesFactory&) = delete;
 	};
@@ -64,6 +67,7 @@ namespace gplc
 			CModuleType* CreateModuleType(const std::string& moduleName, U32 attributes = 0x0, CType* pParent = nullptr) override;
 			CDependentNamedType* CreateDependentNamedType(const ISymTable* pSymTable, const std::string& typeIdentifier, CType* pParent = nullptr) override;
 			CArrayType* CreateArrayType(CType* pBaseType, U32 elementsCount, U32 attribute = 0x0, CType* pParent = nullptr) override;
+			CVariantType* CreateVariantType(const TTypesArray& typesArray, const std::string& name, U32 attributes = 0x0, CType* pParent = nullptr) override;
 		protected:
 			CTypesFactory(const CTypesFactory&) = delete;
 

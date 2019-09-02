@@ -164,4 +164,27 @@ namespace gplc
 	{
 		return llvm::PointerType::get(std::get<llvm::Type*>(pPointerType->GetBaseType()->Accept(this)), 0);
 	}
+
+	TLLVMIRData CLLVMTypeVisitor::VisitVariantType(const CVariantType* pVariantType)
+	{
+		const std::string& variantName = pVariantType->GetName();
+
+		if (mTypesTable.find(variantName) != mTypesTable.cend())
+		{
+			return mTypesTable[variantName];
+		}
+
+		std::vector<llvm::Type*> altTypes;
+
+		for (auto pCurrAltType : pVariantType->GetFieldsTypes())
+		{
+			altTypes.push_back(std::get<llvm::Type*>(pCurrAltType->Accept(this)));
+		}
+
+		auto pTaggedUnionType = llvm::StructType::create(*mContext, altTypes, variantName, true);
+
+		mTypesTable[variantName] = pTaggedUnionType;
+
+		return pTaggedUnionType;
+	}
 }

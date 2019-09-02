@@ -469,6 +469,33 @@ TEST_CASE("Parser's tests")
 		delete pSymbolTable;
 	}
 
+	SECTION("TestParse_PassVariantDeclaration_ReturnsCorrectAST")
+	{
+		gplc::ISymTable* pSymbolTable = new gplc::CSymTable();
+
+		gplc::CASTNode* pMain = pParser->Parse(new CStubLexer(
+			{
+				/*!
+					the sequence below specifies the following declaration
+					variant Data { 
+						int32,
+						string 
+					}
+				*/
+				new gplc::CToken(gplc::TT_VARIANT_TYPE, 2),
+				new gplc::CIdentifierToken("Data", 0),
+				new gplc::CToken(gplc::TT_OPEN_BRACE, 5),
+				new gplc::CToken(gplc::TT_INT32_TYPE, 5),
+				new gplc::CToken(gplc::TT_COMMA, 5),
+				new gplc::CToken(gplc::TT_STRING_TYPE, 5),
+				new gplc::CToken(gplc::TT_CLOSE_BRACE, 5),
+			}), pSymbolTable, pNodesFactory, pTypesFactory);
+
+		REQUIRE(pMain != nullptr);
+
+		delete pSymbolTable;
+	}
+
 	if (pErrorInfo != nullptr)
 	{
 		delete pErrorInfo;

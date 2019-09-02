@@ -51,6 +51,7 @@ namespace gplc
 	class ITypesFactory;
 	class CASTDeferOperatorNode;
 	class CASTIntrinsicCallNode;
+	class CASTVariantDeclNode;
 
 
 	/*!
@@ -394,6 +395,8 @@ namespace gplc
 			U32 _parseAttributes(ILexer* pLexer);
 
 			CASTIntrinsicCallNode* _parseIntrinsicCall(ILexer* pLexer);
+
+			CASTVariantDeclNode* _parseVariantDeclaration(ILexer* pLexer);
 		private:
 			ISymTable*        mpSymTable;
 

@@ -396,6 +396,21 @@ TEST_CASE("Lexer's tests")
 
 		delete pInputStream;
 	}
+
+	SECTION("TestGetNextToken_ParseVariantKeyword_ReturnsCorrectTypeOfToken")
+	{
+		IInputStream* pInputStream = new CStubInputStream(
+			{
+				"variant"
+			});
+
+		REQUIRE(pLexer->Init(pInputStream) == gplc::RV_SUCCESS);
+
+		REQUIRE(pLexer->GetNextToken()->GetType() == TT_VARIANT_TYPE);
+		REQUIRE(!pLexer->GetNextToken());
+
+		delete pInputStream;
+	}
 	
 	delete pLexer;
 }
