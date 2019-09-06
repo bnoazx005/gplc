@@ -1546,9 +1546,18 @@ namespace gplc
 			return nullptr;
 		}
 
-		CASTIdentifierNode* pVariantIdentifier = mpNodesFactory->CreateIdNode((dynamic_cast<const CIdentifierToken*>(pLexer->GetCurrToken()))->GetName());
+		const std::string& variantName = (dynamic_cast<const CIdentifierToken*>(pLexer->GetCurrToken()))->GetName();
+
+		CASTIdentifierNode* pVariantIdentifier = mpNodesFactory->CreateIdNode(variantName);
 
 		pLexer->GetNextToken(); // take variant's name
+		
+		if (!SUCCESS(mpSymTable->CreateNamedScope(variantName)))
+		{
+			return false;
+		}
+
+		mpSymTable->LeaveScope();
 
 		if (!SUCCESS(_expect(TT_OPEN_BRACE, pLexer->GetCurrToken())))
 		{

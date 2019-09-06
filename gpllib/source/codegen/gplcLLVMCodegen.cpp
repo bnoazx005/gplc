@@ -204,6 +204,13 @@ namespace gplc
 						currIRBuidler.CreateCall(pConstructor, { pCurrVariableAllocation });
 					}
 					break;
+				case CT_VARIANT:
+					{
+						currIRBuidler.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt16Ty(mContext), 0),
+												  _getStructElementValue(currIRBuidler, pCurrVariableAllocation, 0)); // store 0 inside tag field
+
+					}
+					break;
 				case CT_POINTER:
 					currIRBuidler.CreateStore(llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(pIdentifiersType)), pCurrVariableAllocation, "ptr_init");
 					break;
@@ -1032,9 +1039,10 @@ namespace gplc
 
 	TLLVMIRData CLLVMCodeGenerator::VisitVariantDeclaration(CASTVariantDeclNode* pNode)
 	{
-		UNIMPLEMENTED();
+		// \todo this implementation is temporary solution
+		CType* pVariantType = mpTypeResolver->Resolve(pNode);
 
-		return {};
+		return pVariantType->Accept(mpTypeGenerator);
 	}
 
 	ITypeVisitor<TLLVMIRData>* CLLVMCodeGenerator::GetTypeGenerator() const

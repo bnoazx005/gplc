@@ -181,7 +181,11 @@ namespace gplc
 			altTypes.push_back(std::get<llvm::Type*>(pCurrAltType->Accept(this)));
 		}
 
-		auto pTaggedUnionType = llvm::StructType::create(*mContext, altTypes, variantName, true);
+		auto pTaggedUnionType = llvm::StructType::create(*mContext, 
+														{
+															llvm::Type::getInt16Ty(*mContext), ///< tag
+															llvm::StructType::create(*mContext, altTypes, "", true) ///< actual data
+														}, variantName);
 
 		mTypesTable[variantName] = pTaggedUnionType;
 

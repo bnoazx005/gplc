@@ -720,12 +720,14 @@ namespace gplc
 
 	bool CSemanticAnalyser::VisitVariantDeclaration(CASTVariantDeclNode* pNode)
 	{
-		CType* pVariantType = nullptr;
+		auto variantScopeEntry = mpSymTable->LookUpNamedScope(pNode->GetVariantName()->GetName());
+
+		assert(variantScopeEntry);
 
 		// \todo check up whether the type with a given name was already specified or not
 
 		if (!pNode->GetAltTypes()->Accept(this) ||
-			!(pVariantType = mpTypeResolver->Resolve(pNode)))
+			!(variantScopeEntry->mpType = mpTypeResolver->Resolve(pNode)))
 		{
 			return false;
 		}
